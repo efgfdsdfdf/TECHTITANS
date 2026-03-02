@@ -143,6 +143,54 @@
       font-size: 0.8rem;
     }
 
+    /* --- Group tabs for CEO --- */
+    .group-tabs {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-left: auto;
+    }
+    .group-tab {
+      background: #1f2a44;
+      color: #9aa4bf;
+      padding: 0.4rem 1rem;
+      border-radius: 2rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid #2f3a5a;
+      transition: 0.2s;
+      white-space: nowrap;
+    }
+    .group-tab.active {
+      background: #428cff;
+      color: white;
+      border-color: #428cff;
+    }
+
+    /* groups list shown when CEO selects "All" */
+    .groups-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      padding: 1rem;
+      align-items: flex-start;
+      justify-content: flex-start;
+    }
+    .group-card {
+      background: #19233a;
+      color: #cfe1ff;
+      padding: 0.8rem 1rem;
+      border-radius: 12px;
+      border: 1px solid #263154;
+      cursor: pointer;
+      min-width: 160px;
+      text-align: center;
+      font-weight: 600;
+      transition: transform 0.12s, box-shadow 0.12s;
+    }
+    .group-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+
     /* === MESSAGES AREA (scrollable) === */
     .messages-area {
       flex: 1;
@@ -458,100 +506,26 @@
       cursor: not-allowed;
     }
 
-    /* Mobile adjustments */
+    /* Mobile adjustments (keep original) */
     @media (max-width: 768px) {
-      body {
-        flex-direction: column;
-      }
-
-      .sidebar {
-        width: 100%;
-        flex-direction: row;
-        padding: 0.5rem 1rem;
-        gap: 0.5rem;
-        border-right: none;
-        border-top: 1px solid #1f2a44;
-        order: 2;
-        flex-shrink: 0;
-      }
-
-      .logo {
-        display: none;
-      }
-
-      .nav {
-        flex-direction: row;
-        justify-content: space-around;
-        flex: 1;
-      }
-
-      .nav a {
-        padding: 0.6rem;
-        border-radius: 1rem;
-        font-size: 0.8rem;
-        justify-content: center;
-      }
-
-      .sidebar-unread {
-        position: absolute;
-        top: 2px;
-        right: 2px;
-        font-size: 0.6rem;
-        padding: 0.1rem 0.4rem;
-      }
-
-      .logout-btn {
-        margin-top: 0;
-        padding: 0.6rem 1rem;
-        font-size: 0.8rem;
-        white-space: nowrap;
-      }
-
-      .main {
-        padding: 0.5rem;
-        order: 1;
-        height: calc(100vh - 70px);
-        overflow: hidden;
-      }
-
-      .chat-header {
-        padding: 0.8rem 1rem;
-      }
-
-      .messages-area {
-        padding: 1rem;
-      }
-
-      .avatar {
-        width: 32px;
-        height: 32px;
-        font-size: 0.9rem;
-      }
-
-      .chat-input-area {
-        padding: 0.8rem;
-      }
+      body { flex-direction: column; }
+      .sidebar { width: 100%; flex-direction: row; padding: 0.5rem 1rem; border-right: none; border-top: 1px solid #1f2a44; order: 2; flex-shrink: 0; }
+      .logo { display: none; }
+      .nav { flex-direction: row; justify-content: space-around; flex: 1; }
+      .nav a { padding: 0.6rem; border-radius: 1rem; font-size: 0.8rem; justify-content: center; }
+      .sidebar-unread { position: absolute; top: 2px; right: 2px; font-size: 0.6rem; padding: 0.1rem 0.4rem; }
+      .logout-btn { margin-top: 0; padding: 0.6rem 1rem; font-size: 0.8rem; white-space: nowrap; }
+      .main { padding: 0.5rem; order: 1; height: calc(100vh - 70px); overflow: hidden; }
+      .chat-header { padding: 0.8rem 1rem; flex-wrap: wrap; }
+      .messages-area { padding: 1rem; }
+      .avatar { width: 32px; height: 32px; font-size: 0.9rem; }
+      .chat-input-area { padding: 0.8rem; }
     }
-
     @media (max-width: 480px) {
-      .nav a span:not(.sidebar-unread) {
-        display: none;
-      }
-
-      .nav a {
-        font-size: 1.2rem;
-        padding: 0.4rem;
-      }
-
-      .sidebar-unread {
-        top: -2px;
-        right: -2px;
-      }
-
-      .logout-btn {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.7rem;
-      }
+      .nav a span:not(.sidebar-unread) { display: none; }
+      .nav a { font-size: 1.2rem; padding: 0.4rem; }
+      .sidebar-unread { top: -2px; right: -2px; }
+      .logout-btn { padding: 0.4rem 0.8rem; font-size: 0.7rem; }
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -560,12 +534,15 @@
   <div class="sidebar">
     <div class="logo">TECH<span>TITANS</span></div>
     <div class="nav">
-      <a href="dashboard.html">📊 <span>Dashboard</span></a>
-      <a href="messages.html" class="active" id="chatNavLink">💬 <span>Group Chat</span>
+      <a href="/dashboard.html">📊 <span>Dashboard</span></a>
+      <a href="/messages.html" class="active" id="chatNavLink">💬 <span>Group Chat</span>
         <span class="sidebar-unread" id="sidebarUnreadBadge" style="display: none;">0</span>
       </a>
-      <a href="resources.html">📚 <span>Resources</span></a>
-      <a href="profile.html">⚙️ <span>Profile</span></a>
+      <a href="#" id="dmNavLink">📩 <span>Direct Messages</span>
+        <span class="sidebar-unread" id="dmUnreadBadge" style="display: none;">0</span>
+      </a>
+      <a href="/resources.html">📚 <span>Resources</span></a>
+      <a href="/profile.html">⚙️ <span>Profile</span></a>
     </div>
     <button class="logout-btn" id="logout">✕ <span>Logout</span></button>
   </div>
@@ -575,6 +552,7 @@
       <div class="chat-header" id="chatHeader">
         <span>💬 <span id="groupTitle">Group</span> <span id="unreadBadge" class="unread-badge" style="display: none;">0</span></span>
         <span class="role-tag" id="roleDisplay"></span>
+        <div id="groupTabs" class="group-tabs" style="display: none;"></div>
       </div>
       <div class="messages-area" id="messagesArea" oncontextmenu="return false;"></div>
       <div class="chat-input-area">
@@ -588,6 +566,143 @@
   <div id="receiptsModal" class="read-receipts-modal" style="display: none;"></div>
   <!-- Profile popup -->
   <div id="profilePopup" class="profile-popup" style="display: none;"></div>
+
+  <!-- Direct Message Modal (hidden by default) -->
+  <div id="dmModal" class="dm-modal" style="display: none;">
+    <div class="dm-modal-header">
+      <span class="dm-modal-title"></span>
+      <button class="dm-modal-close">&times;</button>
+    </div>
+    <div class="dm-modal-messages" id="dmMessages"></div>
+    <div class="dm-modal-input">
+      <input type="text" id="dmInput" placeholder="Type a message...">
+      <button id="dmSendBtn">Send</button>
+    </div>
+  </div>
+
+  <style>
+    /* DM modal styles */
+    .dm-modal {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 320px;
+      height: 400px;
+      background: #2d2d3a;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      z-index: 2000;
+      overflow: hidden;
+      border: 1px solid #40404d;
+      color: #e4e4f0;
+    }
+    .dm-modal-header {
+      background: #1e1e2a;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #40404d;
+      font-weight: 500;
+    }
+    .dm-modal-close {
+      background: none;
+      border: none;
+      color: #aaa;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .dm-modal-close:hover { color: #fff; }
+    .dm-modal-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .dm-message {
+      max-width: 80%;
+      padding: 8px 12px;
+      border-radius: 18px;
+      word-wrap: break-word;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .dm-message.sent {
+      align-self: flex-end;
+      background: #4a4a6a;
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    .dm-message.received {
+      align-self: flex-start;
+      background: #3a3a4a;
+      color: #e4e4f0;
+      border-bottom-left-radius: 4px;
+    }
+    .dm-message small {
+      display: block;
+      font-size: 0.7rem;
+      opacity: 0.7;
+      margin-top: 0.3rem;
+      text-align: right;
+      white-space: nowrap;
+      margin-left: 0;
+    }
+    .dm-date-separator {
+      text-align: center;
+      font-size: 11px;
+      color: #888;
+      margin: 12px 0 4px;
+    }
+    .dm-modal-input {
+      display: flex;
+      padding: 12px;
+      background: #1e1e2a;
+      border-top: 1px solid #40404d;
+    }
+    .dm-modal-input input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #40404d;
+      border-radius: 20px;
+      background: #2d2d3a;
+      color: white;
+      outline: none;
+    }
+    .dm-modal-input button {
+      margin-left: 8px;
+      padding: 8px 16px;
+      background: #5a5a7a;
+      border: none;
+      border-radius: 20px;
+      color: white;
+      cursor: pointer;
+    }
+    .dm-modal-input button:hover { background: #6a6a8a; }
+
+    /* toast notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #1f2a44;
+      color: #fff;
+      padding: 0.8rem 1.2rem;
+      border-radius: 0.8rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      opacity: 0.9;
+      z-index: 3000;
+      font-size: 0.9rem;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .toast.hide { opacity: 0; }
+  </style>
+
 <script>
   (function() {
     const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
@@ -610,59 +725,57 @@
     let isCEO = false;
     let messageSubscription = null;
     let readMessageIds = new Set();
-    let unreadCount = 0;
+    // unread messages for the currently viewed group (or for non-CEO users)
+    let currentUnreadCount = 0;
+    // total unread across all groups (used when CEO is logged in)
+    let totalUnreadCount = 0;
     let editTimeouts = new Map();
     let observer = null;
+    // direct message state & notifications
+    let dmUnreadCount = 0;             // total unread across all senders
+    let dmUnreadBySender = {};         // map senderId -> unread count
+    let openDMUserId = null;
+    let globalDmSubscription = null;
     const modal = document.getElementById('receiptsModal');
     const profilePopup = document.getElementById('profilePopup');
+
+    // --- Group filter state: selected role (no "All" mode) ---
+    let selectedGroupRole = null;
+    let availableRoles = [];
 
     // --- DM state ---
     let dmSubscription = null;
     let dmObserver = null;
     let currentRecipientId = null;
+    const dmModal = document.getElementById('dmModal');
 
-    // --- Helper: format date header (Today / Yesterday / Full date) ---
+    // --- Helper functions ---
     function formatDateHeader(date) {
       const now = new Date();
       const msgDate = new Date(date);
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
-
       const msgDay = new Date(msgDate.getFullYear(), msgDate.getMonth(), msgDate.getDate());
-
-      if (msgDay.getTime() === today.getTime()) {
-        return 'Today';
-      } else if (msgDay.getTime() === yesterday.getTime()) {
-        return 'Yesterday';
-      } else {
-        // e.g., "Monday, March 15, 2025"
-        return msgDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-      }
+      if (msgDay.getTime() === today.getTime()) return 'Today';
+      else if (msgDay.getTime() === yesterday.getTime()) return 'Yesterday';
+      else return msgDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     }
-
-    // --- Helper: format time only (for inside bubble) ---
     function formatTimeOnly(date) {
       return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
-
-    // --- Helper: string to color ---
     function stringToColor(str) {
       let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-      }
+      for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
       const hue = Math.abs(hash % 360);
       return `hsl(${hue}, 70%, 50%)`;
     }
-
     function getInitials(name) {
       if (!name) return '?';
       const parts = name.trim().split(/\s+/);
       if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
       return (parts[0].charAt(0) + parts[parts.length-1].charAt(0)).toUpperCase();
     }
-
     function escapeHtml(unsafe) {
       return unsafe.replace(/[&<>"']/g, function(m) {
         if(m === '&') return '&amp;';
@@ -674,21 +787,86 @@
       });
     }
 
-    // --- Update badges ---
+    // --- Update unread badges ---
     function updateUnreadBadges() {
       const headerBadge = document.getElementById('unreadBadge');
-      if (unreadCount > 0) {
+      // header always shows count for the currently selected group
+      if (currentUnreadCount > 0) {
         headerBadge.style.display = 'inline';
-        headerBadge.textContent = unreadCount;
+        headerBadge.textContent = currentUnreadCount;
       } else {
         headerBadge.style.display = 'none';
       }
+
       const sidebarBadge = document.getElementById('sidebarUnreadBadge');
-      if (unreadCount > 0) {
-        sidebarBadge.style.display = 'inline-block';
-        sidebarBadge.textContent = unreadCount;
+      if (isCEO) {
+        // sidebar for CEO shows total unread across all groups
+        if (totalUnreadCount > 0) {
+          sidebarBadge.style.display = 'inline-block';
+          sidebarBadge.textContent = totalUnreadCount;
+        } else {
+          sidebarBadge.style.display = 'none';
+        }
       } else {
-        sidebarBadge.style.display = 'none';
+        // regular users see their current-group count in sidebar as well
+        if (currentUnreadCount > 0) {
+          sidebarBadge.style.display = 'inline-block';
+          sidebarBadge.textContent = currentUnreadCount;
+        } else {
+          sidebarBadge.style.display = 'none';
+        }
+      }
+    }
+
+    // update badge on DM nav link
+    function updateDMBadge() {
+      const dmBadge = document.getElementById('dmUnreadBadge');
+      // recalc total from per-sender map in case it changed
+      dmUnreadCount = Object.values(dmUnreadBySender).reduce((a,b)=>a+b,0);
+      if (dmUnreadCount > 0) {
+        dmBadge.style.display = 'inline-block';
+        dmBadge.textContent = dmUnreadCount;
+      } else {
+        dmBadge.style.display = 'none';
+      }
+    }
+
+    // simple toast/notification
+    function showToast(text) {
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.textContent = text;
+      document.body.appendChild(t);
+      setTimeout(() => {
+        t.classList.add('hide');
+        setTimeout(() => t.remove(), 300);
+      }, 3000);
+    }
+
+    // --- compute total unread across all groups for CEO ---
+    async function updateTotalUnreadCount() {
+      if (!currentUser) return;
+      try {
+        // fetch all read message ids for this user
+        const { data: reads } = await supabase
+          .from('message_reads')
+          .select('message_id')
+          .eq('user_id', currentUser.id);
+        const readIds = new Set(reads.map(r => r.message_id));
+
+        // fetch all messages not sent by the user
+        const { data: msgs, error } = await supabase
+          .from('group_messages')
+          .select('id, sender_id');
+        if (error) throw error;
+        let count = 0;
+        msgs.forEach(m => {
+          if (m.sender_id !== currentUser.id && !readIds.has(m.id)) count++;
+        });
+        totalUnreadCount = count;
+        updateUnreadBadges();
+      } catch (err) {
+        console.error('updateTotalUnreadCount error:', err);
       }
     }
 
@@ -708,7 +886,9 @@
         const msgRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
         if (msgRow) {
           msgRow.classList.remove('unread');
-          unreadCount = Math.max(0, unreadCount - 1);
+          // decrement both the current group count and the total unread if CEO
+          if (currentUnreadCount > 0) currentUnreadCount--;
+          if (isCEO && totalUnreadCount > 0) totalUnreadCount--;
           updateUnreadBadges();
         }
       } catch (err) {
@@ -760,13 +940,18 @@
       `;
     }
 
-    // --- Render a single message (time only inside bubble) ---
+    // --- Render a single message ---
     function renderMessage(message, isSent, senderName, senderId, messageRole, isUnread = false) {
       const initials = getInitials(senderName);
       const avatarColor = stringToColor(senderName);
       const timeStr = formatTimeOnly(message.created_at);
       const unreadClass = isUnread ? 'unread' : '';
-      const roleBadge = isCEO ? `<span class="role-badge">${escapeHtml(messageRole)}</span>` : '';
+      let roleBadge = '';
+      if (messageRole) {
+        if (messageRole === 'CEO' || isCEO) {
+          roleBadge = `<span class="role-badge">${escapeHtml(messageRole)}</span>`;
+        }
+      }
 
       if (isSent) {
         return `
@@ -798,9 +983,9 @@
       }
     }
 
-    // --- Append a date separator if needed ---
+    // --- Date separator helper ---
     function maybeAppendDateSeparator(prevDate, currentDate) {
-      if (!prevDate) return ''; // first message, separator will be added before it
+      if (!prevDate) return '';
       const prevDay = new Date(prevDate).toDateString();
       const currDay = new Date(currentDate).toDateString();
       if (prevDay !== currDay) {
@@ -810,16 +995,31 @@
       return '';
     }
 
-    // --- Load messages and render them with date separators ---
+    // --- Load messages for the selected group ---
     async function loadMessages() {
       try {
+        // update header title for CEO
+        if (isCEO) {
+          const grp = selectedGroupRole ? selectedGroupRole : 'All';
+          document.getElementById('groupTitle').textContent = `Group Chat (CEO)${grp === 'All' ? '' : ' - ' + grp}`;
+        }
+        // if CEO selected 'All', show the list of groups instead of combined messages
+        if (isCEO && selectedGroupRole === null) {
+          renderGroupsList(availableRoles || []);
+          return;
+        }
+        // when CEO has not chosen a specific group, we still load messages but without a role filter
         let query = supabase
           .from('group_messages')
           .select(`*, sender:profiles!sender_id (full_name)`)
           .order('created_at', { ascending: true });
+
         if (!isCEO) {
           query = query.eq('role', currentRole);
+        } else if (selectedGroupRole) {
+          query = query.eq('role', selectedGroupRole);
         }
+
         const { data, error } = await query;
         if (error) throw error;
 
@@ -837,7 +1037,6 @@
         }
         readMessageIds = readSet;
 
-        // Build HTML with date separators
         let html = '';
         let lastDate = null;
         for (const msg of data) {
@@ -846,7 +1045,6 @@
           const isUnread = !isSent && !readMessageIds.has(msg.id);
           if (isSent) readMessageIds.add(msg.id);
 
-          // Add date separator if needed
           html += maybeAppendDateSeparator(lastDate, msg.created_at);
           lastDate = msg.created_at;
 
@@ -856,7 +1054,12 @@
         const area = document.getElementById('messagesArea');
         area.innerHTML = html;
 
-        unreadCount = (data || []).filter(msg => !readMessageIds.has(msg.id) && msg.sender_id !== currentUser.id).length;
+        // compute unread for this group only
+        currentUnreadCount = data.filter(msg => !readMessageIds.has(msg.id) && msg.sender_id !== currentUser.id).length;
+        // also refresh the global total unread for CEO
+        if (isCEO) {
+          await updateTotalUnreadCount();
+        }
         updateUnreadBadges();
 
         attachMessageHandlers();
@@ -869,79 +1072,7 @@
       }
     }
 
-    // --- Profile popup (no longer used, but kept for reference) ---
-    async function showProfilePopup(userId, userName, userRole, x, y) {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('full_name, job_role, email')
-        .eq('id', userId)
-        .single();
-      if (error) {
-        console.error('profile fetch error:', error);
-        return;
-      }
-      const email = data.email || 'No email';
-      const job = data.job_role || userRole;
-      profilePopup.innerHTML = `
-        <h4>${escapeHtml(data.full_name || userName)}</h4>
-        <p>🎯 ${escapeHtml(job)}</p>
-        <p>✉️ ${escapeHtml(email)}</p>
-      `;
-      profilePopup.style.left = x + 'px';
-      profilePopup.style.top = y + 'px';
-      profilePopup.style.display = 'block';
-      setTimeout(() => {
-        profilePopup.style.display = 'none';
-      }, 3000);
-    }
-
-    // --- Right-click: show read receipts with timestamps ---
-    async function onRightClick(e) {
-      e.preventDefault();
-      const row = e.currentTarget;
-      const messageId = row.dataset.messageId;
-
-      modal.style.display = 'none';
-
-      const { data, error } = await supabase
-        .from('message_reads')
-        .select('user_id, read_at, profiles!inner(full_name)')
-        .eq('message_id', messageId)
-        .order('read_at', { ascending: true });
-
-      if (error || !data) {
-        console.error('fetch readers error:', error);
-        return;
-      }
-
-      if (data.length === 0) {
-        modal.innerHTML = '<h4>Read receipts</h4><p style="padding:0.5rem 0;">No one has seen this message yet.</p>';
-      } else {
-        const listItems = data.map(item => {
-          const name = item.profiles?.full_name || 'Unknown';
-          // Format read time nicely
-          const readTime = item.read_at ? new Date(item.read_at).toLocaleString('en-US', { 
-            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
-          }) : 'Unknown';
-          return `<li><span class="reader-name">${escapeHtml(name)}</span> <span class="reader-time">${readTime}</span></li>`;
-        }).join('');
-        modal.innerHTML = `<h4>Seen by (${data.length})</h4><ul>${listItems}</ul>`;
-      }
-
-      modal.style.left = e.pageX + 10 + 'px';
-      modal.style.top = e.pageY + 10 + 'px';
-      modal.style.display = 'block';
-
-      const hideModal = (ev) => {
-        if (!modal.contains(ev.target)) {
-          modal.style.display = 'none';
-          document.removeEventListener('click', hideModal);
-        }
-      };
-      setTimeout(() => document.addEventListener('click', hideModal), 0);
-    }
-
-    // --- Attach handlers ---
+    // --- Attach event handlers ---
     function attachMessageHandlers() {
       document.querySelectorAll('.message-row').forEach(row => {
         row.removeEventListener('click', onMessageRowClick);
@@ -949,7 +1080,6 @@
         row.removeEventListener('contextmenu', onRightClick);
         row.addEventListener('contextmenu', onRightClick);
       });
-
       document.querySelectorAll('.edit-btn').forEach(btn => {
         btn.removeEventListener('click', handleEditClick);
         btn.addEventListener('click', handleEditClick);
@@ -958,7 +1088,6 @@
         btn.removeEventListener('click', handleDeleteClick);
         btn.addEventListener('click', handleDeleteClick);
       });
-
       document.querySelectorAll('.avatar').forEach(avatar => {
         avatar.removeEventListener('click', onAvatarClick);
         avatar.addEventListener('click', onAvatarClick);
@@ -966,25 +1095,25 @@
     }
 
     function onMessageRowClick(e) {
-      if (e.target.closest('.edit-btn') || e.target.closest('.delete-btn') || e.target.closest('.edit-actions') || e.target.closest('.avatar')) {
-        return;
-      }
+      if (e.target.closest('.edit-btn') || e.target.closest('.delete-btn') || e.target.closest('.edit-actions') || e.target.closest('.avatar')) return;
       const row = e.currentTarget;
-      if (row.classList.contains('selected')) {
-        row.classList.remove('selected');
-      } else {
-        selectMessage(row);
-      }
+      if (row.classList.contains('selected')) row.classList.remove('selected');
+      else selectMessage(row);
     }
 
-    // --- New avatar click: open DM modal ---
     function onAvatarClick(e) {
       e.stopPropagation();
       const avatar = e.currentTarget;
       const userId = avatar.dataset.userId;
       const userName = avatar.dataset.userName;
       const userRole = avatar.dataset.userRole;
-      openDirectMessageModal(userId, userName, userRole);
+      loadPrivateMessagesView().then(() => {
+        // After loading DM view, find and click the user's conversation
+        setTimeout(() => {
+          const item = document.querySelector(`.dm-conversation-item[data-user-id="${userId}"]`);
+          if (item) item.click();
+        }, 100);
+      });
     }
 
     function selectMessage(messageRow) {
@@ -992,7 +1121,7 @@
       messageRow.classList.add('selected');
     }
 
-    // --- Edit/delete handlers (unchanged) ---
+    // --- Edit/Delete handlers ---
     async function handleEditClick(e) {
       e.stopPropagation();
       const btn = e.currentTarget;
@@ -1112,6 +1241,11 @@
     function removeMessageFromUI(messageId) {
       const messageRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
       if (messageRow) {
+        // if it was unread, adjust counters
+        if (messageRow.classList.contains('unread')) {
+          if (currentUnreadCount > 0) currentUnreadCount--;
+          if (isCEO && totalUnreadCount > 0) totalUnreadCount--;
+        }
         if (observer) observer.unobserve(messageRow);
         messageRow.remove();
       }
@@ -1119,37 +1253,69 @@
         clearTimeout(editTimeouts.get(messageId));
         editTimeouts.delete(messageId);
       }
+      updateUnreadBadges();
     }
 
-    // --- Append message (for real-time) with date separator ---
+    // --- Right-click read receipts ---
+    async function onRightClick(e) {
+      e.preventDefault();
+      const row = e.currentTarget;
+      const messageId = row.dataset.messageId;
+      modal.style.display = 'none';
+      const { data, error } = await supabase
+        .from('message_reads')
+        .select('user_id, read_at, profiles!inner(full_name)')
+        .eq('message_id', messageId)
+        .order('read_at', { ascending: true });
+      if (error || !data) {
+        console.error('fetch readers error:', error);
+        return;
+      }
+      if (data.length === 0) {
+        modal.innerHTML = '<h4>Read receipts</h4><p style="padding:0.5rem 0;">No one has seen this message yet.</p>';
+      } else {
+        const listItems = data.map(item => {
+          const name = item.profiles?.full_name || 'Unknown';
+          const readTime = item.read_at ? new Date(item.read_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Unknown';
+          return `<li><span class="reader-name">${escapeHtml(name)}</span> <span class="reader-time">${readTime}</span></li>`;
+        }).join('');
+        modal.innerHTML = `<h4>Seen by (${data.length})</h4><ul>${listItems}</ul>`;
+      }
+      modal.style.left = e.pageX + 10 + 'px';
+      modal.style.top = e.pageY + 10 + 'px';
+      modal.style.display = 'block';
+      const hideModal = (ev) => {
+        if (!modal.contains(ev.target)) {
+          modal.style.display = 'none';
+          document.removeEventListener('click', hideModal);
+        }
+      };
+      setTimeout(() => document.addEventListener('click', hideModal), 0);
+    }
+
+    // --- Append new message (real-time) ---
     function appendMessageToUI(message, isSent, senderName, senderId, messageRole, isUnread = false) {
+      // avoid appending duplicates (could be fired by both initial load and realtime)
+      if (document.querySelector(`.message-row[data-message-id="${message.id}"]`)) return;
+
+      if (isCEO) {
+        // when selectedGroupRole is empty string or null treat as all groups
+        if (selectedGroupRole && messageRole !== selectedGroupRole) return;
+      } else {
+        if (messageRole !== currentRole) return;
+      }
+
       const area = document.getElementById('messagesArea');
       if (!area) return;
-
-      // Check if we need a date separator before the new message
       const lastMessageRow = area.querySelector('.message-row:last-child');
-      let lastDate = null;
-      if (lastMessageRow) {
-        lastDate = lastMessageRow.dataset.createdAt;
-      }
+      let lastDate = lastMessageRow ? lastMessageRow.dataset.createdAt : null;
       const separatorHtml = maybeAppendDateSeparator(lastDate, message.created_at);
-
       const isScrolledToBottom = area.scrollHeight - area.scrollTop <= area.clientHeight + 50;
-
-      // Insert separator if needed
-      if (separatorHtml) {
-        area.insertAdjacentHTML('beforeend', separatorHtml);
-      }
-
+      if (separatorHtml) area.insertAdjacentHTML('beforeend', separatorHtml);
       const msgHtml = renderMessage(message, isSent, senderName, senderId, messageRole, isUnread);
       area.insertAdjacentHTML('beforeend', msgHtml);
-
-      if (isScrolledToBottom) {
-        area.scrollTop = area.scrollHeight;
-      }
-
+      if (isScrolledToBottom) area.scrollTop = area.scrollHeight;
       attachMessageHandlers();
-
       if (isUnread) {
         const newRow = document.querySelector(`.message-row[data-message-id="${message.id}"]`);
         if (observer && newRow) observer.observe(newRow);
@@ -1159,12 +1325,13 @@
     // --- Subscribe to new messages ---
     function subscribeToMessages() {
       if (messageSubscription) messageSubscription.unsubscribe();
-      let channel;
       if (isCEO) {
-        channel = supabase
+        messageSubscription = supabase
           .channel('all-messages')
           .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'group_messages' }, async (payload) => {
             const newMsg = payload.new;
+            // skip if this message is already present (prevents duplicates when loading + realtime)
+            if (document.querySelector(`.message-row[data-message-id="${newMsg.id}"]`)) return;
             if (newMsg.sender_id === currentUser.id) return;
             const { data: senderProfile } = await supabase
               .from('profiles')
@@ -1173,7 +1340,12 @@
               .single();
             const senderName = senderProfile?.full_name || 'Unknown';
             appendMessageToUI(newMsg, false, senderName, newMsg.sender_id, newMsg.role, true);
-            unreadCount++;
+            // increment total unread regardless of the currently selected group
+            totalUnreadCount++;
+            // if the message also belongs to the group currently being viewed (or we're viewing all), bump that counter too
+            if (selectedGroupRole === null || newMsg.role === selectedGroupRole) {
+              currentUnreadCount++;
+            }
             updateUnreadBadges();
           })
           .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'group_messages' }, (payload) => {
@@ -1181,12 +1353,15 @@
           })
           .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'group_messages' }, (payload) => {
             removeMessageFromUI(payload.old.id);
-          });
+          })
+          .subscribe();
       } else {
-        channel = supabase
+        messageSubscription = supabase
           .channel(`group-${currentRole}`)
           .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, async (payload) => {
             const newMsg = payload.new;
+            // skip if this message already exists in the DOM
+            if (document.querySelector(`.message-row[data-message-id="${newMsg.id}"]`)) return;
             if (newMsg.sender_id === currentUser.id) return;
             const { data: senderProfile } = await supabase
               .from('profiles')
@@ -1195,7 +1370,7 @@
               .single();
             const senderName = senderProfile?.full_name || 'Unknown';
             appendMessageToUI(newMsg, false, senderName, newMsg.sender_id, newMsg.role, true);
-            unreadCount++;
+            currentUnreadCount++;
             updateUnreadBadges();
           })
           .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, (payload) => {
@@ -1203,21 +1378,94 @@
           })
           .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, (payload) => {
             removeMessageFromUI(payload.old.id);
-          });
+          })
+          .subscribe();
       }
-      messageSubscription = channel.subscribe();
+    }
+
+
+    // --- Subscribe to all incoming private messages (for notifications) ---
+    function subscribeToAllDirectMessages() {
+      if (globalDmSubscription) globalDmSubscription.unsubscribe();
+      if (!currentUser) return;
+      globalDmSubscription = supabase
+        .channel(`dm-global-${currentUser.id}`)
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'private_messages',
+          filter: `recipient_id=eq.${currentUser.id}`
+        }, async (payload) => {
+          const newMsg = payload.new;
+          if (newMsg.sender_id === currentUser.id) return; // ignore our own sends
+          // check whether the DM modal is currently open for this sender
+          const isOpenForSender = dmModal.style.display === 'flex' && openDMUserId === newMsg.sender_id;
+          // if open, just append and mark read
+          // if conversation open for this sender, append and mark read but don't increment the badge
+          if (isOpenForSender) {
+            appendDirectMessageToUI(newMsg, false);
+          } else {
+            // increment per-sender badge and update
+            dmUnreadBySender[newMsg.sender_id] = (dmUnreadBySender[newMsg.sender_id] || 0) + 1;
+            updateDMBadge();
+          }
+          // always show toast notification
+          let senderName = 'Someone';
+          try {
+            const { data: prof } = await supabase
+              .from('profiles')
+              .select('full_name')
+              .eq('id', newMsg.sender_id)
+              .single();
+            if (prof && prof.full_name) senderName = prof.full_name;
+          } catch (e) {}
+          showToast(`New DM from ${senderName}`);
+        })
+        .subscribe();
+    }
+
+    // --- Render CEO groups list view ---
+    function renderGroupsList(roles) {
+      const area = document.getElementById('messagesArea');
+      if (!area) return;
+      if (!roles || roles.length === 0) {
+        area.innerHTML = '<div style="color:#9aa4bf;text-align:center;padding:2rem;">No groups found</div>';
+        return;
+      }
+      const items = roles.map(r => `<div class="group-card" data-role="${escapeHtml(r)}">${escapeHtml(r)}</div>`).join('');
+      area.innerHTML = `<div class="groups-list">${items}</div>`;
+      // attach handlers
+      document.querySelectorAll('.group-card').forEach(card => {
+        card.addEventListener('click', async (e) => {
+          const role = e.currentTarget.dataset.role;
+          // switch to the specific group
+          await switchGroup(role);
+        });
+      });
     }
 
     // --- Send message ---
     async function sendMessage() {
       const input = document.getElementById('messageInput');
       const content = input.value.trim();
-      if (!content || !currentRole || !currentUser) return;
+      if (!content || !currentUser) return;
+
+      let messageRole;
+      if (isCEO) {
+        if (!selectedGroupRole) {
+          alert('Please select a group first.');
+          return;
+        }
+        messageRole = selectedGroupRole;
+      } else {
+        messageRole = currentRole;
+      }
+
       input.value = '';
       const { data, error } = await supabase
         .from('group_messages')
         .insert({
-          role: currentRole,
+          role: messageRole,
           sender_id: currentUser.id,
           content: content
         })
@@ -1234,178 +1482,386 @@
           .insert({ message_id: data.id, user_id: currentUser.id });
         readMessageIds.add(data.id);
       } catch (readErr) {}
-      appendMessageToUI(data, true, currentUserFullName, currentUser.id, currentRole, false);
+      appendMessageToUI(data, true, currentUserFullName, currentUser.id, messageRole, false);
+    }
+
+    // --- Build group tabs for CEO ---
+    async function buildGroupTabs() {
+      if (!isCEO) return;
+      const tabsContainer = document.getElementById('groupTabs');
+      tabsContainer.style.display = 'flex';
+      tabsContainer.innerHTML = '';
+
+      // Try to get roles from profiles first
+      let roles = [];
+      try {
+        const { data: profiles, error } = await supabase
+          .from('profiles')
+          .select('job_role')
+          .not('job_role', 'is', null);
+        if (!error && profiles && profiles.length > 0) {
+          roles = [...new Set(profiles.map(p => p.job_role))].sort();
+        } else {
+          console.warn('No job_roles found in profiles, falling back to roles from group_messages');
+        }
+      } catch (e) {
+        console.error('Error fetching profiles:', e);
+      }
+
+      // Fallback: get roles from existing messages
+      if (roles.length === 0) {
+        try {
+          const { data: messages, error } = await supabase
+            .from('group_messages')
+            .select('role')
+            .not('role', 'is', null);
+          if (!error && messages) {
+            roles = [...new Set(messages.map(m => m.role))].sort();
+          }
+        } catch (e) {
+          console.error('Error fetching message roles:', e);
+        }
+      }
+
+      if (roles.length === 0) {
+        tabsContainer.innerHTML = '<span style="color:#9aa4bf; padding:0.4rem 1rem;">No groups found</span>';
+        return;
+      }
+
+      availableRoles = roles;
+
+      // ensure availableRoles is set before showing groups
+      if (!availableRoles) availableRoles = roles;
+
+      // add an "All" tab at the beginning
+      const allTab = document.createElement('span');
+      allTab.className = `group-tab ${selectedGroupRole === null ? 'active' : ''}`;
+      allTab.textContent = 'All';
+      allTab.dataset.role = '';
+      allTab.addEventListener('click', () => switchGroup(''));
+      tabsContainer.appendChild(allTab);
+
+      // For CEO header we only show the 'All' tab; individual groups are shown
+      // as cards inside the All view. Roles are rendered in the messages area.
+
+      // If no group selected yet, select the first one
+      if (selectedGroupRole === null && roles.length > 0) {
+        // default to all groups
+        document.querySelectorAll('.group-tab').forEach(tab => {
+          if (tab.dataset.role === '') tab.classList.add('active');
+        });
+        // disable input because CEO cannot send without selecting a specific group
+        document.getElementById('messageInput').disabled = true;
+        document.getElementById('sendBtn').disabled = true;
+        await loadMessages();
+      } else if (!selectedGroupRole && roles.length > 0) {
+        // if still no role selected (shouldn't normally happen), pick first role
+        selectedGroupRole = roles[0];
+        document.querySelectorAll('.group-tab').forEach(tab => {
+          if (tab.dataset.role === selectedGroupRole) tab.classList.add('active');
+        });
+        document.getElementById('messageInput').disabled = false;
+        document.getElementById('sendBtn').disabled = false;
+        await loadMessages();
+      }
+    }
+
+    // --- Switch group tab ---
+    async function switchGroup(role) {
+      // normalize empty string to null for "All"
+      const normalized = role === '' ? null : role;
+      if (selectedGroupRole === normalized) return;
+      selectedGroupRole = normalized;
+      document.querySelectorAll('.group-tab').forEach(tab => {
+        const tr = tab.dataset.role === '' ? null : tab.dataset.role;
+        if (tr === selectedGroupRole) tab.classList.add('active');
+        else tab.classList.remove('active');
+      });
+      // disable input if viewing all groups
+      if (isCEO) {
+        const disabled = selectedGroupRole === null;
+        document.getElementById('messageInput').disabled = disabled;
+        document.getElementById('sendBtn').disabled = disabled;
+      }
+      // update header tabs: show only 'All' or a back icon for CEOs
+      if (isCEO) {
+        const tabsContainer = document.getElementById('groupTabs');
+        tabsContainer.innerHTML = '';
+        if (selectedGroupRole === null) {
+          const allTab = document.createElement('span');
+          allTab.className = 'group-tab active';
+          allTab.dataset.role = '';
+          allTab.textContent = 'All';
+          allTab.addEventListener('click', () => switchGroup(''));
+          tabsContainer.appendChild(allTab);
+        } else {
+          const back = document.createElement('span');
+          back.className = 'group-tab';
+          back.id = 'backToAll';
+          back.innerHTML = '⟵ All';
+          back.addEventListener('click', () => switchGroup(''));
+          tabsContainer.appendChild(back);
+        }
+      }
+
+      await loadMessages();
     }
 
     // --- DM functions ---
-    function openDirectMessageModal(recipientId, recipientName, recipientRole) {
-      // Close any existing DM modal
-      closeDirectMessageModal();
+    async function loadPrivateMessagesView() {
+      try {
+        // Clear group message subscriptions and show DM view
+        if (messageSubscription) messageSubscription.unsubscribe();
+        if (observer) observer.disconnect();
+        
+        // Update header
+        document.getElementById('groupTitle').innerText = 'Direct Messages';
+        document.getElementById('roleDisplay').style.display = 'none';
+        document.getElementById('groupTabs').style.display = 'none';
+        document.getElementById('messageInput').disabled = true;
+        document.getElementById('sendBtn').disabled = true;
 
-      currentRecipientId = recipientId;
+        dmUnreadCount = 0;
+        updateDMBadge();
 
-      // Create modal container if it doesn't exist
-      let dmModal = document.getElementById('dmModal');
-      if (!dmModal) {
-        dmModal = document.createElement('div');
-        dmModal.id = 'dmModal';
-        dmModal.className = 'dm-modal';
-        dmModal.innerHTML = `
-          <div class="dm-modal-header">
-            <span class="dm-modal-title"></span>
-            <button class="dm-modal-close">&times;</button>
-          </div>
-          <div class="dm-modal-messages" id="dmMessages"></div>
-          <div class="dm-modal-input">
-            <input type="text" id="dmInput" placeholder="Type a message...">
-            <button id="dmSendBtn">Send</button>
+        // Fetch all conversations
+        const { data: conversations, error } = await supabase
+          .from('private_messages')
+          .select('sender_id, recipient_id, created_at')
+          .or(`sender_id.eq.${currentUser.id},recipient_id.eq.${currentUser.id}`)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Get unique users from conversations
+        const userIds = new Set();
+        conversations.forEach(msg => {
+          const otherUserId = msg.sender_id === currentUser.id ? msg.recipient_id : msg.sender_id;
+          userIds.add(otherUserId);
+        });
+
+        // Fetch user profiles
+        const { data: profiles, error: profileError } = await supabase
+          .from('profiles')
+          .select('id, full_name, job_role')
+          .in('id', Array.from(userIds));
+
+        if (profileError) throw profileError;
+
+        // Build conversation list HTML
+        const area = document.getElementById('messagesArea');
+        const profileMap = {};
+        profiles.forEach(p => profileMap[p.id] = p);
+
+        const conversationsList = Array.from(userIds).map(userId => {
+          const profile = profileMap[userId];
+          const unread = dmUnreadBySender[userId] || 0;
+          const unreadBadge = unread > 0 ? `<span class="dm-unread-badge">${unread}</span>` : '';
+          return `
+            <div class="dm-conversation-item" data-user-id="${userId}">
+              <div class="dm-conv-content">
+                <div class="dm-conv-name">${escapeHtml(profile?.full_name || 'Unknown')}</div>
+                <div class="dm-conv-role">${escapeHtml(profile?.job_role || 'Member')}</div>
+              </div>
+              ${unreadBadge}
+            </div>
+          `;
+        }).join('');
+
+        area.innerHTML = `
+          <div class="dm-layout">
+            <div class="dm-conversations-list">
+              <div class="dm-list-header">Conversations</div>
+              ${conversationsList}
+            </div>
+            <div class="dm-chat-area" style="display: none;">
+              <div class="dm-chat-header"></div>
+              <div id="dmChatMessages"></div>
+              <div class="dm-chat-input">
+                <input type="text" id="dmChatInput" placeholder="Type a message...">
+                <button id="dmChatSendBtn">Send</button>
+              </div>
+            </div>
           </div>
         `;
-        document.body.appendChild(dmModal);
 
-        // Add styles for DM modal (if not already present)
-        const style = document.createElement('style');
-        style.textContent = `
-          .dm-modal {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 320px;
-            height: 400px;
-            background: #2d2d3a;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-            z-index: 2000;
-            overflow: hidden;
-            border: 1px solid #40404d;
-            color: #e4e4f0;
-          }
-          .dm-modal-header {
-            background: #1e1e2a;
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #40404d;
-            font-weight: 500;
-          }
-          .dm-modal-close {
-            background: none;
-            border: none;
-            color: #aaa;
-            font-size: 20px;
-            cursor: pointer;
-          }
-          .dm-modal-close:hover { color: #fff; }
-          .dm-modal-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-          }
-          .dm-message {
-            max-width: 80%;
-            padding: 8px 12px;
-            border-radius: 18px;
-            word-wrap: break-word;
-            font-size: 14px;
-            line-height: 1.4;
-          }
-          .dm-message.sent {
-            align-self: flex-end;
-            background: #4a4a6a;
-            color: white;
-            border-bottom-right-radius: 4px;
-          }
-          .dm-message.received {
-            align-self: flex-start;
-            background: #3a3a4a;
-            color: #e4e4f0;
-            border-bottom-left-radius: 4px;
-          }
-          .dm-message small {
-            font-size: 10px;
-            opacity: 0.7;
-            margin-left: 6px;
-          }
-          .dm-modal-input {
-            display: flex;
-            padding: 12px;
-            background: #1e1e2a;
-            border-top: 1px solid #40404d;
-          }
-          .dm-modal-input input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid #40404d;
-            border-radius: 20px;
-            background: #2d2d3a;
-            color: white;
-            outline: none;
-          }
-          .dm-modal-input button {
-            margin-left: 8px;
-            padding: 8px 16px;
-            background: #5a5a7a;
-            border: none;
-            border-radius: 20px;
-            color: white;
-            cursor: pointer;
-          }
-          .dm-modal-input button:hover { background: #6a6a8a; }
-          .dm-date-separator {
-            text-align: center;
-            font-size: 11px;
-            color: #888;
-            margin: 12px 0 4px;
-          }
-        `;
-        document.head.appendChild(style);
+        // Add CSS for DM layout
+        if (!document.getElementById('dm-layout-styles')) {
+          const style = document.createElement('style');
+          style.id = 'dm-layout-styles';
+          style.textContent = `
+            .dm-layout {
+              display: flex;
+              height: 100%;
+              gap: 0;
+            }
+            .dm-conversations-list {
+              width: 300px;
+              border-right: 1px solid #263154;
+              overflow-y: auto;
+              background: #0f172f;
+            }
+            .dm-list-header {
+              padding: 1rem;
+              font-weight: 600;
+              color: #9aa4bf;
+              border-bottom: 1px solid #263154;
+              font-size: 0.9rem;
+            }
+            .dm-conversation-item {
+              padding: 0.8rem 1rem;
+              border-bottom: 1px solid #1f2a44;
+              cursor: pointer;
+              transition: background 0.2s;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            }
+            .dm-conversation-item:hover {
+              background: #1f2a44;
+            }
+            .dm-conversation-item.active {
+              background: #2a3a60;
+              border-left: 3px solid #428cff;
+            }
+            .dm-conv-content {
+              flex: 1;
+            }
+            .dm-conv-name {
+              color: white;
+              font-weight: 500;
+              font-size: 0.9rem;
+            }
+            .dm-conv-role {
+              color: #9aa4bf;
+              font-size: 0.75rem;
+              margin-top: 0.2rem;
+            }
+            .dm-unread-badge {
+              background: #428cff;
+              color: white;
+              padding: 0.2rem 0.5rem;
+              border-radius: 1rem;
+              font-size: 0.75rem;
+              font-weight: 600;
+              min-width: 20px;
+              text-align: center;
+            }
+            .dm-chat-area {
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+            }
+            .dm-chat-header {
+              padding: 1rem;
+              border-bottom: 1px solid #263154;
+              color: white;
+              font-weight: 500;
+              background: #131c30;
+            }
+            #dmChatMessages {
+              flex: 1;
+              overflow-y: auto;
+              padding: 1rem;
+              display: flex;
+              flex-direction: column;
+              gap: 0.5rem;
+            }
+            .dm-chat-input {
+              display: flex;
+              padding: 1rem;
+              background: #131c30;
+              border-top: 1px solid #263154;
+              gap: 0.5rem;
+            }
+            #dmChatInput {
+              flex: 1;
+              background: #0f172f;
+              border: 1px solid #263154;
+              border-radius: 2rem;
+              padding: 0.8rem 1.2rem;
+              color: white;
+              outline: none;
+            }
+            #dmChatInput:focus {
+              border-color: #428cff;
+            }
+            #dmChatSendBtn {
+              background: #428cff;
+              border: none;
+              color: white;
+              width: 3rem;
+              height: 3rem;
+              border-radius: 50%;
+              cursor: pointer;
+              font-size: 1.2rem;
+              transition: 0.2s;
+            }
+            #dmChatSendBtn:hover {
+              background: #5f9eff;
+            }
+            .dm-msg-row {
+              display: flex;
+              margin-bottom: 0.5rem;
+            }
+            .dm-msg-row.sent {
+              justify-content: flex-end;
+            }
+            .dm-msg {
+              max-width: 60%;
+              padding: 0.8rem 1rem;
+              border-radius: 1.2rem;
+              word-wrap: break-word;
+              font-size: 0.9rem;
+              line-height: 1.4;
+            }
+            .dm-msg.sent {
+              background: #428cff;
+              color: white;
+            }
+            .dm-msg.received {
+              background: #1f2a44;
+              color: #e0e7ff;
+            }
+            .dm-msg small {
+              display: block;
+              font-size: 0.75rem;
+              opacity: 0.7;
+              margin-top: 0.3rem;
+            }
+          `;
+          document.head.appendChild(style);
+        }
+
+        // Attach conversation click handlers
+        document.querySelectorAll('.dm-conversation-item').forEach(item => {
+          item.addEventListener('click', async () => {
+            const userId = item.dataset.userId;
+            await openPrivateChat(userId, profileMap[userId]);
+            document.querySelectorAll('.dm-conversation-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+          });
+        });
+
+      } catch (err) {
+        console.error('Load DM view error:', err);
+        document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Failed to load direct messages.</div>';
       }
+    }
 
-      // Set title
-      const titleSpan = dmModal.querySelector('.dm-modal-title');
-      titleSpan.innerHTML = `${escapeHtml(recipientName)} <span style="font-size:12px;color:#aaa;">(${escapeHtml(recipientRole)})</span>`;
+    async function openPrivateChat(otherUserId, otherProfile) {
+      const chatArea = document.querySelector('.dm-chat-area');
+      const header = document.querySelector('.dm-chat-header');
+      const messagesDiv = document.getElementById('dmChatMessages');
+      const input = document.getElementById('dmChatInput');
+      const sendBtn = document.getElementById('dmChatSendBtn');
 
-      // Show modal
-      dmModal.style.display = 'flex';
+      header.innerHTML = `${escapeHtml(otherProfile.full_name)} <span style="font-size:0.85rem;color:#9aa4bf;">(${escapeHtml(otherProfile.job_role)})</span>`;
+      chatArea.style.display = 'flex';
+      input.focus();
 
       // Load messages
-      loadDirectMessages(recipientId);
-
-      // Set up send button
-      const dmInput = document.getElementById('dmInput');
-      const dmSendBtn = document.getElementById('dmSendBtn');
-      dmSendBtn.onclick = () => sendDirectMessage(recipientId);
-      dmInput.onkeypress = (e) => {
-        if (e.key === 'Enter') sendDirectMessage(recipientId);
-      };
-
-      // Close button
-      dmModal.querySelector('.dm-modal-close').onclick = closeDirectMessageModal;
-
-      // Subscribe to new messages for this conversation
-      subscribeToDirectMessages(recipientId);
-    }
-
-    function closeDirectMessageModal() {
-      const dmModal = document.getElementById('dmModal');
-      if (dmModal) dmModal.style.display = 'none';
-      if (dmSubscription) dmSubscription.unsubscribe();
-      if (dmObserver) dmObserver.disconnect();
-      currentRecipientId = null;
-    }
-
-    async function loadDirectMessages(otherUserId) {
-      const messagesDiv = document.getElementById('dmMessages');
-      if (!messagesDiv) return;
-
       try {
-        // Fetch messages between current user and other user
         const { data, error } = await supabase
           .from('private_messages')
           .select('*')
@@ -1414,49 +1870,156 @@
 
         if (error) throw error;
 
-        // Render messages with date separators
+        let html = '';
+        for (const msg of data) {
+          const isSent = msg.sender_id === currentUser.id;
+          const timeStr = formatTimeOnly(msg.created_at);
+          const msgClass = isSent ? 'sent' : 'received';
+          html += `
+            <div class="dm-msg-row ${msgClass}">
+              <div class="dm-msg ${msgClass}">
+                ${escapeHtml(msg.content)}
+                <small>${timeStr}</small>
+              </div>
+            </div>
+          `;
+          if (!isSent && !msg.read_at) {
+            markDirectMessageAsRead(msg.id, otherUserId);
+          }
+        }
+        messagesDiv.innerHTML = html;
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+        // Clear old handlers and attach new ones
+        sendBtn.onclick = () => sendPrivateMessage(otherUserId);
+        input.onkeypress = (e) => {
+          if (e.key === 'Enter') sendPrivateMessage(otherUserId);
+        };
+
+      } catch (err) {
+        console.error('Load private chat error:', err);
+        messagesDiv.innerHTML = '<div style="color:#ff628c;">Failed to load messages.</div>';
+      }
+    }
+
+    async function sendPrivateMessage(otherUserId) {
+      const input = document.getElementById('dmChatInput');
+      const content = input.value.trim();
+      if (!content) return;
+      input.value = '';
+
+      try {
+        const { data, error } = await supabase
+          .from('private_messages')
+          .insert({
+            sender_id: currentUser.id,
+            recipient_id: otherUserId,
+            content: content
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        // Append to chat
+        const messagesDiv = document.getElementById('dmChatMessages');
+        const timeStr = formatTimeOnly(data.created_at);
+        const msgHtml = `
+          <div class="dm-msg-row sent">
+            <div class="dm-msg sent">
+              ${escapeHtml(data.content)}
+              <small>${timeStr}</small>
+            </div>
+          </div>
+        `;
+        messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      } catch (err) {
+        console.error('Send private message error:', err);
+        alert('Failed to send: ' + err.message);
+      }
+    }
+
+    function openDirectMessageModal(recipientId, recipientName, recipientRole) {
+      closeDirectMessageModal();
+      currentRecipientId = recipientId;
+      openDMUserId = recipientId;
+      // clear unread for this particular sender
+      if (dmUnreadBySender[recipientId]) {
+        dmUnreadBySender[recipientId] = 0;
+        updateDMBadge();
+      }
+
+      const titleSpan = dmModal.querySelector('.dm-modal-title');
+      titleSpan.innerHTML = `${escapeHtml(recipientName)} <span style="font-size:12px;color:#aaa;">(${escapeHtml(recipientRole)})</span>`;
+      dmModal.style.display = 'flex';
+      loadDirectMessages(recipientId);
+      const dmInput = document.getElementById('dmInput');
+      const dmSendBtn = document.getElementById('dmSendBtn');
+      dmSendBtn.onclick = () => sendDirectMessage(recipientId);
+      dmInput.onkeypress = (e) => {
+        if (e.key === 'Enter') sendDirectMessage(recipientId);
+      };
+      dmModal.querySelector('.dm-modal-close').onclick = closeDirectMessageModal;
+    }
+
+    function closeDirectMessageModal() {
+      dmModal.style.display = 'none';
+      if (dmObserver) dmObserver.disconnect();
+      currentRecipientId = null;
+      openDMUserId = null;
+      // nothing else; other unread values remain intact
+    }
+
+    async function loadDirectMessages(otherUserId) {
+      const messagesDiv = document.getElementById('dmMessages');
+      if (!messagesDiv) return;
+      try {
+        const { data, error } = await supabase
+          .from('private_messages')
+          .select('*')
+          .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`)
+          .order('created_at', { ascending: true });
+        if (error) throw error;
         let html = '';
         let lastDate = null;
         for (const msg of data) {
           const isSent = msg.sender_id === currentUser.id;
           const dateHeader = maybeAppendDateSeparator(lastDate, msg.created_at);
-          if (dateHeader) html += dateHeader;
+          if (dateHeader) html += dateHeader.replace('date-separator', 'dm-date-separator');
           lastDate = msg.created_at;
-
           const timeStr = formatTimeOnly(msg.created_at);
           const messageClass = isSent ? 'sent' : 'received';
           html += `<div class="dm-message ${messageClass}" data-message-id="${msg.id}" data-created-at="${msg.created_at}">
             ${escapeHtml(msg.content)} <small>${timeStr}</small>
           </div>`;
-
-          // Mark as read if received and not already read
           if (!isSent && !msg.read_at) {
-            markDirectMessageAsRead(msg.id);
+            markDirectMessageAsRead(msg.id, msg.sender_id);
           }
         }
         messagesDiv.innerHTML = html;
-
-        // Scroll to bottom
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-        // Set up observer to mark messages as read when they become visible
         setupDirectMessageObserver();
-
       } catch (err) {
         console.error('Load DMs error:', err);
         messagesDiv.innerHTML = '<div style="color:#ff628c;padding:1rem;">Could not load messages.</div>';
       }
     }
 
-    async function markDirectMessageAsRead(messageId) {
+    async function markDirectMessageAsRead(messageId, senderId) {
       try {
         await supabase
           .from('private_messages')
           .update({ read_at: new Date().toISOString() })
           .eq('id', messageId)
-          .eq('recipient_id', currentUser.id); // safety: only recipient can mark read
+          .eq('recipient_id', currentUser.id);
       } catch (err) {
         console.error('Mark DM read error:', err);
+      }
+      // decrement unread counter for sender if we were tracking it
+      if (senderId && dmUnreadBySender[senderId]) {
+        dmUnreadBySender[senderId] = Math.max(0, dmUnreadBySender[senderId] - 1);
+        updateDMBadge();
       }
     }
 
@@ -1468,12 +2031,12 @@
             const msgDiv = entry.target;
             const messageId = msgDiv.dataset.messageId;
             if (messageId && msgDiv.classList.contains('received')) {
-              markDirectMessageAsRead(messageId);
+              const sid = msgDiv.dataset.senderId;
+              markDirectMessageAsRead(messageId, sid);
             }
           }
         });
       }, { threshold: 0.5 });
-
       document.querySelectorAll('#dmMessages .dm-message.received').forEach(msg => {
         dmObserver.observe(msg);
       });
@@ -1483,9 +2046,7 @@
       const input = document.getElementById('dmInput');
       const content = input.value.trim();
       if (!content || !currentUser) return;
-
       input.value = '';
-
       const { data, error } = await supabase
         .from('private_messages')
         .insert({
@@ -1495,42 +2056,32 @@
         })
         .select()
         .single();
-
       if (error) {
         console.error('Send DM error:', error);
         alert('Failed to send: ' + error.message);
         return;
       }
-
-      // Append message to UI immediately (optimistic update, but we'll rely on real-time)
-      // Real-time will add it; but for instant feel we can also add manually
       appendDirectMessageToUI(data, true);
     }
 
     function appendDirectMessageToUI(message, isSent) {
       const messagesDiv = document.getElementById('dmMessages');
       if (!messagesDiv) return;
-
       const lastMsg = messagesDiv.querySelector('.dm-message:last-child');
       let lastDate = lastMsg ? lastMsg.dataset.createdAt : null;
       const separatorHtml = maybeAppendDateSeparator(lastDate, message.created_at);
       if (separatorHtml) {
-        messagesDiv.insertAdjacentHTML('beforeend', separatorHtml);
+        messagesDiv.insertAdjacentHTML('beforeend', separatorHtml.replace('date-separator', 'dm-date-separator'));
       }
-
       const timeStr = formatTimeOnly(message.created_at);
       const messageClass = isSent ? 'sent' : 'received';
-      const msgHtml = `<div class="dm-message ${messageClass}" data-message-id="${message.id}" data-created-at="${message.created_at}">
+      const msgHtml = `<div class="dm-message ${messageClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${message.sender_id}">
         ${escapeHtml(message.content)} <small>${timeStr}</small>
       </div>`;
       messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
-
-      // Scroll to bottom
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-      // If received, mark as read and observe
       if (!isSent) {
-        markDirectMessageAsRead(message.id);
+        markDirectMessageAsRead(message.id, message.sender_id);
         if (dmObserver) {
           const newMsg = messagesDiv.lastElementChild;
           dmObserver.observe(newMsg);
@@ -1540,8 +2091,6 @@
 
     function subscribeToDirectMessages(otherUserId) {
       if (dmSubscription) dmSubscription.unsubscribe();
-
-      // Subscribe to new messages where current user is either sender or recipient with this other user
       dmSubscription = supabase
         .channel(`dm-${currentUser.id}-${otherUserId}`)
         .on('postgres_changes', {
@@ -1551,9 +2100,7 @@
           filter: `or(and(sender_id=eq.${currentUser.id},recipient_id=eq.${otherUserId}),and(sender_id=eq.${otherUserId},recipient_id=eq.${currentUser.id}))`
         }, (payload) => {
           const newMsg = payload.new;
-          // Ignore if sent by current user (already added optimistically, but real-time will double)
           const isSent = newMsg.sender_id === currentUser.id;
-          // Avoid duplicates: check if message already exists in UI
           const existing = document.querySelector(`#dmMessages .dm-message[data-message-id="${newMsg.id}"]`);
           if (!existing) {
             appendDirectMessageToUI(newMsg, isSent);
@@ -1567,7 +2114,7 @@
       try {
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         if (userError || !user) {
-          window.location.href = 'index.html';
+          window.location.href = '/index.html';
           return;
         }
         currentUser = user;
@@ -1583,19 +2130,25 @@
         currentRole = jobRole;
         isCEO = (currentRole === 'CEO');
 
+        // always listen for private messages so we can notify
+        subscribeToAllDirectMessages();
+
         if (isCEO) {
-          document.getElementById('groupTitle').innerText = 'All Groups (CEO)';
+          document.getElementById('groupTitle').innerText = 'Group Chat (CEO)';
           document.getElementById('roleDisplay').style.display = 'none';
+          // compute the initial total unread count before building tabs
+          await updateTotalUnreadCount();
+          await buildGroupTabs();
+          subscribeToMessages();
         } else {
           document.getElementById('groupTitle').innerText = 'Group';
           document.getElementById('roleDisplay').textContent = currentRole;
+          selectedGroupRole = currentRole;
+          document.getElementById('messageInput').disabled = false;
+          document.getElementById('sendBtn').disabled = false;
+          await loadMessages();
+          subscribeToMessages();
         }
-
-        document.getElementById('messageInput').disabled = false;
-        document.getElementById('sendBtn').disabled = false;
-
-        await loadMessages();
-        subscribeToMessages();
 
       } catch (err) {
         console.error('Init error:', err);
@@ -1605,17 +2158,21 @@
 
     // --- Logout ---
     document.getElementById('logout').addEventListener('click', async () => {
-      closeDirectMessageModal(); // Close DM modal if open
+      closeDirectMessageModal();
       if (messageSubscription) messageSubscription.unsubscribe();
       editTimeouts.forEach(t => clearTimeout(t));
       editTimeouts.clear();
       await supabase.auth.signOut();
-      window.location.href = 'index.html';
+      window.location.href = '/index.html';
     });
 
     document.getElementById('sendBtn').addEventListener('click', sendMessage);
     document.getElementById('messageInput').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') sendMessage();
+    });
+    document.getElementById('dmNavLink').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await loadPrivateMessagesView();
     });
 
     window.addEventListener('scroll', () => modal.style.display = 'none', true);
@@ -1628,6 +2185,4 @@
   })();
 </script>
 </body>
-
 </html>
-
