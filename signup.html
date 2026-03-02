@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TECH TITANS · Sign up</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background: #0b0f17;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      position: relative;
+    }
+
+    .top-logo {
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: white;
+      font-size: 1.8rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    .top-logo img {
+      height: 2.5rem;
+      width: auto;
+      filter: drop-shadow(0 4px 8px rgba(66, 140, 255, 0.3));
+    }
+    .top-logo span {
+      color: #428cff;
+    }
+
+    .glass-card {
+      background: rgba(18, 25, 40, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(66, 140, 255, 0.15);
+      border-radius: 2rem;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(66, 140, 255, 0.1) inset;
+    }
+
+    .sub {
+      color: #9aa4bf;
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+      border-left: 3px solid #428cff;
+      padding-left: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      color: #b8c3e0;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 0.4rem;
+    }
+
+    input, select {
+      width: 100%;
+      background: #0f172f;
+      border: 1px solid #263154;
+      border-radius: 1.2rem;
+      padding: 0.9rem 1.2rem;
+      color: white;
+      font-size: 1rem;
+      outline: none;
+      transition: 0.2s;
+    }
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%239aa4bf%22%3E%3Cpath%20d%3D%22M7%2010l5%205%205-5z%22%2F%3E%3C%2Fsvg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+    }
+    select option {
+      background: #0f172f;
+      color: white;
+    }
+
+    input:focus, select:focus {
+      border-color: #428cff;
+      box-shadow: 0 0 0 3px rgba(66, 140, 255, 0.2);
+    }
+
+    .btn {
+      background: #428cff;
+      border: none;
+      color: white;
+      width: 100%;
+      padding: 1rem;
+      border-radius: 1.5rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: 0.2s;
+      margin-top: 1rem;
+      box-shadow: 0 8px 20px -8px #428cff80;
+    }
+
+    .btn:hover {
+      background: #5f9eff;
+      transform: translateY(-2px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .error {
+      color: #ff628c;
+      background: #2f1a28;
+      border-radius: 1rem;
+      padding: 0.75rem 1rem;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      border: 1px solid #ff628c30;
+      display: none;
+    }
+
+    .loading {
+      display: none;
+      color: #9aa4bf;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .success {
+      color: #4caf92;
+      background: #1a2f2a;
+      border-radius: 1rem;
+      padding: 0.75rem 1rem;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      border: 1px solid #4caf9250;
+      display: none;
+    }
+
+    .link {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: #9aa4bf;
+    }
+    .link a {
+      color: #428cff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .link a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+      .top-logo {
+        top: 1rem;
+        left: 1rem;
+        font-size: 1.4rem;
+      }
+      .top-logo img {
+        height: 2rem;
+      }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+  <div class="top-logo">
+    <img src="img/titans_logo2.png" alt="TECH TITANS">
+    <div>TECH<span>TITANS</span></div>
+  </div>
+
+  <div class="glass-card">
+    <div class="sub">join the team</div>
+
+    <form id="signupForm">
+      <div class="form-group">
+        <label>Full name</label>
+        <input type="text" id="fullName" placeholder="e.g. Alex Rivera" autocomplete="name" required>
+      </div>
+      <div class="form-group">
+        <label>Job role</label>
+        <select id="jobRole" required>
+          <option value="" disabled selected>Select your role</option>
+          <option value="CEO">CEO</option>
+          <option value="Backend Developer">Backend Developer</option>
+          <option value="Frontend Developer">Frontend Developer</option>
+          <option value="Graphics Designer">Graphics Designer</option>
+          <option value="DevOps Engineer">DevOps Engineer</option>
+          <option value="Product Manager">Product Manager</option>
+          <option value="QA Engineer">QA Engineer</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="name@techtitans.com" autocomplete="email" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="new-password" required>
+      </div>
+      <button type="submit" class="btn" id="submitBtn">Create account</button>
+    </form>
+
+    <div id="errorMessage" class="error"></div>
+    <div id="successMessage" class="success"></div>
+    <div id="loadingMessage" class="loading">Processing…</div>
+
+    <div class="link">
+      Already have an account? <a href="index.html">Log in</a>
+    </div>
+  </div>
+<script>
+  (function() {
+    // --- Supabase setup with error handling ---
+    const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kcXF0c2RpYnR2eW1mZ250c3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTI1NjIsImV4cCI6MjA4Nzg4ODU2Mn0.hS-7kmoyFljnhkJEkw7nmgimw9ioQreidyu27_NXYyo';
+
+    let supabase;
+    try {
+      if (!window.supabase) throw new Error('Supabase library failed to load. Check your internet connection or CDN.');
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      console.log('Supabase client initialized');
+    } catch (e) {
+      console.error('Supabase init error:', e);
+      const errorDiv = document.getElementById('errorMessage');
+      if (errorDiv) {
+        errorDiv.textContent = 'Authentication service unavailable. Please refresh or try again later.';
+        errorDiv.style.display = 'block';
+      }
+      return; // Stop execution
+    }
+
+    // --- DOM elements ---
+    const form = document.getElementById('signupForm');
+    const fullNameInput = document.getElementById('fullName');
+    const jobRoleInput = document.getElementById('jobRole');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorDiv = document.getElementById('errorMessage');
+    const successDiv = document.getElementById('successMessage');
+    const loadingDiv = document.getElementById('loadingMessage');
+
+
+    // --- Signup form handler ---
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      console.log('Signup form submitted');
+
+      // Reset messages
+      errorDiv.style.display = 'none';
+      successDiv.style.display = 'none';
+      loadingDiv.style.display = 'block';
+      submitBtn.disabled = true;
+
+      // Get values
+      const fullName = fullNameInput.value.trim();
+      const jobRole = jobRoleInput.value;
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      // --- Client-side validation ---
+      if (!fullName || !jobRole) {
+        showError('Full name and job role are required.');
+        return;
+      }
+      if (!email) {
+        showError('Email is required.');
+        return;
+      }
+      if (password.length < 6) {
+        showError('Password must be at least 6 characters long.');
+        return;
+      }
+
+      try {
+        console.log('Attempting signup with:', email);
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: fullName,
+              job_role: jobRole
+            }
+          }
+        });
+
+        if (error) throw error;
+
+        console.log('Signup response:', data);
+
+        if (data.session) {
+          // Auto-confirm enabled – user is logged in immediately
+          console.log('Auto-confirmed, redirecting to dashboard');
+          window.location.href = 'dashboard.html';
+        } else {
+          // Email confirmation required
+          successDiv.textContent = 'Account created! Please check your email to confirm, then log in.';
+          successDiv.style.display = 'block';
+          form.reset(); // Clear form for security
+        }
+      } catch (err) {
+        console.error('Signup error:', err);
+        // User-friendly error messages
+        let message = err.message;
+        if (message.includes('User already registered')) {
+          message = 'An account with this email already exists.';
+        } else if (message.includes('Password should be at least 6 characters')) {
+          message = 'Password must be at least 6 characters.';
+        }
+        showError(message);
+      } finally {
+        loadingDiv.style.display = 'none';
+        submitBtn.disabled = false;
+      }
+    });
+
+    // Helper to display an error and re-enable the form
+    function showError(text) {
+      errorDiv.textContent = text;
+      errorDiv.style.display = 'block';
+      loadingDiv.style.display = 'none';
+      submitBtn.disabled = false;
+    }
+  })();
+</script>
+</body>
+</html>
