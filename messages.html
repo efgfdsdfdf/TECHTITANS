@@ -566,7 +566,7 @@
       cursor: not-allowed;
     }
 
-    /* ===== MOBILE OVERHAUL ===== */
+    /* ===== MOBILE & DM LAYOUT (professional, sensible) ===== */
     @media (max-width: 768px) {
       body { 
         flex-direction: column; 
@@ -678,6 +678,36 @@
         width: 2.8rem;
         height: 2.8rem;
       }
+
+      /* DM layout – stays within panel, no full‑screen overlay */
+      .dm-layout {
+        flex-direction: column;
+      }
+      .dm-conversations-list {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #263154;
+      }
+      .dm-chat-area {
+        width: 100%;
+        display: none; /* hidden by default */
+      }
+      .dm-chat-area.active {
+        display: flex;
+        flex-direction: column;
+      }
+      .dm-conversations-list.hide {
+        display: none;
+      }
+      .dm-back-btn {
+        display: inline-block;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        margin-right: 0.5rem;
+      }
     }
 
     @media (max-width: 480px) {
@@ -704,7 +734,7 @@
       }
     }
 
-    /* DM layout styles (injected via JS, but also included for completeness) */
+    /* DM layout base (desktop) */
     .dm-layout { display:flex; height:100%; gap:0; }
     .dm-conversations-list { width:280px; border-right:1px solid #263154; overflow-y:auto; background:#0f172f; flex-shrink:0; }
     .dm-list-header { padding:1rem; font-weight:600; color:#9aa4bf; border-bottom:1px solid #263154; font-size:0.9rem; }
@@ -718,19 +748,21 @@
     .status-dot.online { background:#2ecc71; }
     .dm-unread-badge { background:#428cff; color:white; padding:0.2rem 0.5rem; border-radius:1rem; font-size:0.75rem; font-weight:600; min-width:20px; text-align:center; margin-left:auto; }
     .dm-chat-area { flex:1; display:flex; flex-direction:column; background:#131c30; }
-    .dm-chat-header { padding:1rem; border-bottom:1px solid #263154; color:white; font-weight:500; background:#131c30; }
+    .dm-chat-header { padding:1rem; border-bottom:1px solid #263154; color:white; font-weight:500; background:#131c30; display:flex; align-items:center; }
+    .dm-chat-header .dm-back-btn { display:none; } /* hidden on desktop */
     .dm-chat-messages { flex:1; overflow-y:auto; padding:1rem; display:flex; flex-direction:column; gap:0.5rem; }
     .dm-chat-input { display:flex; padding:1rem; background:#131c30; border-top:1px solid #263154; gap:0.5rem; }
     #dmChatInput { flex:1; background:#0f172f; border:1px solid #263154; border-radius:2rem; padding:0.8rem 1.2rem; color:white; outline:none; }
     #dmChatInput:focus { border-color:#428cff; }
     #dmChatSendBtn { background:#428cff; border:none; color:white; width:3rem; height:3rem; border-radius:50%; cursor:pointer; font-size:1.2rem; transition:0.2s; flex-shrink:0; }
     #dmChatSendBtn:hover { background:#5f9eff; }
-    .dm-msg-row { display:flex; margin-bottom:0.5rem; }
+    .dm-msg-row { display:flex; margin-bottom:0.5rem; cursor:pointer; }
     .dm-msg-row.sent { justify-content:flex-end; }
-    .dm-msg { max-width:60%; padding:0.8rem 1rem; border-radius:1.2rem; word-wrap:break-word; font-size:0.9rem; line-height:1.4; }
+    .dm-msg { max-width:60%; padding:0.8rem 1rem; border-radius:1.2rem; word-wrap:break-word; font-size:0.9rem; line-height:1.4; position:relative; }
     .dm-msg.sent { background:#428cff; color:white; }
     .dm-msg.received { background:#1f2a44; color:#e0e7ff; }
     .dm-msg small { display:block; font-size:0.75rem; opacity:0.7; margin-top:0.3rem; }
+    .dm-seen-indicator { font-size:0.7rem; color:#9aa4bf; margin-top:0.2rem; text-align:right; }
 
     .toast {
       position: fixed;
@@ -755,15 +787,14 @@
   <div class="sidebar">
     <div class="logo">TECH<span>TITANS</span></div>
     <div class="nav">
-      <a href="dashboard.html">📊 <span>Dashboard</span></a>
+      <a href="/dashboard.html">📊 <span>Dashboard</span></a>
       <a href="#" class="active" id="chatNavLink">💬 <span>Group Chat</span>
         <span class="sidebar-unread" id="sidebarUnreadBadge" style="display: none;">0</span>
       </a>
       <a href="#" id="dmNavLink">📩 <span>Direct Messages</span>
         <span class="sidebar-unread" id="dmUnreadBadge" style="display: none;">0</span>
       </a>
-      <a href="#" id="announcementNavLink">📢 <span>Announcements</span></a>
-      <a href="profile.html">⚙️ <span>Profile</span></a>
+      <a href="/profile.html">⚙️ <span>Profile</span></a>
     </div>
     <button class="logout-btn" id="logout">✕ <span>Logout</span></button>
   </div>
@@ -789,9 +820,6 @@
       
       <div class="chat-input-area" id="chatInputArea">
         <input type="text" id="messageInput" placeholder="Write a message..." disabled>
-        <label id="attachLabel" style="display:none; cursor:pointer; margin-left:0.5rem;">📎
-          <input type="file" id="attachInput" style="display:none;">
-        </label>
         <button id="sendBtn" disabled>➤</button>
       </div>
     </div>
@@ -820,7 +848,7 @@
       let currentUserFullName = 'User';
       let currentRole = null;
       let isCEO = false;
-      let selectedGroupRole = null; // for CEO
+      let selectedGroupRole = null;
       let availableRoles = [];
       let messageSubscription = null;
       let readMessageIds = new Set();
@@ -835,13 +863,10 @@
       let globalDmSubscription = null;
       let dmSubscription = null;
       let dmObserver = null;
-      let currentRecipientId = null; // for DM modal (legacy)
-      const dmModal = document.getElementById('dmModal'); // not used in new DM view
-      // Announcements
-      let showingAnnouncements = false;
+      let currentRecipientId = null;
       // Online presence
       let presenceChannel = null;
-      let onlineUsers = new Map(); // userId -> { name, role }
+      let onlineUsers = new Map();
       // Typing
       let typingTimeouts = {};
       let activeTypers = new Set();
@@ -917,7 +942,6 @@
               });
             });
             document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
-            // Update DM status dots if DM view is active
             if (document.getElementById('dmNavLink').classList.contains('active')) {
               document.querySelectorAll('.dm-conversation-item').forEach(item => {
                 const uid = item.dataset.userId;
@@ -979,7 +1003,6 @@
         }
       }
 
-      // Update DM badge
       function updateDMBadge() {
         const dmBadge = document.getElementById('dmUnreadBadge');
         dmUnreadCount = Object.values(dmUnreadBySender).reduce((a,b)=>a+b,0);
@@ -991,7 +1014,7 @@
         }
       }
 
-      // --- Mark message as read ---
+      // --- Mark group message as read ---
       async function markMessageAsRead(messageId) {
         if (readMessageIds.has(messageId)) return;
         try {
@@ -1017,13 +1040,12 @@
         }
       }
 
-      // --- Update seen indicator for a sent message ---
       async function updateSeenIndicator(messageId) {
         const msgRow = document.querySelector(`.message-row.sent[data-message-id="${messageId}"]`);
         if (!msgRow) return;
         const { data } = await supabase
           .from('message_reads')
-          .select('user_id, profiles!inner(full_name)')
+          .select('user_id, read_at, profiles!inner(full_name)')
           .eq('message_id', messageId);
         const count = data ? data.length : 0;
         let seenHtml = '';
@@ -1036,7 +1058,6 @@
         if (seenHtml) msgRow.querySelector('.message-bubble').insertAdjacentHTML('beforeend', seenHtml);
       }
 
-      // --- Observer for unread messages ---
       function setupObserver() {
         if (observer) observer.disconnect();
         observer = new IntersectionObserver((entries) => {
@@ -1124,7 +1145,6 @@
         }
       }
 
-      // --- Date separator ---
       function maybeAppendDateSeparator(prevDate, currentDate) {
         if (!prevDate) return '';
         const prevDay = new Date(prevDate).toDateString();
@@ -1139,7 +1159,6 @@
       // --- Load messages for the selected group ---
       async function loadMessages() {
         try {
-          if (showingAnnouncements) return;
           if (isCEO && selectedGroupRole === null) {
             renderGroupsList(availableRoles || []);
             return;
@@ -1172,7 +1191,6 @@
           }
           readMessageIds = readSet;
 
-          // For each sent message, fetch seen counts
           const seenCounts = {};
           if (messageIds.length > 0) {
             const { data: readsAll } = await supabase
@@ -1217,7 +1235,6 @@
         }
       }
 
-      // --- Compute total unread across all groups for CEO ---
       async function updateTotalUnreadCount() {
         if (!currentUser) return;
         try {
@@ -1241,7 +1258,6 @@
         }
       }
 
-      // --- Render groups list for CEO with unread counts ---
       async function renderGroupsList(roles) {
         const area = document.getElementById('messagesArea');
         if (!area) return;
@@ -1278,7 +1294,6 @@
         });
       }
 
-      // --- Build group tabs for CEO with unread badges ---
       async function buildGroupTabs() {
         if (!isCEO) return;
         const tabsContainer = document.getElementById('groupTabs');
@@ -1315,7 +1330,6 @@
 
         availableRoles = roles;
 
-        // Fetch unread counts per group for tabs
         const { data: reads } = await supabase
           .from('message_reads')
           .select('message_id')
@@ -1331,7 +1345,6 @@
           }
         });
 
-        // All tab
         const allTab = document.createElement('span');
         allTab.className = `group-tab ${selectedGroupRole === null ? 'active' : ''}`;
         allTab.textContent = 'All';
@@ -1345,7 +1358,6 @@
         allTab.addEventListener('click', () => switchGroup(''));
         tabsContainer.appendChild(allTab);
 
-        // For each role, create tab with unread badge
         roles.forEach(role => {
           const tab = document.createElement('span');
           tab.className = `group-tab ${selectedGroupRole === role ? 'active' : ''}`;
@@ -1377,7 +1389,6 @@
         }
       }
 
-      // --- Switch group tab ---
       async function switchGroup(role) {
         const normalized = role === '' ? null : role;
         if (selectedGroupRole === normalized) return;
@@ -1400,7 +1411,6 @@
         await loadMessages();
       }
 
-      // --- Attach message handlers ---
       function attachMessageHandlers() {
         document.querySelectorAll('.message-row').forEach(row => {
           row.removeEventListener('click', onMessageRowClick);
@@ -1438,7 +1448,6 @@
         const userId = avatar.dataset.userId;
         const userName = avatar.dataset.userName;
         const userRole = avatar.dataset.userRole;
-        // Switch to DM view and open chat with this user
         document.getElementById('dmNavLink').click();
         setTimeout(() => {
           const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${userId}"]`);
@@ -1446,13 +1455,7 @@
         }, 300);
       }
 
-      // --- Edit/Delete handlers (unchanged) ---
-      async function handleEditClick(e) { /* ... as before ... */ }
-      async function handleDeleteClick(e) { /* ... as before ... */ }
-      function updateMessageInUI(messageId, newContent) { /* ... as before ... */ }
-      function removeMessageFromUI(messageId) { /* ... as before ... */ }
-
-      // --- Edit/Delete actual implementations (abbreviated for brevity; they remain same as original) ---
+      // --- Edit/Delete handlers ---
       async function handleEditClick(e) {
         e.stopPropagation();
         const btn = e.currentTarget;
@@ -1584,21 +1587,46 @@
         updateUnreadBadges();
       }
 
-      // --- Right-click read receipts ---
+      // --- Right-click read receipts (for group messages and DMs) ---
       async function onRightClick(e) {
         e.preventDefault();
         const row = e.currentTarget;
         const messageId = row.dataset.messageId;
+        const isDM = row.classList.contains('dm-msg-row');
         modal.style.display = 'none';
-        const { data, error } = await supabase
-          .from('message_reads')
-          .select('user_id, read_at, profiles!inner(full_name)')
-          .eq('message_id', messageId)
-          .order('read_at', { ascending: true });
-        if (error || !data) {
-          console.error('fetch readers error:', error);
-          return;
+
+        let data;
+        if (isDM) {
+          const { data: msg, error } = await supabase
+            .from('private_messages')
+            .select('sender_id, recipient_id, read_at, profiles!sender_id(full_name), profiles!recipient_id(full_name)')
+            .eq('id', messageId)
+            .single();
+          if (error || !msg) {
+            console.error('fetch DM readers error:', error);
+            return;
+          }
+          const readerId = (msg.sender_id === currentUser.id) ? msg.recipient_id : msg.sender_id;
+          const readerName = (msg.sender_id === currentUser.id) ? msg.profiles_recipient_id?.full_name : msg.profiles_sender_id?.full_name;
+          const readTime = msg.read_at ? new Date(msg.read_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
+          if (msg.read_at) {
+            data = [{ profiles: { full_name: readerName }, read_at: readTime }];
+          } else {
+            data = [];
+          }
+        } else {
+          const { data: readers, error } = await supabase
+            .from('message_reads')
+            .select('user_id, read_at, profiles!inner(full_name)')
+            .eq('message_id', messageId)
+            .order('read_at', { ascending: true });
+          if (error || !readers) {
+            console.error('fetch readers error:', error);
+            return;
+          }
+          data = readers;
         }
+
         if (data.length === 0) {
           modal.innerHTML = '<h4>Read receipts</h4><p style="padding:0.5rem 0;">No one has seen this message yet.</p>';
         } else {
@@ -1755,7 +1783,7 @@
         }
       }
 
-      // --- Send group message (optimistic) ---
+      // --- Send group message ---
       async function sendMessage() {
         const input = document.getElementById('messageInput');
         const content = input.value.trim();
@@ -1806,7 +1834,7 @@
         } catch (readErr) {}
       }
 
-      // --- NEW DM FUNCTIONS ---
+      // --- DM FUNCTIONS with professional mobile transition ---
       async function loadPrivateMessagesView() {
         try {
           if (messageSubscription) messageSubscription.unsubscribe();
@@ -1818,7 +1846,6 @@
           document.getElementById('messageInput').disabled = true;
           document.getElementById('sendBtn').disabled = true;
 
-          // Fetch all profiles except current user
           const { data: allProfiles, error: profilesError } = await supabase
             .from('profiles')
             .select('id, full_name, job_role')
@@ -1826,7 +1853,6 @@
 
           if (profilesError) throw profilesError;
 
-          // Count unread messages from each sender
           const unreadCounts = {};
           for (const profile of allProfiles) {
             const { count, error: countError } = await supabase
@@ -1843,7 +1869,6 @@
           dmUnreadBySender = unreadCounts;
           updateDMBadge();
 
-          // Build conversation list HTML
           const conversationsHtml = allProfiles.map(profile => {
             const unread = unreadCounts[profile.id] || 0;
             const unreadBadge = unread > 0 ? `<span class="dm-unread-badge">${unread}</span>` : '';
@@ -1863,12 +1888,15 @@
           const area = document.getElementById('messagesArea');
           area.innerHTML = `
             <div class="dm-layout">
-              <div class="dm-conversations-list">
+              <div class="dm-conversations-list" id="dmConversationsList">
                 <div class="dm-list-header">All Members</div>
                 ${conversationsHtml}
               </div>
-              <div class="dm-chat-area" style="display: none;">
-                <div class="dm-chat-header"></div>
+              <div class="dm-chat-area" id="dmChatArea">
+                <div class="dm-chat-header">
+                  <button class="dm-back-btn" id="dmBackBtn" style="display:none;">←</button>
+                  <span class="dm-chat-title"></span>
+                </div>
                 <div id="dmChatMessages" class="dm-chat-messages"></div>
                 <div class="dm-chat-input">
                   <input type="text" id="dmChatInput" placeholder="Type a message...">
@@ -1887,14 +1915,26 @@
               await openPrivateChat(userId, { full_name: userName, job_role: userRole });
               document.querySelectorAll('.dm-conversation-item').forEach(i => i.classList.remove('active'));
               item.classList.add('active');
-              // Clear unread badge for this conversation
               const badge = item.querySelector('.dm-unread-badge');
               if (badge) {
                 badge.remove();
                 delete dmUnreadBySender[userId];
                 updateDMBadge();
               }
+              // On mobile, hide list and show chat with back button
+              if (window.innerWidth <= 768) {
+                document.getElementById('dmConversationsList').style.display = 'none';
+                document.getElementById('dmChatArea').classList.add('active');
+                document.getElementById('dmBackBtn').style.display = 'inline-block';
+              }
             });
+          });
+
+          // Back button functionality
+          document.getElementById('dmBackBtn').addEventListener('click', () => {
+            document.getElementById('dmConversationsList').style.display = 'block';
+            document.getElementById('dmChatArea').classList.remove('active');
+            document.getElementById('dmBackBtn').style.display = 'none';
           });
 
         } catch (err) {
@@ -1904,13 +1944,13 @@
       }
 
       async function openPrivateChat(otherUserId, otherProfile) {
-        const chatArea = document.querySelector('.dm-chat-area');
-        const header = document.querySelector('.dm-chat-header');
+        const chatArea = document.getElementById('dmChatArea');
+        const headerTitle = document.querySelector('.dm-chat-title');
         const messagesDiv = document.getElementById('dmChatMessages');
         const input = document.getElementById('dmChatInput');
         const sendBtn = document.getElementById('dmChatSendBtn');
 
-        header.innerHTML = `${escapeHtml(otherProfile.full_name)} <span style="font-size:0.85rem;color:#9aa4bf;">(${escapeHtml(otherProfile.job_role)})</span>`;
+        headerTitle.innerHTML = `${escapeHtml(otherProfile.full_name)} <span style="font-size:0.85rem;color:#9aa4bf;">(${escapeHtml(otherProfile.job_role)})</span>`;
         chatArea.style.display = 'flex';
         input.focus();
 
@@ -1924,14 +1964,32 @@
           if (error) throw error;
 
           let html = '';
+          let lastDate = null;
           for (const msg of data) {
             const isSent = msg.sender_id === currentUser.id;
             const timeStr = formatTimeOnly(msg.created_at);
+            const dateHeader = maybeAppendDateSeparator(lastDate, msg.created_at);
+            if (dateHeader) html += dateHeader.replace('date-separator', 'dm-date-separator');
+            lastDate = msg.created_at;
+
+            // Seen indicator for sent messages
+            let seenHtml = '';
+            if (isSent && msg.read_at) {
+              const { data: reader } = await supabase
+                .from('profiles')
+                .select('full_name')
+                .eq('id', otherUserId)
+                .single();
+              const readerName = reader?.full_name || 'User';
+              seenHtml = `<div class="dm-seen-indicator"><span class="double-tick">✓✓</span> Seen by ${escapeHtml(readerName)} at ${formatTimeOnly(msg.read_at)}</div>`;
+            }
+
             html += `
-              <div class="dm-msg-row ${isSent ? 'sent' : 'received'}">
+              <div class="dm-msg-row ${isSent ? 'sent' : 'received'}" data-message-id="${msg.id}" data-created-at="${msg.created_at}">
                 <div class="dm-msg ${isSent ? 'sent' : 'received'}">
                   ${escapeHtml(msg.content)}
                   <small>${timeStr}</small>
+                  ${seenHtml}
                 </div>
               </div>
             `;
@@ -1941,6 +1999,11 @@
           }
           messagesDiv.innerHTML = html || '<div style="color:#9aa4bf; text-align:center; padding:2rem;">No messages yet. Say hello!</div>';
           messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+          // Attach right-click to DM messages
+          document.querySelectorAll('.dm-msg-row').forEach(row => {
+            row.addEventListener('contextmenu', onRightClick);
+          });
 
           sendBtn.onclick = () => sendPrivateMessage(otherUserId);
           input.onkeypress = (e) => { if (e.key === 'Enter') sendPrivateMessage(otherUserId); };
@@ -1970,7 +2033,7 @@
           const messagesDiv = document.getElementById('dmChatMessages');
           const timeStr = formatTimeOnly(data.created_at);
           const msgHtml = `
-            <div class="dm-msg-row sent">
+            <div class="dm-msg-row sent" data-message-id="${data.id}" data-created-at="${data.created_at}">
               <div class="dm-msg sent">
                 ${escapeHtml(data.content)}
                 <small>${timeStr}</small>
@@ -2008,15 +2071,14 @@
             const newMsg = payload.new;
             if (newMsg.sender_id === currentUser.id) return;
 
-            // If DM view is open and the conversation is active, append the message
             if (document.getElementById('dmNavLink').classList.contains('active')) {
               const activeItem = document.querySelector('.dm-conversation-item.active');
               if (activeItem && activeItem.dataset.userId === newMsg.sender_id) {
-                // Chat with this sender is open
+                // Chat open – append and mark read
                 const messagesDiv = document.getElementById('dmChatMessages');
                 const timeStr = formatTimeOnly(newMsg.created_at);
                 const msgHtml = `
-                  <div class="dm-msg-row received">
+                  <div class="dm-msg-row received" data-message-id="${newMsg.id}" data-created-at="${newMsg.created_at}">
                     <div class="dm-msg received">
                       ${escapeHtml(newMsg.content)}
                       <small>${timeStr}</small>
@@ -2030,11 +2092,9 @@
               }
             }
 
-            // Otherwise update unread count and badge
             dmUnreadBySender[newMsg.sender_id] = (dmUnreadBySender[newMsg.sender_id] || 0) + 1;
             updateDMBadge();
 
-            // Also update badge in DM list if it exists
             if (document.getElementById('dmNavLink').classList.contains('active')) {
               const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${newMsg.sender_id}"]`);
               if (targetItem) {
@@ -2065,86 +2125,11 @@
           .subscribe();
       }
 
-      // --- Announcements (unchanged) ---
-      async function loadAnnouncements() {
-        showingAnnouncements = true;
-        document.getElementById('groupTitle').innerText = 'Announcements';
-        document.getElementById('roleDisplay').style.display = 'none';
-        document.getElementById('groupTabs').style.display = 'none';
-        document.getElementById('chatInputArea').style.display = isCEO ? 'flex' : 'none';
-        document.getElementById('messageInput').disabled = true;
-        document.getElementById('sendBtn').disabled = true;
-
-        const area = document.getElementById('messagesArea');
-        let html = '<div class="announcement-area">';
-        if (isCEO) {
-          html += `
-            <div class="announcement-form">
-              <textarea id="announcementContent" placeholder="Write announcement..."></textarea>
-              <input type="file" id="announcementFile" accept="*/*">
-              <button id="postAnnouncementBtn">Post Announcement</button>
-            </div>
-          `;
-        }
-        const { data: announcements, error } = await supabase
-          .from('announcements')
-          .select('*, profiles!created_by(full_name)')
-          .order('created_at', { ascending: false });
-        if (error) console.error(error);
-        else {
-          announcements.forEach(a => {
-            const date = new Date(a.created_at).toLocaleString();
-            const fileLink = a.file_url ? `<div class="file-link"><a href="${a.file_url}" target="_blank">📎 Attachment</a></div>` : '';
-            html += `
-              <div class="announcement-card">
-                <div class="meta"><span>${escapeHtml(a.profiles?.full_name || 'CEO')}</span><span>${date}</span></div>
-                <div class="content">${escapeHtml(a.content)}</div>
-                ${fileLink}
-              </div>
-            `;
-          });
-        }
-        html += '</div>';
-        area.innerHTML = html;
-
-        if (isCEO) {
-          document.getElementById('postAnnouncementBtn').addEventListener('click', postAnnouncement);
-        }
-      }
-
-      async function postAnnouncement() {
-        const content = document.getElementById('announcementContent').value.trim();
-        const file = document.getElementById('announcementFile').files[0];
-        if (!content && !file) return;
-
-        let fileUrl = null;
-        if (file) {
-          const fileExt = file.name.split('.').pop();
-          const fileName = `${currentUser.id}/${Date.now()}.${fileExt}`;
-          const { error: uploadError } = await supabase.storage
-            .from('announcements')
-            .upload(fileName, file);
-          if (uploadError) { alert('Upload failed: ' + uploadError.message); return; }
-          const { data: urlData } = supabase.storage.from('announcements').getPublicUrl(fileName);
-          fileUrl = urlData.publicUrl;
-        }
-
-        const { error } = await supabase
-          .from('announcements')
-          .insert({ content, file_url: fileUrl, created_by: currentUser.id });
-        if (error) { alert('Failed to post: ' + error.message); return; }
-        document.getElementById('announcementContent').value = '';
-        document.getElementById('announcementFile').value = '';
-        loadAnnouncements();
-      }
-
       // --- Navigation ---
       document.getElementById('chatNavLink').addEventListener('click', (e) => {
         e.preventDefault();
-        showingAnnouncements = false;
         document.getElementById('chatNavLink').classList.add('active');
         document.getElementById('dmNavLink').classList.remove('active');
-        document.getElementById('announcementNavLink').classList.remove('active');
         document.getElementById('groupTabs').style.display = isCEO ? 'flex' : 'none';
         document.getElementById('roleDisplay').style.display = isCEO ? 'none' : 'inline';
         document.getElementById('chatInputArea').style.display = 'flex';
@@ -2155,26 +2140,12 @@
 
       document.getElementById('dmNavLink').addEventListener('click', (e) => {
         e.preventDefault();
-        showingAnnouncements = false;
         document.getElementById('chatNavLink').classList.remove('active');
         document.getElementById('dmNavLink').classList.add('active');
-        document.getElementById('announcementNavLink').classList.remove('active');
         document.getElementById('groupTabs').style.display = 'none';
         document.getElementById('roleDisplay').style.display = 'none';
         document.getElementById('chatInputArea').style.display = 'none';
         loadPrivateMessagesView();
-      });
-
-      document.getElementById('announcementNavLink').addEventListener('click', (e) => {
-        e.preventDefault();
-        showingAnnouncements = true;
-        document.getElementById('chatNavLink').classList.remove('active');
-        document.getElementById('dmNavLink').classList.remove('active');
-        document.getElementById('announcementNavLink').classList.add('active');
-        document.getElementById('groupTabs').style.display = 'none';
-        document.getElementById('roleDisplay').style.display = 'none';
-        document.getElementById('chatInputArea').style.display = isCEO ? 'flex' : 'none';
-        loadAnnouncements();
       });
 
       // --- Logout ---
@@ -2186,7 +2157,7 @@
         editTimeouts.forEach(t => clearTimeout(t));
         editTimeouts.clear();
         await supabase.auth.signOut();
-        window.location.href = 'index.html';
+        window.location.href = '/index.html';
       });
 
       document.getElementById('sendBtn').addEventListener('click', sendMessage);
@@ -2252,5 +2223,3 @@
   </script>
 </body>
 </html>
-
-
