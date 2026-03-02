@@ -13,7 +13,7 @@
       overflow: hidden;
     }
 
-    /* === SIDEBAR (desktop) === */
+    /* === SIDEBAR === */
     .sidebar {
       width: 260px;
       background: rgba(10, 16, 28, 0.95);
@@ -142,12 +142,33 @@
       font-size: 0.8rem;
     }
 
-    /* --- Group tabs for CEO --- */
+    /* online count */
+    .online-count {
+      background: #1f2a44;
+      padding: 0.2rem 0.8rem;
+      border-radius: 2rem;
+      font-size: 0.8rem;
+      color: #8affb8;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-left: auto;
+    }
+    .online-count::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: #2ecc71;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    /* Group tabs for CEO */
     .group-tabs {
       display: flex;
       gap: 0.4rem;
       flex-wrap: wrap;
-      margin-left: auto;
+      margin-left: 0;
     }
     .group-tab {
       background: #1f2a44;
@@ -160,11 +181,23 @@
       border: 1px solid #2f3a5a;
       transition: 0.2s;
       white-space: nowrap;
+      position: relative;
     }
     .group-tab.active {
       background: #428cff;
       color: white;
       border-color: #428cff;
+    }
+    .group-tab .unread-badge-tab {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: #ff4d4d;
+      color: white;
+      border-radius: 2rem;
+      padding: 0.1rem 0.4rem;
+      font-size: 0.7rem;
+      font-weight: 600;
     }
 
     /* groups list shown when CEO selects "All" */
@@ -187,10 +220,16 @@
       text-align: center;
       font-weight: 600;
       transition: transform 0.12s, box-shadow 0.12s;
+      position: relative;
     }
     .group-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+    .group-card .unread-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+    }
 
-    /* === MESSAGES AREA (scrollable) === */
+    /* === MESSAGES AREA === */
     .messages-area {
       flex: 1;
       padding: 1.5rem;
@@ -201,7 +240,6 @@
       scroll-behavior: smooth;
     }
 
-    /* Date separator – like WhatsApp */
     .date-separator {
       display: flex;
       align-items: center;
@@ -312,6 +350,22 @@
       margin-top: 0.3rem;
       text-align: right;
       white-space: nowrap;
+    }
+
+    /* seen indicator */
+    .seen-indicator {
+      font-size: 0.7rem;
+      color: #9aa4bf;
+      margin-top: 0.2rem;
+      text-align: right;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.2rem;
+    }
+    .seen-indicator .double-tick {
+      font-size: 1rem;
+      line-height: 1;
     }
 
     /* Edit/Delete buttons */
@@ -430,32 +484,46 @@
       font-size: 0.75rem;
     }
 
-    /* profile popup */
-    .profile-popup {
-      position: absolute;
+    /* Typing indicator */
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.5rem 1rem;
       background: #1f2a44;
-      border: 1px solid #428cff;
-      border-radius: 1.2rem;
-      padding: 1rem;
-      color: white;
-      font-size: 0.9rem;
-      z-index: 1100;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
-      min-width: 180px;
-      backdrop-filter: blur(4px);
+      border-radius: 2rem;
+      width: fit-content;
+      margin-bottom: 0.5rem;
     }
-    .profile-popup h4 {
-      margin-bottom: 0.3rem;
-      color: #fff;
-      border-bottom: 1px solid #3f4a6b;
-      padding-bottom: 0.3rem;
+    .typing-indicator span {
+      width: 0.5rem;
+      height: 0.5rem;
+      background: #9aa4bf;
+      border-radius: 50%;
+      animation: typingBounce 1.4s infinite ease-in-out;
     }
-    .profile-popup p {
-      margin: 0.2rem 0;
-      color: #b0c2e0;
+    .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    
+    @keyframes typingBounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-0.5rem); }
+    }
+    
+    .typing-container {
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      padding: 0 1.5rem;
+    }
+    
+    .typing-text {
+      color: #9aa4bf;
+      font-size: 0.85rem;
+      margin-left: 0.5rem;
     }
 
-    /* Chat input fixed */
+    /* Chat input */
     .chat-input-area {
       display: flex;
       padding: 1.2rem;
@@ -505,7 +573,7 @@
       cursor: not-allowed;
     }
 
-    /* Mobile adjustments (keep original) */
+    /* Mobile */
     @media (max-width: 768px) {
       body { flex-direction: column; }
       .sidebar { width: 100%; flex-direction: row; padding: 0.5rem 1rem; border-right: none; border-top: 1px solid #1f2a44; order: 2; flex-shrink: 0; }
@@ -527,138 +595,36 @@
       .logout-btn { padding: 0.4rem 0.8rem; font-size: 0.7rem; }
     }
 
-    /* Typing indicator */
-    .typing-indicator {
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-      padding: 0.5rem 1rem;
-      background: #1f2a44;
-      border-radius: 2rem;
-      width: fit-content;
-      margin-bottom: 0.5rem;
-    }
-    .typing-indicator span {
-      width: 0.5rem;
-      height: 0.5rem;
-      background: #9aa4bf;
-      border-radius: 50%;
-      animation: typingBounce 1.4s infinite ease-in-out;
-    }
-    .typing-indicator span:nth-child(1) { animation-delay: 0s; }
-    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-    
-    @keyframes typingBounce {
-      0%, 60%, 100% { transform: translateY(0); }
-      30% { transform: translateY(-0.5rem); }
-    }
-    
-    .typing-container {
-      margin-top: 0.5rem;
-      margin-bottom: 0.5rem;
-    }
-    
-    .typing-text {
-      color: #9aa4bf;
-      font-size: 0.85rem;
-      margin-left: 0.5rem;
-    }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-</head>
-<body>
-  <div class="sidebar">
-    <div class="logo">TECH<span>TITANS</span></div>
-    <div class="nav">
-      <a href="/dashboard.html">📊 <span>Dashboard</span></a>
-      <a href="/messages.html" class="active" id="chatNavLink">💬 <span>Group Chat</span>
-        <span class="sidebar-unread" id="sidebarUnreadBadge" style="display: none;">0</span>
-      </a>
-      <a href="#" id="dmNavLink">📩 <span>Direct Messages</span>
-        <span class="sidebar-unread" id="dmUnreadBadge" style="display: none;">0</span>
-      </a>
-      <a href="/resources.html">📚 <span>Resources</span></a>
-      <a href="/profile.html">⚙️ <span>Profile</span></a>
-    </div>
-    <button class="logout-btn" id="logout">✕ <span>Logout</span></button>
-  </div>
-
-  <div class="main">
-    <div class="chat-panel">
-      <div class="chat-header" id="chatHeader">
-        <span>💬 <span id="groupTitle">Group</span> <span id="unreadBadge" class="unread-badge" style="display: none;">0</span></span>
-        <span class="role-tag" id="roleDisplay"></span>
-        <div id="groupTabs" class="group-tabs" style="display: none;"></div>
-      </div>
-      <div class="messages-area" id="messagesArea" oncontextmenu="return false;"></div>
-      
-      <!-- Typing indicator container -->
-      <div id="typingIndicatorContainer" class="typing-container" style="display: none; padding: 0 1.5rem;">
-        <div class="typing-indicator">
-          <span></span>
-          <span></span>
-          <span></span>
-          <span class="typing-text" id="typingText">Someone is typing...</span>
-        </div>
-      </div>
-      
-      <div class="chat-input-area">
-        <input type="text" id="messageInput" placeholder="Write a message..." disabled>
-        <button id="sendBtn" disabled>➤</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Right-click receipts modal -->
-  <div id="receiptsModal" class="read-receipts-modal" style="display: none;"></div>
-  <!-- Profile popup -->
-  <div id="profilePopup" class="profile-popup" style="display: none;"></div>
-
-  <!-- Direct Message Modal (hidden by default) -->
-  <div id="dmModal" class="dm-modal" style="display: none;">
-    <div class="dm-modal-header">
-      <span class="dm-modal-title"></span>
-      <button class="dm-modal-close">&times;</button>
-    </div>
-    <div class="dm-modal-messages" id="dmMessages"></div>
-    <div class="dm-modal-input">
-      <input type="text" id="dmInput" placeholder="Type a message...">
-      <button id="dmSendBtn">Send</button>
-    </div>
-  </div>
-
-  <style>
-    /* DM modal styles */
+    /* DM modal */
     .dm-modal {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      width: 320px;
-      height: 400px;
-      background: #2d2d3a;
-      border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+      width: 350px;
+      height: 450px;
+      background: #1f2a44;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
       display: flex;
       flex-direction: column;
       z-index: 2000;
       overflow: hidden;
-      border: 1px solid #40404d;
-      color: #e4e4f0;
+      border: 1px solid #428cff;
     }
     .dm-modal-header {
-      background: #1e1e2a;
+      background: #0f172f;
       padding: 12px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #40404d;
+      border-bottom: 1px solid #2f3a5a;
       font-weight: 500;
+      color: white;
     }
     .dm-modal-close {
       background: none;
       border: none;
-      color: #aaa;
+      color: #9aa4bf;
       font-size: 20px;
       cursor: pointer;
     }
@@ -681,14 +647,14 @@
     }
     .dm-message.sent {
       align-self: flex-end;
-      background: #4a4a6a;
+      background: #428cff;
       color: white;
       border-bottom-right-radius: 4px;
     }
     .dm-message.received {
       align-self: flex-start;
-      background: #3a3a4a;
-      color: #e4e4f0;
+      background: #2f3a5a;
+      color: #e0e7ff;
       border-bottom-left-radius: 4px;
     }
     .dm-message small {
@@ -697,42 +663,102 @@
       opacity: 0.7;
       margin-top: 0.3rem;
       text-align: right;
-      white-space: nowrap;
-      margin-left: 0;
     }
     .dm-date-separator {
       text-align: center;
       font-size: 11px;
-      color: #888;
+      color: #9aa4bf;
       margin: 12px 0 4px;
     }
     .dm-modal-input {
       display: flex;
       padding: 12px;
-      background: #1e1e2a;
-      border-top: 1px solid #40404d;
+      background: #0f172f;
+      border-top: 1px solid #2f3a5a;
     }
     .dm-modal-input input {
       flex: 1;
       padding: 8px 12px;
-      border: 1px solid #40404d;
+      border: 1px solid #2f3a5a;
       border-radius: 20px;
-      background: #2d2d3a;
+      background: #1f2a44;
       color: white;
       outline: none;
     }
     .dm-modal-input button {
       margin-left: 8px;
       padding: 8px 16px;
-      background: #5a5a7a;
+      background: #428cff;
       border: none;
       border-radius: 20px;
       color: white;
       cursor: pointer;
     }
-    .dm-modal-input button:hover { background: #6a6a8a; }
+    .dm-modal-input button:hover { background: #5f9eff; }
 
-    /* toast notification */
+    /* Announcements */
+    .announcement-area {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+    .announcement-card {
+      background: #1f2a44;
+      border-left: 4px solid #ffaa33;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      color: #e0e7ff;
+    }
+    .announcement-card .meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #9aa4bf;
+      margin-bottom: 0.5rem;
+    }
+    .announcement-card .content {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .announcement-card .file-link a {
+      color: #8ab4ff;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .announcement-card .file-link a:hover {
+      text-decoration: underline;
+    }
+    .announcement-form {
+      background: #0f172f;
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+    .announcement-form textarea {
+      width: 100%;
+      background: #1f2a44;
+      border: 1px solid #2f3a5a;
+      border-radius: 12px;
+      padding: 0.8rem;
+      color: white;
+      resize: vertical;
+      margin-bottom: 0.5rem;
+    }
+    .announcement-form input[type="file"] {
+      margin-bottom: 0.5rem;
+      color: #9aa4bf;
+    }
+    .announcement-form button {
+      background: #428cff;
+      border: none;
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border-radius: 2rem;
+      cursor: pointer;
+    }
+
+    /* toast */
     .toast {
       position: fixed;
       bottom: 20px;
@@ -750,1627 +776,1429 @@
     }
     .toast.hide { opacity: 0; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="logo">TECH<span>TITANS</span></div>
+    <div class="nav">
+      <a href="/dashboard.html">📊 <span>Dashboard</span></a>
+      <a href="#" class="active" id="chatNavLink">💬 <span>Group Chat</span>
+        <span class="sidebar-unread" id="sidebarUnreadBadge" style="display: none;">0</span>
+      </a>
+      <a href="#" id="dmNavLink">📩 <span>Direct Messages</span>
+        <span class="sidebar-unread" id="dmUnreadBadge" style="display: none;">0</span>
+      </a>
+      <a href="#" id="announcementNavLink">📢 <span>Announcements</span></a>
+      <a href="/profile.html">⚙️ <span>Profile</span></a>
+    </div>
+    <button class="logout-btn" id="logout">✕ <span>Logout</span></button>
+  </div>
 
-<script>
-  (function() {
-    const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kcXF0c2RpYnR2eW1mZ250c3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTI1NjIsImV4cCI6MjA4Nzg4ODU2Mn0.hS-7kmoyFljnhkJEkw7nmgimw9ioQreidyu27_NXYyo';
+  <div class="main">
+    <div class="chat-panel">
+      <div class="chat-header" id="chatHeader">
+        <span>💬 <span id="groupTitle">Group</span> <span id="unreadBadge" class="unread-badge" style="display: none;">0</span></span>
+        <span class="role-tag" id="roleDisplay"></span>
+        <div class="online-count" id="onlineCount">0 online</div>
+        <div id="groupTabs" class="group-tabs" style="display: none;"></div>
+      </div>
+      <div class="messages-area" id="messagesArea" oncontextmenu="return false;"></div>
+      
+      <!-- Typing indicator -->
+      <div id="typingIndicatorContainer" class="typing-container" style="display: none;">
+        <div class="typing-indicator">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span class="typing-text" id="typingText">Someone is typing...</span>
+        </div>
+      </div>
+      
+      <div class="chat-input-area" id="chatInputArea">
+        <input type="text" id="messageInput" placeholder="Write a message..." disabled>
+        <label id="attachLabel" style="display:none; cursor:pointer; margin-left:0.5rem;">📎
+          <input type="file" id="attachInput" style="display:none;">
+        </label>
+        <button id="sendBtn" disabled>➤</button>
+      </div>
+    </div>
+  </div>
 
-    let supabase;
-    try {
-      if (!window.supabase) throw new Error('Supabase library failed to load.');
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } catch (e) {
-      console.error(e);
-      document.body.innerHTML = '<p style="color:white;padding:2rem;">Service unavailable. Please refresh.</p>';
-      return;
-    }
+  <!-- Right-click receipts modal -->
+  <div id="receiptsModal" class="read-receipts-modal" style="display: none;"></div>
 
-    // --- Global state ---
-    let currentUser = null;
-    let currentUserFullName = 'User';
-    let currentRole = null;
-    let isCEO = false;
-    let messageSubscription = null;
-    let readMessageIds = new Set();
-    // unread messages for the currently viewed group (or for non-CEO users)
-    let currentUnreadCount = 0;
-    // total unread across all groups (used when CEO is logged in)
-    let totalUnreadCount = 0;
-    let editTimeouts = new Map();
-    let observer = null;
-    // direct message state & notifications
-    let dmUnreadCount = 0;             // total unread across all senders
-    let dmUnreadBySender = {};         // map senderId -> unread count
-    let openDMUserId = null;
-    let globalDmSubscription = null;
-    const modal = document.getElementById('receiptsModal');
-    const profilePopup = document.getElementById('profilePopup');
+  <!-- Direct Message Modal -->
+  <div id="dmModal" class="dm-modal" style="display: none;">
+    <div class="dm-modal-header">
+      <span class="dm-modal-title"></span>
+      <button class="dm-modal-close">&times;</button>
+    </div>
+    <div class="dm-modal-messages" id="dmMessages"></div>
+    <div class="dm-modal-input">
+      <input type="text" id="dmInput" placeholder="Type a message...">
+      <button id="dmSendBtn">Send</button>
+    </div>
+  </div>
 
-    // --- Group filter state: selected role (no "All" mode) ---
-    let selectedGroupRole = null;
-    let availableRoles = [];
+  <!-- Toast container -->
+  <div id="toast" class="toast hide" style="display: none;"></div>
 
-    // --- DM state ---
-    let dmSubscription = null;
-    let dmObserver = null;
-    let currentRecipientId = null;
-    const dmModal = document.getElementById('dmModal');
+  <script>
+    (function() {
+      const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kcXF0c2RpYnR2eW1mZ250c3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTI1NjIsImV4cCI6MjA4Nzg4ODU2Mn0.hS-7kmoyFljnhkJEkw7nmgimw9ioQreidyu27_NXYyo';
 
-    // --- Typing indicator state ---
-    let typingTimeouts = {};
-    let activeTypers = new Set();
-    let typingSubscription = null;
-    const typingContainer = document.getElementById('typingIndicatorContainer');
-    const typingText = document.getElementById('typingText');
-
-    // --- Helper functions ---
-    function formatDateHeader(date) {
-      const now = new Date();
-      const msgDate = new Date(date);
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-      const msgDay = new Date(msgDate.getFullYear(), msgDate.getMonth(), msgDate.getDate());
-      if (msgDay.getTime() === today.getTime()) return 'Today';
-      else if (msgDay.getTime() === yesterday.getTime()) return 'Yesterday';
-      else return msgDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    }
-    function formatTimeOnly(date) {
-      return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-    function stringToColor(str) {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-      const hue = Math.abs(hash % 360);
-      return `hsl(${hue}, 70%, 50%)`;
-    }
-    function getInitials(name) {
-      if (!name) return '?';
-      const parts = name.trim().split(/\s+/);
-      if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-      return (parts[0].charAt(0) + parts[parts.length-1].charAt(0)).toUpperCase();
-    }
-    function escapeHtml(unsafe) {
-      return unsafe.replace(/[&<>"']/g, function(m) {
-        if(m === '&') return '&amp;';
-        if(m === '<') return '&lt;';
-        if(m === '>') return '&gt;';
-        if(m === '"') return '&quot;';
-        if(m === "'") return '&#039;';
-        return m;
-      });
-    }
-
-    // --- Update unread badges ---
-    function updateUnreadBadges() {
-      const headerBadge = document.getElementById('unreadBadge');
-      // header always shows count for the currently selected group
-      if (currentUnreadCount > 0) {
-        headerBadge.style.display = 'inline';
-        headerBadge.textContent = currentUnreadCount;
-      } else {
-        headerBadge.style.display = 'none';
-      }
-
-      const sidebarBadge = document.getElementById('sidebarUnreadBadge');
-      if (isCEO) {
-        // sidebar for CEO shows total unread across all groups
-        if (totalUnreadCount > 0) {
-          sidebarBadge.style.display = 'inline-block';
-          sidebarBadge.textContent = totalUnreadCount;
-        } else {
-          sidebarBadge.style.display = 'none';
-        }
-      } else {
-        // regular users see their current-group count in sidebar as well
-        if (currentUnreadCount > 0) {
-          sidebarBadge.style.display = 'inline-block';
-          sidebarBadge.textContent = currentUnreadCount;
-        } else {
-          sidebarBadge.style.display = 'none';
-        }
-      }
-    }
-
-    // update badge on DM nav link
-    function updateDMBadge() {
-      const dmBadge = document.getElementById('dmUnreadBadge');
-      // recalc total from per-sender map in case it changed
-      dmUnreadCount = Object.values(dmUnreadBySender).reduce((a,b)=>a+b,0);
-      if (dmUnreadCount > 0) {
-        dmBadge.style.display = 'inline-block';
-        dmBadge.textContent = dmUnreadCount;
-      } else {
-        dmBadge.style.display = 'none';
-      }
-    }
-
-    // simple toast/notification
-    function showToast(text) {
-      const t = document.createElement('div');
-      t.className = 'toast';
-      t.textContent = text;
-      document.body.appendChild(t);
-      setTimeout(() => {
-        t.classList.add('hide');
-        setTimeout(() => t.remove(), 300);
-      }, 3000);
-    }
-
-    // --- compute total unread across all groups for CEO ---
-    async function updateTotalUnreadCount() {
-      if (!currentUser) return;
+      let supabase;
       try {
-        // fetch all read message ids for this user
+        if (!window.supabase) throw new Error('Supabase library failed to load.');
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      } catch (e) {
+        console.error(e);
+        document.body.innerHTML = '<p style="color:white;padding:2rem;">Service unavailable. Please refresh.</p>';
+        return;
+      }
+
+      // --- Global state ---
+      let currentUser = null;
+      let currentUserFullName = 'User';
+      let currentRole = null;
+      let isCEO = false;
+      let messageSubscription = null;
+      let readMessageIds = new Set();
+      let currentUnreadCount = 0;
+      let totalUnreadCount = 0;
+      let editTimeouts = new Map();
+      let observer = null;
+      // Direct messages
+      let dmUnreadCount = 0;
+      let dmUnreadBySender = {};
+      let openDMUserId = null;
+      let globalDmSubscription = null;
+      let dmSubscription = null;
+      let dmObserver = null;
+      // Announcements
+      let showingAnnouncements = false;
+      // Online presence
+      let presenceChannel = null;
+      let onlineUsers = new Map(); // userId -> { name, role }
+      // Typing
+      let typingTimeouts = {};
+      let activeTypers = new Set();
+      let typingSubscription = null;
+
+      const modal = document.getElementById('receiptsModal');
+      const dmModal = document.getElementById('dmModal');
+      const toast = document.getElementById('toast');
+      const typingContainer = document.getElementById('typingIndicatorContainer');
+      const typingText = document.getElementById('typingText');
+
+      // --- Helper functions ---
+      function formatDateHeader(date) {
+        const now = new Date();
+        const msgDate = new Date(date);
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const msgDay = new Date(msgDate.getFullYear(), msgDate.getMonth(), msgDate.getDate());
+        if (msgDay.getTime() === today.getTime()) return 'Today';
+        else if (msgDay.getTime() === yesterday.getTime()) return 'Yesterday';
+        else return msgDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      }
+      function formatTimeOnly(date) {
+        return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+      function stringToColor(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        const hue = Math.abs(hash % 360);
+        return `hsl(${hue}, 70%, 50%)`;
+      }
+      function getInitials(name) {
+        if (!name) return '?';
+        const parts = name.trim().split(/\s+/);
+        if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+        return (parts[0].charAt(0) + parts[parts.length-1].charAt(0)).toUpperCase();
+      }
+      function escapeHtml(unsafe) {
+        return unsafe.replace(/[&<>"']/g, function(m) {
+          if(m === '&') return '&amp;';
+          if(m === '<') return '&lt;';
+          if(m === '>') return '&gt;';
+          if(m === '"') return '&quot;';
+          if(m === "'") return '&#039;';
+          return m;
+        });
+      }
+      function showToast(text) {
+        toast.textContent = text;
+        toast.style.display = 'block';
+        toast.classList.remove('hide');
+        setTimeout(() => {
+          toast.classList.add('hide');
+          setTimeout(() => toast.style.display = 'none', 300);
+        }, 3000);
+      }
+
+      // --- Online presence ---
+      async function setupPresence() {
+        if (!currentUser) return;
+        presenceChannel = supabase.channel('online-users', {
+          config: { presence: { key: currentUser.id } }
+        });
+        presenceChannel
+          .on('presence', { event: 'sync' }, () => {
+            const state = presenceChannel.presenceState();
+            onlineUsers.clear();
+            Object.values(state).forEach(presences => {
+              presences.forEach(p => {
+                if (p.userId !== currentUser.id) {
+                  onlineUsers.set(p.userId, { name: p.name, role: p.role });
+                }
+              });
+            });
+            // Include self? Usually online count includes self, but we'll show total including self.
+            document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
+          })
+          .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+            newPresences.forEach(p => {
+              if (p.userId !== currentUser.id) onlineUsers.set(p.userId, { name: p.name, role: p.role });
+            });
+            document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
+          })
+          .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+            leftPresences.forEach(p => onlineUsers.delete(p.userId));
+            document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
+          })
+          .subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+              await presenceChannel.track({
+                userId: currentUser.id,
+                name: currentUserFullName,
+                role: currentRole,
+                online_at: new Date().toISOString()
+              });
+            }
+          });
+      }
+
+      // --- Update unread badges (group) ---
+      function updateUnreadBadges() {
+        const headerBadge = document.getElementById('unreadBadge');
+        if (currentUnreadCount > 0) {
+          headerBadge.style.display = 'inline';
+          headerBadge.textContent = currentUnreadCount;
+        } else {
+          headerBadge.style.display = 'none';
+        }
+
+        const sidebarBadge = document.getElementById('sidebarUnreadBadge');
+        if (isCEO) {
+          if (totalUnreadCount > 0) {
+            sidebarBadge.style.display = 'inline-block';
+            sidebarBadge.textContent = totalUnreadCount;
+          } else {
+            sidebarBadge.style.display = 'none';
+          }
+        } else {
+          if (currentUnreadCount > 0) {
+            sidebarBadge.style.display = 'inline-block';
+            sidebarBadge.textContent = currentUnreadCount;
+          } else {
+            sidebarBadge.style.display = 'none';
+          }
+        }
+      }
+
+      // Update DM badge
+      function updateDMBadge() {
+        const dmBadge = document.getElementById('dmUnreadBadge');
+        dmUnreadCount = Object.values(dmUnreadBySender).reduce((a,b)=>a+b,0);
+        if (dmUnreadCount > 0) {
+          dmBadge.style.display = 'inline-block';
+          dmBadge.textContent = dmUnreadCount;
+        } else {
+          dmBadge.style.display = 'none';
+        }
+      }
+
+      // --- Mark message as read ---
+      async function markMessageAsRead(messageId) {
+        if (readMessageIds.has(messageId)) return;
+        try {
+          const { error } = await supabase
+            .from('message_reads')
+            .insert({ message_id: messageId, user_id: currentUser.id })
+            .single();
+          if (error && error.code !== '23505') {
+            console.error('mark read error:', error);
+            return;
+          }
+          readMessageIds.add(messageId);
+          const msgRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
+          if (msgRow) {
+            msgRow.classList.remove('unread');
+            if (currentUnreadCount > 0) currentUnreadCount--;
+            if (isCEO && totalUnreadCount > 0) totalUnreadCount--;
+            updateUnreadBadges();
+            // Also update seen indicator if this message is sent by current user
+            updateSeenIndicator(messageId);
+          }
+        } catch (err) {
+          console.error('markMessageAsRead error:', err);
+        }
+      }
+
+      // --- Update seen indicator for a sent message ---
+      async function updateSeenIndicator(messageId) {
+        const msgRow = document.querySelector(`.message-row.sent[data-message-id="${messageId}"]`);
+        if (!msgRow) return;
+        const { data } = await supabase
+          .from('message_reads')
+          .select('user_id, profiles!inner(full_name)')
+          .eq('message_id', messageId);
+        const count = data ? data.length : 0;
+        let seenHtml = '';
+        if (count > 0) {
+          const firstReader = data[0]?.profiles?.full_name || 'Someone';
+          seenHtml = `<div class="seen-indicator"><span class="double-tick">✓✓</span> ${firstReader}${count > 1 ? ` +${count-1}` : ''}</div>`;
+        }
+        const existing = msgRow.querySelector('.seen-indicator');
+        if (existing) existing.remove();
+        if (seenHtml) msgRow.querySelector('.message-bubble').insertAdjacentHTML('beforeend', seenHtml);
+      }
+
+      // --- Observer for unread messages ---
+      function setupObserver() {
+        if (observer) observer.disconnect();
+        observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const row = entry.target;
+              const messageId = row.dataset.messageId;
+              if (messageId && !readMessageIds.has(messageId) && row.classList.contains('unread')) {
+                markMessageAsRead(messageId);
+              }
+            }
+          });
+        }, { threshold: 0.5 });
+        document.querySelectorAll('.message-row.unread').forEach(row => observer.observe(row));
+      }
+
+      // --- Render message actions (edit/delete) ---
+      function renderMessageActions(messageId, currentContent, createdAt, senderId) {
+        const msgTime = new Date(createdAt).getTime();
+        const now = Date.now();
+        const age = now - msgTime;
+        const canEdit = (isCEO || senderId === currentUser.id) && age < 60000;
+        const canDelete = isCEO || senderId === currentUser.id;
+        if (canEdit && age < 60000) {
+          const timeLeft = 60000 - age;
+          if (timeLeft > 0) {
+            const timeoutId = setTimeout(() => {
+              const editBtn = document.querySelector(`.edit-btn[data-id="${messageId}"]`);
+              if (editBtn) editBtn.remove();
+            }, timeLeft);
+            editTimeouts.set(messageId, timeoutId);
+          }
+        }
+        return `
+          <div class="message-actions">
+            ${canEdit ? `<button class="edit-btn" data-id="${messageId}" data-content="${escapeHtml(currentContent)}">✏️</button>` : ''}
+            ${canDelete ? `<button class="delete-btn" data-id="${messageId}">🗑️</button>` : ''}
+          </div>
+        `;
+      }
+
+      // --- Render a single message ---
+      function renderMessage(message, isSent, senderName, senderId, messageRole, isUnread = false, seenCount = 0) {
+        const initials = getInitials(senderName);
+        const avatarColor = stringToColor(senderName);
+        const timeStr = formatTimeOnly(message.created_at);
+        const unreadClass = isUnread ? 'unread' : '';
+        let roleBadge = '';
+        if (messageRole && (messageRole === 'CEO' || isCEO)) {
+          roleBadge = `<span class="role-badge">${escapeHtml(messageRole)}</span>`;
+        }
+        let seenHtml = '';
+        if (isSent && seenCount > 0) {
+          seenHtml = `<div class="seen-indicator"><span class="double-tick">✓✓</span> Seen</div>`;
+        }
+
+        if (isSent) {
+          return `
+            <div class="message-row sent ${unreadClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${senderId}">
+              <div class="message-bubble">
+                <div class="message sent">
+                  ${escapeHtml(message.content)}
+                  <small>${timeStr}</small>
+                </div>
+                ${renderMessageActions(message.id, message.content, message.created_at, senderId)}
+                ${seenHtml}
+              </div>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="message-row ${unreadClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${senderId}">
+              <div class="avatar" style="background-color: ${avatarColor};" data-user-id="${senderId}" data-user-name="${escapeHtml(senderName)}" data-user-role="${escapeHtml(messageRole)}">${initials}</div>
+              <div class="message-bubble">
+                <div class="sender-name">
+                  ${escapeHtml(senderName)} ${roleBadge}
+                </div>
+                <div class="message received">
+                  ${escapeHtml(message.content)}
+                  <small>${timeStr}</small>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      // --- Date separator ---
+      function maybeAppendDateSeparator(prevDate, currentDate) {
+        if (!prevDate) return '';
+        const prevDay = new Date(prevDate).toDateString();
+        const currDay = new Date(currentDate).toDateString();
+        if (prevDay !== currDay) {
+          const header = formatDateHeader(currentDate);
+          return `<div class="date-separator"><span>${header}</span></div>`;
+        }
+        return '';
+      }
+
+      // --- Load messages for the selected group ---
+      async function loadMessages() {
+        try {
+          if (showingAnnouncements) return;
+          if (isCEO && selectedGroupRole === null) {
+            renderGroupsList(availableRoles || []);
+            return;
+          }
+          let query = supabase
+            .from('group_messages')
+            .select(`*, sender:profiles!sender_id (full_name)`)
+            .order('created_at', { ascending: true });
+
+          if (!isCEO) {
+            query = query.eq('role', currentRole);
+          } else if (selectedGroupRole) {
+            query = query.eq('role', selectedGroupRole);
+          }
+
+          const { data, error } = await query;
+          if (error) throw error;
+
+          const messageIds = data.map(m => m.id);
+          let readSet = new Set();
+          if (messageIds.length > 0) {
+            const { data: reads, error: readError } = await supabase
+              .from('message_reads')
+              .select('message_id')
+              .eq('user_id', currentUser.id)
+              .in('message_id', messageIds);
+            if (!readError) {
+              readSet = new Set(reads.map(r => r.message_id));
+            }
+          }
+          readMessageIds = readSet;
+
+          // For each sent message, fetch seen counts
+          const seenCounts = {};
+          if (messageIds.length > 0) {
+            const { data: readsAll } = await supabase
+              .from('message_reads')
+              .select('message_id')
+              .in('message_id', messageIds);
+            if (readsAll) {
+              readsAll.forEach(r => {
+                seenCounts[r.message_id] = (seenCounts[r.message_id] || 0) + 1;
+              });
+            }
+          }
+
+          let html = '';
+          let lastDate = null;
+          for (const msg of data) {
+            const isSent = msg.sender_id === currentUser.id;
+            const senderName = msg.sender?.full_name || 'Unknown';
+            const isUnread = !isSent && !readMessageIds.has(msg.id);
+            if (isSent) readMessageIds.add(msg.id);
+
+            html += maybeAppendDateSeparator(lastDate, msg.created_at);
+            lastDate = msg.created_at;
+
+            const seenCount = seenCounts[msg.id] || 0;
+            html += renderMessage(msg, isSent, senderName, msg.sender_id, msg.role, isUnread, seenCount);
+          }
+
+          const area = document.getElementById('messagesArea');
+          area.innerHTML = html;
+
+          currentUnreadCount = data.filter(msg => !readMessageIds.has(msg.id) && msg.sender_id !== currentUser.id).length;
+          if (isCEO) await updateTotalUnreadCount();
+          updateUnreadBadges();
+
+          attachMessageHandlers();
+          setupObserver();
+          area.scrollTop = area.scrollHeight;
+        } catch (err) {
+          console.error('Load messages error:', err);
+          document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Could not load messages.</div>';
+        }
+      }
+
+      // --- Compute total unread across all groups for CEO ---
+      async function updateTotalUnreadCount() {
+        if (!currentUser) return;
+        try {
+          const { data: reads } = await supabase
+            .from('message_reads')
+            .select('message_id')
+            .eq('user_id', currentUser.id);
+          const readIds = new Set(reads.map(r => r.message_id));
+          const { data: msgs, error } = await supabase
+            .from('group_messages')
+            .select('id, sender_id');
+          if (error) throw error;
+          let count = 0;
+          msgs.forEach(m => {
+            if (m.sender_id !== currentUser.id && !readIds.has(m.id)) count++;
+          });
+          totalUnreadCount = count;
+          updateUnreadBadges();
+        } catch (err) {
+          console.error('updateTotalUnreadCount error:', err);
+        }
+      }
+
+      // --- Render groups list for CEO with unread counts ---
+      async function renderGroupsList(roles) {
+        const area = document.getElementById('messagesArea');
+        if (!area) return;
+        if (!roles || roles.length === 0) {
+          area.innerHTML = '<div style="color:#9aa4bf;text-align:center;padding:2rem;">No groups found</div>';
+          return;
+        }
+        // Fetch unread counts per group
         const { data: reads } = await supabase
           .from('message_reads')
           .select('message_id')
           .eq('user_id', currentUser.id);
         const readIds = new Set(reads.map(r => r.message_id));
-
-        // fetch all messages not sent by the user
-        const { data: msgs, error } = await supabase
+        const { data: msgs } = await supabase
           .from('group_messages')
-          .select('id, sender_id');
-        if (error) throw error;
-        let count = 0;
+          .select('id, role, sender_id');
+        const unreadCounts = {};
         msgs.forEach(m => {
-          if (m.sender_id !== currentUser.id && !readIds.has(m.id)) count++;
-        });
-        totalUnreadCount = count;
-        updateUnreadBadges();
-      } catch (err) {
-        console.error('updateTotalUnreadCount error:', err);
-      }
-    }
-
-    // --- Mark message as read ---
-    async function markMessageAsRead(messageId) {
-      if (readMessageIds.has(messageId)) return;
-      try {
-        const { error } = await supabase
-          .from('message_reads')
-          .insert({ message_id: messageId, user_id: currentUser.id })
-          .single();
-        if (error && error.code !== '23505') {
-          console.error('mark read error:', error);
-          return;
-        }
-        readMessageIds.add(messageId);
-        const msgRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
-        if (msgRow) {
-          msgRow.classList.remove('unread');
-          // decrement both the current group count and the total unread if CEO
-          if (currentUnreadCount > 0) currentUnreadCount--;
-          if (isCEO && totalUnreadCount > 0) totalUnreadCount--;
-          updateUnreadBadges();
-        }
-      } catch (err) {
-        console.error('markMessageAsRead error:', err);
-      }
-    }
-
-    // --- Observer setup ---
-    function setupObserver() {
-      if (observer) observer.disconnect();
-      observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const row = entry.target;
-            const messageId = row.dataset.messageId;
-            if (messageId && !readMessageIds.has(messageId) && row.classList.contains('unread')) {
-              markMessageAsRead(messageId);
-            }
+          if (m.sender_id !== currentUser.id && !readIds.has(m.id)) {
+            unreadCounts[m.role] = (unreadCounts[m.role] || 0) + 1;
           }
         });
-      }, { threshold: 0.5 });
-      document.querySelectorAll('.message-row.unread').forEach(row => {
-        observer.observe(row);
-      });
-    }
 
-    // --- Render message actions ---
-    function renderMessageActions(messageId, currentContent, createdAt, senderId) {
-      const msgTime = new Date(createdAt).getTime();
-      const now = Date.now();
-      const age = now - msgTime;
-      const canEdit = (isCEO || senderId === currentUser.id) && age < 60000;
-      const canDelete = isCEO || senderId === currentUser.id;
-      if (canEdit && age < 60000) {
-        const timeLeft = 60000 - age;
-        if (timeLeft > 0) {
-          const timeoutId = setTimeout(() => {
-            const editBtn = document.querySelector(`.edit-btn[data-id="${messageId}"]`);
-            if (editBtn) editBtn.remove();
-          }, timeLeft);
-          editTimeouts.set(messageId, timeoutId);
-        }
-      }
-      return `
-        <div class="message-actions">
-          ${canEdit ? `<button class="edit-btn" data-id="${messageId}" data-content="${escapeHtml(currentContent)}">✏️</button>` : ''}
-          ${canDelete ? `<button class="delete-btn" data-id="${messageId}">🗑️</button>` : ''}
-        </div>
-      `;
-    }
-
-    // --- Render a single message ---
-    function renderMessage(message, isSent, senderName, senderId, messageRole, isUnread = false) {
-      const initials = getInitials(senderName);
-      const avatarColor = stringToColor(senderName);
-      const timeStr = formatTimeOnly(message.created_at);
-      const unreadClass = isUnread ? 'unread' : '';
-      let roleBadge = '';
-      if (messageRole) {
-        if (messageRole === 'CEO' || isCEO) {
-          roleBadge = `<span class="role-badge">${escapeHtml(messageRole)}</span>`;
-        }
-      }
-
-      if (isSent) {
-        return `
-          <div class="message-row sent ${unreadClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${senderId}">
-            <div class="message-bubble">
-              <div class="message sent">
-                ${escapeHtml(message.content)}
-                <small>${timeStr}</small>
-              </div>
-              ${renderMessageActions(message.id, message.content, message.created_at, senderId)}
-            </div>
-          </div>
-        `;
-      } else {
-        return `
-          <div class="message-row ${unreadClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${senderId}">
-            <div class="avatar" style="background-color: ${avatarColor};" data-user-id="${senderId}" data-user-name="${escapeHtml(senderName)}" data-user-role="${escapeHtml(messageRole)}">${initials}</div>
-            <div class="message-bubble">
-              <div class="sender-name">
-                ${escapeHtml(senderName)} ${roleBadge}
-              </div>
-              <div class="message received">
-                ${escapeHtml(message.content)}
-                <small>${timeStr}</small>
-              </div>
-            </div>
-          </div>
-        `;
-      }
-    }
-
-    // --- Date separator helper ---
-    function maybeAppendDateSeparator(prevDate, currentDate) {
-      if (!prevDate) return '';
-      const prevDay = new Date(prevDate).toDateString();
-      const currDay = new Date(currentDate).toDateString();
-      if (prevDay !== currDay) {
-        const header = formatDateHeader(currentDate);
-        return `<div class="date-separator"><span>${header}</span></div>`;
-      }
-      return '';
-    }
-
-    // --- Load messages for the selected group ---
-    async function loadMessages() {
-      try {
-        // update header title for CEO
-        if (isCEO) {
-          const grp = selectedGroupRole ? selectedGroupRole : 'All';
-          document.getElementById('groupTitle').textContent = `Group Chat (CEO)${grp === 'All' ? '' : ' - ' + grp}`;
-        }
-        // if CEO selected 'All', show the list of groups instead of combined messages
-        if (isCEO && selectedGroupRole === null) {
-          renderGroupsList(availableRoles || []);
-          return;
-        }
-        // when CEO has not chosen a specific group, we still load messages but without a role filter
-        let query = supabase
-          .from('group_messages')
-          .select(`*, sender:profiles!sender_id (full_name)`)
-          .order('created_at', { ascending: true });
-
-        if (!isCEO) {
-          query = query.eq('role', currentRole);
-        } else if (selectedGroupRole) {
-          query = query.eq('role', selectedGroupRole);
-        }
-
-        const { data, error } = await query;
-        if (error) throw error;
-
-        const messageIds = data.map(m => m.id);
-        let readSet = new Set();
-        if (messageIds.length > 0) {
-          const { data: reads, error: readError } = await supabase
-            .from('message_reads')
-            .select('message_id')
-            .eq('user_id', currentUser.id)
-            .in('message_id', messageIds);
-          if (!readError) {
-            readSet = new Set(reads.map(r => r.message_id));
-          }
-        }
-        readMessageIds = readSet;
-
-        let html = '';
-        let lastDate = null;
-        for (const msg of data) {
-          const isSent = msg.sender_id === currentUser.id;
-          const senderName = msg.sender?.full_name || 'Unknown';
-          const isUnread = !isSent && !readMessageIds.has(msg.id);
-          if (isSent) readMessageIds.add(msg.id);
-
-          html += maybeAppendDateSeparator(lastDate, msg.created_at);
-          lastDate = msg.created_at;
-
-          html += renderMessage(msg, isSent, senderName, msg.sender_id, msg.role, isUnread);
-        }
-
-        const area = document.getElementById('messagesArea');
-        area.innerHTML = html;
-
-        // compute unread for this group only
-        currentUnreadCount = data.filter(msg => !readMessageIds.has(msg.id) && msg.sender_id !== currentUser.id).length;
-        // also refresh the global total unread for CEO
-        if (isCEO) {
-          await updateTotalUnreadCount();
-        }
-        updateUnreadBadges();
-
-        attachMessageHandlers();
-        setupObserver();
-        area.scrollTop = area.scrollHeight;
-
-      } catch (err) {
-        console.error('Load messages error:', err);
-        document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Could not load messages.</div>';
-      }
-    }
-
-    // --- Attach event handlers ---
-    function attachMessageHandlers() {
-      document.querySelectorAll('.message-row').forEach(row => {
-        row.removeEventListener('click', onMessageRowClick);
-        row.addEventListener('click', onMessageRowClick);
-        row.removeEventListener('contextmenu', onRightClick);
-        row.addEventListener('contextmenu', onRightClick);
-      });
-      document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.removeEventListener('click', handleEditClick);
-        btn.addEventListener('click', handleEditClick);
-      });
-      document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.removeEventListener('click', handleDeleteClick);
-        btn.addEventListener('click', handleDeleteClick);
-      });
-      document.querySelectorAll('.avatar').forEach(avatar => {
-        avatar.removeEventListener('click', onAvatarClick);
-        avatar.addEventListener('click', onAvatarClick);
-      });
-    }
-
-    function onMessageRowClick(e) {
-      if (e.target.closest('.edit-btn') || e.target.closest('.delete-btn') || e.target.closest('.edit-actions') || e.target.closest('.avatar')) return;
-      const row = e.currentTarget;
-      if (row.classList.contains('selected')) row.classList.remove('selected');
-      else selectMessage(row);
-    }
-
-    function onAvatarClick(e) {
-      e.stopPropagation();
-      const avatar = e.currentTarget;
-      const userId = avatar.dataset.userId;
-      const userName = avatar.dataset.userName;
-      const userRole = avatar.dataset.userRole;
-      loadPrivateMessagesView().then(() => {
-        // After loading DM view, find and click the user's conversation
-        setTimeout(() => {
-          const item = document.querySelector(`.dm-conversation-item[data-user-id="${userId}"]`);
-          if (item) item.click();
-        }, 100);
-      });
-    }
-
-    function selectMessage(messageRow) {
-      document.querySelectorAll('.message-row').forEach(row => row.classList.remove('selected'));
-      messageRow.classList.add('selected');
-    }
-
-    // --- Edit/Delete handlers ---
-    async function handleEditClick(e) {
-      e.stopPropagation();
-      const btn = e.currentTarget;
-      const messageId = btn.dataset.id;
-      const currentContent = btn.dataset.content;
-      const row = btn.closest('.message-row');
-      const createdAt = row.dataset.createdAt;
-
-      if (Date.now() - new Date(createdAt).getTime() > 60000) {
-        alert('Cannot edit: message is older than 1 minute.');
-        return;
-      }
-
-      const messageBubble = row.querySelector('.message-bubble');
-      const messageDiv = row.querySelector('.message');
-
-      const editHtml = `
-        <div class="message sent" style="padding:0;">
-          <input type="text" class="edit-input" value="${escapeHtml(currentContent)}" data-original="${escapeHtml(currentContent)}">
-          <div class="edit-actions">
-            <button class="save-btn" data-id="${messageId}">Save</button>
-            <button class="cancel-btn">Cancel</button>
-          </div>
-        </div>
-      `;
-      messageDiv.style.display = 'none';
-      btn.closest('.message-actions').style.display = 'none';
-
-      const editContainer = document.createElement('div');
-      editContainer.innerHTML = editHtml;
-      messageBubble.appendChild(editContainer.firstChild);
-
-      const input = messageBubble.querySelector('.edit-input');
-      input.focus();
-
-      const saveBtn = messageBubble.querySelector('.save-btn');
-      saveBtn.addEventListener('click', async () => {
-        const newContent = input.value.trim();
-        if (!newContent) return;
-        await editMessage(messageId, newContent);
-      });
-
-      const cancelBtn = messageBubble.querySelector('.cancel-btn');
-      cancelBtn.addEventListener('click', () => {
-        messageDiv.style.display = 'block';
-        btn.closest('.message-actions').style.display = 'flex';
-        editContainer.remove();
-      });
-
-      input.addEventListener('keypress', async (e) => {
-        if (e.key === 'Enter') {
-          const newContent = input.value.trim();
-          if (!newContent) return;
-          await editMessage(messageId, newContent);
-        }
-      });
-    }
-
-    async function editMessage(messageId, newContent) {
-      try {
-        const { error } = await supabase
-          .from('group_messages')
-          .update({ content: newContent })
-          .eq('id', messageId)
-          .eq('sender_id', currentUser.id);
-        if (error) throw error;
-        updateMessageInUI(messageId, newContent);
-        const messageRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
-        if (messageRow) {
-          const messageDiv = messageRow.querySelector('.message');
-          const actions = messageRow.querySelector('.message-actions');
-          if (messageDiv) messageDiv.style.display = 'block';
-          if (actions) actions.style.display = 'flex';
-          const editContainer = messageRow.querySelector('.message > div:not(.message):not(.message-actions)')?.closest('.message');
-          if (editContainer) editContainer.remove();
-        }
-      } catch (err) {
-        console.error('Edit error:', err);
-        alert('Failed to edit message: ' + err.message);
-      }
-    }
-
-    async function handleDeleteClick(e) {
-      e.stopPropagation();
-      if (!confirm('Delete this message?')) return;
-      const btn = e.currentTarget;
-      const messageId = btn.dataset.id;
-      const row = btn.closest('.message-row');
-      const senderId = row.dataset.senderId;
-      try {
-        let query = supabase.from('group_messages').delete().eq('id', messageId);
-        if (!isCEO) {
-          query = query.eq('sender_id', currentUser.id);
-        }
-        const { error } = await query;
-        if (error) throw error;
-        removeMessageFromUI(messageId);
-      } catch (err) {
-        console.error('Delete error:', err);
-        alert('Failed to delete message: ' + err.message);
-      }
-    }
-
-    function updateMessageInUI(messageId, newContent) {
-      const messageRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
-      if (!messageRow) return;
-      const messageDiv = messageRow.querySelector('.message');
-      if (messageDiv) {
-        const timeElem = messageDiv.querySelector('small');
-        messageDiv.innerHTML = `${escapeHtml(newContent)} `;
-        if (timeElem) messageDiv.appendChild(timeElem);
-      }
-      const editBtn = messageRow.querySelector('.edit-btn');
-      if (editBtn) editBtn.dataset.content = newContent;
-    }
-
-    function removeMessageFromUI(messageId) {
-      const messageRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
-      if (messageRow) {
-        // if it was unread, adjust counters
-        if (messageRow.classList.contains('unread')) {
-          if (currentUnreadCount > 0) currentUnreadCount--;
-          if (isCEO && totalUnreadCount > 0) totalUnreadCount--;
-        }
-        if (observer) observer.unobserve(messageRow);
-        messageRow.remove();
-      }
-      if (editTimeouts.has(messageId)) {
-        clearTimeout(editTimeouts.get(messageId));
-        editTimeouts.delete(messageId);
-      }
-      updateUnreadBadges();
-    }
-
-    // --- Right-click read receipts ---
-    async function onRightClick(e) {
-      e.preventDefault();
-      const row = e.currentTarget;
-      const messageId = row.dataset.messageId;
-      modal.style.display = 'none';
-      const { data, error } = await supabase
-        .from('message_reads')
-        .select('user_id, read_at, profiles!inner(full_name)')
-        .eq('message_id', messageId)
-        .order('read_at', { ascending: true });
-      if (error || !data) {
-        console.error('fetch readers error:', error);
-        return;
-      }
-      if (data.length === 0) {
-        modal.innerHTML = '<h4>Read receipts</h4><p style="padding:0.5rem 0;">No one has seen this message yet.</p>';
-      } else {
-        const listItems = data.map(item => {
-          const name = item.profiles?.full_name || 'Unknown';
-          const readTime = item.read_at ? new Date(item.read_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Unknown';
-          return `<li><span class="reader-name">${escapeHtml(name)}</span> <span class="reader-time">${readTime}</span></li>`;
+        const items = roles.map(r => {
+          const count = unreadCounts[r] || 0;
+          const badge = count > 0 ? `<span class="unread-badge">${count}</span>` : '';
+          return `<div class="group-card" data-role="${escapeHtml(r)}">${escapeHtml(r)}${badge}</div>`;
         }).join('');
-        modal.innerHTML = `<h4>Seen by (${data.length})</h4><ul>${listItems}</ul>`;
-      }
-      modal.style.left = e.pageX + 10 + 'px';
-      modal.style.top = e.pageY + 10 + 'px';
-      modal.style.display = 'block';
-      const hideModal = (ev) => {
-        if (!modal.contains(ev.target)) {
-          modal.style.display = 'none';
-          document.removeEventListener('click', hideModal);
-        }
-      };
-      setTimeout(() => document.addEventListener('click', hideModal), 0);
-    }
-
-    // --- Append new message (real-time) ---
-    function appendMessageToUI(message, isSent, senderName, senderId, messageRole, isUnread = false) {
-      // avoid appending duplicates (could be fired by both initial load and realtime)
-      if (document.querySelector(`.message-row[data-message-id="${message.id}"]`)) return;
-
-      if (isCEO) {
-        // when selectedGroupRole is empty string or null treat as all groups
-        if (selectedGroupRole && messageRole !== selectedGroupRole) return;
-      } else {
-        if (messageRole !== currentRole) return;
-      }
-
-      const area = document.getElementById('messagesArea');
-      if (!area) return;
-      const lastMessageRow = area.querySelector('.message-row:last-child');
-      let lastDate = lastMessageRow ? lastMessageRow.dataset.createdAt : null;
-      const separatorHtml = maybeAppendDateSeparator(lastDate, message.created_at);
-      const isScrolledToBottom = area.scrollHeight - area.scrollTop <= area.clientHeight + 50;
-      if (separatorHtml) area.insertAdjacentHTML('beforeend', separatorHtml);
-      const msgHtml = renderMessage(message, isSent, senderName, senderId, messageRole, isUnread);
-      area.insertAdjacentHTML('beforeend', msgHtml);
-      if (isScrolledToBottom) area.scrollTop = area.scrollHeight;
-      attachMessageHandlers();
-      if (isUnread) {
-        const newRow = document.querySelector(`.message-row[data-message-id="${message.id}"]`);
-        if (observer && newRow) observer.observe(newRow);
-      }
-    }
-
-    // --- Typing indicator functions ---
-    function updateTypingIndicator() {
-      if (activeTypers.size === 0) {
-        typingContainer.style.display = 'none';
-        return;
-      }
-      
-      const names = Array.from(activeTypers);
-      let text = '';
-      if (names.length === 1) {
-        text = `${names[0]} is typing...`;
-      } else if (names.length === 2) {
-        text = `${names[0]} and ${names[1]} are typing...`;
-      } else {
-        text = `${names.length} people are typing...`;
-      }
-      
-      typingText.textContent = text;
-      typingContainer.style.display = 'block';
-    }
-
-    async function sendTypingIndicator() {
-      if (!currentUser || !selectedGroupRole && !isCEO) return;
-      
-      const channel = isCEO ? `typing-${selectedGroupRole || 'all'}` : `typing-${currentRole}`;
-      await supabase.channel(channel).send({
-        type: 'broadcast',
-        event: 'typing',
-        payload: { 
-          userId: currentUser.id, 
-          userName: currentUserFullName,
-          timestamp: Date.now() 
-        }
-      });
-    }
-
-    function setupTypingSubscription() {
-      if (typingSubscription) typingSubscription.unsubscribe();
-      
-      const channel = isCEO ? 
-        (selectedGroupRole ? `typing-${selectedGroupRole}` : 'typing-all') : 
-        `typing-${currentRole}`;
-      
-      typingSubscription = supabase
-        .channel(channel)
-        .on('broadcast', { event: 'typing' }, (payload) => {
-          const { userId, userName, timestamp } = payload.payload;
-          
-          // Don't show own typing
-          if (userId === currentUser.id) return;
-          
-          // Clear existing timeout for this user
-          if (typingTimeouts[userId]) {
-            clearTimeout(typingTimeouts[userId]);
-          }
-          
-          // Add to active typers
-          activeTypers.add(userName);
-          updateTypingIndicator();
-          
-          // Set timeout to remove after 3 seconds of no typing
-          typingTimeouts[userId] = setTimeout(() => {
-            activeTypers.delete(userName);
-            updateTypingIndicator();
-            delete typingTimeouts[userId];
-          }, 3000);
-        })
-        .subscribe();
-    }
-
-    // --- Subscribe to new messages ---
-    function subscribeToMessages() {
-      if (messageSubscription) messageSubscription.unsubscribe();
-      setupTypingSubscription();
-      
-      if (isCEO) {
-        messageSubscription = supabase
-          .channel('all-messages')
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'group_messages' }, async (payload) => {
-            const newMsg = payload.new;
-            // skip if this message is already present (prevents duplicates when loading + realtime)
-            if (document.querySelector(`.message-row[data-message-id="${newMsg.id}"]`)) return;
-            
-            // Clear typing indicator for this user when they send a message
-            if (activeTypers.has(currentUserFullName)) {
-              activeTypers.delete(currentUserFullName);
-              updateTypingIndicator();
-            }
-            
-            if (newMsg.sender_id === currentUser.id) return;
-            const { data: senderProfile } = await supabase
-              .from('profiles')
-              .select('full_name')
-              .eq('id', newMsg.sender_id)
-              .single();
-            const senderName = senderProfile?.full_name || 'Unknown';
-            appendMessageToUI(newMsg, false, senderName, newMsg.sender_id, newMsg.role, true);
-            // increment total unread regardless of the currently selected group
-            totalUnreadCount++;
-            // if the message also belongs to the group currently being viewed (or we're viewing all), bump that counter too
-            if (selectedGroupRole === null || newMsg.role === selectedGroupRole) {
-              currentUnreadCount++;
-            }
-            updateUnreadBadges();
-          })
-          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'group_messages' }, (payload) => {
-            updateMessageInUI(payload.new.id, payload.new.content);
-          })
-          .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'group_messages' }, (payload) => {
-            removeMessageFromUI(payload.old.id);
-          })
-          .subscribe();
-      } else {
-        messageSubscription = supabase
-          .channel(`group-${currentRole}`)
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, async (payload) => {
-            const newMsg = payload.new;
-            // skip if this message already exists in the DOM
-            if (document.querySelector(`.message-row[data-message-id="${newMsg.id}"]`)) return;
-            
-            // Clear typing indicator for this user when they send a message
-            if (activeTypers.has(currentUserFullName)) {
-              activeTypers.delete(currentUserFullName);
-              updateTypingIndicator();
-            }
-            
-            if (newMsg.sender_id === currentUser.id) return;
-            const { data: senderProfile } = await supabase
-              .from('profiles')
-              .select('full_name')
-              .eq('id', newMsg.sender_id)
-              .single();
-            const senderName = senderProfile?.full_name || 'Unknown';
-            appendMessageToUI(newMsg, false, senderName, newMsg.sender_id, newMsg.role, true);
-            currentUnreadCount++;
-            updateUnreadBadges();
-          })
-          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, (payload) => {
-            updateMessageInUI(payload.new.id, payload.new.content);
-          })
-          .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, (payload) => {
-            removeMessageFromUI(payload.old.id);
-          })
-          .subscribe();
-      }
-    }
-
-    // --- Send message (optimistic update) ---
-    async function sendMessage() {
-      const input = document.getElementById('messageInput');
-      const content = input.value.trim();
-      if (!content || !currentUser) return;
-
-      let messageRole;
-      if (isCEO) {
-        if (!selectedGroupRole) {
-          alert('Please select a group first.');
-          return;
-        }
-        messageRole = selectedGroupRole;
-      } else {
-        messageRole = currentRole;
-      }
-
-      // Clear typing indicator
-      if (activeTypers.has(currentUserFullName)) {
-        activeTypers.delete(currentUserFullName);
-        updateTypingIndicator();
-      }
-
-      // Create optimistic message
-      const tempId = 'temp-' + Date.now();
-      const optimisticMessage = {
-        id: tempId,
-        content: content,
-        created_at: new Date().toISOString(),
-        sender_id: currentUser.id,
-        role: messageRole
-      };
-
-      // Show message immediately
-      appendMessageToUI(optimisticMessage, true, currentUserFullName, currentUser.id, messageRole, false);
-      
-      input.value = '';
-
-      // Actually send to server
-      const { data, error } = await supabase
-        .from('group_messages')
-        .insert({
-          role: messageRole,
-          sender_id: currentUser.id,
-          content: content
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Send error:', error);
-        // Remove optimistic message on error
-        document.querySelector(`.message-row[data-message-id="${tempId}"]`)?.remove();
-        alert('Failed to send: ' + error.message);
-        return;
-      }
-
-      // Replace temp ID with real one
-      const tempRow = document.querySelector(`.message-row[data-message-id="${tempId}"]`);
-      if (tempRow) {
-        tempRow.dataset.messageId = data.id;
-        // Update any references
-      }
-
-      try {
-        await supabase
-          .from('message_reads')
-          .insert({ message_id: data.id, user_id: currentUser.id });
-        readMessageIds.add(data.id);
-      } catch (readErr) {}
-    }
-
-    // --- Subscribe to all incoming private messages (for notifications) ---
-    function subscribeToAllDirectMessages() {
-      if (globalDmSubscription) globalDmSubscription.unsubscribe();
-      if (!currentUser) return;
-      globalDmSubscription = supabase
-        .channel(`dm-global-${currentUser.id}`)
-        .on('postgres_changes', {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'private_messages',
-          filter: `recipient_id=eq.${currentUser.id}`
-        }, async (payload) => {
-          const newMsg = payload.new;
-          if (newMsg.sender_id === currentUser.id) return; // ignore our own sends
-          // check whether the DM modal is currently open for this sender
-          const isOpenForSender = dmModal.style.display === 'flex' && openDMUserId === newMsg.sender_id;
-          // if open, just append and mark read
-          // if conversation open for this sender, append and mark read but don't increment the badge
-          if (isOpenForSender) {
-            appendDirectMessageToUI(newMsg, false);
-          } else {
-            // increment per-sender badge and update
-            dmUnreadBySender[newMsg.sender_id] = (dmUnreadBySender[newMsg.sender_id] || 0) + 1;
-            updateDMBadge();
-          }
-          // always show toast notification
-          let senderName = 'Someone';
-          try {
-            const { data: prof } = await supabase
-              .from('profiles')
-              .select('full_name')
-              .eq('id', newMsg.sender_id)
-              .single();
-            if (prof && prof.full_name) senderName = prof.full_name;
-          } catch (e) {}
-          showToast(`New DM from ${senderName}`);
-        })
-        .subscribe();
-    }
-
-    // --- Render CEO groups list view ---
-    function renderGroupsList(roles) {
-      const area = document.getElementById('messagesArea');
-      if (!area) return;
-      if (!roles || roles.length === 0) {
-        area.innerHTML = '<div style="color:#9aa4bf;text-align:center;padding:2rem;">No groups found</div>';
-        return;
-      }
-      const items = roles.map(r => `<div class="group-card" data-role="${escapeHtml(r)}">${escapeHtml(r)}</div>`).join('');
-      area.innerHTML = `<div class="groups-list">${items}</div>`;
-      // attach handlers
-      document.querySelectorAll('.group-card').forEach(card => {
-        card.addEventListener('click', async (e) => {
-          const role = e.currentTarget.dataset.role;
-          // switch to the specific group
-          await switchGroup(role);
-        });
-      });
-    }
-
-    // --- Build group tabs for CEO ---
-    async function buildGroupTabs() {
-      if (!isCEO) return;
-      const tabsContainer = document.getElementById('groupTabs');
-      tabsContainer.style.display = 'flex';
-      tabsContainer.innerHTML = '';
-
-      // Try to get roles from profiles first
-      let roles = [];
-      try {
-        const { data: profiles, error } = await supabase
-          .from('profiles')
-          .select('job_role')
-          .not('job_role', 'is', null);
-        if (!error && profiles && profiles.length > 0) {
-          roles = [...new Set(profiles.map(p => p.job_role))].sort();
-        } else {
-          console.warn('No job_roles found in profiles, falling back to roles from group_messages');
-        }
-      } catch (e) {
-        console.error('Error fetching profiles:', e);
-      }
-
-      // Fallback: get roles from existing messages
-      if (roles.length === 0) {
-        try {
-          const { data: messages, error } = await supabase
-            .from('group_messages')
-            .select('role')
-            .not('role', 'is', null);
-          if (!error && messages) {
-            roles = [...new Set(messages.map(m => m.role))].sort();
-          }
-        } catch (e) {
-          console.error('Error fetching message roles:', e);
-        }
-      }
-
-      if (roles.length === 0) {
-        tabsContainer.innerHTML = '<span style="color:#9aa4bf; padding:0.4rem 1rem;">No groups found</span>';
-        return;
-      }
-
-      availableRoles = roles;
-
-      // ensure availableRoles is set before showing groups
-      if (!availableRoles) availableRoles = roles;
-
-      // add an "All" tab at the beginning
-      const allTab = document.createElement('span');
-      allTab.className = `group-tab ${selectedGroupRole === null ? 'active' : ''}`;
-      allTab.textContent = 'All';
-      allTab.dataset.role = '';
-      allTab.addEventListener('click', () => switchGroup(''));
-      tabsContainer.appendChild(allTab);
-
-      // For CEO header we only show the 'All' tab; individual groups are shown
-      // as cards inside the All view. Roles are rendered in the messages area.
-
-      // If no group selected yet, select the first one
-      if (selectedGroupRole === null && roles.length > 0) {
-        // default to all groups
-        document.querySelectorAll('.group-tab').forEach(tab => {
-          if (tab.dataset.role === '') tab.classList.add('active');
-        });
-        // disable input because CEO cannot send without selecting a specific group
-        document.getElementById('messageInput').disabled = true;
-        document.getElementById('sendBtn').disabled = true;
-        await loadMessages();
-      } else if (!selectedGroupRole && roles.length > 0) {
-        // if still no role selected (shouldn't normally happen), pick first role
-        selectedGroupRole = roles[0];
-        document.querySelectorAll('.group-tab').forEach(tab => {
-          if (tab.dataset.role === selectedGroupRole) tab.classList.add('active');
-        });
-        document.getElementById('messageInput').disabled = false;
-        document.getElementById('sendBtn').disabled = false;
-        await loadMessages();
-      }
-    }
-
-    // --- Switch group tab ---
-    async function switchGroup(role) {
-      // normalize empty string to null for "All"
-      const normalized = role === '' ? null : role;
-      if (selectedGroupRole === normalized) return;
-      selectedGroupRole = normalized;
-      document.querySelectorAll('.group-tab').forEach(tab => {
-        const tr = tab.dataset.role === '' ? null : tab.dataset.role;
-        if (tr === selectedGroupRole) tab.classList.add('active');
-        else tab.classList.remove('active');
-      });
-      // disable input if viewing all groups
-      if (isCEO) {
-        const disabled = selectedGroupRole === null;
-        document.getElementById('messageInput').disabled = disabled;
-        document.getElementById('sendBtn').disabled = disabled;
-      }
-      // update header tabs: show only 'All' or a back icon for CEOs
-      if (isCEO) {
-        const tabsContainer = document.getElementById('groupTabs');
-        tabsContainer.innerHTML = '';
-        if (selectedGroupRole === null) {
-          const allTab = document.createElement('span');
-          allTab.className = 'group-tab active';
-          allTab.dataset.role = '';
-          allTab.textContent = 'All';
-          allTab.addEventListener('click', () => switchGroup(''));
-          tabsContainer.appendChild(allTab);
-        } else {
-          const back = document.createElement('span');
-          back.className = 'group-tab';
-          back.id = 'backToAll';
-          back.innerHTML = '⟵ All';
-          back.addEventListener('click', () => switchGroup(''));
-          tabsContainer.appendChild(back);
-        }
-      }
-
-      // Update typing subscription for new group
-      if (typingSubscription) typingSubscription.unsubscribe();
-      setupTypingSubscription();
-      
-      await loadMessages();
-    }
-
-    // --- DM functions ---
-    async function loadPrivateMessagesView() {
-      try {
-        // Clear group message subscriptions and show DM view
-        if (messageSubscription) messageSubscription.unsubscribe();
-        if (observer) observer.disconnect();
-        if (typingSubscription) typingSubscription.unsubscribe();
-        
-        // Update header
-        document.getElementById('groupTitle').innerText = 'Direct Messages';
-        document.getElementById('roleDisplay').style.display = 'none';
-        document.getElementById('groupTabs').style.display = 'none';
-        document.getElementById('messageInput').disabled = true;
-        document.getElementById('sendBtn').disabled = true;
-
-        dmUnreadCount = 0;
-        updateDMBadge();
-
-        // Fetch all conversations
-        const { data: conversations, error } = await supabase
-          .from('private_messages')
-          .select('sender_id, recipient_id, created_at')
-          .or(`sender_id.eq.${currentUser.id},recipient_id.eq.${currentUser.id}`)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        // Get unique users from conversations
-        const userIds = new Set();
-        conversations.forEach(msg => {
-          const otherUserId = msg.sender_id === currentUser.id ? msg.recipient_id : msg.sender_id;
-          userIds.add(otherUserId);
-        });
-
-        // Fetch user profiles
-        const { data: profiles, error: profileError } = await supabase
-          .from('profiles')
-          .select('id, full_name, job_role')
-          .in('id', Array.from(userIds));
-
-        if (profileError) throw profileError;
-
-        // Build conversation list HTML
-        const area = document.getElementById('messagesArea');
-        const profileMap = {};
-        profiles.forEach(p => profileMap[p.id] = p);
-
-        const conversationsList = Array.from(userIds).map(userId => {
-          const profile = profileMap[userId];
-          const unread = dmUnreadBySender[userId] || 0;
-          const unreadBadge = unread > 0 ? `<span class="dm-unread-badge">${unread}</span>` : '';
-          return `
-            <div class="dm-conversation-item" data-user-id="${userId}">
-              <div class="dm-conv-content">
-                <div class="dm-conv-name">${escapeHtml(profile?.full_name || 'Unknown')}</div>
-                <div class="dm-conv-role">${escapeHtml(profile?.job_role || 'Member')}</div>
-              </div>
-              ${unreadBadge}
-            </div>
-          `;
-        }).join('');
-
-        area.innerHTML = `
-          <div class="dm-layout">
-            <div class="dm-conversations-list">
-              <div class="dm-list-header">Conversations</div>
-              ${conversationsList}
-            </div>
-            <div class="dm-chat-area" style="display: none;">
-              <div class="dm-chat-header"></div>
-              <div id="dmChatMessages"></div>
-              <div class="dm-chat-input">
-                <input type="text" id="dmChatInput" placeholder="Type a message...">
-                <button id="dmChatSendBtn">Send</button>
-              </div>
-            </div>
-          </div>
-        `;
-
-        // Add CSS for DM layout
-        if (!document.getElementById('dm-layout-styles')) {
-          const style = document.createElement('style');
-          style.id = 'dm-layout-styles';
-          style.textContent = `
-            .dm-layout {
-              display: flex;
-              height: 100%;
-              gap: 0;
-            }
-            .dm-conversations-list {
-              width: 300px;
-              border-right: 1px solid #263154;
-              overflow-y: auto;
-              background: #0f172f;
-            }
-            .dm-list-header {
-              padding: 1rem;
-              font-weight: 600;
-              color: #9aa4bf;
-              border-bottom: 1px solid #263154;
-              font-size: 0.9rem;
-            }
-            .dm-conversation-item {
-              padding: 0.8rem 1rem;
-              border-bottom: 1px solid #1f2a44;
-              cursor: pointer;
-              transition: background 0.2s;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-            }
-            .dm-conversation-item:hover {
-              background: #1f2a44;
-            }
-            .dm-conversation-item.active {
-              background: #2a3a60;
-              border-left: 3px solid #428cff;
-            }
-            .dm-conv-content {
-              flex: 1;
-            }
-            .dm-conv-name {
-              color: white;
-              font-weight: 500;
-              font-size: 0.9rem;
-            }
-            .dm-conv-role {
-              color: #9aa4bf;
-              font-size: 0.75rem;
-              margin-top: 0.2rem;
-            }
-            .dm-unread-badge {
-              background: #428cff;
-              color: white;
-              padding: 0.2rem 0.5rem;
-              border-radius: 1rem;
-              font-size: 0.75rem;
-              font-weight: 600;
-              min-width: 20px;
-              text-align: center;
-            }
-            .dm-chat-area {
-              flex: 1;
-              display: flex;
-              flex-direction: column;
-            }
-            .dm-chat-header {
-              padding: 1rem;
-              border-bottom: 1px solid #263154;
-              color: white;
-              font-weight: 500;
-              background: #131c30;
-            }
-            #dmChatMessages {
-              flex: 1;
-              overflow-y: auto;
-              padding: 1rem;
-              display: flex;
-              flex-direction: column;
-              gap: 0.5rem;
-            }
-            .dm-chat-input {
-              display: flex;
-              padding: 1rem;
-              background: #131c30;
-              border-top: 1px solid #263154;
-              gap: 0.5rem;
-            }
-            #dmChatInput {
-              flex: 1;
-              background: #0f172f;
-              border: 1px solid #263154;
-              border-radius: 2rem;
-              padding: 0.8rem 1.2rem;
-              color: white;
-              outline: none;
-            }
-            #dmChatInput:focus {
-              border-color: #428cff;
-            }
-            #dmChatSendBtn {
-              background: #428cff;
-              border: none;
-              color: white;
-              width: 3rem;
-              height: 3rem;
-              border-radius: 50%;
-              cursor: pointer;
-              font-size: 1.2rem;
-              transition: 0.2s;
-            }
-            #dmChatSendBtn:hover {
-              background: #5f9eff;
-            }
-            .dm-msg-row {
-              display: flex;
-              margin-bottom: 0.5rem;
-            }
-            .dm-msg-row.sent {
-              justify-content: flex-end;
-            }
-            .dm-msg {
-              max-width: 60%;
-              padding: 0.8rem 1rem;
-              border-radius: 1.2rem;
-              word-wrap: break-word;
-              font-size: 0.9rem;
-              line-height: 1.4;
-            }
-            .dm-msg.sent {
-              background: #428cff;
-              color: white;
-            }
-            .dm-msg.received {
-              background: #1f2a44;
-              color: #e0e7ff;
-            }
-            .dm-msg small {
-              display: block;
-              font-size: 0.75rem;
-              opacity: 0.7;
-              margin-top: 0.3rem;
-            }
-          `;
-          document.head.appendChild(style);
-        }
-
-        // Attach conversation click handlers
-        document.querySelectorAll('.dm-conversation-item').forEach(item => {
-          item.addEventListener('click', async () => {
-            const userId = item.dataset.userId;
-            await openPrivateChat(userId, profileMap[userId]);
-            document.querySelectorAll('.dm-conversation-item').forEach(i => i.classList.remove('active'));
-            item.classList.add('active');
+        area.innerHTML = `<div class="groups-list">${items}</div>`;
+        document.querySelectorAll('.group-card').forEach(card => {
+          card.addEventListener('click', async (e) => {
+            const role = e.currentTarget.dataset.role;
+            await switchGroup(role);
           });
         });
-
-      } catch (err) {
-        console.error('Load DM view error:', err);
-        document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Failed to load direct messages.</div>';
       }
-    }
 
-    async function openPrivateChat(otherUserId, otherProfile) {
-      const chatArea = document.querySelector('.dm-chat-area');
-      const header = document.querySelector('.dm-chat-header');
-      const messagesDiv = document.getElementById('dmChatMessages');
-      const input = document.getElementById('dmChatInput');
-      const sendBtn = document.getElementById('dmChatSendBtn');
+      // --- Build group tabs for CEO with unread badges ---
+      async function buildGroupTabs() {
+        if (!isCEO) return;
+        const tabsContainer = document.getElementById('groupTabs');
+        tabsContainer.style.display = 'flex';
+        tabsContainer.innerHTML = '';
 
-      header.innerHTML = `${escapeHtml(otherProfile.full_name)} <span style="font-size:0.85rem;color:#9aa4bf;">(${escapeHtml(otherProfile.job_role)})</span>`;
-      chatArea.style.display = 'flex';
-      input.focus();
-
-      // Load messages
-      try {
-        const { data, error } = await supabase
-          .from('private_messages')
-          .select('*')
-          .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`)
-          .order('created_at', { ascending: true });
-
-        if (error) throw error;
-
-        let html = '';
-        for (const msg of data) {
-          const isSent = msg.sender_id === currentUser.id;
-          const timeStr = formatTimeOnly(msg.created_at);
-          const msgClass = isSent ? 'sent' : 'received';
-          html += `
-            <div class="dm-msg-row ${msgClass}">
-              <div class="dm-msg ${msgClass}">
-                ${escapeHtml(msg.content)}
-                <small>${timeStr}</small>
-              </div>
-            </div>
-          `;
-          if (!isSent && !msg.read_at) {
-            markDirectMessageAsRead(msg.id, otherUserId);
+        let roles = [];
+        try {
+          const { data: profiles, error } = await supabase
+            .from('profiles')
+            .select('job_role')
+            .not('job_role', 'is', null);
+          if (!error && profiles && profiles.length > 0) {
+            roles = [...new Set(profiles.map(p => p.job_role))].sort();
           }
-        }
-        messagesDiv.innerHTML = html;
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        } catch (e) {}
 
-        // Clear old handlers and attach new ones
-        sendBtn.onclick = () => sendPrivateMessage(otherUserId);
-        input.onkeypress = (e) => {
-          if (e.key === 'Enter') sendPrivateMessage(otherUserId);
-        };
-
-      } catch (err) {
-        console.error('Load private chat error:', err);
-        messagesDiv.innerHTML = '<div style="color:#ff628c;">Failed to load messages.</div>';
-      }
-    }
-
-    async function sendPrivateMessage(otherUserId) {
-      const input = document.getElementById('dmChatInput');
-      const content = input.value.trim();
-      if (!content) return;
-      input.value = '';
-
-      try {
-        const { data, error } = await supabase
-          .from('private_messages')
-          .insert({
-            sender_id: currentUser.id,
-            recipient_id: otherUserId,
-            content: content
-          })
-          .select()
-          .single();
-
-        if (error) throw error;
-
-        // Append to chat
-        const messagesDiv = document.getElementById('dmChatMessages');
-        const timeStr = formatTimeOnly(data.created_at);
-        const msgHtml = `
-          <div class="dm-msg-row sent">
-            <div class="dm-msg sent">
-              ${escapeHtml(data.content)}
-              <small>${timeStr}</small>
-            </div>
-          </div>
-        `;
-        messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-      } catch (err) {
-        console.error('Send private message error:', err);
-        alert('Failed to send: ' + err.message);
-      }
-    }
-
-    function openDirectMessageModal(recipientId, recipientName, recipientRole) {
-      closeDirectMessageModal();
-      currentRecipientId = recipientId;
-      openDMUserId = recipientId;
-      // clear unread for this particular sender
-      if (dmUnreadBySender[recipientId]) {
-        dmUnreadBySender[recipientId] = 0;
-        updateDMBadge();
-      }
-
-      const titleSpan = dmModal.querySelector('.dm-modal-title');
-      titleSpan.innerHTML = `${escapeHtml(recipientName)} <span style="font-size:12px;color:#aaa;">(${escapeHtml(recipientRole)})</span>`;
-      dmModal.style.display = 'flex';
-      loadDirectMessages(recipientId);
-      const dmInput = document.getElementById('dmInput');
-      const dmSendBtn = document.getElementById('dmSendBtn');
-      dmSendBtn.onclick = () => sendDirectMessage(recipientId);
-      dmInput.onkeypress = (e) => {
-        if (e.key === 'Enter') sendDirectMessage(recipientId);
-      };
-      dmModal.querySelector('.dm-modal-close').onclick = closeDirectMessageModal;
-    }
-
-    function closeDirectMessageModal() {
-      dmModal.style.display = 'none';
-      if (dmObserver) dmObserver.disconnect();
-      currentRecipientId = null;
-      openDMUserId = null;
-      // nothing else; other unread values remain intact
-    }
-
-    async function loadDirectMessages(otherUserId) {
-      const messagesDiv = document.getElementById('dmMessages');
-      if (!messagesDiv) return;
-      try {
-        const { data, error } = await supabase
-          .from('private_messages')
-          .select('*')
-          .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`)
-          .order('created_at', { ascending: true });
-        if (error) throw error;
-        let html = '';
-        let lastDate = null;
-        for (const msg of data) {
-          const isSent = msg.sender_id === currentUser.id;
-          const dateHeader = maybeAppendDateSeparator(lastDate, msg.created_at);
-          if (dateHeader) html += dateHeader.replace('date-separator', 'dm-date-separator');
-          lastDate = msg.created_at;
-          const timeStr = formatTimeOnly(msg.created_at);
-          const messageClass = isSent ? 'sent' : 'received';
-          html += `<div class="dm-message ${messageClass}" data-message-id="${msg.id}" data-created-at="${msg.created_at}">
-            ${escapeHtml(msg.content)} <small>${timeStr}</small>
-          </div>`;
-          if (!isSent && !msg.read_at) {
-            markDirectMessageAsRead(msg.id, msg.sender_id);
-          }
-        }
-        messagesDiv.innerHTML = html;
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        setupDirectMessageObserver();
-      } catch (err) {
-        console.error('Load DMs error:', err);
-        messagesDiv.innerHTML = '<div style="color:#ff628c;padding:1rem;">Could not load messages.</div>';
-      }
-    }
-
-    async function markDirectMessageAsRead(messageId, senderId) {
-      try {
-        await supabase
-          .from('private_messages')
-          .update({ read_at: new Date().toISOString() })
-          .eq('id', messageId)
-          .eq('recipient_id', currentUser.id);
-      } catch (err) {
-        console.error('Mark DM read error:', err);
-      }
-      // decrement unread counter for sender if we were tracking it
-      if (senderId && dmUnreadBySender[senderId]) {
-        dmUnreadBySender[senderId] = Math.max(0, dmUnreadBySender[senderId] - 1);
-        updateDMBadge();
-      }
-    }
-
-    function setupDirectMessageObserver() {
-      if (dmObserver) dmObserver.disconnect();
-      dmObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const msgDiv = entry.target;
-            const messageId = msgDiv.dataset.messageId;
-            if (messageId && msgDiv.classList.contains('received')) {
-              const sid = msgDiv.dataset.senderId;
-              markDirectMessageAsRead(messageId, sid);
+        if (roles.length === 0) {
+          try {
+            const { data: messages, error } = await supabase
+              .from('group_messages')
+              .select('role')
+              .not('role', 'is', null);
+            if (!error && messages) {
+              roles = [...new Set(messages.map(m => m.role))].sort();
             }
-          }
-        });
-      }, { threshold: 0.5 });
-      document.querySelectorAll('#dmMessages .dm-message.received').forEach(msg => {
-        dmObserver.observe(msg);
-      });
-    }
-
-    async function sendDirectMessage(recipientId) {
-      const input = document.getElementById('dmInput');
-      const content = input.value.trim();
-      if (!content || !currentUser) return;
-      input.value = '';
-      const { data, error } = await supabase
-        .from('private_messages')
-        .insert({
-          sender_id: currentUser.id,
-          recipient_id: recipientId,
-          content: content
-        })
-        .select()
-        .single();
-      if (error) {
-        console.error('Send DM error:', error);
-        alert('Failed to send: ' + error.message);
-        return;
-      }
-      appendDirectMessageToUI(data, true);
-    }
-
-    function appendDirectMessageToUI(message, isSent) {
-      const messagesDiv = document.getElementById('dmMessages');
-      if (!messagesDiv) return;
-      const lastMsg = messagesDiv.querySelector('.dm-message:last-child');
-      let lastDate = lastMsg ? lastMsg.dataset.createdAt : null;
-      const separatorHtml = maybeAppendDateSeparator(lastDate, message.created_at);
-      if (separatorHtml) {
-        messagesDiv.insertAdjacentHTML('beforeend', separatorHtml.replace('date-separator', 'dm-date-separator'));
-      }
-      const timeStr = formatTimeOnly(message.created_at);
-      const messageClass = isSent ? 'sent' : 'received';
-      const msgHtml = `<div class="dm-message ${messageClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${message.sender_id}">
-        ${escapeHtml(message.content)} <small>${timeStr}</small>
-      </div>`;
-      messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-      if (!isSent) {
-        markDirectMessageAsRead(message.id, message.sender_id);
-        if (dmObserver) {
-          const newMsg = messagesDiv.lastElementChild;
-          dmObserver.observe(newMsg);
+          } catch (e) {}
         }
-      }
-    }
 
-    function subscribeToDirectMessages(otherUserId) {
-      if (dmSubscription) dmSubscription.unsubscribe();
-      dmSubscription = supabase
-        .channel(`dm-${currentUser.id}-${otherUserId}`)
-        .on('postgres_changes', {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'private_messages',
-          filter: `or(and(sender_id=eq.${currentUser.id},recipient_id=eq.${otherUserId}),and(sender_id=eq.${otherUserId},recipient_id=eq.${currentUser.id}))`
-        }, (payload) => {
-          const newMsg = payload.new;
-          const isSent = newMsg.sender_id === currentUser.id;
-          const existing = document.querySelector(`#dmMessages .dm-message[data-message-id="${newMsg.id}"]`);
-          if (!existing) {
-            appendDirectMessageToUI(newMsg, isSent);
-          }
-        })
-        .subscribe();
-    }
-
-    // --- Initialize ---
-    async function init() {
-      try {
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (userError || !user) {
-          window.location.href = '/index.html';
-          return;
-        }
-        currentUser = user;
-        const metadata = user.user_metadata || {};
-        currentUserFullName = metadata.full_name || 'User';
-        const jobRole = metadata.job_role;
-
-        if (!jobRole) {
-          document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">No job role assigned. Please contact admin.</div>';
+        if (roles.length === 0) {
+          tabsContainer.innerHTML = '<span style="color:#9aa4bf; padding:0.4rem 1rem;">No groups</span>';
           return;
         }
 
-        currentRole = jobRole;
-        isCEO = (currentRole === 'CEO');
+        availableRoles = roles;
 
-        // always listen for private messages so we can notify
-        subscribeToAllDirectMessages();
-
-        // Set up typing indicator on input
-        const messageInput = document.getElementById('messageInput');
-        let typingTimeout;
-        messageInput.addEventListener('input', () => {
-          if (typingTimeout) clearTimeout(typingTimeout);
-          sendTypingIndicator();
-          typingTimeout = setTimeout(() => {
-            // Stop typing after 2 seconds of no input
-          }, 2000);
+        // Fetch unread counts per group for tabs
+        const { data: reads } = await supabase
+          .from('message_reads')
+          .select('message_id')
+          .eq('user_id', currentUser.id);
+        const readIds = new Set(reads.map(r => r.message_id));
+        const { data: msgs } = await supabase
+          .from('group_messages')
+          .select('id, role, sender_id');
+        const unreadCounts = {};
+        msgs.forEach(m => {
+          if (m.sender_id !== currentUser.id && !readIds.has(m.id)) {
+            unreadCounts[m.role] = (unreadCounts[m.role] || 0) + 1;
+          }
         });
 
-        if (isCEO) {
-          document.getElementById('groupTitle').innerText = 'Group Chat (CEO)';
-          document.getElementById('roleDisplay').style.display = 'none';
-          // compute the initial total unread count before building tabs
-          await updateTotalUnreadCount();
-          await buildGroupTabs();
-          subscribeToMessages();
-        } else {
-          document.getElementById('groupTitle').innerText = 'Group';
-          document.getElementById('roleDisplay').textContent = currentRole;
-          selectedGroupRole = currentRole;
+        // All tab
+        const allTab = document.createElement('span');
+        allTab.className = `group-tab ${selectedGroupRole === null ? 'active' : ''}`;
+        allTab.textContent = 'All';
+        if (totalUnreadCount > 0) {
+          const badge = document.createElement('span');
+          badge.className = 'unread-badge-tab';
+          badge.textContent = totalUnreadCount;
+          allTab.appendChild(badge);
+        }
+        allTab.dataset.role = '';
+        allTab.addEventListener('click', () => switchGroup(''));
+        tabsContainer.appendChild(allTab);
+
+        // For each role, create tab with unread badge
+        roles.forEach(role => {
+          const tab = document.createElement('span');
+          tab.className = `group-tab ${selectedGroupRole === role ? 'active' : ''}`;
+          tab.textContent = role;
+          const unread = unreadCounts[role] || 0;
+          if (unread > 0) {
+            const badge = document.createElement('span');
+            badge.className = 'unread-badge-tab';
+            badge.textContent = unread;
+            tab.appendChild(badge);
+          }
+          tab.dataset.role = role;
+          tab.addEventListener('click', () => switchGroup(role));
+          tabsContainer.appendChild(tab);
+        });
+
+        if (selectedGroupRole === null && roles.length > 0) {
+          document.getElementById('messageInput').disabled = true;
+          document.getElementById('sendBtn').disabled = true;
+          await loadMessages();
+        } else if (!selectedGroupRole && roles.length > 0) {
+          selectedGroupRole = roles[0];
+          document.querySelectorAll('.group-tab').forEach(tab => {
+            if (tab.dataset.role === selectedGroupRole) tab.classList.add('active');
+          });
           document.getElementById('messageInput').disabled = false;
           document.getElementById('sendBtn').disabled = false;
           await loadMessages();
-          subscribeToMessages();
+        }
+      }
+
+      // --- Switch group tab ---
+      async function switchGroup(role) {
+        const normalized = role === '' ? null : role;
+        if (selectedGroupRole === normalized) return;
+        selectedGroupRole = normalized;
+        document.querySelectorAll('.group-tab').forEach(tab => {
+          const tr = tab.dataset.role === '' ? null : tab.dataset.role;
+          if (tr === selectedGroupRole) tab.classList.add('active');
+          else tab.classList.remove('active');
+        });
+        if (isCEO) {
+          const disabled = selectedGroupRole === null;
+          document.getElementById('messageInput').disabled = disabled;
+          document.getElementById('sendBtn').disabled = disabled;
+          if (selectedGroupRole === null) {
+            // rebuild tabs to update badges
+            await buildGroupTabs();
+          }
+        }
+        // Update typing subscription
+        if (typingSubscription) typingSubscription.unsubscribe();
+        setupTypingSubscription();
+        await loadMessages();
+      }
+
+      // --- Attach message handlers ---
+      function attachMessageHandlers() {
+        document.querySelectorAll('.message-row').forEach(row => {
+          row.removeEventListener('click', onMessageRowClick);
+          row.addEventListener('click', onMessageRowClick);
+          row.removeEventListener('contextmenu', onRightClick);
+          row.addEventListener('contextmenu', onRightClick);
+        });
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+          btn.removeEventListener('click', handleEditClick);
+          btn.addEventListener('click', handleEditClick);
+        });
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+          btn.removeEventListener('click', handleDeleteClick);
+          btn.addEventListener('click', handleDeleteClick);
+        });
+        document.querySelectorAll('.avatar').forEach(avatar => {
+          avatar.removeEventListener('click', onAvatarClick);
+          avatar.addEventListener('click', onAvatarClick);
+        });
+      }
+
+      function onMessageRowClick(e) {
+        if (e.target.closest('.edit-btn') || e.target.closest('.delete-btn') || e.target.closest('.edit-actions') || e.target.closest('.avatar')) return;
+        const row = e.currentTarget;
+        if (row.classList.contains('selected')) row.classList.remove('selected');
+        else {
+          document.querySelectorAll('.message-row').forEach(r => r.classList.remove('selected'));
+          row.classList.add('selected');
+        }
+      }
+
+      function onAvatarClick(e) {
+        e.stopPropagation();
+        const avatar = e.currentTarget;
+        const userId = avatar.dataset.userId;
+        const userName = avatar.dataset.userName;
+        const userRole = avatar.dataset.userRole;
+        openDirectMessageModal(userId, userName, userRole);
+      }
+
+      // --- Edit/Delete handlers ---
+      async function handleEditClick(e) {
+        e.stopPropagation();
+        const btn = e.currentTarget;
+        const messageId = btn.dataset.id;
+        const currentContent = btn.dataset.content;
+        const row = btn.closest('.message-row');
+        const createdAt = row.dataset.createdAt;
+
+        if (Date.now() - new Date(createdAt).getTime() > 60000) {
+          alert('Cannot edit: message is older than 1 minute.');
+          return;
         }
 
-      } catch (err) {
-        console.error('Init error:', err);
-        document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Failed to load chat. Please refresh.</div>';
+        const messageBubble = row.querySelector('.message-bubble');
+        const messageDiv = row.querySelector('.message');
+
+        const editHtml = `
+          <div class="message sent" style="padding:0;">
+            <input type="text" class="edit-input" value="${escapeHtml(currentContent)}" data-original="${escapeHtml(currentContent)}">
+            <div class="edit-actions">
+              <button class="save-btn" data-id="${messageId}">Save</button>
+              <button class="cancel-btn">Cancel</button>
+            </div>
+          </div>
+        `;
+        messageDiv.style.display = 'none';
+        btn.closest('.message-actions').style.display = 'none';
+
+        const editContainer = document.createElement('div');
+        editContainer.innerHTML = editHtml;
+        messageBubble.appendChild(editContainer.firstChild);
+
+        const input = messageBubble.querySelector('.edit-input');
+        input.focus();
+
+        const saveBtn = messageBubble.querySelector('.save-btn');
+        saveBtn.addEventListener('click', async () => {
+          const newContent = input.value.trim();
+          if (!newContent) return;
+          await editMessage(messageId, newContent);
+        });
+
+        const cancelBtn = messageBubble.querySelector('.cancel-btn');
+        cancelBtn.addEventListener('click', () => {
+          messageDiv.style.display = 'block';
+          btn.closest('.message-actions').style.display = 'flex';
+          editContainer.remove();
+        });
+
+        input.addEventListener('keypress', async (e) => {
+          if (e.key === 'Enter') {
+            const newContent = input.value.trim();
+            if (!newContent) return;
+            await editMessage(messageId, newContent);
+          }
+        });
       }
-    }
 
-    // --- Logout ---
-    document.getElementById('logout').addEventListener('click', async () => {
-      closeDirectMessageModal();
-      if (messageSubscription) messageSubscription.unsubscribe();
-      if (typingSubscription) typingSubscription.unsubscribe();
-      editTimeouts.forEach(t => clearTimeout(t));
-      editTimeouts.clear();
-      await supabase.auth.signOut();
-      window.location.href = '/index.html';
-    });
+      async function editMessage(messageId, newContent) {
+        try {
+          const { error } = await supabase
+            .from('group_messages')
+            .update({ content: newContent })
+            .eq('id', messageId)
+            .eq('sender_id', currentUser.id);
+          if (error) throw error;
+          updateMessageInUI(messageId, newContent);
+          const messageRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
+          if (messageRow) {
+            const messageDiv = messageRow.querySelector('.message');
+            const actions = messageRow.querySelector('.message-actions');
+            if (messageDiv) messageDiv.style.display = 'block';
+            if (actions) actions.style.display = 'flex';
+            const editContainer = messageRow.querySelector('.message > div:not(.message):not(.message-actions)')?.closest('.message');
+            if (editContainer) editContainer.remove();
+          }
+        } catch (err) {
+          console.error('Edit error:', err);
+          alert('Failed to edit message: ' + err.message);
+        }
+      }
 
-    document.getElementById('sendBtn').addEventListener('click', sendMessage);
-    document.getElementById('messageInput').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') sendMessage();
-    });
-    document.getElementById('dmNavLink').addEventListener('click', async (e) => {
-      e.preventDefault();
-      await loadPrivateMessagesView();
-    });
+      async function handleDeleteClick(e) {
+        e.stopPropagation();
+        if (!confirm('Delete this message?')) return;
+        const btn = e.currentTarget;
+        const messageId = btn.dataset.id;
+        const row = btn.closest('.message-row');
+        const senderId = row.dataset.senderId;
+        try {
+          let query = supabase.from('group_messages').delete().eq('id', messageId);
+          if (!isCEO) query = query.eq('sender_id', currentUser.id);
+          const { error } = await query;
+          if (error) throw error;
+          removeMessageFromUI(messageId);
+        } catch (err) {
+          console.error('Delete error:', err);
+          alert('Failed to delete message: ' + err.message);
+        }
+      }
 
-    window.addEventListener('scroll', () => modal.style.display = 'none', true);
-    document.addEventListener('click', (e) => {
-      if (!modal.contains(e.target)) modal.style.display = 'none';
-      if (!profilePopup.contains(e.target)) profilePopup.style.display = 'none';
-    });
+      function updateMessageInUI(messageId, newContent) {
+        const messageRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
+        if (!messageRow) return;
+        const messageDiv = messageRow.querySelector('.message');
+        if (messageDiv) {
+          const timeElem = messageDiv.querySelector('small');
+          messageDiv.innerHTML = `${escapeHtml(newContent)} `;
+          if (timeElem) messageDiv.appendChild(timeElem);
+        }
+        const editBtn = messageRow.querySelector('.edit-btn');
+        if (editBtn) editBtn.dataset.content = newContent;
+      }
 
-    init();
-  })();
-</script>
+      function removeMessageFromUI(messageId) {
+        const messageRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
+        if (messageRow) {
+          if (messageRow.classList.contains('unread')) {
+            if (currentUnreadCount > 0) currentUnreadCount--;
+            if (isCEO && totalUnreadCount > 0) totalUnreadCount--;
+          }
+          if (observer) observer.unobserve(messageRow);
+          messageRow.remove();
+        }
+        if (editTimeouts.has(messageId)) {
+          clearTimeout(editTimeouts.get(messageId));
+          editTimeouts.delete(messageId);
+        }
+        updateUnreadBadges();
+      }
+
+      // --- Right-click read receipts ---
+      async function onRightClick(e) {
+        e.preventDefault();
+        const row = e.currentTarget;
+        const messageId = row.dataset.messageId;
+        modal.style.display = 'none';
+        const { data, error } = await supabase
+          .from('message_reads')
+          .select('user_id, read_at, profiles!inner(full_name)')
+          .eq('message_id', messageId)
+          .order('read_at', { ascending: true });
+        if (error || !data) {
+          console.error('fetch readers error:', error);
+          return;
+        }
+        if (data.length === 0) {
+          modal.innerHTML = '<h4>Read receipts</h4><p style="padding:0.5rem 0;">No one has seen this message yet.</p>';
+        } else {
+          const listItems = data.map(item => {
+            const name = item.profiles?.full_name || 'Unknown';
+            const readTime = item.read_at ? new Date(item.read_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Unknown';
+            return `<li><span class="reader-name">${escapeHtml(name)}</span> <span class="reader-time">${readTime}</span></li>`;
+          }).join('');
+          modal.innerHTML = `<h4>Seen by (${data.length})</h4><ul>${listItems}</ul>`;
+        }
+        modal.style.left = e.pageX + 10 + 'px';
+        modal.style.top = e.pageY + 10 + 'px';
+        modal.style.display = 'block';
+        const hideModal = (ev) => {
+          if (!modal.contains(ev.target)) {
+            modal.style.display = 'none';
+            document.removeEventListener('click', hideModal);
+          }
+        };
+        setTimeout(() => document.addEventListener('click', hideModal), 0);
+      }
+
+      // --- Append new message to UI (real-time) ---
+      function appendMessageToUI(message, isSent, senderName, senderId, messageRole, isUnread = false) {
+        if (document.querySelector(`.message-row[data-message-id="${message.id}"]`)) return;
+        if (isCEO) {
+          if (selectedGroupRole && messageRole !== selectedGroupRole) return;
+        } else {
+          if (messageRole !== currentRole) return;
+        }
+        const area = document.getElementById('messagesArea');
+        if (!area) return;
+        const lastMessageRow = area.querySelector('.message-row:last-child');
+        let lastDate = lastMessageRow ? lastMessageRow.dataset.createdAt : null;
+        const separatorHtml = maybeAppendDateSeparator(lastDate, message.created_at);
+        const isScrolledToBottom = area.scrollHeight - area.scrollTop <= area.clientHeight + 50;
+        if (separatorHtml) area.insertAdjacentHTML('beforeend', separatorHtml);
+        const msgHtml = renderMessage(message, isSent, senderName, senderId, messageRole, isUnread);
+        area.insertAdjacentHTML('beforeend', msgHtml);
+        if (isScrolledToBottom) area.scrollTop = area.scrollHeight;
+        attachMessageHandlers();
+        if (isUnread) {
+          const newRow = document.querySelector(`.message-row[data-message-id="${message.id}"]`);
+          if (observer && newRow) observer.observe(newRow);
+        }
+      }
+
+      // --- Typing indicator ---
+      function updateTypingIndicator() {
+        if (activeTypers.size === 0) {
+          typingContainer.style.display = 'none';
+          return;
+        }
+        const names = Array.from(activeTypers);
+        let text = '';
+        if (names.length === 1) {
+          text = `${names[0]} is typing...`;
+        } else if (names.length === 2) {
+          text = `${names[0]} and ${names[1]} are typing...`;
+        } else {
+          text = `${names.length} people are typing...`;
+        }
+        typingText.textContent = text;
+        typingContainer.style.display = 'block';
+      }
+
+      async function sendTypingIndicator() {
+        if (!currentUser || (isCEO && !selectedGroupRole) || (!isCEO && !currentRole)) return;
+        const channel = isCEO ? (selectedGroupRole ? `typing-${selectedGroupRole}` : 'typing-all') : `typing-${currentRole}`;
+        await supabase.channel(channel).send({
+          type: 'broadcast',
+          event: 'typing',
+          payload: { userId: currentUser.id, userName: currentUserFullName, timestamp: Date.now() }
+        });
+      }
+
+      function setupTypingSubscription() {
+        if (typingSubscription) typingSubscription.unsubscribe();
+        const channel = isCEO ? (selectedGroupRole ? `typing-${selectedGroupRole}` : 'typing-all') : `typing-${currentRole}`;
+        typingSubscription = supabase
+          .channel(channel)
+          .on('broadcast', { event: 'typing' }, (payload) => {
+            const { userId, userName, timestamp } = payload.payload;
+            if (userId === currentUser.id) return;
+            if (typingTimeouts[userId]) clearTimeout(typingTimeouts[userId]);
+            activeTypers.add(userName);
+            updateTypingIndicator();
+            typingTimeouts[userId] = setTimeout(() => {
+              activeTypers.delete(userName);
+              updateTypingIndicator();
+              delete typingTimeouts[userId];
+            }, 3000);
+          })
+          .subscribe();
+      }
+
+      // --- Subscribe to group messages ---
+      function subscribeToMessages() {
+        if (messageSubscription) messageSubscription.unsubscribe();
+        setupTypingSubscription();
+
+        if (isCEO) {
+          messageSubscription = supabase
+            .channel('all-messages')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'group_messages' }, async (payload) => {
+              const newMsg = payload.new;
+              if (document.querySelector(`.message-row[data-message-id="${newMsg.id}"]`)) return;
+              if (activeTypers.has(currentUserFullName)) { activeTypers.delete(currentUserFullName); updateTypingIndicator(); }
+              if (newMsg.sender_id === currentUser.id) return;
+              const { data: senderProfile } = await supabase
+                .from('profiles')
+                .select('full_name')
+                .eq('id', newMsg.sender_id)
+                .single();
+              const senderName = senderProfile?.full_name || 'Unknown';
+              appendMessageToUI(newMsg, false, senderName, newMsg.sender_id, newMsg.role, true);
+              totalUnreadCount++;
+              if (selectedGroupRole === null || newMsg.role === selectedGroupRole) currentUnreadCount++;
+              updateUnreadBadges();
+              // Also update group tabs if CEO
+              if (isCEO) buildGroupTabs();
+            })
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'group_messages' }, (payload) => {
+              updateMessageInUI(payload.new.id, payload.new.content);
+            })
+            .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'group_messages' }, (payload) => {
+              removeMessageFromUI(payload.old.id);
+            })
+            .subscribe();
+        } else {
+          messageSubscription = supabase
+            .channel(`group-${currentRole}`)
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, async (payload) => {
+              const newMsg = payload.new;
+              if (document.querySelector(`.message-row[data-message-id="${newMsg.id}"]`)) return;
+              if (activeTypers.has(currentUserFullName)) { activeTypers.delete(currentUserFullName); updateTypingIndicator(); }
+              if (newMsg.sender_id === currentUser.id) return;
+              const { data: senderProfile } = await supabase
+                .from('profiles')
+                .select('full_name')
+                .eq('id', newMsg.sender_id)
+                .single();
+              const senderName = senderProfile?.full_name || 'Unknown';
+              appendMessageToUI(newMsg, false, senderName, newMsg.sender_id, newMsg.role, true);
+              currentUnreadCount++;
+              updateUnreadBadges();
+            })
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, (payload) => {
+              updateMessageInUI(payload.new.id, payload.new.content);
+            })
+            .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, (payload) => {
+              removeMessageFromUI(payload.old.id);
+            })
+            .subscribe();
+        }
+      }
+
+      // --- Send group message (optimistic) ---
+      async function sendMessage() {
+        const input = document.getElementById('messageInput');
+        const content = input.value.trim();
+        if (!content || !currentUser) return;
+
+        let messageRole;
+        if (isCEO) {
+          if (!selectedGroupRole) { alert('Please select a group first.'); return; }
+          messageRole = selectedGroupRole;
+        } else {
+          messageRole = currentRole;
+        }
+
+        if (activeTypers.has(currentUserFullName)) { activeTypers.delete(currentUserFullName); updateTypingIndicator(); }
+
+        const tempId = 'temp-' + Date.now();
+        const optimisticMessage = {
+          id: tempId,
+          content: content,
+          created_at: new Date().toISOString(),
+          sender_id: currentUser.id,
+          role: messageRole
+        };
+        appendMessageToUI(optimisticMessage, true, currentUserFullName, currentUser.id, messageRole, false);
+        input.value = '';
+
+        const { data, error } = await supabase
+          .from('group_messages')
+          .insert({ role: messageRole, sender_id: currentUser.id, content: content })
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Send error:', error);
+          document.querySelector(`.message-row[data-message-id="${tempId}"]`)?.remove();
+          alert('Failed to send: ' + error.message);
+          return;
+        }
+
+        const tempRow = document.querySelector(`.message-row[data-message-id="${tempId}"]`);
+        if (tempRow) tempRow.dataset.messageId = data.id;
+
+        try {
+          await supabase
+            .from('message_reads')
+            .insert({ message_id: data.id, user_id: currentUser.id });
+          readMessageIds.add(data.id);
+        } catch (readErr) {}
+      }
+
+      // --- Direct Messages ---
+      function openDirectMessageModal(recipientId, recipientName, recipientRole) {
+        closeDirectMessageModal();
+        currentRecipientId = recipientId;
+        openDMUserId = recipientId;
+        if (dmUnreadBySender[recipientId]) {
+          dmUnreadBySender[recipientId] = 0;
+          updateDMBadge();
+        }
+        const titleSpan = dmModal.querySelector('.dm-modal-title');
+        titleSpan.innerHTML = `${escapeHtml(recipientName)} <span style="font-size:12px;color:#aaa;">(${escapeHtml(recipientRole)})</span>`;
+        dmModal.style.display = 'flex';
+        loadDirectMessages(recipientId);
+        const dmInput = document.getElementById('dmInput');
+        const dmSendBtn = document.getElementById('dmSendBtn');
+        dmSendBtn.onclick = () => sendDirectMessage(recipientId);
+        dmInput.onkeypress = (e) => { if (e.key === 'Enter') sendDirectMessage(recipientId); };
+        dmModal.querySelector('.dm-modal-close').onclick = closeDirectMessageModal;
+      }
+
+      function closeDirectMessageModal() {
+        dmModal.style.display = 'none';
+        if (dmObserver) dmObserver.disconnect();
+        currentRecipientId = null;
+        openDMUserId = null;
+      }
+
+      async function loadDirectMessages(otherUserId) {
+        const messagesDiv = document.getElementById('dmMessages');
+        if (!messagesDiv) return;
+        try {
+          const { data, error } = await supabase
+            .from('private_messages')
+            .select('*')
+            .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`)
+            .order('created_at', { ascending: true });
+          if (error) throw error;
+          let html = '';
+          let lastDate = null;
+          for (const msg of data) {
+            const isSent = msg.sender_id === currentUser.id;
+            const dateHeader = maybeAppendDateSeparator(lastDate, msg.created_at);
+            if (dateHeader) html += dateHeader.replace('date-separator', 'dm-date-separator');
+            lastDate = msg.created_at;
+            const timeStr = formatTimeOnly(msg.created_at);
+            const messageClass = isSent ? 'sent' : 'received';
+            html += `<div class="dm-message ${messageClass}" data-message-id="${msg.id}" data-created-at="${msg.created_at}">
+              ${escapeHtml(msg.content)} <small>${timeStr}</small>
+            </div>`;
+            if (!isSent && !msg.read_at) markDirectMessageAsRead(msg.id, msg.sender_id);
+          }
+          messagesDiv.innerHTML = html;
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+          setupDirectMessageObserver();
+          subscribeToDirectMessages(otherUserId);
+        } catch (err) {
+          console.error('Load DMs error:', err);
+          messagesDiv.innerHTML = '<div style="color:#ff628c;padding:1rem;">Could not load messages.</div>';
+        }
+      }
+
+      async function markDirectMessageAsRead(messageId, senderId) {
+        try {
+          await supabase
+            .from('private_messages')
+            .update({ read_at: new Date().toISOString() })
+            .eq('id', messageId)
+            .eq('recipient_id', currentUser.id);
+        } catch (err) { console.error('Mark DM read error:', err); }
+        if (senderId && dmUnreadBySender[senderId]) {
+          dmUnreadBySender[senderId] = Math.max(0, dmUnreadBySender[senderId] - 1);
+          updateDMBadge();
+        }
+      }
+
+      function setupDirectMessageObserver() {
+        if (dmObserver) dmObserver.disconnect();
+        dmObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const msgDiv = entry.target;
+              const messageId = msgDiv.dataset.messageId;
+              if (messageId && msgDiv.classList.contains('received')) {
+                const sid = msgDiv.dataset.senderId;
+                markDirectMessageAsRead(messageId, sid);
+              }
+            }
+          });
+        }, { threshold: 0.5 });
+        document.querySelectorAll('#dmMessages .dm-message.received').forEach(msg => dmObserver.observe(msg));
+      }
+
+      function subscribeToDirectMessages(otherUserId) {
+        if (dmSubscription) dmSubscription.unsubscribe();
+        dmSubscription = supabase
+          .channel(`dm-${currentUser.id}-${otherUserId}`)
+          .on('postgres_changes', {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'private_messages',
+            filter: `or(and(sender_id=eq.${currentUser.id},recipient_id=eq.${otherUserId}),and(sender_id=eq.${otherUserId},recipient_id=eq.${currentUser.id}))`
+          }, (payload) => {
+            const newMsg = payload.new;
+            const isSent = newMsg.sender_id === currentUser.id;
+            const existing = document.querySelector(`#dmMessages .dm-message[data-message-id="${newMsg.id}"]`);
+            if (!existing) {
+              appendDirectMessageToUI(newMsg, isSent);
+            }
+          })
+          .subscribe();
+      }
+
+      function appendDirectMessageToUI(message, isSent) {
+        const messagesDiv = document.getElementById('dmMessages');
+        if (!messagesDiv) return;
+        const lastMsg = messagesDiv.querySelector('.dm-message:last-child');
+        let lastDate = lastMsg ? lastMsg.dataset.createdAt : null;
+        const separatorHtml = maybeAppendDateSeparator(lastDate, message.created_at);
+        if (separatorHtml) messagesDiv.insertAdjacentHTML('beforeend', separatorHtml.replace('date-separator', 'dm-date-separator'));
+        const timeStr = formatTimeOnly(message.created_at);
+        const messageClass = isSent ? 'sent' : 'received';
+        const msgHtml = `<div class="dm-message ${messageClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${message.sender_id}">
+          ${escapeHtml(message.content)} <small>${timeStr}</small>
+        </div>`;
+        messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        if (!isSent) {
+          markDirectMessageAsRead(message.id, message.sender_id);
+          if (dmObserver) dmObserver.observe(messagesDiv.lastElementChild);
+        }
+      }
+
+      async function sendDirectMessage(recipientId) {
+        const input = document.getElementById('dmInput');
+        const content = input.value.trim();
+        if (!content || !currentUser) return;
+        input.value = '';
+        const { data, error } = await supabase
+          .from('private_messages')
+          .insert({ sender_id: currentUser.id, recipient_id: recipientId, content: content })
+          .select()
+          .single();
+        if (error) { console.error('Send DM error:', error); alert('Failed to send: ' + error.message); return; }
+        appendDirectMessageToUI(data, true);
+      }
+
+      function subscribeToAllDirectMessages() {
+        if (globalDmSubscription) globalDmSubscription.unsubscribe();
+        if (!currentUser) return;
+        globalDmSubscription = supabase
+          .channel(`dm-global-${currentUser.id}`)
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'private_messages', filter: `recipient_id=eq.${currentUser.id}` }, async (payload) => {
+            const newMsg = payload.new;
+            if (newMsg.sender_id === currentUser.id) return;
+            const isOpenForSender = dmModal.style.display === 'flex' && openDMUserId === newMsg.sender_id;
+            if (isOpenForSender) {
+              appendDirectMessageToUI(newMsg, false);
+            } else {
+              dmUnreadBySender[newMsg.sender_id] = (dmUnreadBySender[newMsg.sender_id] || 0) + 1;
+              updateDMBadge();
+            }
+            let senderName = 'Someone';
+            try {
+              const { data: prof } = await supabase
+                .from('profiles')
+                .select('full_name')
+                .eq('id', newMsg.sender_id)
+                .single();
+              if (prof && prof.full_name) senderName = prof.full_name;
+            } catch (e) {}
+            showToast(`New DM from ${senderName}`);
+          })
+          .subscribe();
+      }
+
+      // --- Announcements ---
+      async function loadAnnouncements() {
+        showingAnnouncements = true;
+        document.getElementById('groupTitle').innerText = 'Announcements';
+        document.getElementById('roleDisplay').style.display = 'none';
+        document.getElementById('groupTabs').style.display = 'none';
+        document.getElementById('chatInputArea').style.display = isCEO ? 'flex' : 'none'; // only CEO can post
+        document.getElementById('messageInput').disabled = true;
+        document.getElementById('sendBtn').disabled = true;
+
+        const area = document.getElementById('messagesArea');
+        let html = '<div class="announcement-area">';
+        if (isCEO) {
+          html += `
+            <div class="announcement-form">
+              <textarea id="announcementContent" placeholder="Write announcement..."></textarea>
+              <input type="file" id="announcementFile" accept="*/*">
+              <button id="postAnnouncementBtn">Post Announcement</button>
+            </div>
+          `;
+        }
+        const { data: announcements, error } = await supabase
+          .from('announcements')
+          .select('*, profiles!created_by(full_name)')
+          .order('created_at', { ascending: false });
+        if (error) console.error(error);
+        else {
+          announcements.forEach(a => {
+            const date = new Date(a.created_at).toLocaleString();
+            const fileLink = a.file_url ? `<div class="file-link"><a href="${a.file_url}" target="_blank">📎 Attachment</a></div>` : '';
+            html += `
+              <div class="announcement-card">
+                <div class="meta"><span>${escapeHtml(a.profiles?.full_name || 'CEO')}</span><span>${date}</span></div>
+                <div class="content">${escapeHtml(a.content)}</div>
+                ${fileLink}
+              </div>
+            `;
+          });
+        }
+        html += '</div>';
+        area.innerHTML = html;
+
+        if (isCEO) {
+          document.getElementById('postAnnouncementBtn').addEventListener('click', postAnnouncement);
+        }
+      }
+
+      async function postAnnouncement() {
+        const content = document.getElementById('announcementContent').value.trim();
+        const file = document.getElementById('announcementFile').files[0];
+        if (!content && !file) return;
+
+        let fileUrl = null;
+        if (file) {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${currentUser.id}/${Date.now()}.${fileExt}`;
+          const { error: uploadError } = await supabase.storage
+            .from('announcements')
+            .upload(fileName, file);
+          if (uploadError) { alert('Upload failed: ' + uploadError.message); return; }
+          const { data: urlData } = supabase.storage.from('announcements').getPublicUrl(fileName);
+          fileUrl = urlData.publicUrl;
+        }
+
+        const { error } = await supabase
+          .from('announcements')
+          .insert({ content, file_url: fileUrl, created_by: currentUser.id });
+        if (error) { alert('Failed to post: ' + error.message); return; }
+        document.getElementById('announcementContent').value = '';
+        document.getElementById('announcementFile').value = '';
+        loadAnnouncements();
+      }
+
+      // --- Navigation ---
+      document.getElementById('chatNavLink').addEventListener('click', (e) => {
+        e.preventDefault();
+        showingAnnouncements = false;
+        document.getElementById('chatNavLink').classList.add('active');
+        document.getElementById('dmNavLink').classList.remove('active');
+        document.getElementById('announcementNavLink').classList.remove('active');
+        document.getElementById('groupTabs').style.display = isCEO ? 'flex' : 'none';
+        document.getElementById('roleDisplay').style.display = isCEO ? 'none' : 'inline';
+        document.getElementById('chatInputArea').style.display = 'flex';
+        document.getElementById('messageInput').disabled = isCEO && !selectedGroupRole;
+        document.getElementById('sendBtn').disabled = isCEO && !selectedGroupRole;
+        loadMessages();
+      });
+
+      document.getElementById('dmNavLink').addEventListener('click', (e) => {
+        e.preventDefault();
+        showingAnnouncements = false;
+        document.getElementById('chatNavLink').classList.remove('active');
+        document.getElementById('dmNavLink').classList.add('active');
+        document.getElementById('announcementNavLink').classList.remove('active');
+        document.getElementById('groupTabs').style.display = 'none';
+        document.getElementById('roleDisplay').style.display = 'none';
+        document.getElementById('chatInputArea').style.display = 'none';
+        loadPrivateMessagesView();
+      });
+
+      document.getElementById('announcementNavLink').addEventListener('click', (e) => {
+        e.preventDefault();
+        showingAnnouncements = true;
+        document.getElementById('chatNavLink').classList.remove('active');
+        document.getElementById('dmNavLink').classList.remove('active');
+        document.getElementById('announcementNavLink').classList.add('active');
+        document.getElementById('groupTabs').style.display = 'none';
+        document.getElementById('roleDisplay').style.display = 'none';
+        document.getElementById('chatInputArea').style.display = isCEO ? 'flex' : 'none';
+        loadAnnouncements();
+      });
+
+      // --- Private messages list view (simplified, opens modal on click) ---
+      async function loadPrivateMessagesView() {
+        // For simplicity, we'll just show a message to click avatars to start DMs.
+        // A full DM list would require more UI; we'll keep the modal approach.
+        document.getElementById('messagesArea').innerHTML = '<div style="color:#9aa4bf;text-align:center;padding:2rem;">Click on any avatar to start a direct message.</div>';
+      }
+
+      // --- Initialization ---
+      async function init() {
+        try {
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
+          if (userError || !user) { window.location.href = '/index.html'; return; }
+          currentUser = user;
+          const metadata = user.user_metadata || {};
+          currentUserFullName = metadata.full_name || 'User';
+          const jobRole = metadata.job_role;
+
+          if (!jobRole) {
+            document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">No job role assigned. Please contact admin.</div>';
+            return;
+          }
+
+          currentRole = jobRole;
+          isCEO = (currentRole === 'CEO');
+
+          // Setup presence
+          await setupPresence();
+
+          subscribeToAllDirectMessages();
+
+          const messageInput = document.getElementById('messageInput');
+          let typingTimeout;
+          messageInput.addEventListener('input', () => {
+            if (typingTimeout) clearTimeout(typingTimeout);
+            sendTypingIndicator();
+            typingTimeout = setTimeout(() => {}, 2000);
+          });
+
+          if (isCEO) {
+            document.getElementById('groupTitle').innerText = 'Group Chat (CEO)';
+            document.getElementById('roleDisplay').style.display = 'none';
+            await updateTotalUnreadCount();
+            await buildGroupTabs();
+            subscribeToMessages();
+          } else {
+            document.getElementById('groupTitle').innerText = 'Group';
+            document.getElementById('roleDisplay').textContent = currentRole;
+            selectedGroupRole = currentRole;
+            document.getElementById('messageInput').disabled = false;
+            document.getElementById('sendBtn').disabled = false;
+            await loadMessages();
+            subscribeToMessages();
+          }
+        } catch (err) {
+          console.error('Init error:', err);
+          document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Failed to load chat. Please refresh.</div>';
+        }
+      }
+
+      // --- Logout ---
+      document.getElementById('logout').addEventListener('click', async () => {
+        closeDirectMessageModal();
+        if (messageSubscription) messageSubscription.unsubscribe();
+        if (typingSubscription) typingSubscription.unsubscribe();
+        if (presenceChannel) await presenceChannel.untrack();
+        editTimeouts.forEach(t => clearTimeout(t));
+        editTimeouts.clear();
+        await supabase.auth.signOut();
+        window.location.href = '/index.html';
+      });
+
+      document.getElementById('sendBtn').addEventListener('click', sendMessage);
+      document.getElementById('messageInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+      window.addEventListener('scroll', () => modal.style.display = 'none', true);
+      document.addEventListener('click', (e) => {
+        if (!modal.contains(e.target)) modal.style.display = 'none';
+      });
+
+      init();
+    })();
+  </script>
 </body>
 </html>
