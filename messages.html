@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -527,6 +526,44 @@
       .sidebar-unread { top: -2px; right: -2px; }
       .logout-btn { padding: 0.4rem 0.8rem; font-size: 0.7rem; }
     }
+
+    /* Typing indicator */
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.5rem 1rem;
+      background: #1f2a44;
+      border-radius: 2rem;
+      width: fit-content;
+      margin-bottom: 0.5rem;
+    }
+    .typing-indicator span {
+      width: 0.5rem;
+      height: 0.5rem;
+      background: #9aa4bf;
+      border-radius: 50%;
+      animation: typingBounce 1.4s infinite ease-in-out;
+    }
+    .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    
+    @keyframes typingBounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-0.5rem); }
+    }
+    
+    .typing-container {
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .typing-text {
+      color: #9aa4bf;
+      font-size: 0.85rem;
+      margin-left: 0.5rem;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -555,6 +592,17 @@
         <div id="groupTabs" class="group-tabs" style="display: none;"></div>
       </div>
       <div class="messages-area" id="messagesArea" oncontextmenu="return false;"></div>
+      
+      <!-- Typing indicator container -->
+      <div id="typingIndicatorContainer" class="typing-container" style="display: none; padding: 0 1.5rem;">
+        <div class="typing-indicator">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span class="typing-text" id="typingText">Someone is typing...</span>
+        </div>
+      </div>
+      
       <div class="chat-input-area">
         <input type="text" id="messageInput" placeholder="Write a message..." disabled>
         <button id="sendBtn" disabled>➤</button>
@@ -748,6 +796,13 @@
     let dmObserver = null;
     let currentRecipientId = null;
     const dmModal = document.getElementById('dmModal');
+
+    // --- Typing indicator state ---
+    let typingTimeouts = {};
+    let activeTypers = new Set();
+    let typingSubscription = null;
+    const typingContainer = document.getElementById('typingIndicatorContainer');
+    const typingText = document.getElementById('typingText');
 
     // --- Helper functions ---
     function formatDateHeader(date) {
@@ -1322,9 +1377,81 @@
       }
     }
 
+    // --- Typing indicator functions ---
+    function updateTypingIndicator() {
+      if (activeTypers.size === 0) {
+        typingContainer.style.display = 'none';
+        return;
+      }
+      
+      const names = Array.from(activeTypers);
+      let text = '';
+      if (names.length === 1) {
+        text = `${names[0]} is typing...`;
+      } else if (names.length === 2) {
+        text = `${names[0]} and ${names[1]} are typing...`;
+      } else {
+        text = `${names.length} people are typing...`;
+      }
+      
+      typingText.textContent = text;
+      typingContainer.style.display = 'block';
+    }
+
+    async function sendTypingIndicator() {
+      if (!currentUser || !selectedGroupRole && !isCEO) return;
+      
+      const channel = isCEO ? `typing-${selectedGroupRole || 'all'}` : `typing-${currentRole}`;
+      await supabase.channel(channel).send({
+        type: 'broadcast',
+        event: 'typing',
+        payload: { 
+          userId: currentUser.id, 
+          userName: currentUserFullName,
+          timestamp: Date.now() 
+        }
+      });
+    }
+
+    function setupTypingSubscription() {
+      if (typingSubscription) typingSubscription.unsubscribe();
+      
+      const channel = isCEO ? 
+        (selectedGroupRole ? `typing-${selectedGroupRole}` : 'typing-all') : 
+        `typing-${currentRole}`;
+      
+      typingSubscription = supabase
+        .channel(channel)
+        .on('broadcast', { event: 'typing' }, (payload) => {
+          const { userId, userName, timestamp } = payload.payload;
+          
+          // Don't show own typing
+          if (userId === currentUser.id) return;
+          
+          // Clear existing timeout for this user
+          if (typingTimeouts[userId]) {
+            clearTimeout(typingTimeouts[userId]);
+          }
+          
+          // Add to active typers
+          activeTypers.add(userName);
+          updateTypingIndicator();
+          
+          // Set timeout to remove after 3 seconds of no typing
+          typingTimeouts[userId] = setTimeout(() => {
+            activeTypers.delete(userName);
+            updateTypingIndicator();
+            delete typingTimeouts[userId];
+          }, 3000);
+        })
+        .subscribe();
+    }
+
     // --- Subscribe to new messages ---
     function subscribeToMessages() {
       if (messageSubscription) messageSubscription.unsubscribe();
+      setupTypingSubscription();
+      
       if (isCEO) {
         messageSubscription = supabase
           .channel('all-messages')
@@ -1332,6 +1459,13 @@
             const newMsg = payload.new;
             // skip if this message is already present (prevents duplicates when loading + realtime)
             if (document.querySelector(`.message-row[data-message-id="${newMsg.id}"]`)) return;
+            
+            // Clear typing indicator for this user when they send a message
+            if (activeTypers.has(currentUserFullName)) {
+              activeTypers.delete(currentUserFullName);
+              updateTypingIndicator();
+            }
+            
             if (newMsg.sender_id === currentUser.id) return;
             const { data: senderProfile } = await supabase
               .from('profiles')
@@ -1362,6 +1496,13 @@
             const newMsg = payload.new;
             // skip if this message already exists in the DOM
             if (document.querySelector(`.message-row[data-message-id="${newMsg.id}"]`)) return;
+            
+            // Clear typing indicator for this user when they send a message
+            if (activeTypers.has(currentUserFullName)) {
+              activeTypers.delete(currentUserFullName);
+              updateTypingIndicator();
+            }
+            
             if (newMsg.sender_id === currentUser.id) return;
             const { data: senderProfile } = await supabase
               .from('profiles')
@@ -1383,6 +1524,77 @@
       }
     }
 
+    // --- Send message (optimistic update) ---
+    async function sendMessage() {
+      const input = document.getElementById('messageInput');
+      const content = input.value.trim();
+      if (!content || !currentUser) return;
+
+      let messageRole;
+      if (isCEO) {
+        if (!selectedGroupRole) {
+          alert('Please select a group first.');
+          return;
+        }
+        messageRole = selectedGroupRole;
+      } else {
+        messageRole = currentRole;
+      }
+
+      // Clear typing indicator
+      if (activeTypers.has(currentUserFullName)) {
+        activeTypers.delete(currentUserFullName);
+        updateTypingIndicator();
+      }
+
+      // Create optimistic message
+      const tempId = 'temp-' + Date.now();
+      const optimisticMessage = {
+        id: tempId,
+        content: content,
+        created_at: new Date().toISOString(),
+        sender_id: currentUser.id,
+        role: messageRole
+      };
+
+      // Show message immediately
+      appendMessageToUI(optimisticMessage, true, currentUserFullName, currentUser.id, messageRole, false);
+      
+      input.value = '';
+
+      // Actually send to server
+      const { data, error } = await supabase
+        .from('group_messages')
+        .insert({
+          role: messageRole,
+          sender_id: currentUser.id,
+          content: content
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Send error:', error);
+        // Remove optimistic message on error
+        document.querySelector(`.message-row[data-message-id="${tempId}"]`)?.remove();
+        alert('Failed to send: ' + error.message);
+        return;
+      }
+
+      // Replace temp ID with real one
+      const tempRow = document.querySelector(`.message-row[data-message-id="${tempId}"]`);
+      if (tempRow) {
+        tempRow.dataset.messageId = data.id;
+        // Update any references
+      }
+
+      try {
+        await supabase
+          .from('message_reads')
+          .insert({ message_id: data.id, user_id: currentUser.id });
+        readMessageIds.add(data.id);
+      } catch (readErr) {}
+    }
 
     // --- Subscribe to all incoming private messages (for notifications) ---
     function subscribeToAllDirectMessages() {
@@ -1442,47 +1654,6 @@
           await switchGroup(role);
         });
       });
-    }
-
-    // --- Send message ---
-    async function sendMessage() {
-      const input = document.getElementById('messageInput');
-      const content = input.value.trim();
-      if (!content || !currentUser) return;
-
-      let messageRole;
-      if (isCEO) {
-        if (!selectedGroupRole) {
-          alert('Please select a group first.');
-          return;
-        }
-        messageRole = selectedGroupRole;
-      } else {
-        messageRole = currentRole;
-      }
-
-      input.value = '';
-      const { data, error } = await supabase
-        .from('group_messages')
-        .insert({
-          role: messageRole,
-          sender_id: currentUser.id,
-          content: content
-        })
-        .select()
-        .single();
-      if (error) {
-        console.error('Send error:', error);
-        alert('Failed to send: ' + error.message);
-        return;
-      }
-      try {
-        await supabase
-          .from('message_reads')
-          .insert({ message_id: data.id, user_id: currentUser.id });
-        readMessageIds.add(data.id);
-      } catch (readErr) {}
-      appendMessageToUI(data, true, currentUserFullName, currentUser.id, messageRole, false);
     }
 
     // --- Build group tabs for CEO ---
@@ -1604,6 +1775,10 @@
         }
       }
 
+      // Update typing subscription for new group
+      if (typingSubscription) typingSubscription.unsubscribe();
+      setupTypingSubscription();
+      
       await loadMessages();
     }
 
@@ -1613,6 +1788,7 @@
         // Clear group message subscriptions and show DM view
         if (messageSubscription) messageSubscription.unsubscribe();
         if (observer) observer.disconnect();
+        if (typingSubscription) typingSubscription.unsubscribe();
         
         // Update header
         document.getElementById('groupTitle').innerText = 'Direct Messages';
@@ -2133,6 +2309,17 @@
         // always listen for private messages so we can notify
         subscribeToAllDirectMessages();
 
+        // Set up typing indicator on input
+        const messageInput = document.getElementById('messageInput');
+        let typingTimeout;
+        messageInput.addEventListener('input', () => {
+          if (typingTimeout) clearTimeout(typingTimeout);
+          sendTypingIndicator();
+          typingTimeout = setTimeout(() => {
+            // Stop typing after 2 seconds of no input
+          }, 2000);
+        });
+
         if (isCEO) {
           document.getElementById('groupTitle').innerText = 'Group Chat (CEO)';
           document.getElementById('roleDisplay').style.display = 'none';
@@ -2160,6 +2347,7 @@
     document.getElementById('logout').addEventListener('click', async () => {
       closeDirectMessageModal();
       if (messageSubscription) messageSubscription.unsubscribe();
+      if (typingSubscription) typingSubscription.unsubscribe();
       editTimeouts.forEach(t => clearTimeout(t));
       editTimeouts.clear();
       await supabase.auth.signOut();
