@@ -488,7 +488,7 @@
       async function init() {
         const { data: { user }, error } = await supabase.auth.getUser();
         if (error || !user) {
-          window.location.href = '/index.html';
+          window.location.href = 'index.html';
           return;
         }
         currentUser = user;
@@ -720,7 +720,7 @@
       // ---------- Logout ----------
       document.getElementById('logout').addEventListener('click', async () => {
         await supabase.auth.signOut();
-        window.location.href = '/index.html';
+        window.location.href = 'index.html';
       });
 
       // Start
@@ -730,3 +730,4 @@
 </body>
 
 </html>
+
