@@ -975,6 +975,21 @@
     }
     .call-option-btn.video { background: #428cff; }
     .call-option-btn.video:hover { background: #5f9eff; }
+
+    /* Incoming call modal */
+    #incomingCallModal .call-modal-content {
+      max-width: 400px;
+      text-align: center;
+    }
+    #incomingCallModal .call-controls {
+      margin-top: 1.5rem;
+    }
+    #acceptCallBtn {
+      background: #2ecc71;
+    }
+    #declineCallBtn {
+      background: #ff4d4d;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -1001,7 +1016,7 @@
         <span class="role-tag" id="roleDisplay"></span>
         <div class="online-count" id="onlineCount">0 online</div>
         <div id="groupTabs" class="group-tabs" style="display: none;"></div>
-        <!-- === NEW: Group call button (visible only in group chat) === -->
+        <!-- Group call button (visible only in group chat) -->
         <button id="groupCallBtn" class="voice-btn" style="display: none; background:#2f3a5a;" title="Join group call">📞</button>
       </div>
       <div class="messages-area" id="messagesArea" oncontextmenu="return false;"></div>
@@ -1028,7 +1043,7 @@
   <div id="receiptsModal" class="read-receipts-modal" style="display: none;"></div>
   <div id="toast" class="toast hide" style="display: none;"></div>
 
-  <!-- === NEW: Call options modal (for DM) === -->
+  <!-- Call options modal (for DM) -->
   <div id="callOptionsModal" class="call-options-modal" style="display: none;">
     <div class="call-options-content">
       <h3>Start a call with <span id="callWithUserName"></span></h3>
@@ -1038,7 +1053,7 @@
     </div>
   </div>
 
-  <!-- === NEW: Active call modal === -->
+  <!-- Active call modal -->
   <div id="callModal" class="call-modal" style="display: none;">
     <div class="call-modal-content">
       <div class="call-modal-header">
@@ -1059,6 +1074,18 @@
         <button id="muteAudioBtn" title="Mute">🎤</button>
         <button id="muteVideoBtn" title="Stop video">📹</button>
         <button id="hangupCallBtn" class="hangup" title="Hang up">📞 Hang Up</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Incoming call modal -->
+  <div id="incomingCallModal" class="call-modal" style="display: none;">
+    <div class="call-modal-content">
+      <h3>Incoming call from <span id="incomingCallerName"></span></h3>
+      <p id="incomingCallType"></p>
+      <div class="call-controls">
+        <button id="acceptCallBtn">Accept</button>
+        <button id="declineCallBtn">Decline</button>
       </div>
     </div>
   </div>
@@ -1086,7 +1113,7 @@
     let selectedGroupRole = null;
     let availableRoles = [];
     let messageSubscription = null;
-    let messageReadsSubscription = null;   // subscription for read receipts
+    let messageReadsSubscription = null;
     let readMessageIds = new Set();
     let currentUnreadCount = 0;
     let totalUnreadCount = 0;
@@ -1119,24 +1146,22 @@
     let unreadBorderTimeouts = new Map();
 
     // === NEW: Call-related variables ===
-    let callChannel = null;                // Supabase channel for signaling
-    let peerConnection = null;             // RTCPeerConnection for 1-1 calls
+    let userChannel = null;                // per-user channel for receiving call offers
+    let callChannel = null;                // channel for the current call
+    let peerConnection = null;
     let localStream = null;
     let remoteStream = null;
     let callType = null;                   // 'video' or 'audio'
-    let callTarget = null;                 // For DM: other user ID; for group: group role
-    let isCaller = false;                  // Whether we initiated the call
+    let callTarget = null;                 // For DM: other user ID
+    let isCaller = false;
     let callActive = false;
-    let callOptionsModal = document.getElementById('callOptionsModal');
-    let callModal = document.getElementById('callModal');
-    let localVideo = document.getElementById('localVideo');
-    let remoteVideo = document.getElementById('remoteVideo');
-    let callWithUserNameSpan = document.getElementById('callWithUserName');
-    let callModalTitle = document.getElementById('callModalTitle');
-    let remoteVideoLabel = document.getElementById('remoteVideoLabel');
-    // Group call: we need multiple peer connections (mesh)
-    let groupPeerConnections = new Map();  // key: userId, value: { pc, stream }
-    // ICE servers (use free STUN)
+    // Incoming call state
+    let pendingCall = null;                // { callerId, callerName, callChannelId, offer, callType }
+    // Group call: map of peer connections (mesh)
+    let groupPeerConnections = new Map();
+    let groupCallChannel = null;
+    let groupCallActive = false;
+
     const iceServers = {
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
@@ -1148,6 +1173,16 @@
     const toast = document.getElementById('toast');
     const typingContainer = document.getElementById('typingIndicatorContainer');
     const typingText = document.getElementById('typingText');
+    const callOptionsModal = document.getElementById('callOptionsModal');
+    const callModal = document.getElementById('callModal');
+    const incomingCallModal = document.getElementById('incomingCallModal');
+    const localVideo = document.getElementById('localVideo');
+    const remoteVideo = document.getElementById('remoteVideo');
+    const callWithUserNameSpan = document.getElementById('callWithUserName');
+    const callModalTitle = document.getElementById('callModalTitle');
+    const remoteVideoLabel = document.getElementById('remoteVideoLabel');
+    const incomingCallerName = document.getElementById('incomingCallerName');
+    const incomingCallType = document.getElementById('incomingCallType');
 
     // --- Helper functions (unchanged) ---
     function formatDateHeader(date) {
@@ -1297,7 +1332,7 @@
           row.classList.remove('unread');
         }
         unreadBorderTimeouts.delete(messageId);
-      }, 30000); // 30 seconds
+      }, 30000);
       unreadBorderTimeouts.set(messageId, timeoutId);
     }
 
@@ -1908,7 +1943,7 @@
       updateUnreadBadges();
     }
 
-    // --- Right-click read receipts (for group messages and DMs) ---
+    // --- Right-click read receipts ---
     async function onRightClick(e) {
       e.preventDefault();
       const row = e.currentTarget;
@@ -1995,26 +2030,19 @@
       }
     }
 
-    // --- display sent message directly ---
     function displaySentMessage(message) {
       const area = document.getElementById('messagesArea');
       if (!area) return;
-
       if (document.querySelector(`.message-row[data-message-id="${message.id}"]`)) return;
-
       const lastMessageRow = area.querySelector('.message-row:last-child');
       let lastDate = lastMessageRow ? lastMessageRow.dataset.createdAt : null;
       const separatorHtml = maybeAppendDateSeparator(lastDate, message.created_at);
       if (separatorHtml) area.insertAdjacentHTML('beforeend', separatorHtml);
-
       const msgHtml = renderMessage(message, true, currentUserFullName, currentUser.id, message.role, false);
       area.insertAdjacentHTML('beforeend', msgHtml);
-
       readMessageIds.add(message.id);
-
       const isScrolledToBottom = area.scrollHeight - area.scrollTop <= area.clientHeight + 50;
       if (isScrolledToBottom) area.scrollTop = area.scrollHeight;
-
       attachMessageHandlers();
     }
 
@@ -2331,7 +2359,7 @@
       } catch (readErr) {}
     }
 
-    // --- DM FUNCTIONS (fully implemented) ---
+    // --- DM FUNCTIONS ---
     async function loadPrivateMessagesView() {
       try {
         if (messageSubscription) messageSubscription.unsubscribe();
@@ -2342,7 +2370,7 @@
         document.getElementById('groupTabs').style.display = 'none';
         document.getElementById('messageInput').disabled = true;
         document.getElementById('sendBtn').disabled = true;
-        document.getElementById('voiceNoteBtn').style.display = 'none'; // hide group voice btn
+        document.getElementById('voiceNoteBtn').style.display = 'none';
 
         const { data: allProfiles, error: profilesError } = await supabase
           .from('profiles')
@@ -2398,7 +2426,7 @@
               <div id="dmChatMessages" class="dm-chat-messages"></div>
               <div class="dm-chat-input">
                 <input type="text" id="dmChatInput" placeholder="Type a message...">
-                <!-- === NEW: Replace voice button with plus button === -->
+                <!-- Replace voice button with plus button for calls -->
                 <button class="voice-btn" id="dmCallPlusBtn" style="background:#2f3a5a;">➕</button>
                 <button id="dmChatSendBtn">➤</button>
                 <span id="dmRecordingTimer" class="recording-timer" style="display: none;">0:00</span>
@@ -2407,7 +2435,7 @@
           </div>
         `;
 
-        // === NEW: Attach plus button click for call options ===
+        // Attach plus button click for call options
         document.getElementById('dmCallPlusBtn').addEventListener('click', () => {
           if (!currentRecipientId) {
             alert('Please select a conversation first.');
@@ -2446,7 +2474,7 @@
           document.getElementById('dmConversationsList').style.display = 'block';
           document.getElementById('dmChatArea').classList.remove('active');
           document.getElementById('dmBackBtn').style.display = 'none';
-          currentRecipientId = null; // clear recipient when leaving chat
+          currentRecipientId = null;
         });
 
       } catch (err) {
@@ -2456,7 +2484,7 @@
     }
 
     async function openPrivateChat(otherUserId, otherProfile) {
-      currentRecipientId = otherUserId;   // store recipient ID
+      currentRecipientId = otherUserId;
 
       const chatArea = document.getElementById('dmChatArea');
       const headerTitle = document.querySelector('.dm-chat-title');
@@ -2582,9 +2610,6 @@
       }
     }
 
-    // --- DM voice note removed, now replaced by calls ---
-    async function sendPrivateVoiceNote(audioBlob, otherUserId) { /* not used */ }
-
     async function markDirectMessageAsRead(messageId, senderId) {
       try {
         await supabase
@@ -2668,14 +2693,30 @@
         .subscribe();
     }
 
-    // === NEW: Call functions ===
+    // === NEW: Call functions (fixed signaling) ===
+    function setupUserChannel() {
+      if (userChannel) userChannel.unsubscribe();
+      if (!currentUser) return;
+      userChannel = supabase.channel(`user-${currentUser.id}`);
+      userChannel
+        .on('broadcast', { event: 'call-offer' }, async ({ payload }) => {
+          // Incoming call offer
+          const { callerId, callerName, callChannelId, offer, callType } = payload;
+          pendingCall = { callerId, callerName, callChannelId, offer, callType };
+          incomingCallerName.textContent = callerName;
+          incomingCallType.textContent = callType === 'video' ? '📹 Video call' : '🎤 Voice call';
+          incomingCallModal.style.display = 'flex';
+        })
+        .on('broadcast', { event: 'call-answer' }, async ({ payload }) => {
+          // Answer from callee (only used if we missed the channel setup)
+        })
+        .subscribe();
+    }
+
     async function startCall(targetUserId, targetUserName, type) {
-      // type: 'video' or 'audio'
       callType = type;
       callTarget = targetUserId;
       isCaller = true;
-      callModalTitle.textContent = `Call with ${targetUserName}`;
-      remoteVideoLabel.textContent = targetUserName;
 
       // Get user media
       try {
@@ -2687,39 +2728,34 @@
         return;
       }
 
+      // Create unique call channel ID
+      const callChannelId = `call-${currentUser.id}-${targetUserId}-${Date.now()}`;
+
       // Create peer connection
       peerConnection = new RTCPeerConnection(iceServers);
       localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
-      // Set up remote stream
       remoteStream = new MediaStream();
       remoteVideo.srcObject = remoteStream;
       peerConnection.ontrack = event => {
         event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
       };
 
-      // ICE candidate handling
       peerConnection.onicecandidate = event => {
         if (event.candidate && callChannel) {
           callChannel.send({ type: 'broadcast', event: 'ice-candidate', payload: { candidate: event.candidate, from: currentUser.id } });
         }
       };
 
-      // Create and send offer
+      // Create offer
       const offer = await peerConnection.createOffer();
       await peerConnection.setLocalDescription(offer);
 
-      // Set up signaling channel
-      const channelName = `call-dm-${currentUser.id}-${targetUserId}`; // deterministic order
-      callChannel = supabase.channel(channelName);
+      // Subscribe to the call channel
+      callChannel = supabase.channel(callChannelId);
       callChannel
-        .on('broadcast', { event: 'offer' }, async ({ payload }) => {
-          if (!isCaller && payload.to === currentUser.id) {
-            await handleOffer(payload.offer, payload.from);
-          }
-        })
         .on('broadcast', { event: 'answer' }, async ({ payload }) => {
-          if (isCaller && payload.to === currentUser.id) {
+          if (payload.from === targetUserId) {
             await peerConnection.setRemoteDescription(new RTCSessionDescription(payload.answer));
           }
         })
@@ -2735,24 +2771,36 @@
         })
         .subscribe();
 
-      // Send offer
-      callChannel.send({
+      // Send offer via callee's user channel
+      await supabase.channel(`user-${targetUserId}`).send({
         type: 'broadcast',
-        event: 'offer',
-        payload: { offer: peerConnection.localDescription, from: currentUser.id, to: targetUserId }
+        event: 'call-offer',
+        payload: {
+          callerId: currentUser.id,
+          callerName: currentUserFullName,
+          callChannelId,
+          offer,
+          callType
+        }
       });
 
       callOptionsModal.style.display = 'none';
+      callModalTitle.textContent = `Calling ${targetUserName}...`;
       callModal.style.display = 'flex';
       callActive = true;
     }
 
-    async function handleOffer(offer, fromUserId) {
-      isCaller = false;
-      callTarget = fromUserId;
-      callModalTitle.textContent = `Incoming call from ...`; // we can fetch name later
-      remoteVideoLabel.textContent = 'Caller';
+    // Accept incoming call
+    document.getElementById('acceptCallBtn').addEventListener('click', async () => {
+      if (!pendingCall) return;
+      incomingCallModal.style.display = 'none';
 
+      const { callerId, callerName, callChannelId, offer, callType } = pendingCall;
+      callType = callType;
+      callTarget = callerId;
+      isCaller = false;
+
+      // Get media
       try {
         localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: callType === 'video' });
         localVideo.srcObject = localStream;
@@ -2761,6 +2809,7 @@
         return;
       }
 
+      // Create peer connection
       peerConnection = new RTCPeerConnection(iceServers);
       localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
@@ -2776,19 +2825,43 @@
         }
       };
 
+      // Subscribe to call channel
+      callChannel = supabase.channel(callChannelId);
+      callChannel
+        .on('broadcast', { event: 'ice-candidate' }, async ({ payload }) => {
+          if (payload.from !== currentUser.id && peerConnection) {
+            await peerConnection.addIceCandidate(new RTCIceCandidate(payload.candidate));
+          }
+        })
+        .on('broadcast', { event: 'hangup' }, ({ payload }) => {
+          if (payload.from !== currentUser.id) {
+            endCall();
+          }
+        })
+        .subscribe();
+
+      // Set remote description
       await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
       const answer = await peerConnection.createAnswer();
       await peerConnection.setLocalDescription(answer);
 
-      callChannel.send({
+      // Send answer via caller's user channel
+      await supabase.channel(`user-${callerId}`).send({
         type: 'broadcast',
-        event: 'answer',
-        payload: { answer, from: currentUser.id, to: fromUserId }
+        event: 'call-answer',
+        payload: { answer, from: currentUser.id }
       });
 
+      callModalTitle.textContent = `Call with ${callerName}`;
+      remoteVideoLabel.textContent = callerName;
       callModal.style.display = 'flex';
       callActive = true;
-    }
+    });
+
+    document.getElementById('declineCallBtn').addEventListener('click', () => {
+      incomingCallModal.style.display = 'none';
+      pendingCall = null;
+    });
 
     function endCall() {
       if (callChannel) {
@@ -2826,7 +2899,6 @@
       document.getElementById('messageInput').disabled = isCEO && !selectedGroupRole;
       document.getElementById('sendBtn').disabled = isCEO && !selectedGroupRole;
       document.getElementById('voiceNoteBtn').disabled = isCEO && !selectedGroupRole;
-      // Show group call button
       document.getElementById('groupCallBtn').style.display = 'inline-block';
 
       setupGroupSubscription();
@@ -2840,7 +2912,7 @@
       document.getElementById('groupTabs').style.display = 'none';
       document.getElementById('roleDisplay').style.display = 'none';
       document.getElementById('chatInputArea').style.display = 'none';
-      document.getElementById('groupCallBtn').style.display = 'none'; // hide group call button
+      document.getElementById('groupCallBtn').style.display = 'none';
 
       if (messageSubscription) {
         messageSubscription.unsubscribe();
@@ -2849,7 +2921,7 @@
       loadPrivateMessagesView();
     });
 
-    // === NEW: Group call button handler (placeholder for mesh) ===
+    // Group call button (placeholder – you can implement mesh here)
     document.getElementById('groupCallBtn').addEventListener('click', async () => {
       if (!selectedGroupRole && isCEO) {
         alert('Please select a group first.');
@@ -2857,10 +2929,9 @@
       }
       const group = selectedGroupRole || currentRole;
       alert(`Group call feature is under construction. Would open a call with everyone in group ${group}.`);
-      // In a full implementation, you would set up a mesh network:
-      // 1. Join a channel `call-group-${group}`
-      // 2. Broadcast your presence and exchange offers/answers with all participants.
-      // 3. Maintain multiple peer connections.
+      // For a full implementation, you'd use a mesh network:
+      // - Join a channel `group-call-${group}`
+      // - Broadcast your presence and exchange offers/answers with all participants.
     });
 
     // --- Logout ---
@@ -2870,6 +2941,7 @@
       if (typingSubscription) typingSubscription.unsubscribe();
       if (presenceChannel) await presenceChannel.untrack();
       if (globalDmSubscription) globalDmSubscription.unsubscribe();
+      if (userChannel) userChannel.unsubscribe();
       if (callActive) endCall();
       editTimeouts.forEach(t => clearTimeout(t));
       editTimeouts.clear();
@@ -2887,7 +2959,7 @@
       if (!modal.contains(e.target)) modal.style.display = 'none';
     });
 
-    // === NEW: Call modal event listeners ===
+    // Call modal event listeners
     document.getElementById('startVideoCallBtn').addEventListener('click', () => {
       if (!currentRecipientId) return;
       const activeItem = document.querySelector('.dm-conversation-item.active');
@@ -2905,7 +2977,6 @@
     });
     document.getElementById('closeCallModalBtn').addEventListener('click', endCall);
     document.getElementById('hangupCallBtn').addEventListener('click', endCall);
-    // Mute/unmute (simplified)
     let audioEnabled = true;
     let videoEnabled = true;
     document.getElementById('muteAudioBtn').addEventListener('click', () => {
@@ -2947,6 +3018,7 @@
         await setupPresence();
         subscribeToAllDirectMessages();
         setupMessageReadsSubscription();
+        setupUserChannel(); // Set up incoming call listener
 
         const messageInput = document.getElementById('messageInput');
         let typingTimeout;
