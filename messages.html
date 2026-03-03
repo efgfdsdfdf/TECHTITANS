@@ -2,765 +2,909 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TECH TITANS · Dashboard</title>
-  <!-- Font Awesome Icons (v6 free) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- Chart.js for message trend -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <!-- Supabase JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>TECH TITANS · Group Chat</title>
   <style>
-    /* (styles unchanged from your original – kept exactly as provided) */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
     body {
-      background: radial-gradient(circle at 10% 20%, #141b2b, #0a0f1a);
-      min-height: 100vh;
+      background: #0b0f17;
       display: flex;
-      color: #eef2fb;
+      height: 100vh;
+      overflow: hidden;
     }
 
-    /* ---------- SIDEBAR ---------- */
+    /* === SIDEBAR (desktop) === */
     .sidebar {
-      width: 280px;
-      background: rgba(18, 26, 40, 0.8);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-right: 1px solid rgba(66, 140, 255, 0.15);
-      padding: 2rem 1.2rem;
+      width: 260px;
+      background: rgba(10, 16, 28, 0.95);
+      backdrop-filter: blur(10px);
+      border-right: 1px solid #1f2a44;
+      padding: 2rem 1rem;
       display: flex;
       flex-direction: column;
-      gap: 2.5rem;
-      box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
+      gap: 2rem;
+      flex-shrink: 0;
     }
 
     .logo {
-      font-size: 1.8rem;
-      font-weight: 700;
+      color: white;
+      font-size: 1.5rem;
+      font-weight: 600;
       letter-spacing: -0.02em;
-      padding-left: 0.5rem;
-      background: linear-gradient(135deg, #fff 0%, #a0c0ff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      padding-left: 1rem;
     }
-    .logo span { background: none; -webkit-text-fill-color: #428cff; }
+    .logo span { color: #428cff; }
 
     .nav {
       display: flex;
       flex-direction: column;
-      gap: 0.6rem;
+      gap: 0.5rem;
     }
     .nav a {
-      color: #a5b3d1;
+      color: #9aa4bf;
       text-decoration: none;
-      padding: 0.9rem 1.2rem;
-      border-radius: 1.5rem;
-      transition: all 0.2s ease;
+      padding: 0.9rem 1rem;
+      border-radius: 1.2rem;
+      transition: 0.2s;
       font-weight: 500;
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.8rem;
       position: relative;
-      border: 1px solid transparent;
     }
-    .nav a i { width: 1.5rem; font-size: 1.2rem; }
-    .nav a:hover {
-      background: rgba(66, 140, 255, 0.1);
-      border-color: rgba(66, 140, 255, 0.3);
+    .nav a:hover,
+    .nav a.active {
+      background: #1f2a44;
       color: white;
     }
     .nav a.active {
-      background: linear-gradient(145deg, #428cff, #2a5bbf);
+      background: #428cff;
       color: white;
-      box-shadow: 0 10px 20px -8px #428cff;
+      box-shadow: 0 8px 16px -8px #428cff;
     }
 
     .sidebar-unread {
       background: #ff4d4d;
       color: white;
       border-radius: 2rem;
-      padding: 0.2rem 0.6rem;
+      padding: 0.15rem 0.5rem;
       font-size: 0.7rem;
-      font-weight: 700;
+      font-weight: 600;
       margin-left: auto;
-      box-shadow: 0 0 0 2px #0f1a2f;
+      line-height: 1.3;
+      box-shadow: 0 0 0 1px #0b0f17;
     }
 
     .logout-btn {
       margin-top: auto;
       background: transparent;
-      border: 1px solid #3e4a6b;
-      color: #ffb4b4;
+      border: 1px solid #2f3a5a;
+      color: #ff9f9f;
       padding: 0.9rem;
-      border-radius: 1.5rem;
-      font-weight: 600;
+      border-radius: 1.2rem;
       cursor: pointer;
+      font-weight: 500;
       transition: 0.2s;
+    }
+    .logout-btn:hover {
+      background: #ff4d4d20;
+      border-color: #ff4d4d;
+    }
+
+    /* === MAIN CHAT AREA === */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+      min-width: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .chat-panel {
+      flex: 1;
+      background: #131c30;
+      border-radius: 2rem;
+      border: 1px solid #263154;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .chat-header {
+      padding: 1.2rem 1.8rem;
+      border-bottom: 1px solid #263154;
+      color: white;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      flex-shrink: 0; 
+      background: #131c30;
+      z-index: 5;
+    }
+
+    .unread-badge {
+      background: #ff4d4d;
+      color: white;
+      border-radius: 2rem;
+      padding: 0.2rem 0.8rem;
+      font-size: 0.8rem;
+      margin-left: 0.5rem;
+    }
+
+    .role-tag {
+      background: #428cff;
+      padding: 0.2rem 0.8rem;
+      border-radius: 2rem;
+      font-size: 0.8rem;
+    }
+
+    .online-count {
+      background: #1f2a44;
+      padding: 0.2rem 0.8rem;
+      border-radius: 2rem;
+      font-size: 0.8rem;
+      color: #8affb8;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-left: auto;
+    }
+    .online-count::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: #2ecc71;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .group-tabs {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-left: 0;
+    }
+    .group-tab {
+      background: #1f2a44;
+      color: #9aa4bf;
+      padding: 0.4rem 1rem;
+      border-radius: 2rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid #2f3a5a;
+      transition: 0.2s;
+      white-space: nowrap;
+      position: relative;
+    }
+    .group-tab.active {
+      background: #428cff;
+      color: white;
+      border-color: #428cff;
+    }
+    .group-tab .unread-badge-tab {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: #ff4d4d;
+      color: white;
+      border-radius: 2rem;
+      padding: 0.1rem 0.4rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .groups-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      padding: 1rem;
+      align-items: flex-start;
+      justify-content: flex-start;
+    }
+    .group-card {
+      background: #19233a;
+      color: #cfe1ff;
+      padding: 0.8rem 1rem;
+      border-radius: 12px;
+      border: 1px solid #263154;
+      cursor: pointer;
+      min-width: 160px;
+      text-align: center;
+      font-weight: 600;
+      transition: transform 0.12s, box-shadow 0.12s;
+      position: relative;
+    }
+    .group-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+    .group-card .unread-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+    }
+
+    /* === MESSAGES AREA === */
+    .messages-area {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      scroll-behavior: smooth;
+    }
+
+    .date-separator {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
+      margin: 0.8rem 0;
+      position: relative;
     }
-    .logout-btn:hover {
-      background: rgba(255, 77, 77, 0.1);
-      border-color: #ff4d4d;
-      color: #fff;
-    }
-
-    /* ---------- MAIN CONTENT ---------- */
-    .main {
-      flex: 1;
-      padding: 2rem 2.5rem;
-      overflow-y: auto;
-    }
-
-    .top-bar {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      margin-bottom: 2rem;
-    }
-    .user-greeting {
-      background: rgba(26, 35, 53, 0.7);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      padding: 0.7rem 2rem;
-      border-radius: 3rem;
-      border: 1px solid rgba(66, 140, 255, 0.3);
+    .date-separator span {
+      background: #1f2a44;
+      color: #9aa4bf;
+      padding: 0.3rem 1rem;
+      border-radius: 2rem;
+      font-size: 0.75rem;
       font-weight: 500;
-      color: #d3e0ff;
-    }
-    .user-greeting i { margin-right: 0.5rem; color: #428cff; }
-    .user-greeting span { color: white; font-weight: 600; }
-
-    /* dashboard grid (user info cards) – now only 3 cards */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 1.8rem;
-      margin-bottom: 2rem;
-    }
-    .card {
-      background: rgba(18, 26, 40, 0.6);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(66, 140, 255, 0.2);
-      border-radius: 2.2rem;
-      padding: 1.8rem 1.5rem;
-      transition: 0.2s;
-      box-shadow: 0 15px 30px -15px rgba(0, 0, 0, 0.6);
-    }
-    .card:hover {
-      border-color: #428cff80;
-      box-shadow: 0 20px 35px -15px #428cff;
-      transform: translateY(-3px);
-    }
-    .card-title {
-      color: #8f9fc9;
-      font-size: 0.85rem;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 0.7rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-    .card-value {
-      color: white;
-      font-size: 1.8rem;
-      font-weight: 700;
-      line-height: 1.2;
-      margin-bottom: 0.2rem;
-      word-break: break-word;
-    }
-    .card-label {
-      color: #5b6b92;
-      font-size: 0.9rem;
+      letter-spacing: 0.3px;
+      border: 1px solid #2f3a5a;
     }
 
-    /* ---------- ANNOUNCEMENTS SECTION ---------- */
-    .announcements-section {
-      background: rgba(18, 26, 40, 0.6);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(66, 140, 255, 0.2);
-      border-radius: 2.2rem;
-      padding: 1.8rem;
-      margin-bottom: 2rem;
+    .message-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.5rem;
+      cursor: pointer;
     }
-    .announcements-header {
+
+    .message-row.sent {
+      justify-content: flex-end;
+    }
+
+    .message-row.unread .message.received,
+    .message-row.unread .message.sent {
+      box-shadow: 0 0 0 2px #428cff80;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #428cff;
       display: flex;
       align-items: center;
-      gap: 0.8rem;
-      color: white;
-      font-size: 1.3rem;
+      justify-content: center;
       font-weight: 600;
-      margin-bottom: 1.5rem;
+      color: white;
+      text-transform: uppercase;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: transform 0.1s;
     }
-    .announcements-header i { color: #428cff; }
+    .avatar:hover {
+      transform: scale(1.05);
+    }
 
-    /* CEO form */
-    .announcement-form {
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 1.5rem;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-      border: 1px solid #2f3f6a;
+    .message-bubble {
+      max-width: 70%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
     }
-    .announcement-form textarea {
-      width: 100%;
-      background: #0f1a2f;
-      border: 1px solid #2f3f6a;
-      border-radius: 1.2rem;
-      padding: 1rem;
+
+    .sender-name {
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+      color: #9aa4bf;
+      padding-left: 0.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .role-badge {
+      background: #2a3a60;
+      color: #b0c8ff;
+      font-size: 0.7rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 1rem;
+      font-weight: 400;
+    }
+
+    .message {
+      padding: 0.8rem 1.2rem;
+      border-radius: 1.5rem;
+      word-break: break-word;
+      line-height: 1.4;
+      position: relative;
+    }
+
+    .message.sent {
+      background: #428cff;
+      color: white;
+      border-bottom-right-radius: 0.2rem;
+    }
+
+    .message.received {
+      background: #1f2a44;
+      color: #e0e7ff;
+      border-bottom-left-radius: 0.2rem;
+    }
+
+    .message small {
+      display: block;
+      font-size: 0.7rem;
+      opacity: 0.7;
+      margin-top: 0.3rem;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .seen-indicator {
+      font-size: 0.7rem;
+      color: #9aa4bf;
+      margin-top: 0.2rem;
+      text-align: right;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.2rem;
+    }
+    .seen-indicator .double-tick {
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .message-actions {
+      display: none;
+      gap: 0.5rem;
+      justify-content: flex-end;
+      margin-top: 0.3rem;
+    }
+
+    .message-row.selected .message-actions {
+      display: flex;
+    }
+
+    .message-actions button {
+      background: transparent;
+      border: none;
       color: white;
       font-size: 1rem;
-      resize: vertical;
-      margin-bottom: 1rem;
-    }
-    .announcement-form textarea:focus {
-      outline: none;
-      border-color: #428cff;
-    }
-    .form-actions {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 1rem;
-    }
-    .file-label {
-      background: #1f2f4a;
-      color: #aab9e0;
-      padding: 0.6rem 1.2rem;
-      border-radius: 2rem;
       cursor: pointer;
-      border: 1px solid #3e4f75;
+      opacity: 0.8;
       transition: 0.2s;
-      font-size: 0.9rem;
+      padding: 0.2rem;
     }
-    .file-label:hover {
-      background: #2a3a60;
-      color: white;
+
+    .message-actions button:hover {
+      opacity: 1;
+      transform: scale(1.1);
     }
-    #announcementFile {
+
+    .message-row.sent .message-bubble {
+      align-items: flex-end;
+    }
+
+    .message-row.sent .avatar {
       display: none;
     }
-    .post-btn {
+
+    .edit-input {
+      width: 100%;
+      background: #0f172f;
+      border: 1px solid #428cff;
+      border-radius: 1.5rem;
+      padding: 0.6rem 1rem;
+      color: white;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .edit-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.3rem;
+      justify-content: flex-end;
+    }
+
+    .edit-actions button {
+      background: #1f2a44;
+      border: none;
+      color: white;
+      padding: 0.3rem 0.8rem;
+      border-radius: 1rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .edit-actions button.save-btn {
+      background: #428cff;
+    }
+
+    .read-receipts-modal {
+      position: absolute;
+      background: #1f2a44;
+      border: 1px solid #428cff;
+      border-radius: 1.2rem;
+      padding: 1rem 1.2rem;
+      color: white;
+      font-size: 0.9rem;
+      z-index: 1000;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.7);
+      min-width: 260px;
+      max-width: 320px;
+      backdrop-filter: blur(4px);
+    }
+    .read-receipts-modal h4 {
+      margin-bottom: 0.8rem;
+      color: #b0c8ff;
+      font-weight: 500;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 0.4rem;
+    }
+    .read-receipts-modal ul {
+      list-style: none;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .read-receipts-modal li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid #263154;
+      font-size: 0.9rem;
+    }
+    .read-receipts-modal li:last-child {
+      border-bottom: none;
+    }
+    .reader-name {
+      color: white;
+      font-weight: 500;
+    }
+    .reader-time {
+      color: #9aa4bf;
+      font-size: 0.75rem;
+    }
+
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.5rem 1rem;
+      background: #1f2a44;
+      border-radius: 2rem;
+      width: fit-content;
+      margin-bottom: 0.5rem;
+    }
+    .typing-indicator span {
+      width: 0.5rem;
+      height: 0.5rem;
+      background: #9aa4bf;
+      border-radius: 50%;
+      animation: typingBounce 1.4s infinite ease-in-out;
+    }
+    .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    
+    @keyframes typingBounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-0.5rem); }
+    }
+    
+    .typing-container {
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      padding: 0 1.5rem;
+    }
+    
+    .typing-text {
+      color: #9aa4bf;
+      font-size: 0.85rem;
+      margin-left: 0.5rem;
+    }
+
+    .chat-input-area {
+      display: flex;
+      padding: 1.2rem;
+      border-top: 1px solid #263154;
+      gap: 0.5rem;
+      flex-shrink: 0;
+      background: #131c30;
+      z-index: 5;
+      position: relative;
+      bottom: 0;
+    }
+
+    .chat-input-area input {
+      flex: 1;
+      background: #0f172f;
+      border: 1px solid #263154;
+      border-radius: 2rem;
+      padding: 0.8rem 1.2rem;
+      color: white;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .chat-input-area input:focus {
+      border-color: #428cff;
+    }
+
+    .chat-input-area button {
       background: #428cff;
       border: none;
       color: white;
-      padding: 0.6rem 2rem;
-      border-radius: 2rem;
-      font-weight: 600;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
       cursor: pointer;
+      font-size: 1.2rem;
       transition: 0.2s;
-      font-size: 0.95rem;
-      margin-left: auto;
+      flex-shrink: 0;
     }
-    .post-btn:hover {
+
+    .chat-input-area button:hover {
       background: #5f9eff;
-      transform: scale(1.02);
     }
-    .post-btn:disabled {
+
+    .chat-input-area button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
 
-    /* announcements list */
-    .announcements-list {
-      max-height: 400px;
-      overflow-y: auto;
-      padding-right: 0.5rem;
-    }
-    .announcement-card {
-      background: rgba(10, 18, 30, 0.7);
-      border-left: 4px solid #ffaa33;
-      border-radius: 1rem;
-      padding: 1.2rem;
-      margin-bottom: 1rem;
-      position: relative;
-    }
-    .announcement-meta {
-      display: flex;
-      justify-content: space-between;
-      color: #8f9fc9;
-      font-size: 0.85rem;
-      margin-bottom: 0.5rem;
-    }
-    .announcement-author {
-      font-weight: 600;
-      color: #d0dfff;
-    }
-    .announcement-date {
-      color: #6b7fb1;
-    }
-    .announcement-content {
-      color: #eef2fb;
-      font-size: 1rem;
-      margin-bottom: 0.7rem;
-      white-space: pre-wrap;
-    }
-    .announcement-attachment a {
-      color: #8ab4ff;
-      text-decoration: none;
-      font-size: 0.9rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-    }
-    .announcement-attachment a:hover {
-      text-decoration: underline;
-    }
-    /* delete button for CEO */
-    .delete-announcement {
-      position: absolute;
-      top: 0.8rem;
-      right: 0.8rem;
-      background: rgba(255, 77, 77, 0.2);
-      border: none;
-      color: #ff8a8a;
-      width: 2rem;
-      height: 2rem;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: 0.2s;
-      font-size: 1rem;
-    }
-    .delete-announcement:hover {
-      background: #ff4d4d;
-      color: white;
-    }
-
-    /* chart & activity row */
-    .row-duo {
-      display: grid;
-      grid-template-columns: 1.5fr 1fr;
-      gap: 1.8rem;
-      margin-top: 1rem;
-    }
-    .chart-container, .activity-feed {
-      background: rgba(18, 26, 40, 0.6);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(66, 140, 255, 0.2);
-      border-radius: 2.2rem;
-      padding: 1.8rem;
-    }
-    .chart-container h3, .activity-feed h3 {
-      font-size: 1.2rem;
-      margin-bottom: 1.5rem;
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .chart-container h3 i, .activity-feed h3 i { color: #428cff; }
-    canvas { max-height: 200px; width: 100% !important; }
-
-    .activity-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-      padding: 0.8rem 0;
-      border-bottom: 1px solid rgba(66, 140, 255, 0.1);
-    }
-    .activity-item:last-child { border-bottom: none; }
-    .activity-avatar {
-      width: 36px; height: 36px;
-      background: #1f2f4a;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #428cff;
-      font-weight: bold;
-    }
-    .activity-details {
-      flex: 1;
-    }
-    .activity-name {
-      font-weight: 600;
-      color: white;
-    }
-    .activity-msg {
-      color: #aab9e0;
-      font-size: 0.9rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 200px;
-    }
-    .activity-time {
-      font-size: 0.7rem;
-      color: #5f73a3;
-    }
-
-    /* loading state */
-    .loading {
-      opacity: 0.6;
-      pointer-events: none;
-      animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
-
-    /* ---------- RESPONSIVE ---------- */
-    @media (max-width: 1000px) {
-      .row-duo { grid-template-columns: 1fr; }
-    }
+    /* ===== MOBILE & DM LAYOUT (professional, sensible) ===== */
     @media (max-width: 768px) {
-      body { flex-direction: column; }
+      body { 
+        flex-direction: column; 
+        height: 100dvh;
+      }
+
       .sidebar {
         width: 100%;
-        padding: 1rem;
-        gap: 1rem;
-        backdrop-filter: blur(16px);
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0.75rem;
+        border-right: none;
+        border-top: 1px solid #1f2a44;
+        order: 2;
+        flex-shrink: 0;
+        gap: 0.5rem;
+        background: rgba(10, 16, 28, 0.98);
+        min-height: auto;
       }
-      .nav { flex-direction: row; flex-wrap: wrap; justify-content: center; }
-      .nav a { padding: 0.6rem 1rem; font-size: 0.9rem; }
-      .sidebar-unread { position: absolute; top: -2px; right: -2px; }
-      .main { padding: 1rem; }
-      .dashboard-grid { gap: 1rem; }
-      .announcements-list { max-height: 300px; }
-      .form-actions { flex-direction: column; align-items: stretch; }
-      .post-btn { margin-left: 0; }
+
+      .logo { display: none; }
+
+      .nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        flex: 1 1 auto;
+        gap: 0.3rem;
+      }
+
+      .nav a {
+        padding: 0.6rem 0.8rem;
+        border-radius: 1.5rem;
+        font-size: 0.8rem;
+        justify-content: center;
+        flex: 0 1 auto;
+        min-width: 44px;
+      }
+
+      .sidebar-unread {
+        position: static;
+        margin-left: 0.2rem;
+        font-size: 0.6rem;
+        padding: 0.1rem 0.4rem;
+      }
+
+      .logout-btn {
+        margin-top: 0;
+        padding: 0.6rem 1rem;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+        border-radius: 2rem;
+      }
+
+      .main {
+        padding: 0.5rem;
+        order: 1;
+        flex: 1 1 0;
+        height: auto;
+        overflow: hidden;
+      }
+
+      .chat-header {
+        padding: 0.8rem 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .group-tabs {
+        order: 3;
+        width: 100%;
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 0.3rem;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .group-tab {
+        white-space: nowrap;
+      }
+
+      .online-count {
+        margin-left: 0;
+      }
+
+      .messages-area {
+        padding: 1rem;
+      }
+
+      .avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+      }
+
+      .chat-input-area {
+        padding: 0.8rem;
+      }
+
+      .chat-input-area input {
+        font-size: 16px;
+        padding: 0.7rem 1rem;
+      }
+
+      .chat-input-area button {
+        width: 2.8rem;
+        height: 2.8rem;
+      }
+
+      /* DM layout – stays within panel, no full‑screen overlay */
+      .dm-layout {
+        flex-direction: column;
+      }
+      .dm-conversations-list {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #263154;
+      }
+      .dm-chat-area {
+        width: 100%;
+        display: none; /* hidden by default */
+      }
+      .dm-chat-area.active {
+        display: flex;
+        flex-direction: column;
+      }
+      .dm-conversations-list.hide {
+        display: none;
+      }
+      .dm-back-btn {
+        display: inline-block;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        margin-right: 0.5rem;
+      }
     }
+
     @media (max-width: 480px) {
-      .card-value { font-size: 1.6rem; }
-      .announcement-form { padding: 1rem; }
+      .nav a span:not(.sidebar-unread) { 
+        display: none;
+      }
+      .nav a { 
+        font-size: 1.2rem; 
+        padding: 0.5rem; 
+        min-width: 48px; 
+      }
+      .sidebar-unread { 
+        top: -2px; 
+        right: -2px; 
+      }
+      .logout-btn { 
+        padding: 0.5rem 0.8rem; 
+        font-size: 0.7rem;
+        min-width: 56px; 
+      }
+      .group-tab {
+        padding: 0.3rem 0.8rem;
+        font-size: 0.75rem;
+      }
     }
+
+    /* DM layout base (desktop) */
+    .dm-layout { display:flex; height:100%; gap:0; }
+    .dm-conversations-list { width:280px; border-right:1px solid #263154; overflow-y:auto; background:#0f172f; flex-shrink:0; }
+    .dm-list-header { padding:1rem; font-weight:600; color:#9aa4bf; border-bottom:1px solid #263154; font-size:0.9rem; }
+    .dm-conversation-item { padding:0.8rem 1rem; border-bottom:1px solid #1f2a44; cursor:pointer; transition:background 0.2s; display:flex; align-items:center; gap:0.8rem; }
+    .dm-conversation-item:hover { background:#1f2a44; }
+    .dm-conversation-item.active { background:#2a3a60; border-left:3px solid #428cff; }
+    .dm-conv-content { flex:1; min-width:0; }
+    .dm-conv-name { color:white; font-weight:500; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .dm-conv-role { color:#9aa4bf; font-size:0.75rem; margin-top:0.2rem; }
+    .status-dot { width:0.6rem; height:0.6rem; border-radius:50%; background:#444; flex-shrink:0; }
+    .status-dot.online { background:#2ecc71; }
+    .dm-unread-badge { background:#428cff; color:white; padding:0.2rem 0.5rem; border-radius:1rem; font-size:0.75rem; font-weight:600; min-width:20px; text-align:center; margin-left:auto; }
+    .dm-chat-area { flex:1; display:flex; flex-direction:column; background:#131c30; }
+    .dm-chat-header { padding:1rem; border-bottom:1px solid #263154; color:white; font-weight:500; background:#131c30; display:flex; align-items:center; }
+    .dm-chat-header .dm-back-btn { display:none; } /* hidden on desktop */
+    .dm-chat-messages { flex:1; overflow-y:auto; padding:1rem; display:flex; flex-direction:column; gap:0.5rem; }
+    .dm-chat-input { display:flex; padding:1rem; background:#131c30; border-top:1px solid #263154; gap:0.5rem; }
+    #dmChatInput { flex:1; background:#0f172f; border:1px solid #263154; border-radius:2rem; padding:0.8rem 1.2rem; color:white; outline:none; }
+    #dmChatInput:focus { border-color:#428cff; }
+    #dmChatSendBtn { background:#428cff; border:none; color:white; width:3rem; height:3rem; border-radius:50%; cursor:pointer; font-size:1.2rem; transition:0.2s; flex-shrink:0; }
+    #dmChatSendBtn:hover { background:#5f9eff; }
+    .dm-msg-row { display:flex; margin-bottom:0.5rem; cursor:pointer; }
+    .dm-msg-row.sent { justify-content:flex-end; }
+    .dm-msg { max-width:60%; padding:0.8rem 1rem; border-radius:1.2rem; word-wrap:break-word; font-size:0.9rem; line-height:1.4; position:relative; }
+    .dm-msg.sent { background:#428cff; color:white; }
+    .dm-msg.received { background:#1f2a44; color:#e0e7ff; }
+    .dm-msg small { display:block; font-size:0.75rem; opacity:0.7; margin-top:0.3rem; }
+    .dm-seen-indicator { font-size:0.7rem; color:#9aa4bf; margin-top:0.2rem; text-align:right; }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #1f2a44;
+      color: #fff;
+      padding: 0.8rem 1.2rem;
+      border-radius: 0.8rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      opacity: 0.9;
+      z-index: 3000;
+      font-size: 0.9rem;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .toast.hide { opacity: 0; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
   <div class="sidebar">
     <div class="logo">TECH<span>TITANS</span></div>
     <div class="nav">
-      <a href="dashboard.html" class="active"><i class="fas fa-chart-pie"></i> Dashboard</a>
-      <a href="messages.html" id="chatNavLink"><i class="fas fa-comments"></i> GROUP CHAT
+      <a href="dashboard.html">📊 <span>Dashboard</span></a>
+      <a href="#" class="active" id="chatNavLink">💬 <span>Group Chat</span>
         <span class="sidebar-unread" id="sidebarUnreadBadge" style="display: none;">0</span>
       </a>
-      <a href="resources.html"><i class="fas fa-book-open"></i> Resources</a>
-      <a href="profile.html"><i class="fas fa-user-cog"></i> Profile</a>
+      <a href="#" id="dmNavLink">📩 <span>Direct Messages</span>
+        <span class="sidebar-unread" id="dmUnreadBadge" style="display: none;">0</span>
+      </a>
+      <a href="profile.html">⚙️ <span>Profile</span></a>
     </div>
-    <button class="logout-btn" id="logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    <button class="logout-btn" id="logout">✕ <span>Logout</span></button>
   </div>
 
   <div class="main">
-    <div class="top-bar">
-      <div class="user-greeting"><i class="fas fa-hand-peace"></i> Hello, <span id="userName"></span></div>
-    </div>
-
-    <!-- Compact user info cards (3 only) -->
-    <div class="dashboard-grid" id="userInfoGrid">
-      <!-- filled by js -->
-    </div>
-
-    <!-- ========== ANNOUNCEMENTS SECTION ========== -->
-    <div class="announcements-section" id="announcementsSection">
-      <div class="announcements-header">
-        <i class="fas fa-bullhorn"></i> Announcements
+    <div class="chat-panel">
+      <div class="chat-header" id="chatHeader">
+        <span>💬 <span id="groupTitle">Group</span> <span id="unreadBadge" class="unread-badge" style="display: none;">0</span></span>
+        <span class="role-tag" id="roleDisplay"></span>
+        <div class="online-count" id="onlineCount">0 online</div>
+        <div id="groupTabs" class="group-tabs" style="display: none;"></div>
       </div>
-      <!-- CEO form (hidden for non-CEO) -->
-      <div id="ceoAnnouncementForm" style="display: none;" class="announcement-form">
-        <textarea id="announcementContent" placeholder="Write an important announcement..."></textarea>
-        <div class="form-actions">
-          <label for="announcementFile" class="file-label"><i class="fas fa-paperclip"></i> Attach file</label>
-          <input type="file" id="announcementFile" accept="*/*">
-          <button class="post-btn" id="postAnnouncementBtn"><i class="fas fa-paper-plane"></i> Post</button>
+      <div class="messages-area" id="messagesArea" oncontextmenu="return false;"></div>
+      
+      <div id="typingIndicatorContainer" class="typing-container" style="display: none;">
+        <div class="typing-indicator">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span class="typing-text" id="typingText">Someone is typing...</span>
         </div>
       </div>
-      <!-- announcements list container -->
-      <div id="announcementsList" class="announcements-list">
-        <div class="loading">Loading announcements...</div>
-      </div>
-    </div>
-
-    <!-- extended stats + chart + activity -->
-    <div class="row-duo">
-      <!-- message trend chart -->
-      <div class="chart-container">
-        <h3><i class="fas fa-chart-line"></i> Message activity (7 days)</h3>
-        <canvas id="messageChart"></canvas>
-        <p class="card-label" style="margin-top: 0.8rem; text-align: center;">messages per day</p>
-      </div>
-      <!-- recent activity feed -->
-      <div class="activity-feed">
-        <h3><i class="fas fa-clock"></i> Recent activity</h3>
-        <div id="recentActivityList">
-          <div class="activity-item loading">Loading...</div>
-        </div>
+      
+      <div class="chat-input-area" id="chatInputArea">
+        <input type="text" id="messageInput" placeholder="Write a message..." disabled>
+        <button id="sendBtn" disabled>➤</button>
       </div>
     </div>
   </div>
 
+  <div id="receiptsModal" class="read-receipts-modal" style="display: none;"></div>
+  <div id="toast" class="toast hide" style="display: none;"></div>
+
   <script>
     (function() {
-      // --- Supabase config ---
       const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kcXF0c2RpYnR2eW1mZ250c3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTI1NjIsImV4cCI6MjA4Nzg4ODU2Mn0.hS-7kmoyFljnhkJEkw7nmgimw9ioQreidyu27_NXYyo';
 
-      if (!window.supabase) {
-        document.body.innerHTML = '<p style="color:white;padding:2rem;">Failed to load Supabase. Refresh.</p>';
+      let supabase;
+      try {
+        if (!window.supabase) throw new Error('Supabase library failed to load.');
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      } catch (e) {
+        console.error(e);
+        document.body.innerHTML = '<p style="color:white;padding:2rem;">Service unavailable. Please refresh.</p>';
         return;
       }
-      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+      // --- Global state ---
       let currentUser = null;
+      let currentUserFullName = 'User';
       let currentRole = null;
       let isCEO = false;
-      let unreadCount = 0;
-      let refreshInterval = null;
-      let messageChart = null;
-      let announcementsChannel = null;
+      let selectedGroupRole = null;
+      let availableRoles = [];
+      let messageSubscription = null;
+      let readMessageIds = new Set();
+      let currentUnreadCount = 0;
+      let totalUnreadCount = 0;
+      let editTimeouts = new Map();
+      let observer = null;
+      // Direct messages
+      let dmUnreadCount = 0;
+      let dmUnreadBySender = {};
+      let openDMUserId = null;
+      let globalDmSubscription = null;
+      let dmSubscription = null;
+      let dmObserver = null;
+      let currentRecipientId = null;
+      // Online presence
+      let presenceChannel = null;
+      let onlineUsers = new Map();
+      // Typing
+      let typingTimeouts = {};
+      let activeTypers = new Set();
+      let typingSubscription = null;
 
-      // --- Helper: update badge ---
-      function updateBadge(count) {
-        const badge = document.getElementById('sidebarUnreadBadge');
-        if (!badge) return;
-        if (count > 0) {
-          badge.style.display = 'inline-block';
-          badge.textContent = count;
-        } else {
-          badge.style.display = 'none';
-        }
+      const modal = document.getElementById('receiptsModal');
+      const toast = document.getElementById('toast');
+      const typingContainer = document.getElementById('typingIndicatorContainer');
+      const typingText = document.getElementById('typingText');
+
+      // --- Helper functions ---
+      function formatDateHeader(date) {
+        const now = new Date();
+        const msgDate = new Date(date);
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const msgDay = new Date(msgDate.getFullYear(), msgDate.getMonth(), msgDate.getDate());
+        if (msgDay.getTime() === today.getTime()) return 'Today';
+        else if (msgDay.getTime() === yesterday.getTime()) return 'Yesterday';
+        else return msgDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
       }
-
-      // --- Fetch unread count ---
-      async function fetchUnreadCount() {
-        if (!currentUser || !currentRole) return 0;
-        try {
-          let query = supabase.from('group_messages').select('id, sender_id');
-          if (!isCEO) query = query.eq('role', currentRole);
-          const { data: messages, error: msgError } = await query;
-          if (msgError) throw msgError;
-          const messageIds = messages.map(m => m.id);
-          let readSet = new Set();
-          if (messageIds.length) {
-            const { data: reads } = await supabase
-              .from('message_reads')
-              .select('message_id')
-              .eq('user_id', currentUser.id)
-              .in('message_id', messageIds);
-            if (reads) readSet = new Set(reads.map(r => r.message_id));
-          }
-          return messages.filter(msg => !readSet.has(msg.id) && msg.sender_id !== currentUser.id).length;
-        } catch (err) {
-          console.error('unread error:', err);
-          return 0;
-        }
+      function formatTimeOnly(date) {
+        return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       }
-
-      // --- Refresh badge ---
-      async function refreshUnreadBadge() {
-        unreadCount = await fetchUnreadCount();
-        updateBadge(unreadCount);
+      function stringToColor(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        const hue = Math.abs(hash % 360);
+        return `hsl(${hue}, 70%, 50%)`;
       }
-
-      // --- Fetch total messages ---
-      async function fetchTotalMessages() {
-        try {
-          let query = supabase.from('group_messages').select('*', { count: 'exact', head: true });
-          if (!isCEO && currentRole) query = query.eq('role', currentRole);
-          const { count, error } = await query;
-          return error ? 0 : count;
-        } catch { return 0; }
+      function getInitials(name) {
+        if (!name) return '?';
+        const parts = name.trim().split(/\s+/);
+        if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+        return (parts[0].charAt(0) + parts[parts.length-1].charAt(0)).toUpperCase();
       }
-
-      // --- Fetch total resources ---
-      async function fetchTotalResources() {
-        try {
-          const { count, error } = await supabase.from('resources').select('*', { count: 'exact', head: true });
-          return error ? 0 : count;
-        } catch { return 0; }
-      }
-
-      // --- Fetch last 3 messages for activity feed ---
-      async function fetchRecentMessages() {
-        try {
-          let query = supabase
-            .from('group_messages')
-            .select('id, content, created_at, sender_id, profiles!inner(full_name)')
-            .order('created_at', { ascending: false })
-            .limit(3);
-          if (!isCEO && currentRole) query = query.eq('role', currentRole);
-          const { data, error } = await query;
-          if (error) throw error;
-          return data || [];
-        } catch (err) {
-          console.error('recent messages error:', err);
-          return [];
-        }
-      }
-
-      // --- Fetch daily counts for chart ---
-      async function fetchDailyCounts() {
-        try {
-          const now = new Date();
-          const sevenDaysAgo = new Date(now);
-          sevenDaysAgo.setDate(now.getDate() - 7);
-          const start = sevenDaysAgo.toISOString();
-
-          let query = supabase
-            .from('group_messages')
-            .select('created_at')
-            .gte('created_at', start);
-          if (!isCEO && currentRole) query = query.eq('role', currentRole);
-          const { data, error } = await query;
-          if (error) throw error;
-
-          const counts = {};
-          for (let i = 0; i < 7; i++) {
-            const d = new Date(now);
-            d.setDate(now.getDate() - i);
-            const ymd = d.toISOString().split('T')[0];
-            counts[ymd] = 0;
-          }
-          data.forEach(msg => {
-            const day = msg.created_at.split('T')[0];
-            if (counts.hasOwnProperty(day)) counts[day]++;
-          });
-          return Object.keys(counts).sort().map(date => ({ date, count: counts[date] }));
-        } catch (err) {
-          console.error('daily counts error:', err);
-          return [];
-        }
-      }
-
-      // --- Render chart ---
-      async function renderChart() {
-        const daily = await fetchDailyCounts();
-        const ctx = document.getElementById('messageChart').getContext('2d');
-        if (messageChart) messageChart.destroy();
-        messageChart = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: daily.map(d => d.date.slice(5)),
-            datasets: [{
-              label: 'messages',
-              data: daily.map(d => d.count),
-              backgroundColor: '#428cff80',
-              borderRadius: 6,
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, grid: { color: '#2f3f66' }, ticks: { color: '#a0b0d0' } },
-                     x: { ticks: { color: '#a0b0d0' } } }
-          }
-        });
-      }
-
-      // --- Render activity feed ---
-      async function renderActivity() {
-        const recent = await fetchRecentMessages();
-        const container = document.getElementById('recentActivityList');
-        if (!recent.length) {
-          container.innerHTML = '<div class="activity-item">No recent messages</div>';
-          return;
-        }
-        container.innerHTML = recent.map(msg => {
-          const name = msg.profiles?.full_name || 'User';
-          const initial = name.charAt(0).toUpperCase();
-          const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          return `
-            <div class="activity-item">
-              <div class="activity-avatar">${initial}</div>
-              <div class="activity-details">
-                <span class="activity-name">${name}</span>
-                <div class="activity-msg">${msg.content || '📎 file'}</div>
-                <span class="activity-time">${time}</span>
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
-
-      // --- Update stats cards (total messages, unread, resources) ---
-      async function updateStatsCards() {
-        const [totalMsg, unread, totalRes] = await Promise.all([
-          fetchTotalMessages(),
-          fetchUnreadCount(),
-          fetchTotalResources()
-        ]);
-        const grid = document.getElementById('userInfoGrid');
-        document.querySelectorAll('.stats-card').forEach(el => el.remove());
-        const statsHTML = `
-          <div class="card stats-card">
-            <div class="card-title"><i class="fas fa-envelope"></i> Total messages</div>
-            <div class="card-value">${totalMsg}</div>
-            <div class="card-label">in current scope</div>
-          </div>
-          <div class="card stats-card">
-            <div class="card-title"><i class="fas fa-bell"></i> Unread</div>
-            <div class="card-value">${unread}</div>
-            <div class="card-label">messages waiting</div>
-          </div>
-          <div class="card stats-card">
-            <div class="card-title"><i class="fas fa-archive"></i> Resources</div>
-            <div class="card-value">${totalRes}</div>
-            <div class="card-label">available files</div>
-          </div>
-        `;
-        grid.insertAdjacentHTML('beforeend', statsHTML);
-      }
-
-      // --- ANNOUNCEMENT FUNCTIONS (updated for 24h expiration and CEO delete) ---
-
-      // Delete announcements older than 24 hours (only if CEO)
-      async function deleteOldAnnouncements() {
-        if (!isCEO) return;
-        const oneDayAgo = new Date(Date.now() - 24*60*60*1000).toISOString();
-        const { error } = await supabase
-          .from('announcements')
-          .delete()
-          .lt('created_at', oneDayAgo);
-        if (error) console.error('Failed to delete old announcements:', error);
-      }
-
-      // Delete a single announcement (CEO only)
-      async function deleteAnnouncement(id) {
-        if (!isCEO) return;
-        if (!confirm('Delete this announcement?')) return;
-        const { error } = await supabase
-          .from('announcements')
-          .delete()
-          .eq('id', id);
-        if (error) {
-          alert('Failed to delete: ' + error.message);
-        } else {
-          // Remove from DOM
-          document.querySelector(`.announcement-card[data-id="${id}"]`)?.remove();
-        }
-      }
-
-      async function fetchAnnouncements() {
-        try {
-          const oneDayAgo = new Date(Date.now() - 24*60*60*1000).toISOString();
-          const { data, error } = await supabase
-            .from('announcements')
-            .select('*, profiles!created_by(full_name)')
-            .gte('created_at', oneDayAgo)
-            .order('created_at', { ascending: false });
-          if (error) throw error;
-          return data || [];
-        } catch (err) {
-          console.error('fetch announcements error:', err);
-          return [];
-        }
-      }
-
       function escapeHtml(unsafe) {
-        if (!unsafe) return '';
         return unsafe.replace(/[&<>"']/g, function(m) {
           if(m === '&') return '&amp;';
           if(m === '<') return '&lt;';
@@ -770,219 +914,1312 @@
           return m;
         });
       }
-
-      function renderAnnouncements(announcements) {
-        const container = document.getElementById('announcementsList');
-        if (!announcements.length) {
-          container.innerHTML = '<div style="color:#9aa4bf; text-align:center; padding:1rem;">No announcements yet.</div>';
-          return;
-        }
-        container.innerHTML = announcements.map(a => {
-          const date = new Date(a.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-          const fileLink = a.file_url ? `<div class="announcement-attachment"><a href="${a.file_url}" target="_blank"><i class="fas fa-paperclip"></i> Attachment</a></div>` : '';
-          const deleteBtn = isCEO ? `<button class="delete-announcement" onclick="deleteAnnouncement('${a.id}')"><i class="fas fa-trash"></i></button>` : '';
-          return `
-            <div class="announcement-card" data-id="${a.id}">
-              ${deleteBtn}
-              <div class="announcement-meta">
-                <span class="announcement-author"><i class="fas fa-user-circle"></i> ${escapeHtml(a.profiles?.full_name || 'CEO')}</span>
-                <span class="announcement-date">${date}</span>
-              </div>
-              <div class="announcement-content">${escapeHtml(a.content)}</div>
-              ${fileLink}
-            </div>
-          `;
-        }).join('');
+      function showToast(text) {
+        toast.textContent = text;
+        toast.style.display = 'block';
+        toast.classList.remove('hide');
+        setTimeout(() => {
+          toast.classList.add('hide');
+          setTimeout(() => toast.style.display = 'none', 300);
+        }, 3000);
       }
 
-      async function loadAnnouncements() {
-        const announcements = await fetchAnnouncements();
-        renderAnnouncements(announcements);
-      }
-
-      async function postAnnouncement() {
-        const content = document.getElementById('announcementContent').value.trim();
-        const fileInput = document.getElementById('announcementFile');
-        const file = fileInput.files[0];
-        if (!content && !file) return;
-
-        const postBtn = document.getElementById('postAnnouncementBtn');
-        postBtn.disabled = true;
-        postBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Posting...';
-
-        let fileUrl = null;
-        if (file) {
-          const fileExt = file.name.split('.').pop();
-          const fileName = `${currentUser.id}/${Date.now()}.${fileExt}`;
-          const { error: uploadError } = await supabase.storage
-            .from('announcements')
-            .upload(fileName, file);
-          if (uploadError) {
-            alert('Upload failed: ' + uploadError.message);
-            postBtn.disabled = false;
-            postBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Post';
-            return;
-          }
-          const { data: urlData } = supabase.storage.from('announcements').getPublicUrl(fileName);
-          fileUrl = urlData.publicUrl;
-        }
-
-        const { error } = await supabase
-          .from('announcements')
-          .insert({ content, file_url: fileUrl, created_by: currentUser.id });
-
-        postBtn.disabled = false;
-        postBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Post';
-
-        if (error) {
-          alert('Failed to post: ' + error.message);
-          return;
-        }
-
-        document.getElementById('announcementContent').value = '';
-        fileInput.value = '';
-
-        // After posting, delete any announcements older than 24 hours (CEO only)
-        await deleteOldAnnouncements();
-
-        // Announcement will appear via realtime (no need to reload)
-      }
-
-      function subscribeToAnnouncements() {
-        if (announcementsChannel) announcementsChannel.unsubscribe();
-        announcementsChannel = supabase
-          .channel('announcements-channel')
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'announcements' }, async (payload) => {
-            // Fetch full announcement with profile
-            const { data, error } = await supabase
-              .from('announcements')
-              .select('*, profiles!created_by(full_name)')
-              .eq('id', payload.new.id)
-              .single();
-            if (!error && data) {
-              // Insert at top
-              const container = document.getElementById('announcementsList');
-              const date = new Date(data.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-              const fileLink = data.file_url ? `<div class="announcement-attachment"><a href="${data.file_url}" target="_blank"><i class="fas fa-paperclip"></i> Attachment</a></div>` : '';
-              const deleteBtn = isCEO ? `<button class="delete-announcement" onclick="deleteAnnouncement('${data.id}')"><i class="fas fa-trash"></i></button>` : '';
-              const newCard = document.createElement('div');
-              newCard.className = 'announcement-card';
-              newCard.setAttribute('data-id', data.id);
-              newCard.innerHTML = `
-                ${deleteBtn}
-                <div class="announcement-meta">
-                  <span class="announcement-author"><i class="fas fa-user-circle"></i> ${escapeHtml(data.profiles?.full_name || 'CEO')}</span>
-                  <span class="announcement-date">${date}</span>
-                </div>
-                <div class="announcement-content">${escapeHtml(data.content)}</div>
-                ${fileLink}
-              `;
-              container.insertBefore(newCard, container.firstChild);
+      // --- Online presence ---
+      async function setupPresence() {
+        if (!currentUser) return;
+        presenceChannel = supabase.channel('online-users', {
+          config: { presence: { key: currentUser.id } }
+        });
+        presenceChannel
+          .on('presence', { event: 'sync' }, () => {
+            const state = presenceChannel.presenceState();
+            onlineUsers.clear();
+            Object.values(state).forEach(presences => {
+              presences.forEach(p => {
+                if (p.userId !== currentUser.id) {
+                  onlineUsers.set(p.userId, { name: p.name, role: p.role });
+                }
+              });
+            });
+            document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
+            if (document.getElementById('dmNavLink').classList.contains('active')) {
+              document.querySelectorAll('.dm-conversation-item').forEach(item => {
+                const uid = item.dataset.userId;
+                const dot = item.querySelector('.status-dot');
+                if (dot) {
+                  if (onlineUsers.has(uid)) dot.classList.add('online');
+                  else dot.classList.remove('online');
+                }
+              });
             }
           })
-          .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'announcements' }, (payload) => {
-            // Remove deleted announcement from UI (for CEO deletes)
-            document.querySelector(`.announcement-card[data-id="${payload.old.id}"]`)?.remove();
+          .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+            newPresences.forEach(p => {
+              if (p.userId !== currentUser.id) onlineUsers.set(p.userId, { name: p.name, role: p.role });
+            });
+            document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
+          })
+          .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+            leftPresences.forEach(p => onlineUsers.delete(p.userId));
+            document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
+          })
+          .subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+              await presenceChannel.track({
+                userId: currentUser.id,
+                name: currentUserFullName,
+                role: currentRole,
+                online_at: new Date().toISOString()
+              });
+            }
+          });
+      }
+
+      // --- Update unread badges (group) ---
+      function updateUnreadBadges() {
+        const headerBadge = document.getElementById('unreadBadge');
+        if (currentUnreadCount > 0) {
+          headerBadge.style.display = 'inline';
+          headerBadge.textContent = currentUnreadCount;
+        } else {
+          headerBadge.style.display = 'none';
+        }
+
+        const sidebarBadge = document.getElementById('sidebarUnreadBadge');
+        if (isCEO) {
+          if (totalUnreadCount > 0) {
+            sidebarBadge.style.display = 'inline-block';
+            sidebarBadge.textContent = totalUnreadCount;
+          } else {
+            sidebarBadge.style.display = 'none';
+          }
+        } else {
+          if (currentUnreadCount > 0) {
+            sidebarBadge.style.display = 'inline-block';
+            sidebarBadge.textContent = currentUnreadCount;
+          } else {
+            sidebarBadge.style.display = 'none';
+          }
+        }
+      }
+
+      function updateDMBadge() {
+        const dmBadge = document.getElementById('dmUnreadBadge');
+        dmUnreadCount = Object.values(dmUnreadBySender).reduce((a,b)=>a+b,0);
+        if (dmUnreadCount > 0) {
+          dmBadge.style.display = 'inline-block';
+          dmBadge.textContent = dmUnreadCount;
+        } else {
+          dmBadge.style.display = 'none';
+        }
+      }
+
+      // --- Mark group message as read ---
+      async function markMessageAsRead(messageId) {
+        if (readMessageIds.has(messageId)) return;
+        try {
+          const { error } = await supabase
+            .from('message_reads')
+            .insert({ message_id: messageId, user_id: currentUser.id })
+            .single();
+          if (error && error.code !== '23505') {
+            console.error('mark read error:', error);
+            return;
+          }
+          readMessageIds.add(messageId);
+          const msgRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
+          if (msgRow) {
+            msgRow.classList.remove('unread');
+            if (currentUnreadCount > 0) currentUnreadCount--;
+            if (isCEO && totalUnreadCount > 0) totalUnreadCount--;
+            updateUnreadBadges();
+            updateSeenIndicator(messageId);
+          }
+        } catch (err) {
+          console.error('markMessageAsRead error:', err);
+        }
+      }
+
+      async function updateSeenIndicator(messageId) {
+        const msgRow = document.querySelector(`.message-row.sent[data-message-id="${messageId}"]`);
+        if (!msgRow) return;
+        const { data } = await supabase
+          .from('message_reads')
+          .select('user_id, read_at, profiles!inner(full_name)')
+          .eq('message_id', messageId);
+        const count = data ? data.length : 0;
+        let seenHtml = '';
+        if (count > 0) {
+          const firstReader = data[0]?.profiles?.full_name || 'Someone';
+          seenHtml = `<div class="seen-indicator"><span class="double-tick">✓✓</span> ${firstReader}${count > 1 ? ` +${count-1}` : ''}</div>`;
+        }
+        const existing = msgRow.querySelector('.seen-indicator');
+        if (existing) existing.remove();
+        if (seenHtml) msgRow.querySelector('.message-bubble').insertAdjacentHTML('beforeend', seenHtml);
+      }
+
+      function setupObserver() {
+        if (observer) observer.disconnect();
+        observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const row = entry.target;
+              const messageId = row.dataset.messageId;
+              if (messageId && !readMessageIds.has(messageId) && row.classList.contains('unread')) {
+                markMessageAsRead(messageId);
+              }
+            }
+          });
+        }, { threshold: 0.5 });
+        document.querySelectorAll('.message-row.unread').forEach(row => observer.observe(row));
+      }
+
+      // --- Render message actions (edit/delete) ---
+      function renderMessageActions(messageId, currentContent, createdAt, senderId) {
+        const msgTime = new Date(createdAt).getTime();
+        const now = Date.now();
+        const age = now - msgTime;
+        const canEdit = (isCEO || senderId === currentUser.id) && age < 60000;
+        const canDelete = isCEO || senderId === currentUser.id;
+        if (canEdit && age < 60000) {
+          const timeLeft = 60000 - age;
+          if (timeLeft > 0) {
+            const timeoutId = setTimeout(() => {
+              const editBtn = document.querySelector(`.edit-btn[data-id="${messageId}"]`);
+              if (editBtn) editBtn.remove();
+            }, timeLeft);
+            editTimeouts.set(messageId, timeoutId);
+          }
+        }
+        return `
+          <div class="message-actions">
+            ${canEdit ? `<button class="edit-btn" data-id="${messageId}" data-content="${escapeHtml(currentContent)}">✏️</button>` : ''}
+            ${canDelete ? `<button class="delete-btn" data-id="${messageId}">🗑️</button>` : ''}
+          </div>
+        `;
+      }
+
+      // --- Render a single message ---
+      function renderMessage(message, isSent, senderName, senderId, messageRole, isUnread = false, seenCount = 0) {
+        const initials = getInitials(senderName);
+        const avatarColor = stringToColor(senderName);
+        const timeStr = formatTimeOnly(message.created_at);
+        const unreadClass = isUnread ? 'unread' : '';
+        let roleBadge = '';
+        if (messageRole && (messageRole === 'CEO' || isCEO)) {
+          roleBadge = `<span class="role-badge">${escapeHtml(messageRole)}</span>`;
+        }
+        let seenHtml = '';
+        if (isSent && seenCount > 0) {
+          seenHtml = `<div class="seen-indicator"><span class="double-tick">✓✓</span> Seen</div>`;
+        }
+
+        if (isSent) {
+          return `
+            <div class="message-row sent ${unreadClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${senderId}">
+              <div class="message-bubble">
+                <div class="message sent">
+                  ${escapeHtml(message.content)}
+                  <small>${timeStr}</small>
+                </div>
+                ${renderMessageActions(message.id, message.content, message.created_at, senderId)}
+                ${seenHtml}
+              </div>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="message-row ${unreadClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${senderId}">
+              <div class="avatar" style="background-color: ${avatarColor};" data-user-id="${senderId}" data-user-name="${escapeHtml(senderName)}" data-user-role="${escapeHtml(messageRole)}">${initials}</div>
+              <div class="message-bubble">
+                <div class="sender-name">
+                  ${escapeHtml(senderName)} ${roleBadge}
+                </div>
+                <div class="message received">
+                  ${escapeHtml(message.content)}
+                  <small>${timeStr}</small>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      function maybeAppendDateSeparator(prevDate, currentDate) {
+        if (!prevDate) return '';
+        const prevDay = new Date(prevDate).toDateString();
+        const currDay = new Date(currentDate).toDateString();
+        if (prevDay !== currDay) {
+          const header = formatDateHeader(currentDate);
+          return `<div class="date-separator"><span>${header}</span></div>`;
+        }
+        return '';
+      }
+
+      // --- Load messages for the selected group ---
+      async function loadMessages() {
+        try {
+          if (isCEO && selectedGroupRole === null) {
+            renderGroupsList(availableRoles || []);
+            return;
+          }
+          let query = supabase
+            .from('group_messages')
+            .select(`*, sender:profiles!sender_id (full_name)`)
+            .order('created_at', { ascending: true });
+
+          if (!isCEO) {
+            query = query.eq('role', currentRole);
+          } else if (selectedGroupRole) {
+            query = query.eq('role', selectedGroupRole);
+          }
+
+          const { data, error } = await query;
+          if (error) throw error;
+
+          const messageIds = data.map(m => m.id);
+          let readSet = new Set();
+          if (messageIds.length > 0) {
+            const { data: reads, error: readError } = await supabase
+              .from('message_reads')
+              .select('message_id')
+              .eq('user_id', currentUser.id)
+              .in('message_id', messageIds);
+            if (!readError) {
+              readSet = new Set(reads.map(r => r.message_id));
+            }
+          }
+          readMessageIds = readSet;
+
+          const seenCounts = {};
+          if (messageIds.length > 0) {
+            const { data: readsAll } = await supabase
+              .from('message_reads')
+              .select('message_id')
+              .in('message_id', messageIds);
+            if (readsAll) {
+              readsAll.forEach(r => {
+                seenCounts[r.message_id] = (seenCounts[r.message_id] || 0) + 1;
+              });
+            }
+          }
+
+          let html = '';
+          let lastDate = null;
+          for (const msg of data) {
+            const isSent = msg.sender_id === currentUser.id;
+            const senderName = msg.sender?.full_name || 'Unknown';
+            const isUnread = !isSent && !readMessageIds.has(msg.id);
+            if (isSent) readMessageIds.add(msg.id);
+
+            html += maybeAppendDateSeparator(lastDate, msg.created_at);
+            lastDate = msg.created_at;
+
+            const seenCount = seenCounts[msg.id] || 0;
+            html += renderMessage(msg, isSent, senderName, msg.sender_id, msg.role, isUnread, seenCount);
+          }
+
+          const area = document.getElementById('messagesArea');
+          area.innerHTML = html;
+
+          currentUnreadCount = data.filter(msg => !readMessageIds.has(msg.id) && msg.sender_id !== currentUser.id).length;
+          if (isCEO) await updateTotalUnreadCount();
+          updateUnreadBadges();
+
+          attachMessageHandlers();
+          setupObserver();
+          area.scrollTop = area.scrollHeight;
+        } catch (err) {
+          console.error('Load messages error:', err);
+          document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Could not load messages.</div>';
+        }
+      }
+
+      async function updateTotalUnreadCount() {
+        if (!currentUser) return;
+        try {
+          const { data: reads } = await supabase
+            .from('message_reads')
+            .select('message_id')
+            .eq('user_id', currentUser.id);
+          const readIds = new Set(reads.map(r => r.message_id));
+          const { data: msgs, error } = await supabase
+            .from('group_messages')
+            .select('id, sender_id');
+          if (error) throw error;
+          let count = 0;
+          msgs.forEach(m => {
+            if (m.sender_id !== currentUser.id && !readIds.has(m.id)) count++;
+          });
+          totalUnreadCount = count;
+          updateUnreadBadges();
+        } catch (err) {
+          console.error('updateTotalUnreadCount error:', err);
+        }
+      }
+
+      async function renderGroupsList(roles) {
+        const area = document.getElementById('messagesArea');
+        if (!area) return;
+        if (!roles || roles.length === 0) {
+          area.innerHTML = '<div style="color:#9aa4bf;text-align:center;padding:2rem;">No groups found</div>';
+          return;
+        }
+        const { data: reads } = await supabase
+          .from('message_reads')
+          .select('message_id')
+          .eq('user_id', currentUser.id);
+        const readIds = new Set(reads.map(r => r.message_id));
+        const { data: msgs } = await supabase
+          .from('group_messages')
+          .select('id, role, sender_id');
+        const unreadCounts = {};
+        msgs.forEach(m => {
+          if (m.sender_id !== currentUser.id && !readIds.has(m.id)) {
+            unreadCounts[m.role] = (unreadCounts[m.role] || 0) + 1;
+          }
+        });
+
+        const items = roles.map(r => {
+          const count = unreadCounts[r] || 0;
+          const badge = count > 0 ? `<span class="unread-badge">${count}</span>` : '';
+          return `<div class="group-card" data-role="${escapeHtml(r)}">${escapeHtml(r)}${badge}</div>`;
+        }).join('');
+        area.innerHTML = `<div class="groups-list">${items}</div>`;
+        document.querySelectorAll('.group-card').forEach(card => {
+          card.addEventListener('click', async (e) => {
+            const role = e.currentTarget.dataset.role;
+            await switchGroup(role);
+          });
+        });
+      }
+
+      async function buildGroupTabs() {
+        if (!isCEO) return;
+        const tabsContainer = document.getElementById('groupTabs');
+        tabsContainer.style.display = 'flex';
+        tabsContainer.innerHTML = '';
+
+        let roles = [];
+        try {
+          const { data: profiles, error } = await supabase
+            .from('profiles')
+            .select('job_role')
+            .not('job_role', 'is', null);
+          if (!error && profiles && profiles.length > 0) {
+            roles = [...new Set(profiles.map(p => p.job_role))].sort();
+          }
+        } catch (e) {}
+
+        if (roles.length === 0) {
+          try {
+            const { data: messages, error } = await supabase
+              .from('group_messages')
+              .select('role')
+              .not('role', 'is', null);
+            if (!error && messages) {
+              roles = [...new Set(messages.map(m => m.role))].sort();
+            }
+          } catch (e) {}
+        }
+
+        if (roles.length === 0) {
+          tabsContainer.innerHTML = '<span style="color:#9aa4bf; padding:0.4rem 1rem;">No groups</span>';
+          return;
+        }
+
+        availableRoles = roles;
+
+        const { data: reads } = await supabase
+          .from('message_reads')
+          .select('message_id')
+          .eq('user_id', currentUser.id);
+        const readIds = new Set(reads.map(r => r.message_id));
+        const { data: msgs } = await supabase
+          .from('group_messages')
+          .select('id, role, sender_id');
+        const unreadCounts = {};
+        msgs.forEach(m => {
+          if (m.sender_id !== currentUser.id && !readIds.has(m.id)) {
+            unreadCounts[m.role] = (unreadCounts[m.role] || 0) + 1;
+          }
+        });
+
+        const allTab = document.createElement('span');
+        allTab.className = `group-tab ${selectedGroupRole === null ? 'active' : ''}`;
+        allTab.textContent = 'All';
+        if (totalUnreadCount > 0) {
+          const badge = document.createElement('span');
+          badge.className = 'unread-badge-tab';
+          badge.textContent = totalUnreadCount;
+          allTab.appendChild(badge);
+        }
+        allTab.dataset.role = '';
+        allTab.addEventListener('click', () => switchGroup(''));
+        tabsContainer.appendChild(allTab);
+
+        roles.forEach(role => {
+          const tab = document.createElement('span');
+          tab.className = `group-tab ${selectedGroupRole === role ? 'active' : ''}`;
+          tab.textContent = role;
+          const unread = unreadCounts[role] || 0;
+          if (unread > 0) {
+            const badge = document.createElement('span');
+            badge.className = 'unread-badge-tab';
+            badge.textContent = unread;
+            tab.appendChild(badge);
+          }
+          tab.dataset.role = role;
+          tab.addEventListener('click', () => switchGroup(role));
+          tabsContainer.appendChild(tab);
+        });
+
+        if (selectedGroupRole === null && roles.length > 0) {
+          document.getElementById('messageInput').disabled = true;
+          document.getElementById('sendBtn').disabled = true;
+          await loadMessages();
+        } else if (!selectedGroupRole && roles.length > 0) {
+          selectedGroupRole = roles[0];
+          document.querySelectorAll('.group-tab').forEach(tab => {
+            if (tab.dataset.role === selectedGroupRole) tab.classList.add('active');
+          });
+          document.getElementById('messageInput').disabled = false;
+          document.getElementById('sendBtn').disabled = false;
+          await loadMessages();
+        }
+      }
+
+      async function switchGroup(role) {
+        const normalized = role === '' ? null : role;
+        if (selectedGroupRole === normalized) return;
+        selectedGroupRole = normalized;
+        document.querySelectorAll('.group-tab').forEach(tab => {
+          const tr = tab.dataset.role === '' ? null : tab.dataset.role;
+          if (tr === selectedGroupRole) tab.classList.add('active');
+          else tab.classList.remove('active');
+        });
+        if (isCEO) {
+          const disabled = selectedGroupRole === null;
+          document.getElementById('messageInput').disabled = disabled;
+          document.getElementById('sendBtn').disabled = disabled;
+          if (selectedGroupRole === null) {
+            await buildGroupTabs();
+          }
+        }
+        if (typingSubscription) typingSubscription.unsubscribe();
+        setupTypingSubscription();
+        await loadMessages();
+      }
+
+      function attachMessageHandlers() {
+        document.querySelectorAll('.message-row').forEach(row => {
+          row.removeEventListener('click', onMessageRowClick);
+          row.addEventListener('click', onMessageRowClick);
+          row.removeEventListener('contextmenu', onRightClick);
+          row.addEventListener('contextmenu', onRightClick);
+        });
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+          btn.removeEventListener('click', handleEditClick);
+          btn.addEventListener('click', handleEditClick);
+        });
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+          btn.removeEventListener('click', handleDeleteClick);
+          btn.addEventListener('click', handleDeleteClick);
+        });
+        document.querySelectorAll('.avatar').forEach(avatar => {
+          avatar.removeEventListener('click', onAvatarClick);
+          avatar.addEventListener('click', onAvatarClick);
+        });
+      }
+
+      function onMessageRowClick(e) {
+        if (e.target.closest('.edit-btn') || e.target.closest('.delete-btn') || e.target.closest('.edit-actions') || e.target.closest('.avatar')) return;
+        const row = e.currentTarget;
+        if (row.classList.contains('selected')) row.classList.remove('selected');
+        else {
+          document.querySelectorAll('.message-row').forEach(r => r.classList.remove('selected'));
+          row.classList.add('selected');
+        }
+      }
+
+      function onAvatarClick(e) {
+        e.stopPropagation();
+        const avatar = e.currentTarget;
+        const userId = avatar.dataset.userId;
+        const userName = avatar.dataset.userName;
+        const userRole = avatar.dataset.userRole;
+        document.getElementById('dmNavLink').click();
+        setTimeout(() => {
+          const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${userId}"]`);
+          if (targetItem) targetItem.click();
+        }, 300);
+      }
+
+      // --- Edit/Delete handlers ---
+      async function handleEditClick(e) {
+        e.stopPropagation();
+        const btn = e.currentTarget;
+        const messageId = btn.dataset.id;
+        const currentContent = btn.dataset.content;
+        const row = btn.closest('.message-row');
+        const createdAt = row.dataset.createdAt;
+
+        if (Date.now() - new Date(createdAt).getTime() > 60000) {
+          alert('Cannot edit: message is older than 1 minute.');
+          return;
+        }
+
+        const messageBubble = row.querySelector('.message-bubble');
+        const messageDiv = row.querySelector('.message');
+
+        const editHtml = `
+          <div class="message sent" style="padding:0;">
+            <input type="text" class="edit-input" value="${escapeHtml(currentContent)}" data-original="${escapeHtml(currentContent)}">
+            <div class="edit-actions">
+              <button class="save-btn" data-id="${messageId}">Save</button>
+              <button class="cancel-btn">Cancel</button>
+            </div>
+          </div>
+        `;
+        messageDiv.style.display = 'none';
+        btn.closest('.message-actions').style.display = 'none';
+
+        const editContainer = document.createElement('div');
+        editContainer.innerHTML = editHtml;
+        messageBubble.appendChild(editContainer.firstChild);
+
+        const input = messageBubble.querySelector('.edit-input');
+        input.focus();
+
+        const saveBtn = messageBubble.querySelector('.save-btn');
+        saveBtn.addEventListener('click', async () => {
+          const newContent = input.value.trim();
+          if (!newContent) return;
+          await editMessage(messageId, newContent);
+        });
+
+        const cancelBtn = messageBubble.querySelector('.cancel-btn');
+        cancelBtn.addEventListener('click', () => {
+          messageDiv.style.display = 'block';
+          btn.closest('.message-actions').style.display = 'flex';
+          editContainer.remove();
+        });
+
+        input.addEventListener('keypress', async (e) => {
+          if (e.key === 'Enter') {
+            const newContent = input.value.trim();
+            if (!newContent) return;
+            await editMessage(messageId, newContent);
+          }
+        });
+      }
+
+      async function editMessage(messageId, newContent) {
+        try {
+          const { error } = await supabase
+            .from('group_messages')
+            .update({ content: newContent })
+            .eq('id', messageId)
+            .eq('sender_id', currentUser.id);
+          if (error) throw error;
+          updateMessageInUI(messageId, newContent);
+          const messageRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
+          if (messageRow) {
+            const messageDiv = messageRow.querySelector('.message');
+            const actions = messageRow.querySelector('.message-actions');
+            if (messageDiv) messageDiv.style.display = 'block';
+            if (actions) actions.style.display = 'flex';
+            const editContainer = messageRow.querySelector('.message > div:not(.message):not(.message-actions)')?.closest('.message');
+            if (editContainer) editContainer.remove();
+          }
+        } catch (err) {
+          console.error('Edit error:', err);
+          alert('Failed to edit message: ' + err.message);
+        }
+      }
+
+      async function handleDeleteClick(e) {
+        e.stopPropagation();
+        if (!confirm('Delete this message?')) return;
+        const btn = e.currentTarget;
+        const messageId = btn.dataset.id;
+        const row = btn.closest('.message-row');
+        const senderId = row.dataset.senderId;
+        try {
+          let query = supabase.from('group_messages').delete().eq('id', messageId);
+          if (!isCEO) query = query.eq('sender_id', currentUser.id);
+          const { error } = await query;
+          if (error) throw error;
+          removeMessageFromUI(messageId);
+        } catch (err) {
+          console.error('Delete error:', err);
+          alert('Failed to delete message: ' + err.message);
+        }
+      }
+
+      function updateMessageInUI(messageId, newContent) {
+        const messageRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
+        if (!messageRow) return;
+        const messageDiv = messageRow.querySelector('.message');
+        if (messageDiv) {
+          const timeElem = messageDiv.querySelector('small');
+          messageDiv.innerHTML = `${escapeHtml(newContent)} `;
+          if (timeElem) messageDiv.appendChild(timeElem);
+        }
+        const editBtn = messageRow.querySelector('.edit-btn');
+        if (editBtn) editBtn.dataset.content = newContent;
+      }
+
+      function removeMessageFromUI(messageId) {
+        const messageRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
+        if (messageRow) {
+          if (messageRow.classList.contains('unread')) {
+            if (currentUnreadCount > 0) currentUnreadCount--;
+            if (isCEO && totalUnreadCount > 0) totalUnreadCount--;
+          }
+          if (observer) observer.unobserve(messageRow);
+          messageRow.remove();
+        }
+        if (editTimeouts.has(messageId)) {
+          clearTimeout(editTimeouts.get(messageId));
+          editTimeouts.delete(messageId);
+        }
+        updateUnreadBadges();
+      }
+
+      // --- Right-click read receipts (for group messages and DMs) ---
+      async function onRightClick(e) {
+        e.preventDefault();
+        const row = e.currentTarget;
+        const messageId = row.dataset.messageId;
+        const isDM = row.classList.contains('dm-msg-row');
+        modal.style.display = 'none';
+
+        let data;
+        if (isDM) {
+          const { data: msg, error } = await supabase
+            .from('private_messages')
+            .select('sender_id, recipient_id, read_at, profiles!sender_id(full_name), profiles!recipient_id(full_name)')
+            .eq('id', messageId)
+            .single();
+          if (error || !msg) {
+            console.error('fetch DM readers error:', error);
+            return;
+          }
+          const readerId = (msg.sender_id === currentUser.id) ? msg.recipient_id : msg.sender_id;
+          const readerName = (msg.sender_id === currentUser.id) ? msg.profiles_recipient_id?.full_name : msg.profiles_sender_id?.full_name;
+          const readTime = msg.read_at ? new Date(msg.read_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
+          if (msg.read_at) {
+            data = [{ profiles: { full_name: readerName }, read_at: readTime }];
+          } else {
+            data = [];
+          }
+        } else {
+          const { data: readers, error } = await supabase
+            .from('message_reads')
+            .select('user_id, read_at, profiles!inner(full_name)')
+            .eq('message_id', messageId)
+            .order('read_at', { ascending: true });
+          if (error || !readers) {
+            console.error('fetch readers error:', error);
+            return;
+          }
+          data = readers;
+        }
+
+        if (data.length === 0) {
+          modal.innerHTML = '<h4>Read receipts</h4><p style="padding:0.5rem 0;">No one has seen this message yet.</p>';
+        } else {
+          const listItems = data.map(item => {
+            const name = item.profiles?.full_name || 'Unknown';
+            const readTime = item.read_at ? new Date(item.read_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Unknown';
+            return `<li><span class="reader-name">${escapeHtml(name)}</span> <span class="reader-time">${readTime}</span></li>`;
+          }).join('');
+          modal.innerHTML = `<h4>Seen by (${data.length})</h4><ul>${listItems}</ul>`;
+        }
+        modal.style.left = e.pageX + 10 + 'px';
+        modal.style.top = e.pageY + 10 + 'px';
+        modal.style.display = 'block';
+        const hideModal = (ev) => {
+          if (!modal.contains(ev.target)) {
+            modal.style.display = 'none';
+            document.removeEventListener('click', hideModal);
+          }
+        };
+        setTimeout(() => document.addEventListener('click', hideModal), 0);
+      }
+
+      // --- Append new message to UI (real-time) ---
+      function appendMessageToUI(message, isSent, senderName, senderId, messageRole, isUnread = false) {
+        if (document.querySelector(`.message-row[data-message-id="${message.id}"]`)) return;
+        if (isCEO) {
+          if (selectedGroupRole && messageRole !== selectedGroupRole) return;
+        } else {
+          if (messageRole !== currentRole) return;
+        }
+        const area = document.getElementById('messagesArea');
+        if (!area) return;
+        const lastMessageRow = area.querySelector('.message-row:last-child');
+        let lastDate = lastMessageRow ? lastMessageRow.dataset.createdAt : null;
+        const separatorHtml = maybeAppendDateSeparator(lastDate, message.created_at);
+        const isScrolledToBottom = area.scrollHeight - area.scrollTop <= area.clientHeight + 50;
+        if (separatorHtml) area.insertAdjacentHTML('beforeend', separatorHtml);
+        const msgHtml = renderMessage(message, isSent, senderName, senderId, messageRole, isUnread);
+        area.insertAdjacentHTML('beforeend', msgHtml);
+        if (isScrolledToBottom) area.scrollTop = area.scrollHeight;
+        attachMessageHandlers();
+        if (isUnread) {
+          const newRow = document.querySelector(`.message-row[data-message-id="${message.id}"]`);
+          if (observer && newRow) observer.observe(newRow);
+        }
+      }
+
+      // --- Typing indicator ---
+      function updateTypingIndicator() {
+        if (activeTypers.size === 0) {
+          typingContainer.style.display = 'none';
+          return;
+        }
+        const names = Array.from(activeTypers);
+        let text = '';
+        if (names.length === 1) {
+          text = `${names[0]} is typing...`;
+        } else if (names.length === 2) {
+          text = `${names[0]} and ${names[1]} are typing...`;
+        } else {
+          text = `${names.length} people are typing...`;
+        }
+        typingText.textContent = text;
+        typingContainer.style.display = 'block';
+      }
+
+      async function sendTypingIndicator() {
+        if (!currentUser || (isCEO && !selectedGroupRole) || (!isCEO && !currentRole)) return;
+        const channel = isCEO ? (selectedGroupRole ? `typing-${selectedGroupRole}` : 'typing-all') : `typing-${currentRole}`;
+        await supabase.channel(channel).send({
+          type: 'broadcast',
+          event: 'typing',
+          payload: { userId: currentUser.id, userName: currentUserFullName, timestamp: Date.now() }
+        });
+      }
+
+      function setupTypingSubscription() {
+        if (typingSubscription) typingSubscription.unsubscribe();
+        const channel = isCEO ? (selectedGroupRole ? `typing-${selectedGroupRole}` : 'typing-all') : `typing-${currentRole}`;
+        typingSubscription = supabase
+          .channel(channel)
+          .on('broadcast', { event: 'typing' }, (payload) => {
+            const { userId, userName, timestamp } = payload.payload;
+            if (userId === currentUser.id) return;
+            if (typingTimeouts[userId]) clearTimeout(typingTimeouts[userId]);
+            activeTypers.add(userName);
+            updateTypingIndicator();
+            typingTimeouts[userId] = setTimeout(() => {
+              activeTypers.delete(userName);
+              updateTypingIndicator();
+              delete typingTimeouts[userId];
+            }, 3000);
           })
           .subscribe();
       }
 
-      // --- Load user and populate dashboard ---
-      async function loadDashboard() {
-        try {
-          const { data: { user }, error } = await supabase.auth.getUser();
-          if (error || !user) {
-            window.location.href = '/index.html';
-            return;
-          }
-          currentUser = user;
-          const metadata = user.user_metadata || {};
-          const fullName = metadata.full_name || 'User';
-          const jobRole = metadata.job_role || 'Not specified';
-          const firstName = fullName.split(' ')[0] || 'User';
-          const email = user.email || '—';
-          const createdAt = user.created_at 
-            ? new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) 
-            : '—';
+      // --- Subscribe to group messages ---
+      function subscribeToMessages() {
+        if (messageSubscription) messageSubscription.unsubscribe();
+        setupTypingSubscription();
 
-          currentRole = jobRole;
-          isCEO = (currentRole === 'CEO');
-
-          document.getElementById('userName').textContent = firstName;
-
-          // Compact user info cards (3 only)
-          const grid = document.getElementById('userInfoGrid');
-          grid.innerHTML = `
-            <div class="card">
-              <div class="card-title"><i class="fas fa-user"></i> User</div>
-              <div class="card-value">${fullName}</div>
-              <div class="card-label">${jobRole}</div>
-            </div>
-            <div class="card">
-              <div class="card-title"><i class="fas fa-envelope"></i> Email</div>
-              <div class="card-value" style="font-size:1.4rem;">${email}</div>
-              <div class="card-label">contact</div>
-            </div>
-            <div class="card">
-              <div class="card-title"><i class="fas fa-calendar"></i> Member since</div>
-              <div class="card-value" style="font-size:1.4rem;">${createdAt}</div>
-              <div class="card-label">join date</div>
-            </div>
-          `;
-
-          // Show/hide CEO announcement form
-          const ceoForm = document.getElementById('ceoAnnouncementForm');
-          if (isCEO) {
-            ceoForm.style.display = 'block';
-            document.getElementById('postAnnouncementBtn').addEventListener('click', postAnnouncement);
-            // Delete any announcements older than 24 hours on load
-            await deleteOldAnnouncements();
-          } else {
-            ceoForm.style.display = 'none';
-          }
-
-          // Load announcements (only last 24h)
-          await loadAnnouncements();
-          subscribeToAnnouncements();
-
-          // Make deleteAnnouncement globally accessible for inline onclick
-          window.deleteAnnouncement = deleteAnnouncement;
-
-          // Start periodic unread sync
-          refreshUnreadBadge();
-          refreshInterval = setInterval(refreshUnreadBadge, 10000);
-          document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) refreshUnreadBadge();
-          });
-
-          // Load extended stats & chart & activity
-          await Promise.all([
-            updateStatsCards(),
-            renderChart(),
-            renderActivity()
-          ]);
-
-        } catch (err) {
-          console.error('Dashboard load error:', err);
+        if (isCEO) {
+          messageSubscription = supabase
+            .channel('all-messages')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'group_messages' }, async (payload) => {
+              const newMsg = payload.new;
+              if (document.querySelector(`.message-row[data-message-id="${newMsg.id}"]`)) return;
+              if (activeTypers.has(currentUserFullName)) { activeTypers.delete(currentUserFullName); updateTypingIndicator(); }
+              if (newMsg.sender_id === currentUser.id) return;
+              const { data: senderProfile } = await supabase
+                .from('profiles')
+                .select('full_name')
+                .eq('id', newMsg.sender_id)
+                .single();
+              const senderName = senderProfile?.full_name || 'Unknown';
+              appendMessageToUI(newMsg, false, senderName, newMsg.sender_id, newMsg.role, true);
+              totalUnreadCount++;
+              if (selectedGroupRole === null || newMsg.role === selectedGroupRole) currentUnreadCount++;
+              updateUnreadBadges();
+              if (isCEO) buildGroupTabs();
+            })
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'group_messages' }, (payload) => {
+              updateMessageInUI(payload.new.id, payload.new.content);
+            })
+            .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'group_messages' }, (payload) => {
+              removeMessageFromUI(payload.old.id);
+            })
+            .subscribe();
+        } else {
+          messageSubscription = supabase
+            .channel(`group-${currentRole}`)
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, async (payload) => {
+              const newMsg = payload.new;
+              if (document.querySelector(`.message-row[data-message-id="${newMsg.id}"]`)) return;
+              if (activeTypers.has(currentUserFullName)) { activeTypers.delete(currentUserFullName); updateTypingIndicator(); }
+              if (newMsg.sender_id === currentUser.id) return;
+              const { data: senderProfile } = await supabase
+                .from('profiles')
+                .select('full_name')
+                .eq('id', newMsg.sender_id)
+                .single();
+              const senderName = senderProfile?.full_name || 'Unknown';
+              appendMessageToUI(newMsg, false, senderName, newMsg.sender_id, newMsg.role, true);
+              currentUnreadCount++;
+              updateUnreadBadges();
+            })
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, (payload) => {
+              updateMessageInUI(payload.new.id, payload.new.content);
+            })
+            .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, (payload) => {
+              removeMessageFromUI(payload.old.id);
+            })
+            .subscribe();
         }
       }
 
+      // --- Send group message ---
+      async function sendMessage() {
+        const input = document.getElementById('messageInput');
+        const content = input.value.trim();
+        if (!content || !currentUser) return;
+
+        let messageRole;
+        if (isCEO) {
+          if (!selectedGroupRole) { alert('Please select a group first.'); return; }
+          messageRole = selectedGroupRole;
+        } else {
+          messageRole = currentRole;
+        }
+
+        if (activeTypers.has(currentUserFullName)) { activeTypers.delete(currentUserFullName); updateTypingIndicator(); }
+
+        const tempId = 'temp-' + Date.now();
+        const optimisticMessage = {
+          id: tempId,
+          content: content,
+          created_at: new Date().toISOString(),
+          sender_id: currentUser.id,
+          role: messageRole
+        };
+        appendMessageToUI(optimisticMessage, true, currentUserFullName, currentUser.id, messageRole, false);
+        input.value = '';
+
+        const { data, error } = await supabase
+          .from('group_messages')
+          .insert({ role: messageRole, sender_id: currentUser.id, content: content })
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Send error:', error);
+          document.querySelector(`.message-row[data-message-id="${tempId}"]`)?.remove();
+          alert('Failed to send: ' + error.message);
+          return;
+        }
+
+        const tempRow = document.querySelector(`.message-row[data-message-id="${tempId}"]`);
+        if (tempRow) tempRow.dataset.messageId = data.id;
+
+        try {
+          await supabase
+            .from('message_reads')
+            .insert({ message_id: data.id, user_id: currentUser.id });
+          readMessageIds.add(data.id);
+        } catch (readErr) {}
+      }
+
+      // --- DM FUNCTIONS with professional mobile transition ---
+      async function loadPrivateMessagesView() {
+        try {
+          if (messageSubscription) messageSubscription.unsubscribe();
+          if (observer) observer.disconnect();
+
+          document.getElementById('groupTitle').innerText = 'Direct Messages';
+          document.getElementById('roleDisplay').style.display = 'none';
+          document.getElementById('groupTabs').style.display = 'none';
+          document.getElementById('messageInput').disabled = true;
+          document.getElementById('sendBtn').disabled = true;
+
+          const { data: allProfiles, error: profilesError } = await supabase
+            .from('profiles')
+            .select('id, full_name, job_role')
+            .neq('id', currentUser.id);
+
+          if (profilesError) throw profilesError;
+
+          const unreadCounts = {};
+          for (const profile of allProfiles) {
+            const { count, error: countError } = await supabase
+              .from('private_messages')
+              .select('*', { count: 'exact', head: true })
+              .eq('sender_id', profile.id)
+              .eq('recipient_id', currentUser.id)
+              .is('read_at', null);
+
+            if (!countError && count > 0) {
+              unreadCounts[profile.id] = count;
+            }
+          }
+          dmUnreadBySender = unreadCounts;
+          updateDMBadge();
+
+          const conversationsHtml = allProfiles.map(profile => {
+            const unread = unreadCounts[profile.id] || 0;
+            const unreadBadge = unread > 0 ? `<span class="dm-unread-badge">${unread}</span>` : '';
+            const onlineClass = onlineUsers.has(profile.id) ? 'online' : '';
+            return `
+              <div class="dm-conversation-item" data-user-id="${profile.id}" data-user-name="${escapeHtml(profile.full_name)}" data-user-role="${escapeHtml(profile.job_role)}">
+                <span class="status-dot ${onlineClass}"></span>
+                <div class="dm-conv-content">
+                  <div class="dm-conv-name">${escapeHtml(profile.full_name)}</div>
+                  <div class="dm-conv-role">${escapeHtml(profile.job_role)}</div>
+                </div>
+                ${unreadBadge}
+              </div>
+            `;
+          }).join('');
+
+          const area = document.getElementById('messagesArea');
+          area.innerHTML = `
+            <div class="dm-layout">
+              <div class="dm-conversations-list" id="dmConversationsList">
+                <div class="dm-list-header">All Members</div>
+                ${conversationsHtml}
+              </div>
+              <div class="dm-chat-area" id="dmChatArea">
+                <div class="dm-chat-header">
+                  <button class="dm-back-btn" id="dmBackBtn" style="display:none;">←</button>
+                  <span class="dm-chat-title"></span>
+                </div>
+                <div id="dmChatMessages" class="dm-chat-messages"></div>
+                <div class="dm-chat-input">
+                  <input type="text" id="dmChatInput" placeholder="Type a message...">
+                  <button id="dmChatSendBtn">➤</button>
+                </div>
+              </div>
+            </div>
+          `;
+
+          // Attach click handlers
+          document.querySelectorAll('.dm-conversation-item').forEach(item => {
+            item.addEventListener('click', async () => {
+              const userId = item.dataset.userId;
+              const userName = item.dataset.userName;
+              const userRole = item.dataset.userRole;
+              await openPrivateChat(userId, { full_name: userName, job_role: userRole });
+              document.querySelectorAll('.dm-conversation-item').forEach(i => i.classList.remove('active'));
+              item.classList.add('active');
+              const badge = item.querySelector('.dm-unread-badge');
+              if (badge) {
+                badge.remove();
+                delete dmUnreadBySender[userId];
+                updateDMBadge();
+              }
+              // On mobile, hide list and show chat with back button
+              if (window.innerWidth <= 768) {
+                document.getElementById('dmConversationsList').style.display = 'none';
+                document.getElementById('dmChatArea').classList.add('active');
+                document.getElementById('dmBackBtn').style.display = 'inline-block';
+              }
+            });
+          });
+
+          // Back button functionality
+          document.getElementById('dmBackBtn').addEventListener('click', () => {
+            document.getElementById('dmConversationsList').style.display = 'block';
+            document.getElementById('dmChatArea').classList.remove('active');
+            document.getElementById('dmBackBtn').style.display = 'none';
+          });
+
+        } catch (err) {
+          console.error('Load DM view error:', err);
+          document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Failed to load direct messages.</div>';
+        }
+      }
+
+      async function openPrivateChat(otherUserId, otherProfile) {
+        const chatArea = document.getElementById('dmChatArea');
+        const headerTitle = document.querySelector('.dm-chat-title');
+        const messagesDiv = document.getElementById('dmChatMessages');
+        const input = document.getElementById('dmChatInput');
+        const sendBtn = document.getElementById('dmChatSendBtn');
+
+        headerTitle.innerHTML = `${escapeHtml(otherProfile.full_name)} <span style="font-size:0.85rem;color:#9aa4bf;">(${escapeHtml(otherProfile.job_role)})</span>`;
+        chatArea.style.display = 'flex';
+        input.focus();
+
+        try {
+          const { data, error } = await supabase
+            .from('private_messages')
+            .select('*')
+            .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`)
+            .order('created_at', { ascending: true });
+
+          if (error) throw error;
+
+          let html = '';
+          let lastDate = null;
+          for (const msg of data) {
+            const isSent = msg.sender_id === currentUser.id;
+            const timeStr = formatTimeOnly(msg.created_at);
+            const dateHeader = maybeAppendDateSeparator(lastDate, msg.created_at);
+            if (dateHeader) html += dateHeader.replace('date-separator', 'dm-date-separator');
+            lastDate = msg.created_at;
+
+            // Seen indicator for sent messages
+            let seenHtml = '';
+            if (isSent && msg.read_at) {
+              const { data: reader } = await supabase
+                .from('profiles')
+                .select('full_name')
+                .eq('id', otherUserId)
+                .single();
+              const readerName = reader?.full_name || 'User';
+              seenHtml = `<div class="dm-seen-indicator"><span class="double-tick">✓✓</span> Seen by ${escapeHtml(readerName)} at ${formatTimeOnly(msg.read_at)}</div>`;
+            }
+
+            html += `
+              <div class="dm-msg-row ${isSent ? 'sent' : 'received'}" data-message-id="${msg.id}" data-created-at="${msg.created_at}">
+                <div class="dm-msg ${isSent ? 'sent' : 'received'}">
+                  ${escapeHtml(msg.content)}
+                  <small>${timeStr}</small>
+                  ${seenHtml}
+                </div>
+              </div>
+            `;
+            if (!isSent && !msg.read_at) {
+              markDirectMessageAsRead(msg.id, otherUserId);
+            }
+          }
+          messagesDiv.innerHTML = html || '<div style="color:#9aa4bf; text-align:center; padding:2rem;">No messages yet. Say hello!</div>';
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+          // Attach right-click to DM messages
+          document.querySelectorAll('.dm-msg-row').forEach(row => {
+            row.addEventListener('contextmenu', onRightClick);
+          });
+
+          sendBtn.onclick = () => sendPrivateMessage(otherUserId);
+          input.onkeypress = (e) => { if (e.key === 'Enter') sendPrivateMessage(otherUserId); };
+          input.value = '';
+
+        } catch (err) {
+          console.error('Load private chat error:', err);
+          messagesDiv.innerHTML = '<div style="color:#ff628c;">Failed to load messages.</div>';
+        }
+      }
+
+      async function sendPrivateMessage(otherUserId) {
+        const input = document.getElementById('dmChatInput');
+        const content = input.value.trim();
+        if (!content) return;
+        input.value = '';
+
+        try {
+          const { data, error } = await supabase
+            .from('private_messages')
+            .insert({ sender_id: currentUser.id, recipient_id: otherUserId, content: content })
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          const messagesDiv = document.getElementById('dmChatMessages');
+          const timeStr = formatTimeOnly(data.created_at);
+          const msgHtml = `
+            <div class="dm-msg-row sent" data-message-id="${data.id}" data-created-at="${data.created_at}">
+              <div class="dm-msg sent">
+                ${escapeHtml(data.content)}
+                <small>${timeStr}</small>
+              </div>
+            </div>
+          `;
+          messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        } catch (err) {
+          console.error('Send private message error:', err);
+          alert('Failed to send: ' + err.message);
+        }
+      }
+
+      async function markDirectMessageAsRead(messageId, senderId) {
+        try {
+          await supabase
+            .from('private_messages')
+            .update({ read_at: new Date().toISOString() })
+            .eq('id', messageId)
+            .eq('recipient_id', currentUser.id);
+        } catch (err) { console.error('Mark DM read error:', err); }
+        if (senderId && dmUnreadBySender[senderId]) {
+          dmUnreadBySender[senderId] = Math.max(0, dmUnreadBySender[senderId] - 1);
+          updateDMBadge();
+        }
+      }
+
+      function subscribeToAllDirectMessages() {
+        if (globalDmSubscription) globalDmSubscription.unsubscribe();
+        if (!currentUser) return;
+        globalDmSubscription = supabase
+          .channel(`dm-global-${currentUser.id}`)
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'private_messages', filter: `recipient_id=eq.${currentUser.id}` }, async (payload) => {
+            const newMsg = payload.new;
+            if (newMsg.sender_id === currentUser.id) return;
+
+            if (document.getElementById('dmNavLink').classList.contains('active')) {
+              const activeItem = document.querySelector('.dm-conversation-item.active');
+              if (activeItem && activeItem.dataset.userId === newMsg.sender_id) {
+                // Chat open – append and mark read
+                const messagesDiv = document.getElementById('dmChatMessages');
+                const timeStr = formatTimeOnly(newMsg.created_at);
+                const msgHtml = `
+                  <div class="dm-msg-row received" data-message-id="${newMsg.id}" data-created-at="${newMsg.created_at}">
+                    <div class="dm-msg received">
+                      ${escapeHtml(newMsg.content)}
+                      <small>${timeStr}</small>
+                    </div>
+                  </div>
+                `;
+                messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                markDirectMessageAsRead(newMsg.id, newMsg.sender_id);
+                return;
+              }
+            }
+
+            dmUnreadBySender[newMsg.sender_id] = (dmUnreadBySender[newMsg.sender_id] || 0) + 1;
+            updateDMBadge();
+
+            if (document.getElementById('dmNavLink').classList.contains('active')) {
+              const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${newMsg.sender_id}"]`);
+              if (targetItem) {
+                let badge = targetItem.querySelector('.dm-unread-badge');
+                const currentCount = dmUnreadBySender[newMsg.sender_id];
+                if (badge) {
+                  badge.textContent = currentCount;
+                } else {
+                  badge = document.createElement('span');
+                  badge.className = 'dm-unread-badge';
+                  badge.textContent = currentCount;
+                  targetItem.appendChild(badge);
+                }
+              }
+            }
+
+            let senderName = 'Someone';
+            try {
+              const { data: prof } = await supabase
+                .from('profiles')
+                .select('full_name')
+                .eq('id', newMsg.sender_id)
+                .single();
+              if (prof && prof.full_name) senderName = prof.full_name;
+            } catch (e) {}
+            showToast(`New DM from ${senderName}`);
+          })
+          .subscribe();
+      }
+
+      // --- Navigation ---
+      document.getElementById('chatNavLink').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('chatNavLink').classList.add('active');
+        document.getElementById('dmNavLink').classList.remove('active');
+        document.getElementById('groupTabs').style.display = isCEO ? 'flex' : 'none';
+        document.getElementById('roleDisplay').style.display = isCEO ? 'none' : 'inline';
+        document.getElementById('chatInputArea').style.display = 'flex';
+        document.getElementById('messageInput').disabled = isCEO && !selectedGroupRole;
+        document.getElementById('sendBtn').disabled = isCEO && !selectedGroupRole;
+        loadMessages();
+      });
+
+      document.getElementById('dmNavLink').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('chatNavLink').classList.remove('active');
+        document.getElementById('dmNavLink').classList.add('active');
+        document.getElementById('groupTabs').style.display = 'none';
+        document.getElementById('roleDisplay').style.display = 'none';
+        document.getElementById('chatInputArea').style.display = 'none';
+        loadPrivateMessagesView();
+      });
+
       // --- Logout ---
       document.getElementById('logout').addEventListener('click', async () => {
-        if (refreshInterval) clearInterval(refreshInterval);
-        if (announcementsChannel) announcementsChannel.unsubscribe();
+        if (messageSubscription) messageSubscription.unsubscribe();
+        if (typingSubscription) typingSubscription.unsubscribe();
+        if (presenceChannel) await presenceChannel.untrack();
+        if (globalDmSubscription) globalDmSubscription.unsubscribe();
+        editTimeouts.forEach(t => clearTimeout(t));
+        editTimeouts.clear();
         await supabase.auth.signOut();
         window.location.href = 'index.html';
       });
 
-      // --- Initialise ---
-      loadDashboard();
+      document.getElementById('sendBtn').addEventListener('click', sendMessage);
+      document.getElementById('messageInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+      window.addEventListener('scroll', () => modal.style.display = 'none', true);
+      document.addEventListener('click', (e) => {
+        if (!modal.contains(e.target)) modal.style.display = 'none';
+      });
+
+      // --- Initialization ---
+      async function init() {
+        try {
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
+          if (userError || !user) { window.location.href = '/index.html'; return; }
+          currentUser = user;
+          const metadata = user.user_metadata || {};
+          currentUserFullName = metadata.full_name || 'User';
+          const jobRole = metadata.job_role;
+
+          if (!jobRole) {
+            document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">No job role assigned. Please contact admin.</div>';
+            return;
+          }
+
+          currentRole = jobRole;
+          isCEO = (currentRole === 'CEO');
+
+          await setupPresence();
+          subscribeToAllDirectMessages();
+
+          const messageInput = document.getElementById('messageInput');
+          let typingTimeout;
+          messageInput.addEventListener('input', () => {
+            if (typingTimeout) clearTimeout(typingTimeout);
+            sendTypingIndicator();
+            typingTimeout = setTimeout(() => {}, 2000);
+          });
+
+          if (isCEO) {
+            document.getElementById('groupTitle').innerText = 'Group Chat (CEO)';
+            document.getElementById('roleDisplay').style.display = 'none';
+            await updateTotalUnreadCount();
+            await buildGroupTabs();
+            subscribeToMessages();
+          } else {
+            document.getElementById('groupTitle').innerText = 'Group';
+            document.getElementById('roleDisplay').textContent = currentRole;
+            selectedGroupRole = currentRole;
+            document.getElementById('messageInput').disabled = false;
+            document.getElementById('sendBtn').disabled = false;
+            await loadMessages();
+            subscribeToMessages();
+          }
+        } catch (err) {
+          console.error('Init error:', err);
+          document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Failed to load chat. Please refresh.</div>';
+        }
+      }
+
+      init();
     })();
   </script>
-  <!-- 
-    Note: For automatic 24-hour deletion without relying on CEO actions,
-    create a Supabase cron job (pg_cron) that runs daily:
-    DELETE FROM announcements WHERE created_at < NOW() - INTERVAL '24 hours';
-  -->
 </body>
 </html>
