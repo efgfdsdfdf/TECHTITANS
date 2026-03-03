@@ -269,9 +269,13 @@
       justify-content: flex-end;
     }
 
-    .message-row.unread .message.received,
-    .message-row.unread .message.sent {
-      box-shadow: 0 0 0 2px #428cff80;
+    /* Unread indicator: blue left border */
+    .message-row.unread .message {
+      border-left: 4px solid #428cff;
+    }
+    .message-row.sent.unread .message {
+      border-left: 4px solid #428cff;
+      border-radius: 1.5rem 1.5rem 0.2rem 1.5rem;
     }
 
     .avatar {
@@ -328,6 +332,7 @@
       word-break: break-word;
       line-height: 1.4;
       position: relative;
+      transition: border-color 0.2s;
     }
 
     .message.sent {
@@ -807,6 +812,7 @@
     .dm-voice-btn { background:#2f3a5a; border:none; color:white; width:3rem; height:3rem; border-radius:50%; cursor:pointer; font-size:1.2rem; transition:0.2s; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
     .dm-msg-row { display:flex; margin-bottom:0.5rem; cursor:pointer; }
     .dm-msg-row.sent { justify-content:flex-end; }
+    .dm-msg-row.unread .dm-msg { border-left: 4px solid #428cff; }
     .dm-msg { max-width:60%; padding:0.8rem 1rem; border-radius:1.2rem; word-wrap:break-word; font-size:0.9rem; line-height:1.4; position:relative; }
     .dm-msg.sent { background:#428cff; color:white; }
     .dm-msg.received { background:#1f2a44; color:#e0e7ff; }
@@ -830,6 +836,145 @@
       transition: opacity 0.3s;
     }
     .toast.hide { opacity: 0; }
+
+    /* === NEW: Call modal styles === */
+    .call-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    .call-modal-content {
+      background: #1f2a44;
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      max-width: 800px;
+      width: 90%;
+      color: white;
+    }
+    .call-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .call-modal-header h3 {
+      font-size: 1.2rem;
+    }
+    .call-modal-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    .call-videos {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .video-container {
+      background: #0b0f17;
+      border-radius: 1rem;
+      overflow: hidden;
+      width: 300px;
+      height: 200px;
+      position: relative;
+    }
+    .video-container video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .video-label {
+      position: absolute;
+      bottom: 0.5rem;
+      left: 0.5rem;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.5rem;
+      font-size: 0.8rem;
+    }
+    .call-controls {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    .call-controls button {
+      background: #428cff;
+      border: none;
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .call-controls button.hangup {
+      background: #ff4d4d;
+    }
+    .call-controls button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Call options modal (for DM) */
+    .call-options-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1500;
+    }
+    .call-options-content {
+      background: #1f2a44;
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      width: 300px;
+      color: white;
+      text-align: center;
+    }
+    .call-options-content h3 {
+      margin-bottom: 1rem;
+    }
+    .call-option-btn {
+      background: #2f3a5a;
+      border: none;
+      color: white;
+      padding: 1rem;
+      margin: 0.5rem 0;
+      width: 100%;
+      border-radius: 2rem;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: background 0.2s;
+    }
+    .call-option-btn:hover {
+      background: #428cff;
+    }
+    .call-option-btn.video { background: #428cff; }
+    .call-option-btn.video:hover { background: #5f9eff; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -856,6 +1001,8 @@
         <span class="role-tag" id="roleDisplay"></span>
         <div class="online-count" id="onlineCount">0 online</div>
         <div id="groupTabs" class="group-tabs" style="display: none;"></div>
+        <!-- === NEW: Group call button (visible only in group chat) === -->
+        <button id="groupCallBtn" class="voice-btn" style="display: none; background:#2f3a5a;" title="Join group call">📞</button>
       </div>
       <div class="messages-area" id="messagesArea" oncontextmenu="return false;"></div>
       
@@ -881,1668 +1028,1958 @@
   <div id="receiptsModal" class="read-receipts-modal" style="display: none;"></div>
   <div id="toast" class="toast hide" style="display: none;"></div>
 
-  <script>
-    (function() {
-      const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kcXF0c2RpYnR2eW1mZ250c3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTI1NjIsImV4cCI6MjA4Nzg4ODU2Mn0.hS-7kmoyFljnhkJEkw7nmgimw9ioQreidyu27_NXYyo';
+  <!-- === NEW: Call options modal (for DM) === -->
+  <div id="callOptionsModal" class="call-options-modal" style="display: none;">
+    <div class="call-options-content">
+      <h3>Start a call with <span id="callWithUserName"></span></h3>
+      <button class="call-option-btn video" id="startVideoCallBtn">📹 Video Call</button>
+      <button class="call-option-btn" id="startVoiceCallBtn">🎤 Voice Call</button>
+      <button class="call-option-btn" id="cancelCallOptionsBtn" style="background:#ff4d4d;">Cancel</button>
+    </div>
+  </div>
 
-      let supabase;
-      try {
-        if (!window.supabase) throw new Error('Supabase library failed to load.');
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      } catch (e) {
-        console.error(e);
-        document.body.innerHTML = '<p style="color:white;padding:2rem;">Service unavailable. Please refresh.</p>';
-        return;
-      }
+  <!-- === NEW: Active call modal === -->
+  <div id="callModal" class="call-modal" style="display: none;">
+    <div class="call-modal-content">
+      <div class="call-modal-header">
+        <h3 id="callModalTitle">Call with ...</h3>
+        <button class="call-modal-close" id="closeCallModalBtn">&times;</button>
+      </div>
+      <div class="call-videos" id="callVideos">
+        <div class="video-container" id="localVideoContainer">
+          <video id="localVideo" autoplay muted playsinline></video>
+          <div class="video-label">You</div>
+        </div>
+        <div class="video-container" id="remoteVideoContainer">
+          <video id="remoteVideo" autoplay playsinline></video>
+          <div class="video-label" id="remoteVideoLabel">Remote</div>
+        </div>
+      </div>
+      <div class="call-controls">
+        <button id="muteAudioBtn" title="Mute">🎤</button>
+        <button id="muteVideoBtn" title="Stop video">📹</button>
+        <button id="hangupCallBtn" class="hangup" title="Hang up">📞 Hang Up</button>
+      </div>
+    </div>
+  </div>
 
-      // --- Global state ---
-      let currentUser = null;
-      let currentUserFullName = 'User';
-      let currentRole = null;
-      let isCEO = false;
-      let selectedGroupRole = null;
-      let availableRoles = [];
-      let messageSubscription = null;
-      let readMessageIds = new Set();
-      let currentUnreadCount = 0;
-      let totalUnreadCount = 0;
-      let editTimeouts = new Map();
-      let observer = null;
-      // Direct messages
-      let dmUnreadCount = 0;
-      let dmUnreadBySender = {};
-      let openDMUserId = null;
-      let globalDmSubscription = null;
-      let dmSubscription = null;
-      let dmObserver = null;
-      let currentRecipientId = null;       // <-- store active DM recipient
-      // Online presence
-      let presenceChannel = null;
-      let onlineUsers = new Map();
-      // Typing
-      let typingTimeouts = {};
-      let activeTypers = new Set();
-      let typingSubscription = null;
+<script>
+  (function() {
+    const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kcXF0c2RpYnR2eW1mZ250c3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTI1NjIsImV4cCI6MjA4Nzg4ODU2Mn0.hS-7kmoyFljnhkJEkw7nmgimw9ioQreidyu27_NXYyo';
 
-      // Voice recording
-      let mediaRecorder = null;
-      let audioChunks = [];
-      let recordingStartTime = null;
-      let recordingTimerInterval = null;
-      let isRecording = false;
+    let supabase;
+    try {
+      if (!window.supabase) throw new Error('Supabase library failed to load.');
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch (e) {
+      console.error(e);
+      document.body.innerHTML = '<p style="color:white;padding:2rem;">Service unavailable. Please refresh.</p>';
+      return;
+    }
 
-      const modal = document.getElementById('receiptsModal');
-      const toast = document.getElementById('toast');
-      const typingContainer = document.getElementById('typingIndicatorContainer');
-      const typingText = document.getElementById('typingText');
+    // --- Global state ---
+    let currentUser = null;
+    let currentUserFullName = 'User';
+    let currentRole = null;
+    let isCEO = false;
+    let selectedGroupRole = null;
+    let availableRoles = [];
+    let messageSubscription = null;
+    let messageReadsSubscription = null;   // subscription for read receipts
+    let readMessageIds = new Set();
+    let currentUnreadCount = 0;
+    let totalUnreadCount = 0;
+    let editTimeouts = new Map();
+    let observer = null;
+    // Direct messages
+    let dmUnreadCount = 0;
+    let dmUnreadBySender = {};
+    let openDMUserId = null;
+    let globalDmSubscription = null;
+    let dmSubscription = null;
+    let dmObserver = null;
+    let currentRecipientId = null;       // store active DM recipient
+    // Online presence
+    let presenceChannel = null;
+    let onlineUsers = new Map();
+    // Typing
+    let typingTimeouts = {};
+    let activeTypers = new Set();
+    let typingSubscription = null;
 
-      // --- Helper functions (unchanged) ---
-      function formatDateHeader(date) {
-        const now = new Date();
-        const msgDate = new Date(date);
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
-        const msgDay = new Date(msgDate.getFullYear(), msgDate.getMonth(), msgDate.getDate());
-        if (msgDay.getTime() === today.getTime()) return 'Today';
-        else if (msgDay.getTime() === yesterday.getTime()) return 'Yesterday';
-        else return msgDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-      }
-      function formatTimeOnly(date) {
-        return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      }
-      function stringToColor(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-        const hue = Math.abs(hash % 360);
-        return `hsl(${hue}, 70%, 50%)`;
-      }
-      function getInitials(name) {
-        if (!name) return '?';
-        const parts = name.trim().split(/\s+/);
-        if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-        return (parts[0].charAt(0) + parts[parts.length-1].charAt(0)).toUpperCase();
-      }
-      function escapeHtml(unsafe) {
-        return unsafe.replace(/[&<>"']/g, function(m) {
-          if(m === '&') return '&amp;';
-          if(m === '<') return '&lt;';
-          if(m === '>') return '&gt;';
-          if(m === '"') return '&quot;';
-          if(m === "'") return '&#039;';
-          return m;
-        });
-      }
-      function showToast(text) {
-        toast.textContent = text;
-        toast.style.display = 'block';
-        toast.classList.remove('hide');
-        setTimeout(() => {
-          toast.classList.add('hide');
-          setTimeout(() => toast.style.display = 'none', 300);
-        }, 3000);
-      }
+    // Voice recording
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let recordingStartTime = null;
+    let recordingTimerInterval = null;
+    let isRecording = false;
 
-      // --- Online presence (unchanged) ---
-      async function setupPresence() {
-        if (!currentUser) return;
-        presenceChannel = supabase.channel('online-users', {
-          config: { presence: { key: currentUser.id } }
-        });
-        presenceChannel
-          .on('presence', { event: 'sync' }, () => {
-            const state = presenceChannel.presenceState();
-            onlineUsers.clear();
-            Object.values(state).forEach(presences => {
-              presences.forEach(p => {
-                if (p.userId !== currentUser.id) {
-                  onlineUsers.set(p.userId, { name: p.name, role: p.role });
-                }
-              });
-            });
-            document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
-            if (document.getElementById('dmNavLink').classList.contains('active')) {
-              document.querySelectorAll('.dm-conversation-item').forEach(item => {
-                const uid = item.dataset.userId;
-                const dot = item.querySelector('.status-dot');
-                if (dot) {
-                  if (onlineUsers.has(uid)) dot.classList.add('online');
-                  else dot.classList.remove('online');
-                }
-              });
-            }
-          })
-          .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-            newPresences.forEach(p => {
-              if (p.userId !== currentUser.id) onlineUsers.set(p.userId, { name: p.name, role: p.role });
-            });
-            document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
-          })
-          .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-            leftPresences.forEach(p => onlineUsers.delete(p.userId));
-            document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
-          })
-          .subscribe(async (status) => {
-            if (status === 'SUBSCRIBED') {
-              await presenceChannel.track({
-                userId: currentUser.id,
-                name: currentUserFullName,
-                role: currentRole,
-                online_at: new Date().toISOString()
-              });
-            }
-          });
-      }
+    // Map to store 30-second timeouts for removing unread border
+    let unreadBorderTimeouts = new Map();
 
-      // --- Update unread badges (group) ---
-      function updateUnreadBadges() {
-        const headerBadge = document.getElementById('unreadBadge');
-        if (currentUnreadCount > 0) {
-          headerBadge.style.display = 'inline';
-          headerBadge.textContent = currentUnreadCount;
-        } else {
-          headerBadge.style.display = 'none';
-        }
+    // === NEW: Call-related variables ===
+    let callChannel = null;                // Supabase channel for signaling
+    let peerConnection = null;             // RTCPeerConnection for 1-1 calls
+    let localStream = null;
+    let remoteStream = null;
+    let callType = null;                   // 'video' or 'audio'
+    let callTarget = null;                 // For DM: other user ID; for group: group role
+    let isCaller = false;                  // Whether we initiated the call
+    let callActive = false;
+    let callOptionsModal = document.getElementById('callOptionsModal');
+    let callModal = document.getElementById('callModal');
+    let localVideo = document.getElementById('localVideo');
+    let remoteVideo = document.getElementById('remoteVideo');
+    let callWithUserNameSpan = document.getElementById('callWithUserName');
+    let callModalTitle = document.getElementById('callModalTitle');
+    let remoteVideoLabel = document.getElementById('remoteVideoLabel');
+    // Group call: we need multiple peer connections (mesh)
+    let groupPeerConnections = new Map();  // key: userId, value: { pc, stream }
+    // ICE servers (use free STUN)
+    const iceServers = {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+      ]
+    };
 
-        const sidebarBadge = document.getElementById('sidebarUnreadBadge');
-        if (isCEO) {
-          if (totalUnreadCount > 0) {
-            sidebarBadge.style.display = 'inline-block';
-            sidebarBadge.textContent = totalUnreadCount;
-          } else {
-            sidebarBadge.style.display = 'none';
-          }
-        } else {
-          if (currentUnreadCount > 0) {
-            sidebarBadge.style.display = 'inline-block';
-            sidebarBadge.textContent = currentUnreadCount;
-          } else {
-            sidebarBadge.style.display = 'none';
-          }
-        }
-      }
+    const modal = document.getElementById('receiptsModal');
+    const toast = document.getElementById('toast');
+    const typingContainer = document.getElementById('typingIndicatorContainer');
+    const typingText = document.getElementById('typingText');
 
-      function updateDMBadge() {
-        const dmBadge = document.getElementById('dmUnreadBadge');
-        dmUnreadCount = Object.values(dmUnreadBySender).reduce((a,b)=>a+b,0);
-        if (dmUnreadCount > 0) {
-          dmBadge.style.display = 'inline-block';
-          dmBadge.textContent = dmUnreadCount;
-        } else {
-          dmBadge.style.display = 'none';
-        }
-      }
+    // --- Helper functions (unchanged) ---
+    function formatDateHeader(date) {
+      const now = new Date();
+      const msgDate = new Date(date);
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const msgDay = new Date(msgDate.getFullYear(), msgDate.getMonth(), msgDate.getDate());
+      if (msgDay.getTime() === today.getTime()) return 'Today';
+      else if (msgDay.getTime() === yesterday.getTime()) return 'Yesterday';
+      else return msgDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    function formatTimeOnly(date) {
+      return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    function stringToColor(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      const hue = Math.abs(hash % 360);
+      return `hsl(${hue}, 70%, 50%)`;
+    }
+    function getInitials(name) {
+      if (!name) return '?';
+      const parts = name.trim().split(/\s+/);
+      if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+      return (parts[0].charAt(0) + parts[parts.length-1].charAt(0)).toUpperCase();
+    }
+    function escapeHtml(unsafe) {
+      return unsafe.replace(/[&<>"']/g, function(m) {
+        if(m === '&') return '&amp;';
+        if(m === '<') return '&lt;';
+        if(m === '>') return '&gt;';
+        if(m === '"') return '&quot;';
+        if(m === "'") return '&#039;';
+        return m;
+      });
+    }
+    function showToast(text) {
+      toast.textContent = text;
+      toast.style.display = 'block';
+      toast.classList.remove('hide');
+      setTimeout(() => {
+        toast.classList.add('hide');
+        setTimeout(() => toast.style.display = 'none', 300);
+      }, 3000);
+    }
 
-      // --- Mark group message as read ---
-      async function markMessageAsRead(messageId) {
-        if (readMessageIds.has(messageId)) return;
-        try {
-          const { error } = await supabase
-            .from('message_reads')
-            .insert({ message_id: messageId, user_id: currentUser.id })
-            .single();
-          if (error && error.code !== '23505') {
-            console.error('mark read error:', error);
-            return;
-          }
-          readMessageIds.add(messageId);
-          const msgRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
-          if (msgRow) {
-            msgRow.classList.remove('unread');
-            if (currentUnreadCount > 0) currentUnreadCount--;
-            if (isCEO && totalUnreadCount > 0) totalUnreadCount--;
-            updateUnreadBadges();
-            updateSeenIndicator(messageId);
-          }
-        } catch (err) {
-          console.error('markMessageAsRead error:', err);
-        }
-      }
-
-      async function updateSeenIndicator(messageId) {
-        const msgRow = document.querySelector(`.message-row.sent[data-message-id="${messageId}"]`);
-        if (!msgRow) return;
-        const { data } = await supabase
-          .from('message_reads')
-          .select('user_id, read_at, profiles!inner(full_name)')
-          .eq('message_id', messageId);
-        const count = data ? data.length : 0;
-        let seenHtml = '';
-        if (count > 0) {
-          const firstReader = data[0]?.profiles?.full_name || 'Someone';
-          seenHtml = `<div class="seen-indicator"><span class="double-tick">✓✓</span> ${firstReader}${count > 1 ? ` +${count-1}` : ''}</div>`;
-        }
-        const existing = msgRow.querySelector('.seen-indicator');
-        if (existing) existing.remove();
-        if (seenHtml) msgRow.querySelector('.message-bubble').insertAdjacentHTML('beforeend', seenHtml);
-      }
-
-      function setupObserver() {
-        if (observer) observer.disconnect();
-        observer = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              const row = entry.target;
-              const messageId = row.dataset.messageId;
-              if (messageId && !readMessageIds.has(messageId) && row.classList.contains('unread')) {
-                markMessageAsRead(messageId);
+    // --- Online presence ---
+    async function setupPresence() {
+      if (!currentUser) return;
+      presenceChannel = supabase.channel('online-users', {
+        config: { presence: { key: currentUser.id } }
+      });
+      presenceChannel
+        .on('presence', { event: 'sync' }, () => {
+          const state = presenceChannel.presenceState();
+          onlineUsers.clear();
+          Object.values(state).forEach(presences => {
+            presences.forEach(p => {
+              if (p.userId !== currentUser.id) {
+                onlineUsers.set(p.userId, { name: p.name, role: p.role });
               }
-            }
+            });
           });
-        }, { threshold: 0.5 });
-        document.querySelectorAll('.message-row.unread').forEach(row => observer.observe(row));
+          document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
+          if (document.getElementById('dmNavLink').classList.contains('active')) {
+            document.querySelectorAll('.dm-conversation-item').forEach(item => {
+              const uid = item.dataset.userId;
+              const dot = item.querySelector('.status-dot');
+              if (dot) {
+                if (onlineUsers.has(uid)) dot.classList.add('online');
+                else dot.classList.remove('online');
+              }
+            });
+          }
+        })
+        .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+          newPresences.forEach(p => {
+            if (p.userId !== currentUser.id) onlineUsers.set(p.userId, { name: p.name, role: p.role });
+          });
+          document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
+        })
+        .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+          leftPresences.forEach(p => onlineUsers.delete(p.userId));
+          document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
+        })
+        .subscribe(async (status) => {
+          if (status === 'SUBSCRIBED') {
+            await presenceChannel.track({
+              userId: currentUser.id,
+              name: currentUserFullName,
+              role: currentRole,
+              online_at: new Date().toISOString()
+            });
+          }
+        });
+    }
+
+    // --- Update unread badges (group) ---
+    function updateUnreadBadges() {
+      const headerBadge = document.getElementById('unreadBadge');
+      if (currentUnreadCount > 0) {
+        headerBadge.style.display = 'inline';
+        headerBadge.textContent = currentUnreadCount;
+      } else {
+        headerBadge.style.display = 'none';
       }
 
-      // --- Render message actions (edit/delete) - unchanged ---
-      function renderMessageActions(messageId, currentContent, createdAt, senderId, hasAudio) {
-        // Voice notes cannot be edited
-        if (hasAudio) return '';
-        const msgTime = new Date(createdAt).getTime();
-        const now = Date.now();
-        const age = now - msgTime;
-        const canEdit = (isCEO || senderId === currentUser.id) && age < 60000;
-        const canDelete = isCEO || senderId === currentUser.id;
-        if (canEdit && age < 60000) {
-          const timeLeft = 60000 - age;
-          if (timeLeft > 0) {
-            const timeoutId = setTimeout(() => {
-              const editBtn = document.querySelector(`.edit-btn[data-id="${messageId}"]`);
-              if (editBtn) editBtn.remove();
-            }, timeLeft);
-            editTimeouts.set(messageId, timeoutId);
-          }
+      const sidebarBadge = document.getElementById('sidebarUnreadBadge');
+      if (isCEO) {
+        if (totalUnreadCount > 0) {
+          sidebarBadge.style.display = 'inline-block';
+          sidebarBadge.textContent = totalUnreadCount;
+        } else {
+          sidebarBadge.style.display = 'none';
         }
+      } else {
+        if (currentUnreadCount > 0) {
+          sidebarBadge.style.display = 'inline-block';
+          sidebarBadge.textContent = currentUnreadCount;
+        } else {
+          sidebarBadge.style.display = 'none';
+        }
+      }
+    }
+
+    function updateDMBadge() {
+      const dmBadge = document.getElementById('dmUnreadBadge');
+      dmUnreadCount = Object.values(dmUnreadBySender).reduce((a,b)=>a+b,0);
+      if (dmUnreadCount > 0) {
+        dmBadge.style.display = 'inline-block';
+        dmBadge.textContent = dmUnreadCount;
+      } else {
+        dmBadge.style.display = 'none';
+      }
+    }
+
+    // --- 30-second unread border removal ---
+    function scheduleUnreadBorderRemoval(messageId) {
+      if (unreadBorderTimeouts.has(messageId)) {
+        clearTimeout(unreadBorderTimeouts.get(messageId));
+      }
+      const timeoutId = setTimeout(() => {
+        const row = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
+        if (row) {
+          row.classList.remove('unread');
+        }
+        unreadBorderTimeouts.delete(messageId);
+      }, 30000); // 30 seconds
+      unreadBorderTimeouts.set(messageId, timeoutId);
+    }
+
+    // --- Mark group message as read ---
+    async function markMessageAsRead(messageId) {
+      if (readMessageIds.has(messageId)) return;
+      try {
+        const { error } = await supabase
+          .from('message_reads')
+          .insert({ message_id: messageId, user_id: currentUser.id })
+          .single();
+        if (error && error.code !== '23505') {
+          console.error('mark read error:', error);
+          return;
+        }
+        readMessageIds.add(messageId);
+        const msgRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
+        if (msgRow) {
+          if (currentUnreadCount > 0) currentUnreadCount--;
+          if (isCEO && totalUnreadCount > 0) totalUnreadCount--;
+          updateUnreadBadges();
+          updateSeenIndicator(messageId);
+          scheduleUnreadBorderRemoval(messageId);
+        }
+      } catch (err) {
+        console.error('markMessageAsRead error:', err);
+      }
+    }
+
+    // --- Update the seen indicator on a sent message ---
+    async function updateSeenIndicator(messageId) {
+      const msgRow = document.querySelector(`.message-row.sent[data-message-id="${messageId}"]`);
+      if (!msgRow) return;
+      const { data } = await supabase
+        .from('message_reads')
+        .select('user_id, read_at, profiles!inner(full_name)')
+        .eq('message_id', messageId);
+      const count = data ? data.length : 0;
+      let seenHtml = '';
+      if (count > 0) {
+        const firstReader = data[0]?.profiles?.full_name || 'Someone';
+        seenHtml = `<div class="seen-indicator"><span class="double-tick">✓✓</span> ${firstReader}${count > 1 ? ` +${count-1}` : ''}</div>`;
+      }
+      const existing = msgRow.querySelector('.seen-indicator');
+      if (existing) existing.remove();
+      if (seenHtml) {
+        const bubble = msgRow.querySelector('.message-bubble');
+        if (bubble) bubble.insertAdjacentHTML('beforeend', seenHtml);
+      }
+    }
+
+    function setupObserver() {
+      if (observer) observer.disconnect();
+      observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const row = entry.target;
+            const messageId = row.dataset.messageId;
+            if (messageId && !readMessageIds.has(messageId) && row.classList.contains('unread')) {
+              markMessageAsRead(messageId);
+            }
+          }
+        });
+      }, { threshold: 0.5 });
+      document.querySelectorAll('.message-row.unread').forEach(row => observer.observe(row));
+    }
+
+    // --- Render message actions (edit/delete) - unchanged ---
+    function renderMessageActions(messageId, currentContent, createdAt, senderId, hasAudio) {
+      if (hasAudio) return '';
+      const msgTime = new Date(createdAt).getTime();
+      const now = Date.now();
+      const age = now - msgTime;
+      const canEdit = (isCEO || senderId === currentUser.id) && age < 60000;
+      const canDelete = isCEO || senderId === currentUser.id;
+      if (canEdit && age < 60000) {
+        const timeLeft = 60000 - age;
+        if (timeLeft > 0) {
+          const timeoutId = setTimeout(() => {
+            const editBtn = document.querySelector(`.edit-btn[data-id="${messageId}"]`);
+            if (editBtn) editBtn.remove();
+          }, timeLeft);
+          editTimeouts.set(messageId, timeoutId);
+        }
+      }
+      return `
+        <div class="message-actions">
+          ${canEdit ? `<button class="edit-btn" data-id="${messageId}" data-content="${escapeHtml(currentContent)}">✏️</button>` : ''}
+          ${canDelete ? `<button class="delete-btn" data-id="${messageId}">🗑️</button>` : ''}
+        </div>
+      `;
+    }
+
+    // --- Render a single message (supports audio) ---
+    function renderMessage(message, isSent, senderName, senderId, messageRole, isUnread = false, seenCount = 0) {
+      const initials = getInitials(senderName);
+      const avatarColor = stringToColor(senderName);
+      const timeStr = formatTimeOnly(message.created_at);
+      const unreadClass = isUnread ? 'unread' : '';
+      let roleBadge = '';
+      if (messageRole && (messageRole === 'CEO' || isCEO)) {
+        roleBadge = `<span class="role-badge">${escapeHtml(messageRole)}</span>`;
+      }
+      let seenHtml = '';
+      if (isSent && seenCount > 0) {
+        seenHtml = `<div class="seen-indicator"><span class="double-tick">✓✓</span> Seen</div>`;
+      }
+
+      let contentHtml = '';
+      if (message.audio_url) {
+        contentHtml = `<audio controls src="${escapeHtml(message.audio_url)}"></audio>`;
+      } else {
+        contentHtml = escapeHtml(message.content);
+      }
+
+      if (isSent) {
         return `
-          <div class="message-actions">
-            ${canEdit ? `<button class="edit-btn" data-id="${messageId}" data-content="${escapeHtml(currentContent)}">✏️</button>` : ''}
-            ${canDelete ? `<button class="delete-btn" data-id="${messageId}">🗑️</button>` : ''}
+          <div class="message-row sent ${unreadClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${senderId}">
+            <div class="message-bubble">
+              <div class="message sent">
+                ${contentHtml}
+                <small>${timeStr}</small>
+              </div>
+              ${renderMessageActions(message.id, message.content, message.created_at, senderId, !!message.audio_url)}
+              ${seenHtml}
+            </div>
+          </div>
+        `;
+      } else {
+        return `
+          <div class="message-row ${unreadClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${senderId}">
+            <div class="avatar" style="background-color: ${avatarColor};" data-user-id="${senderId}" data-user-name="${escapeHtml(senderName)}" data-user-role="${escapeHtml(messageRole)}">${initials}</div>
+            <div class="message-bubble">
+              <div class="sender-name">
+                ${escapeHtml(senderName)} ${roleBadge}
+              </div>
+              <div class="message received">
+                ${contentHtml}
+                <small>${timeStr}</small>
+              </div>
+            </div>
           </div>
         `;
       }
+    }
 
-      // --- Render a single message (supports audio) ---
-      function renderMessage(message, isSent, senderName, senderId, messageRole, isUnread = false, seenCount = 0) {
-        const initials = getInitials(senderName);
-        const avatarColor = stringToColor(senderName);
-        const timeStr = formatTimeOnly(message.created_at);
-        const unreadClass = isUnread ? 'unread' : '';
-        let roleBadge = '';
-        if (messageRole && (messageRole === 'CEO' || isCEO)) {
-          roleBadge = `<span class="role-badge">${escapeHtml(messageRole)}</span>`;
+    function maybeAppendDateSeparator(prevDate, currentDate) {
+      if (!prevDate) return '';
+      const prevDay = new Date(prevDate).toDateString();
+      const currDay = new Date(currentDate).toDateString();
+      if (prevDay !== currDay) {
+        const header = formatDateHeader(currentDate);
+        return `<div class="date-separator"><span>${header}</span></div>`;
+      }
+      return '';
+    }
+
+    // --- Load messages for the selected group ---
+    async function loadMessages() {
+      try {
+        if (isCEO && selectedGroupRole === null) {
+          renderGroupsList(availableRoles || []);
+          return;
         }
-        let seenHtml = '';
-        if (isSent && seenCount > 0) {
-          seenHtml = `<div class="seen-indicator"><span class="double-tick">✓✓</span> Seen</div>`;
+        let query = supabase
+          .from('group_messages')
+          .select(`*, sender:profiles!sender_id (full_name)`)
+          .order('created_at', { ascending: true });
+
+        if (!isCEO) {
+          query = query.eq('role', currentRole);
+        } else if (selectedGroupRole) {
+          query = query.eq('role', selectedGroupRole);
         }
 
-        // Audio content
-        let contentHtml = '';
-        if (message.audio_url) {
-          contentHtml = `<audio controls src="${escapeHtml(message.audio_url)}"></audio>`;
+        const { data, error } = await query;
+        if (error) throw error;
+
+        const messageIds = data.map(m => m.id);
+        let readSet = new Set();
+        if (messageIds.length > 0) {
+          const { data: reads, error: readError } = await supabase
+            .from('message_reads')
+            .select('message_id')
+            .eq('user_id', currentUser.id)
+            .in('message_id', messageIds);
+          if (!readError) {
+            readSet = new Set(reads.map(r => r.message_id));
+          }
+        }
+        readMessageIds = readSet;
+
+        const seenCounts = {};
+        if (messageIds.length > 0) {
+          const { data: readsAll } = await supabase
+            .from('message_reads')
+            .select('message_id')
+            .in('message_id', messageIds);
+          if (readsAll) {
+            readsAll.forEach(r => {
+              seenCounts[r.message_id] = (seenCounts[r.message_id] || 0) + 1;
+            });
+          }
+        }
+
+        let html = '';
+        let lastDate = null;
+        let firstUnreadMessageId = null;
+        for (const msg of data) {
+          const isSent = msg.sender_id === currentUser.id;
+          const senderName = msg.sender?.full_name || 'Unknown';
+          const isUnread = !isSent && !readMessageIds.has(msg.id);
+          if (isSent) readMessageIds.add(msg.id);
+
+          html += maybeAppendDateSeparator(lastDate, msg.created_at);
+          lastDate = msg.created_at;
+
+          const seenCount = seenCounts[msg.id] || 0;
+          html += renderMessage(msg, isSent, senderName, msg.sender_id, msg.role, isUnread, seenCount);
+
+          if (isUnread && !firstUnreadMessageId) {
+            firstUnreadMessageId = msg.id;
+          }
+        }
+
+        const area = document.getElementById('messagesArea');
+        area.innerHTML = html;
+
+        currentUnreadCount = data.filter(msg => !readMessageIds.has(msg.id) && msg.sender_id !== currentUser.id).length;
+        if (isCEO) await updateTotalUnreadCount();
+        updateUnreadBadges();
+
+        attachMessageHandlers();
+        setupObserver();
+
+        if (firstUnreadMessageId) {
+          const targetRow = document.querySelector(`.message-row[data-message-id="${firstUnreadMessageId}"]`);
+          if (targetRow) {
+            targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          } else {
+            area.scrollTop = area.scrollHeight;
+          }
         } else {
-          contentHtml = escapeHtml(message.content);
+          area.scrollTop = area.scrollHeight;
         }
+      } catch (err) {
+        console.error('Load messages error:', err);
+        document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Could not load messages.</div>';
+      }
+    }
 
-        if (isSent) {
+    async function updateTotalUnreadCount() {
+      if (!currentUser) return;
+      try {
+        const { data: reads } = await supabase
+          .from('message_reads')
+          .select('message_id')
+          .eq('user_id', currentUser.id);
+        const readIds = new Set(reads.map(r => r.message_id));
+        const { data: msgs, error } = await supabase
+          .from('group_messages')
+          .select('id, sender_id');
+        if (error) throw error;
+        let count = 0;
+        msgs.forEach(m => {
+          if (m.sender_id !== currentUser.id && !readIds.has(m.id)) count++;
+        });
+        totalUnreadCount = count;
+        updateUnreadBadges();
+      } catch (err) {
+        console.error('updateTotalUnreadCount error:', err);
+      }
+    }
+
+    async function renderGroupsList(roles) {
+      const area = document.getElementById('messagesArea');
+      if (!area) return;
+      if (!roles || roles.length === 0) {
+        area.innerHTML = '<div style="color:#9aa4bf;text-align:center;padding:2rem;">No groups found</div>';
+        return;
+      }
+      const { data: reads } = await supabase
+        .from('message_reads')
+        .select('message_id')
+        .eq('user_id', currentUser.id);
+      const readIds = new Set(reads.map(r => r.message_id));
+      const { data: msgs } = await supabase
+        .from('group_messages')
+        .select('id, role, sender_id');
+      const unreadCounts = {};
+      msgs.forEach(m => {
+        if (m.sender_id !== currentUser.id && !readIds.has(m.id)) {
+          unreadCounts[m.role] = (unreadCounts[m.role] || 0) + 1;
+        }
+      });
+
+      const items = roles.map(r => {
+        const count = unreadCounts[r] || 0;
+        const badge = count > 0 ? `<span class="unread-badge">${count}</span>` : '';
+        return `<div class="group-card" data-role="${escapeHtml(r)}">${escapeHtml(r)}${badge}</div>`;
+      }).join('');
+      area.innerHTML = `<div class="groups-list">${items}</div>`;
+      document.querySelectorAll('.group-card').forEach(card => {
+        card.addEventListener('click', async (e) => {
+          const role = e.currentTarget.dataset.role;
+          await switchGroup(role);
+        });
+      });
+    }
+
+    async function buildGroupTabs() {
+      if (!isCEO) return;
+      const tabsContainer = document.getElementById('groupTabs');
+      tabsContainer.style.display = 'flex';
+      tabsContainer.innerHTML = '';
+
+      let roles = [];
+      try {
+        const { data: profiles, error } = await supabase
+          .from('profiles')
+          .select('job_role')
+          .not('job_role', 'is', null);
+        if (!error && profiles && profiles.length > 0) {
+          roles = [...new Set(profiles.map(p => p.job_role))].sort();
+        }
+      } catch (e) {}
+
+      if (roles.length === 0) {
+        try {
+          const { data: messages, error } = await supabase
+            .from('group_messages')
+            .select('role')
+            .not('role', 'is', null);
+          if (!error && messages) {
+            roles = [...new Set(messages.map(m => m.role))].sort();
+          }
+        } catch (e) {}
+      }
+
+      if (roles.length === 0) {
+        tabsContainer.innerHTML = '<span style="color:#9aa4bf; padding:0.4rem 1rem;">No groups</span>';
+        return;
+      }
+
+      availableRoles = roles;
+
+      const { data: reads } = await supabase
+        .from('message_reads')
+        .select('message_id')
+        .eq('user_id', currentUser.id);
+      const readIds = new Set(reads.map(r => r.message_id));
+      const { data: msgs } = await supabase
+        .from('group_messages')
+        .select('id, role, sender_id');
+      const unreadCounts = {};
+      msgs.forEach(m => {
+        if (m.sender_id !== currentUser.id && !readIds.has(m.id)) {
+          unreadCounts[m.role] = (unreadCounts[m.role] || 0) + 1;
+        }
+      });
+
+      const allTab = document.createElement('span');
+      allTab.className = `group-tab ${selectedGroupRole === null ? 'active' : ''}`;
+      allTab.textContent = 'All';
+      if (totalUnreadCount > 0) {
+        const badge = document.createElement('span');
+        badge.className = 'unread-badge-tab';
+        badge.textContent = totalUnreadCount;
+        allTab.appendChild(badge);
+      }
+      allTab.dataset.role = '';
+      allTab.addEventListener('click', () => switchGroup(''));
+      tabsContainer.appendChild(allTab);
+
+      roles.forEach(role => {
+        const tab = document.createElement('span');
+        tab.className = `group-tab ${selectedGroupRole === role ? 'active' : ''}`;
+        tab.textContent = role;
+        const unread = unreadCounts[role] || 0;
+        if (unread > 0) {
+          const badge = document.createElement('span');
+          badge.className = 'unread-badge-tab';
+          badge.textContent = unread;
+          tab.appendChild(badge);
+        }
+        tab.dataset.role = role;
+        tab.addEventListener('click', () => switchGroup(role));
+        tabsContainer.appendChild(tab);
+      });
+
+      if (selectedGroupRole === null && roles.length > 0) {
+        document.getElementById('messageInput').disabled = true;
+        document.getElementById('sendBtn').disabled = true;
+        document.getElementById('voiceNoteBtn').disabled = true;
+        await loadMessages();
+      } else if (!selectedGroupRole && roles.length > 0) {
+        selectedGroupRole = roles[0];
+        document.querySelectorAll('.group-tab').forEach(tab => {
+          if (tab.dataset.role === selectedGroupRole) tab.classList.add('active');
+        });
+        document.getElementById('messageInput').disabled = false;
+        document.getElementById('sendBtn').disabled = false;
+        document.getElementById('voiceNoteBtn').disabled = false;
+        await loadMessages();
+      }
+    }
+
+    async function switchGroup(role) {
+      const normalized = role === '' ? null : role;
+      if (selectedGroupRole === normalized) return;
+      selectedGroupRole = normalized;
+      document.querySelectorAll('.group-tab').forEach(tab => {
+        const tr = tab.dataset.role === '' ? null : tab.dataset.role;
+        if (tr === selectedGroupRole) tab.classList.add('active');
+        else tab.classList.remove('active');
+      });
+      if (isCEO) {
+        const disabled = selectedGroupRole === null;
+        document.getElementById('messageInput').disabled = disabled;
+        document.getElementById('sendBtn').disabled = disabled;
+        document.getElementById('voiceNoteBtn').disabled = disabled;
+        if (selectedGroupRole === null) {
+          await buildGroupTabs();
+        }
+      }
+      if (typingSubscription) typingSubscription.unsubscribe();
+      setupTypingSubscription();
+      await loadMessages();
+    }
+
+    function attachMessageHandlers() {
+      document.querySelectorAll('.message-row').forEach(row => {
+        row.removeEventListener('click', onMessageRowClick);
+        row.addEventListener('click', onMessageRowClick);
+        row.removeEventListener('contextmenu', onRightClick);
+        row.addEventListener('contextmenu', onRightClick);
+      });
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.removeEventListener('click', handleEditClick);
+        btn.addEventListener('click', handleEditClick);
+      });
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.removeEventListener('click', handleDeleteClick);
+        btn.addEventListener('click', handleDeleteClick);
+      });
+      document.querySelectorAll('.avatar').forEach(avatar => {
+        avatar.removeEventListener('click', onAvatarClick);
+        avatar.addEventListener('click', onAvatarClick);
+      });
+    }
+
+    function onMessageRowClick(e) {
+      if (e.target.closest('.edit-btn') || e.target.closest('.delete-btn') || e.target.closest('.edit-actions') || e.target.closest('.avatar')) return;
+      const row = e.currentTarget;
+      if (row.classList.contains('selected')) row.classList.remove('selected');
+      else {
+        document.querySelectorAll('.message-row').forEach(r => r.classList.remove('selected'));
+        row.classList.add('selected');
+      }
+    }
+
+    function onAvatarClick(e) {
+      e.stopPropagation();
+      const avatar = e.currentTarget;
+      const userId = avatar.dataset.userId;
+      const userName = avatar.dataset.userName;
+      const userRole = avatar.dataset.userRole;
+      document.getElementById('dmNavLink').click();
+      setTimeout(() => {
+        const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${userId}"]`);
+        if (targetItem) targetItem.click();
+      }, 300);
+    }
+
+    // --- Edit/Delete handlers ---
+    async function handleEditClick(e) {
+      e.stopPropagation();
+      const btn = e.currentTarget;
+      const messageId = btn.dataset.id;
+      const currentContent = btn.dataset.content;
+      const row = btn.closest('.message-row');
+      const createdAt = row.dataset.createdAt;
+
+      if (Date.now() - new Date(createdAt).getTime() > 60000) {
+        alert('Cannot edit: message is older than 1 minute.');
+        return;
+      }
+
+      const messageBubble = row.querySelector('.message-bubble');
+      const messageDiv = row.querySelector('.message');
+
+      const editHtml = `
+        <div class="message sent" style="padding:0;">
+          <input type="text" class="edit-input" value="${escapeHtml(currentContent)}" data-original="${escapeHtml(currentContent)}">
+          <div class="edit-actions">
+            <button class="save-btn" data-id="${messageId}">Save</button>
+            <button class="cancel-btn">Cancel</button>
+          </div>
+        </div>
+      `;
+      messageDiv.style.display = 'none';
+      btn.closest('.message-actions').style.display = 'none';
+
+      const editContainer = document.createElement('div');
+      editContainer.innerHTML = editHtml;
+      messageBubble.appendChild(editContainer.firstChild);
+
+      const input = messageBubble.querySelector('.edit-input');
+      input.focus();
+
+      const saveBtn = messageBubble.querySelector('.save-btn');
+      saveBtn.addEventListener('click', async () => {
+        const newContent = input.value.trim();
+        if (!newContent) return;
+        await editMessage(messageId, newContent);
+      });
+
+      const cancelBtn = messageBubble.querySelector('.cancel-btn');
+      cancelBtn.addEventListener('click', () => {
+        messageDiv.style.display = 'block';
+        btn.closest('.message-actions').style.display = 'flex';
+        editContainer.remove();
+      });
+
+      input.addEventListener('keypress', async (e) => {
+        if (e.key === 'Enter') {
+          const newContent = input.value.trim();
+          if (!newContent) return;
+          await editMessage(messageId, newContent);
+        }
+      });
+    }
+
+    async function editMessage(messageId, newContent) {
+      try {
+        const { error } = await supabase
+          .from('group_messages')
+          .update({ content: newContent })
+          .eq('id', messageId)
+          .eq('sender_id', currentUser.id);
+        if (error) throw error;
+        updateMessageInUI(messageId, newContent);
+        const messageRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
+        if (messageRow) {
+          const messageDiv = messageRow.querySelector('.message');
+          const actions = messageRow.querySelector('.message-actions');
+          if (messageDiv) messageDiv.style.display = 'block';
+          if (actions) actions.style.display = 'flex';
+          const editContainer = messageRow.querySelector('.message > div:not(.message):not(.message-actions)')?.closest('.message');
+          if (editContainer) editContainer.remove();
+        }
+      } catch (err) {
+        console.error('Edit error:', err);
+        alert('Failed to edit message: ' + err.message);
+      }
+    }
+
+    async function handleDeleteClick(e) {
+      e.stopPropagation();
+      if (!confirm('Delete this message?')) return;
+      const btn = e.currentTarget;
+      const messageId = btn.dataset.id;
+      const row = btn.closest('.message-row');
+      const senderId = row.dataset.senderId;
+      try {
+        let query = supabase.from('group_messages').delete().eq('id', messageId);
+        if (!isCEO) query = query.eq('sender_id', currentUser.id);
+        const { error } = await query;
+        if (error) throw error;
+        removeMessageFromUI(messageId);
+      } catch (err) {
+        console.error('Delete error:', err);
+        alert('Failed to delete message: ' + err.message);
+      }
+    }
+
+    function updateMessageInUI(messageId, newContent) {
+      const messageRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
+      if (!messageRow) return;
+      const messageDiv = messageRow.querySelector('.message');
+      if (messageDiv) {
+        const timeElem = messageDiv.querySelector('small');
+        messageDiv.innerHTML = `${escapeHtml(newContent)} `;
+        if (timeElem) messageDiv.appendChild(timeElem);
+      }
+      const editBtn = messageRow.querySelector('.edit-btn');
+      if (editBtn) editBtn.dataset.content = newContent;
+    }
+
+    function removeMessageFromUI(messageId) {
+      const messageRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
+      if (messageRow) {
+        if (messageRow.classList.contains('unread')) {
+          if (currentUnreadCount > 0) currentUnreadCount--;
+          if (isCEO && totalUnreadCount > 0) totalUnreadCount--;
+        }
+        if (observer) observer.unobserve(messageRow);
+        messageRow.remove();
+      }
+      if (editTimeouts.has(messageId)) {
+        clearTimeout(editTimeouts.get(messageId));
+        editTimeouts.delete(messageId);
+      }
+      if (unreadBorderTimeouts.has(messageId)) {
+        clearTimeout(unreadBorderTimeouts.get(messageId));
+        unreadBorderTimeouts.delete(messageId);
+      }
+      updateUnreadBadges();
+    }
+
+    // --- Right-click read receipts (for group messages and DMs) ---
+    async function onRightClick(e) {
+      e.preventDefault();
+      const row = e.currentTarget;
+      const messageId = row.dataset.messageId;
+      const isDM = row.classList.contains('dm-msg-row');
+      modal.style.display = 'none';
+
+      let data;
+      if (isDM) {
+        const { data: msg, error } = await supabase
+          .from('private_messages')
+          .select('sender_id, recipient_id, read_at, profiles!sender_id(full_name), profiles!recipient_id(full_name)')
+          .eq('id', messageId)
+          .single();
+        if (error || !msg) {
+          console.error('fetch DM readers error:', error);
+          return;
+        }
+        const readerId = (msg.sender_id === currentUser.id) ? msg.recipient_id : msg.sender_id;
+        const readerName = (msg.sender_id === currentUser.id) ? msg.profiles_recipient_id?.full_name : msg.profiles_sender_id?.full_name;
+        const readTime = msg.read_at ? new Date(msg.read_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
+        if (msg.read_at) {
+          data = [{ profiles: { full_name: readerName }, read_at: readTime }];
+        } else {
+          data = [];
+        }
+      } else {
+        const { data: readers, error } = await supabase
+          .from('message_reads')
+          .select('user_id, read_at, profiles!inner(full_name)')
+          .eq('message_id', messageId)
+          .order('read_at', { ascending: true });
+        if (error || !readers) {
+          console.error('fetch readers error:', error);
+          return;
+        }
+        data = readers;
+      }
+
+      if (data.length === 0) {
+        modal.innerHTML = '<h4>Read receipts</h4><p style="padding:0.5rem 0;">No one has seen this message yet.</p>';
+      } else {
+        const listItems = data.map(item => {
+          const name = item.profiles?.full_name || 'Unknown';
+          const readTime = item.read_at ? new Date(item.read_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Unknown';
+          return `<li><span class="reader-name">${escapeHtml(name)}</span> <span class="reader-time">${readTime}</span></li>`;
+        }).join('');
+        modal.innerHTML = `<h4>Seen by (${data.length})</h4><ul>${listItems}</ul>`;
+      }
+      modal.style.left = e.pageX + 10 + 'px';
+      modal.style.top = e.pageY + 10 + 'px';
+      modal.style.display = 'block';
+      const hideModal = (ev) => {
+        if (!modal.contains(ev.target)) {
+          modal.style.display = 'none';
+          document.removeEventListener('click', hideModal);
+        }
+      };
+      setTimeout(() => document.addEventListener('click', hideModal), 0);
+    }
+
+    // --- Append new message to UI (for received messages only) ---
+    function appendMessageToUI(message, isSent, senderName, senderId, messageRole, isUnread = false) {
+      if (document.querySelector(`.message-row[data-message-id="${message.id}"]`)) return;
+      if (isCEO) {
+        if (selectedGroupRole && messageRole !== selectedGroupRole) return;
+      } else {
+        if (messageRole !== currentRole) return;
+      }
+      const area = document.getElementById('messagesArea');
+      if (!area) return;
+      const lastMessageRow = area.querySelector('.message-row:last-child');
+      let lastDate = lastMessageRow ? lastMessageRow.dataset.createdAt : null;
+      const separatorHtml = maybeAppendDateSeparator(lastDate, message.created_at);
+      const isScrolledToBottom = area.scrollHeight - area.scrollTop <= area.clientHeight + 50;
+      if (separatorHtml) area.insertAdjacentHTML('beforeend', separatorHtml);
+      const msgHtml = renderMessage(message, isSent, senderName, senderId, messageRole, isUnread);
+      area.insertAdjacentHTML('beforeend', msgHtml);
+      if (isScrolledToBottom) area.scrollTop = area.scrollHeight;
+      attachMessageHandlers();
+      if (isUnread) {
+        const newRow = document.querySelector(`.message-row[data-message-id="${message.id}"]`);
+        if (observer && newRow) observer.observe(newRow);
+      }
+    }
+
+    // --- display sent message directly ---
+    function displaySentMessage(message) {
+      const area = document.getElementById('messagesArea');
+      if (!area) return;
+
+      if (document.querySelector(`.message-row[data-message-id="${message.id}"]`)) return;
+
+      const lastMessageRow = area.querySelector('.message-row:last-child');
+      let lastDate = lastMessageRow ? lastMessageRow.dataset.createdAt : null;
+      const separatorHtml = maybeAppendDateSeparator(lastDate, message.created_at);
+      if (separatorHtml) area.insertAdjacentHTML('beforeend', separatorHtml);
+
+      const msgHtml = renderMessage(message, true, currentUserFullName, currentUser.id, message.role, false);
+      area.insertAdjacentHTML('beforeend', msgHtml);
+
+      readMessageIds.add(message.id);
+
+      const isScrolledToBottom = area.scrollHeight - area.scrollTop <= area.clientHeight + 50;
+      if (isScrolledToBottom) area.scrollTop = area.scrollHeight;
+
+      attachMessageHandlers();
+    }
+
+    // --- Typing indicator ---
+    function updateTypingIndicator() {
+      if (activeTypers.size === 0) {
+        typingContainer.style.display = 'none';
+        return;
+      }
+      const names = Array.from(activeTypers);
+      let text = '';
+      if (names.length === 1) {
+        text = `${names[0]} is typing...`;
+      } else if (names.length === 2) {
+        text = `${names[0]} and ${names[1]} are typing...`;
+      } else {
+        text = `${names.length} people are typing...`;
+      }
+      typingText.textContent = text;
+      typingContainer.style.display = 'block';
+    }
+
+    async function sendTypingIndicator() {
+      if (!currentUser || (isCEO && !selectedGroupRole) || (!isCEO && !currentRole)) return;
+      const channel = isCEO ? (selectedGroupRole ? `typing-${selectedGroupRole}` : 'typing-all') : `typing-${currentRole}`;
+      await supabase.channel(channel).send({
+        type: 'broadcast',
+        event: 'typing',
+        payload: { userId: currentUser.id, userName: currentUserFullName, timestamp: Date.now() }
+      });
+    }
+
+    function setupTypingSubscription() {
+      if (typingSubscription) typingSubscription.unsubscribe();
+      const channel = isCEO ? (selectedGroupRole ? `typing-${selectedGroupRole}` : 'typing-all') : `typing-${currentRole}`;
+      typingSubscription = supabase
+        .channel(channel)
+        .on('broadcast', { event: 'typing' }, (payload) => {
+          const { userId, userName, timestamp } = payload.payload;
+          if (userId === currentUser.id) return;
+          if (typingTimeouts[userId]) clearTimeout(typingTimeouts[userId]);
+          activeTypers.add(userName);
+          updateTypingIndicator();
+          typingTimeouts[userId] = setTimeout(() => {
+            activeTypers.delete(userName);
+            updateTypingIndicator();
+            delete typingTimeouts[userId];
+          }, 3000);
+        })
+        .subscribe();
+    }
+
+    // --- Group subscription management ---
+    function setupGroupSubscription() {
+      if (messageSubscription) {
+        messageSubscription.unsubscribe();
+        messageSubscription = null;
+      }
+
+      const chatTabActive = document.getElementById('chatNavLink').classList.contains('active');
+      if (!chatTabActive || !currentUser) return;
+
+      if (isCEO) {
+        messageSubscription = supabase
+          .channel('all-messages')
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'group_messages' }, async (payload) => {
+            console.log('🔵 CEO INSERT received:', payload.new);
+            const newMsg = payload.new;
+            if (document.querySelector(`.message-row[data-message-id="${newMsg.id}"]`)) return;
+            if (newMsg.sender_id === currentUser.id) return;
+
+            const { data: senderProfile } = await supabase
+              .from('profiles')
+              .select('full_name')
+              .eq('id', newMsg.sender_id)
+              .single();
+            const senderName = senderProfile?.full_name || 'Unknown';
+
+            const shouldShow = selectedGroupRole === null || newMsg.role === selectedGroupRole;
+            if (shouldShow) {
+              appendMessageToUI(newMsg, false, senderName, newMsg.sender_id, newMsg.role, true);
+              currentUnreadCount++;
+            }
+            totalUnreadCount++;
+            updateUnreadBadges();
+            if (isCEO) buildGroupTabs();
+          })
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'group_messages' }, (payload) => {
+            console.log('🟡 CEO UPDATE received:', payload.new);
+            updateMessageInUI(payload.new.id, payload.new.content);
+          })
+          .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'group_messages' }, (payload) => {
+            console.log('🔴 CEO DELETE received:', payload.old);
+            removeMessageFromUI(payload.old.id);
+          })
+          .subscribe((status) => {
+            console.log('📡 CEO subscription status:', status);
+            if (status === 'CHANNEL_ERROR') {
+              console.error('Realtime channel error - check RLS and permissions');
+            }
+          });
+      } else {
+        messageSubscription = supabase
+          .channel(`group-${currentRole}`)
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, async (payload) => {
+            console.log('🔵 Non-CEO INSERT received:', payload.new);
+            const newMsg = payload.new;
+            if (document.querySelector(`.message-row[data-message-id="${newMsg.id}"]`)) return;
+            if (newMsg.sender_id === currentUser.id) return;
+
+            const { data: senderProfile } = await supabase
+              .from('profiles')
+              .select('full_name')
+              .eq('id', newMsg.sender_id)
+              .single();
+            const senderName = senderProfile?.full_name || 'Unknown';
+
+            appendMessageToUI(newMsg, false, senderName, newMsg.sender_id, newMsg.role, true);
+            currentUnreadCount++;
+            updateUnreadBadges();
+          })
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, (payload) => {
+            console.log('🟡 Non-CEO UPDATE received:', payload.new);
+            updateMessageInUI(payload.new.id, payload.new.content);
+          })
+          .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, (payload) => {
+            console.log('🔴 Non-CEO DELETE received:', payload.old);
+            removeMessageFromUI(payload.old.id);
+          })
+          .subscribe((status) => {
+            console.log('📡 Non‑CEO subscription status:', status);
+            if (status === 'CHANNEL_ERROR') {
+              console.error('Realtime channel error - check RLS and permissions');
+            }
+          });
+      }
+    }
+
+    // --- Subscribe to message_reads for realtime seen updates ---
+    function setupMessageReadsSubscription() {
+      if (messageReadsSubscription) {
+        messageReadsSubscription.unsubscribe();
+      }
+      if (!currentUser) return;
+
+      messageReadsSubscription = supabase
+        .channel('message-reads')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'message_reads' }, async (payload) => {
+          const { message_id, user_id } = payload.new;
+          if (user_id === currentUser.id) return;
+
+          const { data: msg } = await supabase
+            .from('group_messages')
+            .select('sender_id')
+            .eq('id', message_id)
+            .single();
+
+          if (msg && msg.sender_id === currentUser.id) {
+            console.log('👁️ New read on your message', message_id);
+            await updateSeenIndicator(message_id);
+          }
+        })
+        .subscribe((status) => {
+          console.log('📡 message_reads subscription status:', status);
+        });
+    }
+
+    // --- Send group message (text) ---
+    async function sendMessage() {
+      const input = document.getElementById('messageInput');
+      const content = input.value.trim();
+      if (!content || !currentUser) return;
+
+      let messageRole;
+      if (isCEO) {
+        if (!selectedGroupRole) { alert('Please select a group first.'); return; }
+        messageRole = selectedGroupRole;
+      } else {
+        messageRole = currentRole;
+      }
+
+      if (activeTypers.has(currentUserFullName)) { activeTypers.delete(currentUserFullName); updateTypingIndicator(); }
+
+      input.value = '';
+
+      const { data, error } = await supabase
+        .from('group_messages')
+        .insert({ role: messageRole, sender_id: currentUser.id, content: content })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Send error:', error);
+        alert('Failed to send: ' + error.message);
+        return;
+      }
+
+      displaySentMessage(data);
+
+      try {
+        await supabase
+          .from('message_reads')
+          .insert({ message_id: data.id, user_id: currentUser.id });
+      } catch (readErr) {}
+    }
+
+    // --- Voice Note Functions (Group) ---
+    const voiceBtn = document.getElementById('voiceNoteBtn');
+    const recordingTimer = document.getElementById('recordingTimer');
+
+    voiceBtn.addEventListener('click', toggleRecording);
+
+    async function toggleRecording() {
+      if (isRecording) {
+        stopRecording();
+      } else {
+        await startRecording();
+      }
+    }
+
+    async function startRecording() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        mediaRecorder.ondataavailable = event => {
+          audioChunks.push(event.data);
+        };
+        mediaRecorder.onstop = async () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          await uploadVoiceNote(audioBlob);
+          stream.getTracks().forEach(track => track.stop());
+        };
+        mediaRecorder.start();
+        isRecording = true;
+        voiceBtn.classList.add('recording');
+        voiceBtn.textContent = '🔴';
+        recordingStartTime = Date.now();
+        recordingTimer.style.display = 'inline';
+        updateRecordingTimer();
+      } catch (err) {
+        console.error('Microphone access error:', err);
+        alert('Could not access microphone. Please check permissions.');
+      }
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+        isRecording = false;
+        voiceBtn.classList.remove('recording');
+        voiceBtn.textContent = '🎤';
+        recordingTimer.style.display = 'none';
+        if (recordingTimerInterval) {
+          clearInterval(recordingTimerInterval);
+          recordingTimerInterval = null;
+        }
+      }
+    }
+
+    function updateRecordingTimer() {
+      recordingTimerInterval = setInterval(() => {
+        if (!isRecording) return;
+        const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+        const minutes = Math.floor(elapsed / 60);
+        const seconds = elapsed % 60;
+        recordingTimer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      }, 1000);
+    }
+
+    async function uploadVoiceNote(audioBlob) {
+      let messageRole;
+      if (isCEO) {
+        if (!selectedGroupRole) { alert('Please select a group first.'); return; }
+        messageRole = selectedGroupRole;
+      } else {
+        messageRole = currentRole;
+      }
+
+      const fileName = `${currentUser.id}/${Date.now()}.webm`;
+      const { error: uploadError } = await supabase.storage
+        .from('voice_notes')
+        .upload(fileName, audioBlob, { contentType: 'audio/webm' });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        alert('Failed to upload voice note: ' + uploadError.message);
+        return;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('voice_notes')
+        .getPublicUrl(fileName);
+      const audioUrl = urlData.publicUrl;
+
+      const { data, error } = await supabase
+        .from('group_messages')
+        .insert({ role: messageRole, sender_id: currentUser.id, audio_url: audioUrl })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Insert error:', error);
+        alert('Failed to send voice note: ' + error.message);
+        return;
+      }
+
+      displaySentMessage(data);
+
+      try {
+        await supabase
+          .from('message_reads')
+          .insert({ message_id: data.id, user_id: currentUser.id });
+      } catch (readErr) {}
+    }
+
+    // --- DM FUNCTIONS (fully implemented) ---
+    async function loadPrivateMessagesView() {
+      try {
+        if (messageSubscription) messageSubscription.unsubscribe();
+        if (observer) observer.disconnect();
+
+        document.getElementById('groupTitle').innerText = 'Direct Messages';
+        document.getElementById('roleDisplay').style.display = 'none';
+        document.getElementById('groupTabs').style.display = 'none';
+        document.getElementById('messageInput').disabled = true;
+        document.getElementById('sendBtn').disabled = true;
+        document.getElementById('voiceNoteBtn').style.display = 'none'; // hide group voice btn
+
+        const { data: allProfiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, full_name, job_role')
+          .neq('id', currentUser.id);
+
+        if (profilesError) throw profilesError;
+
+        const unreadCounts = {};
+        for (const profile of allProfiles) {
+          const { count, error: countError } = await supabase
+            .from('private_messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('sender_id', profile.id)
+            .eq('recipient_id', currentUser.id)
+            .is('read_at', null);
+
+          if (!countError && count > 0) {
+            unreadCounts[profile.id] = count;
+          }
+        }
+        dmUnreadBySender = unreadCounts;
+        updateDMBadge();
+
+        const conversationsHtml = allProfiles.map(profile => {
+          const unread = unreadCounts[profile.id] || 0;
+          const unreadBadge = unread > 0 ? `<span class="dm-unread-badge">${unread}</span>` : '';
+          const onlineClass = onlineUsers.has(profile.id) ? 'online' : '';
           return `
-            <div class="message-row sent ${unreadClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${senderId}">
-              <div class="message-bubble">
-                <div class="message sent">
-                  ${contentHtml}
-                  <small>${timeStr}</small>
-                </div>
-                ${renderMessageActions(message.id, message.content, message.created_at, senderId, !!message.audio_url)}
+            <div class="dm-conversation-item" data-user-id="${profile.id}" data-user-name="${escapeHtml(profile.full_name)}" data-user-role="${escapeHtml(profile.job_role)}">
+              <span class="status-dot ${onlineClass}"></span>
+              <div class="dm-conv-content">
+                <div class="dm-conv-name">${escapeHtml(profile.full_name)}</div>
+                <div class="dm-conv-role">${escapeHtml(profile.job_role)}</div>
+              </div>
+              ${unreadBadge}
+            </div>
+          `;
+        }).join('');
+
+        const area = document.getElementById('messagesArea');
+        area.innerHTML = `
+          <div class="dm-layout">
+            <div class="dm-conversations-list" id="dmConversationsList">
+              <div class="dm-list-header">All Members</div>
+              ${conversationsHtml}
+            </div>
+            <div class="dm-chat-area" id="dmChatArea">
+              <div class="dm-chat-header">
+                <button class="dm-back-btn" id="dmBackBtn" style="display:none;">←</button>
+                <span class="dm-chat-title"></span>
+              </div>
+              <div id="dmChatMessages" class="dm-chat-messages"></div>
+              <div class="dm-chat-input">
+                <input type="text" id="dmChatInput" placeholder="Type a message...">
+                <!-- === NEW: Replace voice button with plus button === -->
+                <button class="voice-btn" id="dmCallPlusBtn" style="background:#2f3a5a;">➕</button>
+                <button id="dmChatSendBtn">➤</button>
+                <span id="dmRecordingTimer" class="recording-timer" style="display: none;">0:00</span>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // === NEW: Attach plus button click for call options ===
+        document.getElementById('dmCallPlusBtn').addEventListener('click', () => {
+          if (!currentRecipientId) {
+            alert('Please select a conversation first.');
+            return;
+          }
+          const activeItem = document.querySelector('.dm-conversation-item.active');
+          const userName = activeItem ? activeItem.dataset.userName : 'this user';
+          callWithUserNameSpan.textContent = userName;
+          callOptionsModal.style.display = 'flex';
+        });
+
+        // Attach click handlers for conversations
+        document.querySelectorAll('.dm-conversation-item').forEach(item => {
+          item.addEventListener('click', async () => {
+            const userId = item.dataset.userId;
+            const userName = item.dataset.userName;
+            const userRole = item.dataset.userRole;
+            await openPrivateChat(userId, { full_name: userName, job_role: userRole });
+            document.querySelectorAll('.dm-conversation-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            const badge = item.querySelector('.dm-unread-badge');
+            if (badge) {
+              badge.remove();
+              delete dmUnreadBySender[userId];
+              updateDMBadge();
+            }
+            if (window.innerWidth <= 768) {
+              document.getElementById('dmConversationsList').style.display = 'none';
+              document.getElementById('dmChatArea').classList.add('active');
+              document.getElementById('dmBackBtn').style.display = 'inline-block';
+            }
+          });
+        });
+
+        document.getElementById('dmBackBtn').addEventListener('click', () => {
+          document.getElementById('dmConversationsList').style.display = 'block';
+          document.getElementById('dmChatArea').classList.remove('active');
+          document.getElementById('dmBackBtn').style.display = 'none';
+          currentRecipientId = null; // clear recipient when leaving chat
+        });
+
+      } catch (err) {
+        console.error('Load DM view error:', err);
+        document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Failed to load direct messages.</div>';
+      }
+    }
+
+    async function openPrivateChat(otherUserId, otherProfile) {
+      currentRecipientId = otherUserId;   // store recipient ID
+
+      const chatArea = document.getElementById('dmChatArea');
+      const headerTitle = document.querySelector('.dm-chat-title');
+      const messagesDiv = document.getElementById('dmChatMessages');
+      const input = document.getElementById('dmChatInput');
+      const sendBtn = document.getElementById('dmChatSendBtn');
+
+      headerTitle.innerHTML = `${escapeHtml(otherProfile.full_name)} <span style="font-size:0.85rem;color:#9aa4bf;">(${escapeHtml(otherProfile.job_role)})</span>`;
+      chatArea.style.display = 'flex';
+      input.focus();
+
+      try {
+        const { data, error } = await supabase
+          .from('private_messages')
+          .select('*')
+          .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`)
+          .order('created_at', { ascending: true });
+
+        if (error) throw error;
+
+        let html = '';
+        let lastDate = null;
+        let firstUnreadMessageId = null;
+        for (const msg of data) {
+          const isSent = msg.sender_id === currentUser.id;
+          const timeStr = formatTimeOnly(msg.created_at);
+          const dateHeader = maybeAppendDateSeparator(lastDate, msg.created_at);
+          if (dateHeader) html += dateHeader.replace('date-separator', 'dm-date-separator');
+          lastDate = msg.created_at;
+
+          let seenHtml = '';
+          if (isSent && msg.read_at) {
+            const { data: reader } = await supabase
+              .from('profiles')
+              .select('full_name')
+              .eq('id', otherUserId)
+              .single();
+            const readerName = reader?.full_name || 'User';
+            seenHtml = `<div class="dm-seen-indicator"><span class="double-tick">✓✓</span> Seen by ${escapeHtml(readerName)} at ${formatTimeOnly(msg.read_at)}</div>`;
+          }
+
+          let contentHtml = '';
+          if (msg.audio_url) {
+            contentHtml = `<audio controls src="${escapeHtml(msg.audio_url)}"></audio>`;
+          } else {
+            contentHtml = escapeHtml(msg.content);
+          }
+
+          const isUnread = !isSent && !msg.read_at;
+          html += `
+            <div class="dm-msg-row ${isSent ? 'sent' : 'received'} ${isUnread ? 'unread' : ''}" data-message-id="${msg.id}" data-created-at="${msg.created_at}">
+              <div class="dm-msg ${isSent ? 'sent' : 'received'}">
+                ${contentHtml}
+                <small>${timeStr}</small>
                 ${seenHtml}
               </div>
             </div>
           `;
+          if (isUnread && !firstUnreadMessageId) {
+            firstUnreadMessageId = msg.id;
+          }
+          if (!isSent && !msg.read_at) {
+            markDirectMessageAsRead(msg.id, otherUserId);
+          }
+        }
+        messagesDiv.innerHTML = html || '<div style="color:#9aa4bf; text-align:center; padding:2rem;">No messages yet. Say hello!</div>';
+        
+        if (firstUnreadMessageId) {
+          const targetRow = messagesDiv.querySelector(`.dm-msg-row[data-message-id="${firstUnreadMessageId}"]`);
+          if (targetRow) {
+            targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          } else {
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+          }
         } else {
-          return `
-            <div class="message-row ${unreadClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${senderId}">
-              <div class="avatar" style="background-color: ${avatarColor};" data-user-id="${senderId}" data-user-name="${escapeHtml(senderName)}" data-user-role="${escapeHtml(messageRole)}">${initials}</div>
-              <div class="message-bubble">
-                <div class="sender-name">
-                  ${escapeHtml(senderName)} ${roleBadge}
-                </div>
-                <div class="message received">
-                  ${contentHtml}
-                  <small>${timeStr}</small>
-                </div>
-              </div>
-            </div>
-          `;
-        }
-      }
-
-      function maybeAppendDateSeparator(prevDate, currentDate) {
-        if (!prevDate) return '';
-        const prevDay = new Date(prevDate).toDateString();
-        const currDay = new Date(currentDate).toDateString();
-        if (prevDay !== currDay) {
-          const header = formatDateHeader(currentDate);
-          return `<div class="date-separator"><span>${header}</span></div>`;
-        }
-        return '';
-      }
-
-      // --- Load messages for the selected group ---
-      async function loadMessages() {
-        try {
-          if (isCEO && selectedGroupRole === null) {
-            renderGroupsList(availableRoles || []);
-            return;
-          }
-          let query = supabase
-            .from('group_messages')
-            .select(`*, sender:profiles!sender_id (full_name)`)
-            .order('created_at', { ascending: true });
-
-          if (!isCEO) {
-            query = query.eq('role', currentRole);
-          } else if (selectedGroupRole) {
-            query = query.eq('role', selectedGroupRole);
-          }
-
-          const { data, error } = await query;
-          if (error) throw error;
-
-          const messageIds = data.map(m => m.id);
-          let readSet = new Set();
-          if (messageIds.length > 0) {
-            const { data: reads, error: readError } = await supabase
-              .from('message_reads')
-              .select('message_id')
-              .eq('user_id', currentUser.id)
-              .in('message_id', messageIds);
-            if (!readError) {
-              readSet = new Set(reads.map(r => r.message_id));
-            }
-          }
-          readMessageIds = readSet;
-
-          const seenCounts = {};
-          if (messageIds.length > 0) {
-            const { data: readsAll } = await supabase
-              .from('message_reads')
-              .select('message_id')
-              .in('message_id', messageIds);
-            if (readsAll) {
-              readsAll.forEach(r => {
-                seenCounts[r.message_id] = (seenCounts[r.message_id] || 0) + 1;
-              });
-            }
-          }
-
-          let html = '';
-          let lastDate = null;
-          for (const msg of data) {
-            const isSent = msg.sender_id === currentUser.id;
-            const senderName = msg.sender?.full_name || 'Unknown';
-            const isUnread = !isSent && !readMessageIds.has(msg.id);
-            if (isSent) readMessageIds.add(msg.id);
-
-            html += maybeAppendDateSeparator(lastDate, msg.created_at);
-            lastDate = msg.created_at;
-
-            const seenCount = seenCounts[msg.id] || 0;
-            html += renderMessage(msg, isSent, senderName, msg.sender_id, msg.role, isUnread, seenCount);
-          }
-
-          const area = document.getElementById('messagesArea');
-          area.innerHTML = html;
-
-          currentUnreadCount = data.filter(msg => !readMessageIds.has(msg.id) && msg.sender_id !== currentUser.id).length;
-          if (isCEO) await updateTotalUnreadCount();
-          updateUnreadBadges();
-
-          attachMessageHandlers();
-          setupObserver();
-          area.scrollTop = area.scrollHeight;
-        } catch (err) {
-          console.error('Load messages error:', err);
-          document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Could not load messages.</div>';
-        }
-      }
-
-      async function updateTotalUnreadCount() {
-        if (!currentUser) return;
-        try {
-          const { data: reads } = await supabase
-            .from('message_reads')
-            .select('message_id')
-            .eq('user_id', currentUser.id);
-          const readIds = new Set(reads.map(r => r.message_id));
-          const { data: msgs, error } = await supabase
-            .from('group_messages')
-            .select('id, sender_id');
-          if (error) throw error;
-          let count = 0;
-          msgs.forEach(m => {
-            if (m.sender_id !== currentUser.id && !readIds.has(m.id)) count++;
-          });
-          totalUnreadCount = count;
-          updateUnreadBadges();
-        } catch (err) {
-          console.error('updateTotalUnreadCount error:', err);
-        }
-      }
-
-      async function renderGroupsList(roles) {
-        const area = document.getElementById('messagesArea');
-        if (!area) return;
-        if (!roles || roles.length === 0) {
-          area.innerHTML = '<div style="color:#9aa4bf;text-align:center;padding:2rem;">No groups found</div>';
-          return;
-        }
-        const { data: reads } = await supabase
-          .from('message_reads')
-          .select('message_id')
-          .eq('user_id', currentUser.id);
-        const readIds = new Set(reads.map(r => r.message_id));
-        const { data: msgs } = await supabase
-          .from('group_messages')
-          .select('id, role, sender_id');
-        const unreadCounts = {};
-        msgs.forEach(m => {
-          if (m.sender_id !== currentUser.id && !readIds.has(m.id)) {
-            unreadCounts[m.role] = (unreadCounts[m.role] || 0) + 1;
-          }
-        });
-
-        const items = roles.map(r => {
-          const count = unreadCounts[r] || 0;
-          const badge = count > 0 ? `<span class="unread-badge">${count}</span>` : '';
-          return `<div class="group-card" data-role="${escapeHtml(r)}">${escapeHtml(r)}${badge}</div>`;
-        }).join('');
-        area.innerHTML = `<div class="groups-list">${items}</div>`;
-        document.querySelectorAll('.group-card').forEach(card => {
-          card.addEventListener('click', async (e) => {
-            const role = e.currentTarget.dataset.role;
-            await switchGroup(role);
-          });
-        });
-      }
-
-      async function buildGroupTabs() {
-        if (!isCEO) return;
-        const tabsContainer = document.getElementById('groupTabs');
-        tabsContainer.style.display = 'flex';
-        tabsContainer.innerHTML = '';
-
-        let roles = [];
-        try {
-          const { data: profiles, error } = await supabase
-            .from('profiles')
-            .select('job_role')
-            .not('job_role', 'is', null);
-          if (!error && profiles && profiles.length > 0) {
-            roles = [...new Set(profiles.map(p => p.job_role))].sort();
-          }
-        } catch (e) {}
-
-        if (roles.length === 0) {
-          try {
-            const { data: messages, error } = await supabase
-              .from('group_messages')
-              .select('role')
-              .not('role', 'is', null);
-            if (!error && messages) {
-              roles = [...new Set(messages.map(m => m.role))].sort();
-            }
-          } catch (e) {}
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
-        if (roles.length === 0) {
-          tabsContainer.innerHTML = '<span style="color:#9aa4bf; padding:0.4rem 1rem;">No groups</span>';
-          return;
-        }
-
-        availableRoles = roles;
-
-        const { data: reads } = await supabase
-          .from('message_reads')
-          .select('message_id')
-          .eq('user_id', currentUser.id);
-        const readIds = new Set(reads.map(r => r.message_id));
-        const { data: msgs } = await supabase
-          .from('group_messages')
-          .select('id, role, sender_id');
-        const unreadCounts = {};
-        msgs.forEach(m => {
-          if (m.sender_id !== currentUser.id && !readIds.has(m.id)) {
-            unreadCounts[m.role] = (unreadCounts[m.role] || 0) + 1;
-          }
-        });
-
-        const allTab = document.createElement('span');
-        allTab.className = `group-tab ${selectedGroupRole === null ? 'active' : ''}`;
-        allTab.textContent = 'All';
-        if (totalUnreadCount > 0) {
-          const badge = document.createElement('span');
-          badge.className = 'unread-badge-tab';
-          badge.textContent = totalUnreadCount;
-          allTab.appendChild(badge);
-        }
-        allTab.dataset.role = '';
-        allTab.addEventListener('click', () => switchGroup(''));
-        tabsContainer.appendChild(allTab);
-
-        roles.forEach(role => {
-          const tab = document.createElement('span');
-          tab.className = `group-tab ${selectedGroupRole === role ? 'active' : ''}`;
-          tab.textContent = role;
-          const unread = unreadCounts[role] || 0;
-          if (unread > 0) {
-            const badge = document.createElement('span');
-            badge.className = 'unread-badge-tab';
-            badge.textContent = unread;
-            tab.appendChild(badge);
-          }
-          tab.dataset.role = role;
-          tab.addEventListener('click', () => switchGroup(role));
-          tabsContainer.appendChild(tab);
-        });
-
-        if (selectedGroupRole === null && roles.length > 0) {
-          document.getElementById('messageInput').disabled = true;
-          document.getElementById('sendBtn').disabled = true;
-          document.getElementById('voiceNoteBtn').disabled = true;
-          await loadMessages();
-        } else if (!selectedGroupRole && roles.length > 0) {
-          selectedGroupRole = roles[0];
-          document.querySelectorAll('.group-tab').forEach(tab => {
-            if (tab.dataset.role === selectedGroupRole) tab.classList.add('active');
-          });
-          document.getElementById('messageInput').disabled = false;
-          document.getElementById('sendBtn').disabled = false;
-          document.getElementById('voiceNoteBtn').disabled = false;
-          await loadMessages();
-        }
-      }
-
-      async function switchGroup(role) {
-        const normalized = role === '' ? null : role;
-        if (selectedGroupRole === normalized) return;
-        selectedGroupRole = normalized;
-        document.querySelectorAll('.group-tab').forEach(tab => {
-          const tr = tab.dataset.role === '' ? null : tab.dataset.role;
-          if (tr === selectedGroupRole) tab.classList.add('active');
-          else tab.classList.remove('active');
-        });
-        if (isCEO) {
-          const disabled = selectedGroupRole === null;
-          document.getElementById('messageInput').disabled = disabled;
-          document.getElementById('sendBtn').disabled = disabled;
-          document.getElementById('voiceNoteBtn').disabled = disabled;
-          if (selectedGroupRole === null) {
-            await buildGroupTabs();
-          }
-        }
-        if (typingSubscription) typingSubscription.unsubscribe();
-        setupTypingSubscription();
-        await loadMessages();
-      }
-
-      function attachMessageHandlers() {
-        document.querySelectorAll('.message-row').forEach(row => {
-          row.removeEventListener('click', onMessageRowClick);
-          row.addEventListener('click', onMessageRowClick);
-          row.removeEventListener('contextmenu', onRightClick);
+        document.querySelectorAll('.dm-msg-row').forEach(row => {
           row.addEventListener('contextmenu', onRightClick);
         });
-        document.querySelectorAll('.edit-btn').forEach(btn => {
-          btn.removeEventListener('click', handleEditClick);
-          btn.addEventListener('click', handleEditClick);
-        });
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-          btn.removeEventListener('click', handleDeleteClick);
-          btn.addEventListener('click', handleDeleteClick);
-        });
-        document.querySelectorAll('.avatar').forEach(avatar => {
-          avatar.removeEventListener('click', onAvatarClick);
-          avatar.addEventListener('click', onAvatarClick);
-        });
-      }
 
-      function onMessageRowClick(e) {
-        if (e.target.closest('.edit-btn') || e.target.closest('.delete-btn') || e.target.closest('.edit-actions') || e.target.closest('.avatar')) return;
-        const row = e.currentTarget;
-        if (row.classList.contains('selected')) row.classList.remove('selected');
-        else {
-          document.querySelectorAll('.message-row').forEach(r => r.classList.remove('selected'));
-          row.classList.add('selected');
-        }
-      }
-
-      function onAvatarClick(e) {
-        e.stopPropagation();
-        const avatar = e.currentTarget;
-        const userId = avatar.dataset.userId;
-        const userName = avatar.dataset.userName;
-        const userRole = avatar.dataset.userRole;
-        document.getElementById('dmNavLink').click();
-        setTimeout(() => {
-          const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${userId}"]`);
-          if (targetItem) targetItem.click();
-        }, 300);
-      }
-
-      // --- Edit/Delete handlers ---
-      async function handleEditClick(e) {
-        e.stopPropagation();
-        const btn = e.currentTarget;
-        const messageId = btn.dataset.id;
-        const currentContent = btn.dataset.content;
-        const row = btn.closest('.message-row');
-        const createdAt = row.dataset.createdAt;
-
-        if (Date.now() - new Date(createdAt).getTime() > 60000) {
-          alert('Cannot edit: message is older than 1 minute.');
-          return;
-        }
-
-        const messageBubble = row.querySelector('.message-bubble');
-        const messageDiv = row.querySelector('.message');
-
-        const editHtml = `
-          <div class="message sent" style="padding:0;">
-            <input type="text" class="edit-input" value="${escapeHtml(currentContent)}" data-original="${escapeHtml(currentContent)}">
-            <div class="edit-actions">
-              <button class="save-btn" data-id="${messageId}">Save</button>
-              <button class="cancel-btn">Cancel</button>
-            </div>
-          </div>
-        `;
-        messageDiv.style.display = 'none';
-        btn.closest('.message-actions').style.display = 'none';
-
-        const editContainer = document.createElement('div');
-        editContainer.innerHTML = editHtml;
-        messageBubble.appendChild(editContainer.firstChild);
-
-        const input = messageBubble.querySelector('.edit-input');
-        input.focus();
-
-        const saveBtn = messageBubble.querySelector('.save-btn');
-        saveBtn.addEventListener('click', async () => {
-          const newContent = input.value.trim();
-          if (!newContent) return;
-          await editMessage(messageId, newContent);
-        });
-
-        const cancelBtn = messageBubble.querySelector('.cancel-btn');
-        cancelBtn.addEventListener('click', () => {
-          messageDiv.style.display = 'block';
-          btn.closest('.message-actions').style.display = 'flex';
-          editContainer.remove();
-        });
-
-        input.addEventListener('keypress', async (e) => {
-          if (e.key === 'Enter') {
-            const newContent = input.value.trim();
-            if (!newContent) return;
-            await editMessage(messageId, newContent);
-          }
-        });
-      }
-
-      async function editMessage(messageId, newContent) {
-        try {
-          const { error } = await supabase
-            .from('group_messages')
-            .update({ content: newContent })
-            .eq('id', messageId)
-            .eq('sender_id', currentUser.id);
-          if (error) throw error;
-          updateMessageInUI(messageId, newContent);
-          const messageRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
-          if (messageRow) {
-            const messageDiv = messageRow.querySelector('.message');
-            const actions = messageRow.querySelector('.message-actions');
-            if (messageDiv) messageDiv.style.display = 'block';
-            if (actions) actions.style.display = 'flex';
-            const editContainer = messageRow.querySelector('.message > div:not(.message):not(.message-actions)')?.closest('.message');
-            if (editContainer) editContainer.remove();
-          }
-        } catch (err) {
-          console.error('Edit error:', err);
-          alert('Failed to edit message: ' + err.message);
-        }
-      }
-
-      async function handleDeleteClick(e) {
-        e.stopPropagation();
-        if (!confirm('Delete this message?')) return;
-        const btn = e.currentTarget;
-        const messageId = btn.dataset.id;
-        const row = btn.closest('.message-row');
-        const senderId = row.dataset.senderId;
-        try {
-          let query = supabase.from('group_messages').delete().eq('id', messageId);
-          if (!isCEO) query = query.eq('sender_id', currentUser.id);
-          const { error } = await query;
-          if (error) throw error;
-          removeMessageFromUI(messageId);
-        } catch (err) {
-          console.error('Delete error:', err);
-          alert('Failed to delete message: ' + err.message);
-        }
-      }
-
-      function updateMessageInUI(messageId, newContent) {
-        const messageRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
-        if (!messageRow) return;
-        const messageDiv = messageRow.querySelector('.message');
-        if (messageDiv) {
-          const timeElem = messageDiv.querySelector('small');
-          messageDiv.innerHTML = `${escapeHtml(newContent)} `;
-          if (timeElem) messageDiv.appendChild(timeElem);
-        }
-        const editBtn = messageRow.querySelector('.edit-btn');
-        if (editBtn) editBtn.dataset.content = newContent;
-      }
-
-      function removeMessageFromUI(messageId) {
-        const messageRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
-        if (messageRow) {
-          if (messageRow.classList.contains('unread')) {
-            if (currentUnreadCount > 0) currentUnreadCount--;
-            if (isCEO && totalUnreadCount > 0) totalUnreadCount--;
-          }
-          if (observer) observer.unobserve(messageRow);
-          messageRow.remove();
-        }
-        if (editTimeouts.has(messageId)) {
-          clearTimeout(editTimeouts.get(messageId));
-          editTimeouts.delete(messageId);
-        }
-        updateUnreadBadges();
-      }
-
-      // --- Right-click read receipts (for group messages and DMs) ---
-      async function onRightClick(e) {
-        e.preventDefault();
-        const row = e.currentTarget;
-        const messageId = row.dataset.messageId;
-        const isDM = row.classList.contains('dm-msg-row');
-        modal.style.display = 'none';
-
-        let data;
-        if (isDM) {
-          const { data: msg, error } = await supabase
-            .from('private_messages')
-            .select('sender_id, recipient_id, read_at, profiles!sender_id(full_name), profiles!recipient_id(full_name)')
-            .eq('id', messageId)
-            .single();
-          if (error || !msg) {
-            console.error('fetch DM readers error:', error);
-            return;
-          }
-          const readerId = (msg.sender_id === currentUser.id) ? msg.recipient_id : msg.sender_id;
-          const readerName = (msg.sender_id === currentUser.id) ? msg.profiles_recipient_id?.full_name : msg.profiles_sender_id?.full_name;
-          const readTime = msg.read_at ? new Date(msg.read_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
-          if (msg.read_at) {
-            data = [{ profiles: { full_name: readerName }, read_at: readTime }];
-          } else {
-            data = [];
-          }
-        } else {
-          const { data: readers, error } = await supabase
-            .from('message_reads')
-            .select('user_id, read_at, profiles!inner(full_name)')
-            .eq('message_id', messageId)
-            .order('read_at', { ascending: true });
-          if (error || !readers) {
-            console.error('fetch readers error:', error);
-            return;
-          }
-          data = readers;
-        }
-
-        if (data.length === 0) {
-          modal.innerHTML = '<h4>Read receipts</h4><p style="padding:0.5rem 0;">No one has seen this message yet.</p>';
-        } else {
-          const listItems = data.map(item => {
-            const name = item.profiles?.full_name || 'Unknown';
-            const readTime = item.read_at ? new Date(item.read_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Unknown';
-            return `<li><span class="reader-name">${escapeHtml(name)}</span> <span class="reader-time">${readTime}</span></li>`;
-          }).join('');
-          modal.innerHTML = `<h4>Seen by (${data.length})</h4><ul>${listItems}</ul>`;
-        }
-        modal.style.left = e.pageX + 10 + 'px';
-        modal.style.top = e.pageY + 10 + 'px';
-        modal.style.display = 'block';
-        const hideModal = (ev) => {
-          if (!modal.contains(ev.target)) {
-            modal.style.display = 'none';
-            document.removeEventListener('click', hideModal);
-          }
-        };
-        setTimeout(() => document.addEventListener('click', hideModal), 0);
-      }
-
-      // --- Append new message to UI (real-time) ---
-      function appendMessageToUI(message, isSent, senderName, senderId, messageRole, isUnread = false) {
-        if (document.querySelector(`.message-row[data-message-id="${message.id}"]`)) return;
-        if (isCEO) {
-          if (selectedGroupRole && messageRole !== selectedGroupRole) return;
-        } else {
-          if (messageRole !== currentRole) return;
-        }
-        const area = document.getElementById('messagesArea');
-        if (!area) return;
-        const lastMessageRow = area.querySelector('.message-row:last-child');
-        let lastDate = lastMessageRow ? lastMessageRow.dataset.createdAt : null;
-        const separatorHtml = maybeAppendDateSeparator(lastDate, message.created_at);
-        const isScrolledToBottom = area.scrollHeight - area.scrollTop <= area.clientHeight + 50;
-        if (separatorHtml) area.insertAdjacentHTML('beforeend', separatorHtml);
-        const msgHtml = renderMessage(message, isSent, senderName, senderId, messageRole, isUnread);
-        area.insertAdjacentHTML('beforeend', msgHtml);
-        if (isScrolledToBottom) area.scrollTop = area.scrollHeight;
-        attachMessageHandlers();
-        if (isUnread) {
-          const newRow = document.querySelector(`.message-row[data-message-id="${message.id}"]`);
-          if (observer && newRow) observer.observe(newRow);
-        }
-      }
-
-      // --- Typing indicator ---
-      function updateTypingIndicator() {
-        if (activeTypers.size === 0) {
-          typingContainer.style.display = 'none';
-          return;
-        }
-        const names = Array.from(activeTypers);
-        let text = '';
-        if (names.length === 1) {
-          text = `${names[0]} is typing...`;
-        } else if (names.length === 2) {
-          text = `${names[0]} and ${names[1]} are typing...`;
-        } else {
-          text = `${names.length} people are typing...`;
-        }
-        typingText.textContent = text;
-        typingContainer.style.display = 'block';
-      }
-
-      async function sendTypingIndicator() {
-        if (!currentUser || (isCEO && !selectedGroupRole) || (!isCEO && !currentRole)) return;
-        const channel = isCEO ? (selectedGroupRole ? `typing-${selectedGroupRole}` : 'typing-all') : `typing-${currentRole}`;
-        await supabase.channel(channel).send({
-          type: 'broadcast',
-          event: 'typing',
-          payload: { userId: currentUser.id, userName: currentUserFullName, timestamp: Date.now() }
-        });
-      }
-
-      function setupTypingSubscription() {
-        if (typingSubscription) typingSubscription.unsubscribe();
-        const channel = isCEO ? (selectedGroupRole ? `typing-${selectedGroupRole}` : 'typing-all') : `typing-${currentRole}`;
-        typingSubscription = supabase
-          .channel(channel)
-          .on('broadcast', { event: 'typing' }, (payload) => {
-            const { userId, userName, timestamp } = payload.payload;
-            if (userId === currentUser.id) return;
-            if (typingTimeouts[userId]) clearTimeout(typingTimeouts[userId]);
-            activeTypers.add(userName);
-            updateTypingIndicator();
-            typingTimeouts[userId] = setTimeout(() => {
-              activeTypers.delete(userName);
-              updateTypingIndicator();
-              delete typingTimeouts[userId];
-            }, 3000);
-          })
-          .subscribe();
-      }
-
-      // --- Subscribe to group messages ---
-      function subscribeToMessages() {
-        if (messageSubscription) messageSubscription.unsubscribe();
-        setupTypingSubscription();
-
-        if (isCEO) {
-          messageSubscription = supabase
-            .channel('all-messages')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'group_messages' }, async (payload) => {
-              const newMsg = payload.new;
-              if (document.querySelector(`.message-row[data-message-id="${newMsg.id}"]`)) return;
-              if (activeTypers.has(currentUserFullName)) { activeTypers.delete(currentUserFullName); updateTypingIndicator(); }
-              if (newMsg.sender_id === currentUser.id) return;
-              const { data: senderProfile } = await supabase
-                .from('profiles')
-                .select('full_name')
-                .eq('id', newMsg.sender_id)
-                .single();
-              const senderName = senderProfile?.full_name || 'Unknown';
-              appendMessageToUI(newMsg, false, senderName, newMsg.sender_id, newMsg.role, true);
-              totalUnreadCount++;
-              if (selectedGroupRole === null || newMsg.role === selectedGroupRole) currentUnreadCount++;
-              updateUnreadBadges();
-              if (isCEO) buildGroupTabs();
-            })
-            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'group_messages' }, (payload) => {
-              updateMessageInUI(payload.new.id, payload.new.content);
-            })
-            .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'group_messages' }, (payload) => {
-              removeMessageFromUI(payload.old.id);
-            })
-            .subscribe();
-        } else {
-          messageSubscription = supabase
-            .channel(`group-${currentRole}`)
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, async (payload) => {
-              const newMsg = payload.new;
-              if (document.querySelector(`.message-row[data-message-id="${newMsg.id}"]`)) return;
-              if (activeTypers.has(currentUserFullName)) { activeTypers.delete(currentUserFullName); updateTypingIndicator(); }
-              if (newMsg.sender_id === currentUser.id) return;
-              const { data: senderProfile } = await supabase
-                .from('profiles')
-                .select('full_name')
-                .eq('id', newMsg.sender_id)
-                .single();
-              const senderName = senderProfile?.full_name || 'Unknown';
-              appendMessageToUI(newMsg, false, senderName, newMsg.sender_id, newMsg.role, true);
-              currentUnreadCount++;
-              updateUnreadBadges();
-            })
-            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, (payload) => {
-              updateMessageInUI(payload.new.id, payload.new.content);
-            })
-            .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, (payload) => {
-              removeMessageFromUI(payload.old.id);
-            })
-            .subscribe();
-        }
-      }
-
-      // --- Send group message (text) ---
-      async function sendMessage() {
-        const input = document.getElementById('messageInput');
-        const content = input.value.trim();
-        if (!content || !currentUser) return;
-
-        let messageRole;
-        if (isCEO) {
-          if (!selectedGroupRole) { alert('Please select a group first.'); return; }
-          messageRole = selectedGroupRole;
-        } else {
-          messageRole = currentRole;
-        }
-
-        if (activeTypers.has(currentUserFullName)) { activeTypers.delete(currentUserFullName); updateTypingIndicator(); }
-
-        const tempId = 'temp-' + Date.now();
-        const optimisticMessage = {
-          id: tempId,
-          content: content,
-          created_at: new Date().toISOString(),
-          sender_id: currentUser.id,
-          role: messageRole,
-          audio_url: null
-        };
-        appendMessageToUI(optimisticMessage, true, currentUserFullName, currentUser.id, messageRole, false);
+        sendBtn.onclick = () => sendPrivateMessage(otherUserId);
+        input.onkeypress = (e) => { if (e.key === 'Enter') sendPrivateMessage(otherUserId); };
         input.value = '';
 
+      } catch (err) {
+        console.error('Load private chat error:', err);
+        messagesDiv.innerHTML = '<div style="color:#ff628c;">Failed to load messages.</div>';
+      }
+    }
+
+    async function sendPrivateMessage(otherUserId) {
+      const input = document.getElementById('dmChatInput');
+      const content = input.value.trim();
+      if (!content) return;
+      input.value = '';
+
+      try {
         const { data, error } = await supabase
-          .from('group_messages')
-          .insert({ role: messageRole, sender_id: currentUser.id, content: content })
+          .from('private_messages')
+          .insert({ sender_id: currentUser.id, recipient_id: otherUserId, content: content })
           .select()
           .single();
 
-        if (error) {
-          console.error('Send error:', error);
-          document.querySelector(`.message-row[data-message-id="${tempId}"]`)?.remove();
-          alert('Failed to send: ' + error.message);
-          return;
-        }
+        if (error) throw error;
 
-        const tempRow = document.querySelector(`.message-row[data-message-id="${tempId}"]`);
-        if (tempRow) tempRow.dataset.messageId = data.id;
-
-        try {
-          await supabase
-            .from('message_reads')
-            .insert({ message_id: data.id, user_id: currentUser.id });
-          readMessageIds.add(data.id);
-        } catch (readErr) {}
-      }
-
-      // --- Voice Note Functions (Group) ---
-      const voiceBtn = document.getElementById('voiceNoteBtn');
-      const recordingTimer = document.getElementById('recordingTimer');
-
-      voiceBtn.addEventListener('click', toggleRecording);
-
-      async function toggleRecording() {
-        if (isRecording) {
-          stopRecording();
-        } else {
-          await startRecording();
-        }
-      }
-
-      async function startRecording() {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          mediaRecorder = new MediaRecorder(stream);
-          audioChunks = [];
-          mediaRecorder.ondataavailable = event => {
-            audioChunks.push(event.data);
-          };
-          mediaRecorder.onstop = async () => {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-            await uploadVoiceNote(audioBlob);
-            stream.getTracks().forEach(track => track.stop());
-          };
-          mediaRecorder.start();
-          isRecording = true;
-          voiceBtn.classList.add('recording');
-          voiceBtn.textContent = '🔴';
-          recordingStartTime = Date.now();
-          recordingTimer.style.display = 'inline';
-          updateRecordingTimer();
-        } catch (err) {
-          console.error('Microphone access error:', err);
-          alert('Could not access microphone. Please check permissions.');
-        }
-      }
-
-      function stopRecording() {
-        if (mediaRecorder && isRecording) {
-          mediaRecorder.stop();
-          isRecording = false;
-          voiceBtn.classList.remove('recording');
-          voiceBtn.textContent = '🎤';
-          recordingTimer.style.display = 'none';
-          if (recordingTimerInterval) {
-            clearInterval(recordingTimerInterval);
-            recordingTimerInterval = null;
-          }
-        }
-      }
-
-      function updateRecordingTimer() {
-        recordingTimerInterval = setInterval(() => {
-          if (!isRecording) return;
-          const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
-          const minutes = Math.floor(elapsed / 60);
-          const seconds = elapsed % 60;
-          recordingTimer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        }, 1000);
-      }
-
-      async function uploadVoiceNote(audioBlob) {
-        let messageRole;
-        if (isCEO) {
-          if (!selectedGroupRole) { alert('Please select a group first.'); return; }
-          messageRole = selectedGroupRole;
-        } else {
-          messageRole = currentRole;
-        }
-
-        const fileName = `${currentUser.id}/${Date.now()}.webm`;
-        const { error: uploadError } = await supabase.storage
-          .from('voice_notes')
-          .upload(fileName, audioBlob, { contentType: 'audio/webm' });
-
-        if (uploadError) {
-          console.error('Upload error:', uploadError);
-          alert('Failed to upload voice note: ' + uploadError.message);
-          return;
-        }
-
-        const { data: urlData } = supabase.storage
-          .from('voice_notes')
-          .getPublicUrl(fileName);
-        const audioUrl = urlData.publicUrl;
-
-        const tempId = 'temp-' + Date.now();
-        const optimisticMessage = {
-          id: tempId,
-          content: '',
-          created_at: new Date().toISOString(),
-          sender_id: currentUser.id,
-          role: messageRole,
-          audio_url: audioUrl
-        };
-        appendMessageToUI(optimisticMessage, true, currentUserFullName, currentUser.id, messageRole, false);
-
- const { data, error } = await supabase
-  .from('group_messages')
-  .insert({ role: messageRole, sender_id: currentUser.id, content: '', audio_url: audioUrl })
-  .select()
-  .single();
-        if (error) {
-          console.error('Insert error:', error);
-          document.querySelector(`.message-row[data-message-id="${tempId}"]`)?.remove();
-          alert('Failed to send voice note: ' + error.message);
-          return;
-        }
-
-        const tempRow = document.querySelector(`.message-row[data-message-id="${tempId}"]`);
-        if (tempRow) tempRow.dataset.messageId = data.id;
-
-        try {
-          await supabase
-            .from('message_reads')
-            .insert({ message_id: data.id, user_id: currentUser.id });
-          readMessageIds.add(data.id);
-        } catch (readErr) {}
-      }
-
-      // --- DM FUNCTIONS with voice notes (FIXED) ---
-      async function loadPrivateMessagesView() {
-        try {
-          if (messageSubscription) messageSubscription.unsubscribe();
-          if (observer) observer.disconnect();
-
-          document.getElementById('groupTitle').innerText = 'Direct Messages';
-          document.getElementById('roleDisplay').style.display = 'none';
-          document.getElementById('groupTabs').style.display = 'none';
-          document.getElementById('messageInput').disabled = true;
-          document.getElementById('sendBtn').disabled = true;
-          document.getElementById('voiceNoteBtn').style.display = 'none'; // hide group voice btn
-
-          const { data: allProfiles, error: profilesError } = await supabase
-            .from('profiles')
-            .select('id, full_name, job_role')
-            .neq('id', currentUser.id);
-
-          if (profilesError) throw profilesError;
-
-          const unreadCounts = {};
-          for (const profile of allProfiles) {
-            const { count, error: countError } = await supabase
-              .from('private_messages')
-              .select('*', { count: 'exact', head: true })
-              .eq('sender_id', profile.id)
-              .eq('recipient_id', currentUser.id)
-              .is('read_at', null);
-
-            if (!countError && count > 0) {
-              unreadCounts[profile.id] = count;
-            }
-          }
-          dmUnreadBySender = unreadCounts;
-          updateDMBadge();
-
-          const conversationsHtml = allProfiles.map(profile => {
-            const unread = unreadCounts[profile.id] || 0;
-            const unreadBadge = unread > 0 ? `<span class="dm-unread-badge">${unread}</span>` : '';
-            const onlineClass = onlineUsers.has(profile.id) ? 'online' : '';
-            return `
-              <div class="dm-conversation-item" data-user-id="${profile.id}" data-user-name="${escapeHtml(profile.full_name)}" data-user-role="${escapeHtml(profile.job_role)}">
-                <span class="status-dot ${onlineClass}"></span>
-                <div class="dm-conv-content">
-                  <div class="dm-conv-name">${escapeHtml(profile.full_name)}</div>
-                  <div class="dm-conv-role">${escapeHtml(profile.job_role)}</div>
-                </div>
-                ${unreadBadge}
-              </div>
-            `;
-          }).join('');
-
-          const area = document.getElementById('messagesArea');
-          area.innerHTML = `
-            <div class="dm-layout">
-              <div class="dm-conversations-list" id="dmConversationsList">
-                <div class="dm-list-header">All Members</div>
-                ${conversationsHtml}
-              </div>
-              <div class="dm-chat-area" id="dmChatArea">
-                <div class="dm-chat-header">
-                  <button class="dm-back-btn" id="dmBackBtn" style="display:none;">←</button>
-                  <span class="dm-chat-title"></span>
-                </div>
-                <div id="dmChatMessages" class="dm-chat-messages"></div>
-                <div class="dm-chat-input">
-                  <input type="text" id="dmChatInput" placeholder="Type a message...">
-                  <button class="dm-voice-btn" id="dmVoiceNoteBtn">🎤</button>
-                  <button id="dmChatSendBtn">➤</button>
-                  <span id="dmRecordingTimer" class="recording-timer" style="display: none;">0:00</span>
-                </div>
-              </div>
-            </div>
-          `;
-
-          // DM voice recording variables
-          let dmMediaRecorder = null;
-          let dmAudioChunks = [];
-          let dmIsRecording = false;
-          let dmRecordingStartTime = null;
-          let dmRecordingTimerInterval = null;
-          const dmVoiceBtn = document.getElementById('dmVoiceNoteBtn');
-          const dmRecordingTimer = document.getElementById('dmRecordingTimer');
-
-          dmVoiceBtn.addEventListener('click', async () => {
-            if (dmIsRecording) {
-              if (dmMediaRecorder) {
-                dmMediaRecorder.stop();
-                dmIsRecording = false;
-                dmVoiceBtn.textContent = '🎤';
-                dmVoiceBtn.classList.remove('recording');
-                dmRecordingTimer.style.display = 'none';
-                if (dmRecordingTimerInterval) {
-                  clearInterval(dmRecordingTimerInterval);
-                  dmRecordingTimerInterval = null;
-                }
-              }
-            } else {
-              try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                dmMediaRecorder = new MediaRecorder(stream);
-                dmAudioChunks = [];
-                dmMediaRecorder.ondataavailable = event => {
-                  dmAudioChunks.push(event.data);
-                };
-                dmMediaRecorder.onstop = async () => {
-                  const audioBlob = new Blob(dmAudioChunks, { type: 'audio/webm' });
-                  // FIX: use currentRecipientId (set when opening a DM chat)
-                  if (!currentRecipientId) {
-                    alert('No chat selected. Please open a conversation first.');
-                    return;
-                  }
-                  await sendPrivateVoiceNote(audioBlob, currentRecipientId);
-                  stream.getTracks().forEach(track => track.stop());
-                };
-                dmMediaRecorder.start();
-                dmIsRecording = true;
-                dmVoiceBtn.classList.add('recording');
-                dmVoiceBtn.textContent = '🔴';
-                dmRecordingStartTime = Date.now();
-                dmRecordingTimer.style.display = 'inline';
-                dmRecordingTimerInterval = setInterval(() => {
-                  if (!dmIsRecording) return;
-                  const elapsed = Math.floor((Date.now() - dmRecordingStartTime) / 1000);
-                  const minutes = Math.floor(elapsed / 60);
-                  const seconds = elapsed % 60;
-                  dmRecordingTimer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                }, 1000);
-              } catch (err) {
-                console.error('DM mic error:', err);
-                alert('Could not access microphone.');
-              }
-            }
-          });
-
-          // Attach click handlers
-          document.querySelectorAll('.dm-conversation-item').forEach(item => {
-            item.addEventListener('click', async () => {
-              const userId = item.dataset.userId;
-              const userName = item.dataset.userName;
-              const userRole = item.dataset.userRole;
-              await openPrivateChat(userId, { full_name: userName, job_role: userRole });
-              document.querySelectorAll('.dm-conversation-item').forEach(i => i.classList.remove('active'));
-              item.classList.add('active');
-              const badge = item.querySelector('.dm-unread-badge');
-              if (badge) {
-                badge.remove();
-                delete dmUnreadBySender[userId];
-                updateDMBadge();
-              }
-              if (window.innerWidth <= 768) {
-                document.getElementById('dmConversationsList').style.display = 'none';
-                document.getElementById('dmChatArea').classList.add('active');
-                document.getElementById('dmBackBtn').style.display = 'inline-block';
-              }
-            });
-          });
-
-          document.getElementById('dmBackBtn').addEventListener('click', () => {
-            document.getElementById('dmConversationsList').style.display = 'block';
-            document.getElementById('dmChatArea').classList.remove('active');
-            document.getElementById('dmBackBtn').style.display = 'none';
-            currentRecipientId = null; // clear recipient when leaving chat
-          });
-
-        } catch (err) {
-          console.error('Load DM view error:', err);
-          document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Failed to load direct messages.</div>';
-        }
-      }
-
-      async function openPrivateChat(otherUserId, otherProfile) {
-        currentRecipientId = otherUserId;   // <-- FIX: store recipient ID
-
-        const chatArea = document.getElementById('dmChatArea');
-        const headerTitle = document.querySelector('.dm-chat-title');
         const messagesDiv = document.getElementById('dmChatMessages');
-        const input = document.getElementById('dmChatInput');
-        const sendBtn = document.getElementById('dmChatSendBtn');
+        const timeStr = formatTimeOnly(data.created_at);
+        const msgHtml = `
+          <div class="dm-msg-row sent" data-message-id="${data.id}" data-created-at="${data.created_at}">
+            <div class="dm-msg sent">
+              ${escapeHtml(data.content)}
+              <small>${timeStr}</small>
+            </div>
+          </div>
+        `;
+        messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      } catch (err) {
+        console.error('Send private message error:', err);
+        alert('Failed to send: ' + err.message);
+      }
+    }
 
-        headerTitle.innerHTML = `${escapeHtml(otherProfile.full_name)} <span style="font-size:0.85rem;color:#9aa4bf;">(${escapeHtml(otherProfile.job_role)})</span>`;
-        chatArea.style.display = 'flex';
-        input.focus();
+    // --- DM voice note removed, now replaced by calls ---
+    async function sendPrivateVoiceNote(audioBlob, otherUserId) { /* not used */ }
 
-        try {
-          const { data, error } = await supabase
-            .from('private_messages')
-            .select('*')
-            .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`)
-            .order('created_at', { ascending: true });
+    async function markDirectMessageAsRead(messageId, senderId) {
+      try {
+        await supabase
+          .from('private_messages')
+          .update({ read_at: new Date().toISOString() })
+          .eq('id', messageId)
+          .eq('recipient_id', currentUser.id);
+      } catch (err) { console.error('Mark DM read error:', err); }
+      if (senderId && dmUnreadBySender[senderId]) {
+        dmUnreadBySender[senderId] = Math.max(0, dmUnreadBySender[senderId] - 1);
+        updateDMBadge();
+      }
+      scheduleUnreadBorderRemoval(messageId);
+    }
 
-          if (error) throw error;
+    function subscribeToAllDirectMessages() {
+      if (globalDmSubscription) globalDmSubscription.unsubscribe();
+      if (!currentUser) return;
+      globalDmSubscription = supabase
+        .channel(`dm-global-${currentUser.id}`)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'private_messages', filter: `recipient_id=eq.${currentUser.id}` }, async (payload) => {
+          const newMsg = payload.new;
+          if (newMsg.sender_id === currentUser.id) return;
 
-          let html = '';
-          let lastDate = null;
-          for (const msg of data) {
-            const isSent = msg.sender_id === currentUser.id;
-            const timeStr = formatTimeOnly(msg.created_at);
-            const dateHeader = maybeAppendDateSeparator(lastDate, msg.created_at);
-            if (dateHeader) html += dateHeader.replace('date-separator', 'dm-date-separator');
-            lastDate = msg.created_at;
-
-            let seenHtml = '';
-            if (isSent && msg.read_at) {
-              const { data: reader } = await supabase
-                .from('profiles')
-                .select('full_name')
-                .eq('id', otherUserId)
-                .single();
-              const readerName = reader?.full_name || 'User';
-              seenHtml = `<div class="dm-seen-indicator"><span class="double-tick">✓✓</span> Seen by ${escapeHtml(readerName)} at ${formatTimeOnly(msg.read_at)}</div>`;
-            }
-
-            let contentHtml = '';
-            if (msg.audio_url) {
-              contentHtml = `<audio controls src="${escapeHtml(msg.audio_url)}"></audio>`;
-            } else {
-              contentHtml = escapeHtml(msg.content);
-            }
-
-            html += `
-              <div class="dm-msg-row ${isSent ? 'sent' : 'received'}" data-message-id="${msg.id}" data-created-at="${msg.created_at}">
-                <div class="dm-msg ${isSent ? 'sent' : 'received'}">
-                  ${contentHtml}
-                  <small>${timeStr}</small>
-                  ${seenHtml}
+          if (document.getElementById('dmNavLink').classList.contains('active')) {
+            const activeItem = document.querySelector('.dm-conversation-item.active');
+            if (activeItem && activeItem.dataset.userId === newMsg.sender_id) {
+              const messagesDiv = document.getElementById('dmChatMessages');
+              const timeStr = formatTimeOnly(newMsg.created_at);
+              let contentHtml = '';
+              if (newMsg.audio_url) {
+                contentHtml = `<audio controls src="${escapeHtml(newMsg.audio_url)}"></audio>`;
+              } else {
+                contentHtml = escapeHtml(newMsg.content);
+              }
+              const msgHtml = `
+                <div class="dm-msg-row received unread" data-message-id="${newMsg.id}" data-created-at="${newMsg.created_at}">
+                  <div class="dm-msg received">
+                    ${contentHtml}
+                    <small>${timeStr}</small>
+                  </div>
                 </div>
-              </div>
-            `;
-            if (!isSent && !msg.read_at) {
-              markDirectMessageAsRead(msg.id, otherUserId);
+              `;
+              messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
+              messagesDiv.scrollTop = messagesDiv.scrollHeight;
+              markDirectMessageAsRead(newMsg.id, newMsg.sender_id);
+              return;
             }
           }
-          messagesDiv.innerHTML = html || '<div style="color:#9aa4bf; text-align:center; padding:2rem;">No messages yet. Say hello!</div>';
-          messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-          document.querySelectorAll('.dm-msg-row').forEach(row => {
-            row.addEventListener('contextmenu', onRightClick);
-          });
-
-          sendBtn.onclick = () => sendPrivateMessage(otherUserId);
-          input.onkeypress = (e) => { if (e.key === 'Enter') sendPrivateMessage(otherUserId); };
-          input.value = '';
-
-        } catch (err) {
-          console.error('Load private chat error:', err);
-          messagesDiv.innerHTML = '<div style="color:#ff628c;">Failed to load messages.</div>';
-        }
-      }
-
-      async function sendPrivateMessage(otherUserId) {
-        const input = document.getElementById('dmChatInput');
-        const content = input.value.trim();
-        if (!content) return;
-        input.value = '';
-
-        try {
-const { data, error } = await supabase
-  .from('private_messages')
-  .insert({ sender_id: currentUser.id, recipient_id: otherUserId, content: '', audio_url: audioUrl })
-  .select()
-  .single();
-
-          if (error) throw error;
-
-          const messagesDiv = document.getElementById('dmChatMessages');
-          const timeStr = formatTimeOnly(data.created_at);
-          const msgHtml = `
-            <div class="dm-msg-row sent" data-message-id="${data.id}" data-created-at="${data.created_at}">
-              <div class="dm-msg sent">
-                ${escapeHtml(data.content)}
-                <small>${timeStr}</small>
-              </div>
-            </div>
-          `;
-          messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
-          messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        } catch (err) {
-          console.error('Send private message error:', err);
-          alert('Failed to send: ' + err.message);
-        }
-      }
-
-      async function sendPrivateVoiceNote(audioBlob, otherUserId) {
-        if (!otherUserId) {
-          alert('Recipient not specified.');
-          return;
-        }
-
-        const fileName = `${currentUser.id}/${Date.now()}.webm`;
-        const { error: uploadError } = await supabase.storage
-          .from('voice_notes')
-          .upload(fileName, audioBlob, { contentType: 'audio/webm' });
-
-        if (uploadError) {
-          console.error('Upload error:', uploadError);
-          alert('Failed to upload voice note: ' + uploadError.message);
-          return;
-        }
-
-        const { data: urlData } = supabase.storage
-          .from('voice_notes')
-          .getPublicUrl(fileName);
-        const audioUrl = urlData.publicUrl;
-
-        try {
-          const { data, error } = await supabase
-            .from('private_messages')
-            .insert({ sender_id: currentUser.id, recipient_id: otherUserId, audio_url: audioUrl })
-            .select()
-            .single();
-
-          if (error) throw error;
-
-          const messagesDiv = document.getElementById('dmChatMessages');
-          const timeStr = formatTimeOnly(data.created_at);
-          const msgHtml = `
-            <div class="dm-msg-row sent" data-message-id="${data.id}" data-created-at="${data.created_at}">
-              <div class="dm-msg sent">
-                <audio controls src="${escapeHtml(audioUrl)}"></audio>
-                <small>${timeStr}</small>
-              </div>
-            </div>
-          `;
-          messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
-          messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        } catch (err) {
-          console.error('Insert private voice note error:', err);
-          alert('Failed to send voice note: ' + err.message);
-        }
-      }
-
-      async function markDirectMessageAsRead(messageId, senderId) {
-        try {
-          await supabase
-            .from('private_messages')
-            .update({ read_at: new Date().toISOString() })
-            .eq('id', messageId)
-            .eq('recipient_id', currentUser.id);
-        } catch (err) { console.error('Mark DM read error:', err); }
-        if (senderId && dmUnreadBySender[senderId]) {
-          dmUnreadBySender[senderId] = Math.max(0, dmUnreadBySender[senderId] - 1);
+          dmUnreadBySender[newMsg.sender_id] = (dmUnreadBySender[newMsg.sender_id] || 0) + 1;
           updateDMBadge();
+
+          if (document.getElementById('dmNavLink').classList.contains('active')) {
+            const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${newMsg.sender_id}"]`);
+            if (targetItem) {
+              let badge = targetItem.querySelector('.dm-unread-badge');
+              const currentCount = dmUnreadBySender[newMsg.sender_id];
+              if (badge) {
+                badge.textContent = currentCount;
+              } else {
+                badge = document.createElement('span');
+                badge.className = 'dm-unread-badge';
+                badge.textContent = currentCount;
+                targetItem.appendChild(badge);
+              }
+            }
+          }
+
+          let senderName = 'Someone';
+          try {
+            const { data: prof } = await supabase
+              .from('profiles')
+              .select('full_name')
+              .eq('id', newMsg.sender_id)
+              .single();
+            if (prof && prof.full_name) senderName = prof.full_name;
+          } catch (e) {}
+          showToast(`New DM from ${senderName}`);
+        })
+        .subscribe();
+    }
+
+    // === NEW: Call functions ===
+    async function startCall(targetUserId, targetUserName, type) {
+      // type: 'video' or 'audio'
+      callType = type;
+      callTarget = targetUserId;
+      isCaller = true;
+      callModalTitle.textContent = `Call with ${targetUserName}`;
+      remoteVideoLabel.textContent = targetUserName;
+
+      // Get user media
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: type === 'video' });
+        localVideo.srcObject = localStream;
+      } catch (err) {
+        console.error('Failed to get media:', err);
+        alert('Could not access camera/microphone.');
+        return;
+      }
+
+      // Create peer connection
+      peerConnection = new RTCPeerConnection(iceServers);
+      localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+      // Set up remote stream
+      remoteStream = new MediaStream();
+      remoteVideo.srcObject = remoteStream;
+      peerConnection.ontrack = event => {
+        event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
+      };
+
+      // ICE candidate handling
+      peerConnection.onicecandidate = event => {
+        if (event.candidate && callChannel) {
+          callChannel.send({ type: 'broadcast', event: 'ice-candidate', payload: { candidate: event.candidate, from: currentUser.id } });
         }
+      };
+
+      // Create and send offer
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+
+      // Set up signaling channel
+      const channelName = `call-dm-${currentUser.id}-${targetUserId}`; // deterministic order
+      callChannel = supabase.channel(channelName);
+      callChannel
+        .on('broadcast', { event: 'offer' }, async ({ payload }) => {
+          if (!isCaller && payload.to === currentUser.id) {
+            await handleOffer(payload.offer, payload.from);
+          }
+        })
+        .on('broadcast', { event: 'answer' }, async ({ payload }) => {
+          if (isCaller && payload.to === currentUser.id) {
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(payload.answer));
+          }
+        })
+        .on('broadcast', { event: 'ice-candidate' }, async ({ payload }) => {
+          if (payload.from !== currentUser.id && peerConnection) {
+            await peerConnection.addIceCandidate(new RTCIceCandidate(payload.candidate));
+          }
+        })
+        .on('broadcast', { event: 'hangup' }, ({ payload }) => {
+          if (payload.from !== currentUser.id) {
+            endCall();
+          }
+        })
+        .subscribe();
+
+      // Send offer
+      callChannel.send({
+        type: 'broadcast',
+        event: 'offer',
+        payload: { offer: peerConnection.localDescription, from: currentUser.id, to: targetUserId }
+      });
+
+      callOptionsModal.style.display = 'none';
+      callModal.style.display = 'flex';
+      callActive = true;
+    }
+
+    async function handleOffer(offer, fromUserId) {
+      isCaller = false;
+      callTarget = fromUserId;
+      callModalTitle.textContent = `Incoming call from ...`; // we can fetch name later
+      remoteVideoLabel.textContent = 'Caller';
+
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: callType === 'video' });
+        localVideo.srcObject = localStream;
+      } catch (err) {
+        console.error('Failed to get media:', err);
+        return;
       }
 
-      function subscribeToAllDirectMessages() {
-        if (globalDmSubscription) globalDmSubscription.unsubscribe();
-        if (!currentUser) return;
-        globalDmSubscription = supabase
-          .channel(`dm-global-${currentUser.id}`)
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'private_messages', filter: `recipient_id=eq.${currentUser.id}` }, async (payload) => {
-            const newMsg = payload.new;
-            if (newMsg.sender_id === currentUser.id) return;
+      peerConnection = new RTCPeerConnection(iceServers);
+      localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
-            if (document.getElementById('dmNavLink').classList.contains('active')) {
-              const activeItem = document.querySelector('.dm-conversation-item.active');
-              if (activeItem && activeItem.dataset.userId === newMsg.sender_id) {
-                const messagesDiv = document.getElementById('dmChatMessages');
-                const timeStr = formatTimeOnly(newMsg.created_at);
-                let contentHtml = '';
-                if (newMsg.audio_url) {
-                  contentHtml = `<audio controls src="${escapeHtml(newMsg.audio_url)}"></audio>`;
-                } else {
-                  contentHtml = escapeHtml(newMsg.content);
-                }
-                const msgHtml = `
-                  <div class="dm-msg-row received" data-message-id="${newMsg.id}" data-created-at="${newMsg.created_at}">
-                    <div class="dm-msg received">
-                      ${contentHtml}
-                      <small>${timeStr}</small>
-                    </div>
-                  </div>
-                `;
-                messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                markDirectMessageAsRead(newMsg.id, newMsg.sender_id);
-                return;
-              }
-            }
+      remoteStream = new MediaStream();
+      remoteVideo.srcObject = remoteStream;
+      peerConnection.ontrack = event => {
+        event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
+      };
 
-            dmUnreadBySender[newMsg.sender_id] = (dmUnreadBySender[newMsg.sender_id] || 0) + 1;
-            updateDMBadge();
+      peerConnection.onicecandidate = event => {
+        if (event.candidate && callChannel) {
+          callChannel.send({ type: 'broadcast', event: 'ice-candidate', payload: { candidate: event.candidate, from: currentUser.id } });
+        }
+      };
 
-            if (document.getElementById('dmNavLink').classList.contains('active')) {
-              const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${newMsg.sender_id}"]`);
-              if (targetItem) {
-                let badge = targetItem.querySelector('.dm-unread-badge');
-                const currentCount = dmUnreadBySender[newMsg.sender_id];
-                if (badge) {
-                  badge.textContent = currentCount;
-                } else {
-                  badge = document.createElement('span');
-                  badge.className = 'dm-unread-badge';
-                  badge.textContent = currentCount;
-                  targetItem.appendChild(badge);
-                }
-              }
-            }
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+      const answer = await peerConnection.createAnswer();
+      await peerConnection.setLocalDescription(answer);
 
-            let senderName = 'Someone';
-            try {
-              const { data: prof } = await supabase
-                .from('profiles')
-                .select('full_name')
-                .eq('id', newMsg.sender_id)
-                .single();
-              if (prof && prof.full_name) senderName = prof.full_name;
-            } catch (e) {}
-            showToast(`New DM from ${senderName}`);
-          })
-          .subscribe();
+      callChannel.send({
+        type: 'broadcast',
+        event: 'answer',
+        payload: { answer, from: currentUser.id, to: fromUserId }
+      });
+
+      callModal.style.display = 'flex';
+      callActive = true;
+    }
+
+    function endCall() {
+      if (callChannel) {
+        callChannel.send({ type: 'broadcast', event: 'hangup', payload: { from: currentUser.id } });
+        callChannel.unsubscribe();
+        callChannel = null;
       }
+      if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+      }
+      if (localStream) {
+        localStream.getTracks().forEach(t => t.stop());
+        localStream = null;
+      }
+      if (remoteStream) {
+        remoteStream.getTracks().forEach(t => t.stop());
+        remoteStream = null;
+      }
+      localVideo.srcObject = null;
+      remoteVideo.srcObject = null;
+      callModal.style.display = 'none';
+      callActive = false;
+    }
 
-      // --- Navigation ---
-      document.getElementById('chatNavLink').addEventListener('click', (e) => {
-        e.preventDefault();
+    // --- Navigation ---
+    document.getElementById('chatNavLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('chatNavLink').classList.add('active');
+      document.getElementById('dmNavLink').classList.remove('active');
+      document.getElementById('groupTabs').style.display = isCEO ? 'flex' : 'none';
+      document.getElementById('roleDisplay').style.display = isCEO ? 'none' : 'inline';
+      document.getElementById('chatInputArea').style.display = 'flex';
+      document.getElementById('voiceNoteBtn').style.display = 'flex';
+      document.getElementById('messageInput').disabled = isCEO && !selectedGroupRole;
+      document.getElementById('sendBtn').disabled = isCEO && !selectedGroupRole;
+      document.getElementById('voiceNoteBtn').disabled = isCEO && !selectedGroupRole;
+      // Show group call button
+      document.getElementById('groupCallBtn').style.display = 'inline-block';
+
+      setupGroupSubscription();
+      loadMessages();
+    });
+
+    document.getElementById('dmNavLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('chatNavLink').classList.remove('active');
+      document.getElementById('dmNavLink').classList.add('active');
+      document.getElementById('groupTabs').style.display = 'none';
+      document.getElementById('roleDisplay').style.display = 'none';
+      document.getElementById('chatInputArea').style.display = 'none';
+      document.getElementById('groupCallBtn').style.display = 'none'; // hide group call button
+
+      if (messageSubscription) {
+        messageSubscription.unsubscribe();
+        messageSubscription = null;
+      }
+      loadPrivateMessagesView();
+    });
+
+    // === NEW: Group call button handler (placeholder for mesh) ===
+    document.getElementById('groupCallBtn').addEventListener('click', async () => {
+      if (!selectedGroupRole && isCEO) {
+        alert('Please select a group first.');
+        return;
+      }
+      const group = selectedGroupRole || currentRole;
+      alert(`Group call feature is under construction. Would open a call with everyone in group ${group}.`);
+      // In a full implementation, you would set up a mesh network:
+      // 1. Join a channel `call-group-${group}`
+      // 2. Broadcast your presence and exchange offers/answers with all participants.
+      // 3. Maintain multiple peer connections.
+    });
+
+    // --- Logout ---
+    document.getElementById('logout').addEventListener('click', async () => {
+      if (messageSubscription) messageSubscription.unsubscribe();
+      if (messageReadsSubscription) messageReadsSubscription.unsubscribe();
+      if (typingSubscription) typingSubscription.unsubscribe();
+      if (presenceChannel) await presenceChannel.untrack();
+      if (globalDmSubscription) globalDmSubscription.unsubscribe();
+      if (callActive) endCall();
+      editTimeouts.forEach(t => clearTimeout(t));
+      editTimeouts.clear();
+      unreadBorderTimeouts.forEach(t => clearTimeout(t));
+      unreadBorderTimeouts.clear();
+      await supabase.auth.signOut();
+      window.location.href = 'index.html';
+    });
+
+    document.getElementById('sendBtn').addEventListener('click', sendMessage);
+    document.getElementById('messageInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+    window.addEventListener('scroll', () => modal.style.display = 'none', true);
+    document.addEventListener('click', (e) => {
+      if (!modal.contains(e.target)) modal.style.display = 'none';
+    });
+
+    // === NEW: Call modal event listeners ===
+    document.getElementById('startVideoCallBtn').addEventListener('click', () => {
+      if (!currentRecipientId) return;
+      const activeItem = document.querySelector('.dm-conversation-item.active');
+      const userName = activeItem ? activeItem.dataset.userName : 'User';
+      startCall(currentRecipientId, userName, 'video');
+    });
+    document.getElementById('startVoiceCallBtn').addEventListener('click', () => {
+      if (!currentRecipientId) return;
+      const activeItem = document.querySelector('.dm-conversation-item.active');
+      const userName = activeItem ? activeItem.dataset.userName : 'User';
+      startCall(currentRecipientId, userName, 'audio');
+    });
+    document.getElementById('cancelCallOptionsBtn').addEventListener('click', () => {
+      callOptionsModal.style.display = 'none';
+    });
+    document.getElementById('closeCallModalBtn').addEventListener('click', endCall);
+    document.getElementById('hangupCallBtn').addEventListener('click', endCall);
+    // Mute/unmute (simplified)
+    let audioEnabled = true;
+    let videoEnabled = true;
+    document.getElementById('muteAudioBtn').addEventListener('click', () => {
+      if (localStream) {
+        localStream.getAudioTracks().forEach(t => t.enabled = !t.enabled);
+        audioEnabled = !audioEnabled;
+        document.getElementById('muteAudioBtn').textContent = audioEnabled ? '🎤' : '🔇';
+      }
+    });
+    document.getElementById('muteVideoBtn').addEventListener('click', () => {
+      if (localStream) {
+        localStream.getVideoTracks().forEach(t => t.enabled = !t.enabled);
+        videoEnabled = !videoEnabled;
+        document.getElementById('muteVideoBtn').textContent = videoEnabled ? '📹' : '🚫';
+      }
+    });
+
+    // --- Initialization ---
+    async function init() {
+      try {
         document.getElementById('chatNavLink').classList.add('active');
         document.getElementById('dmNavLink').classList.remove('active');
-        document.getElementById('groupTabs').style.display = isCEO ? 'flex' : 'none';
-        document.getElementById('roleDisplay').style.display = isCEO ? 'none' : 'inline';
-        document.getElementById('chatInputArea').style.display = 'flex';
-        document.getElementById('voiceNoteBtn').style.display = 'flex'; // show group voice btn
-        document.getElementById('messageInput').disabled = isCEO && !selectedGroupRole;
-        document.getElementById('sendBtn').disabled = isCEO && !selectedGroupRole;
-        document.getElementById('voiceNoteBtn').disabled = isCEO && !selectedGroupRole;
-        loadMessages();
-      });
 
-      document.getElementById('dmNavLink').addEventListener('click', (e) => {
-        e.preventDefault();
-        document.getElementById('chatNavLink').classList.remove('active');
-        document.getElementById('dmNavLink').classList.add('active');
-        document.getElementById('groupTabs').style.display = 'none';
-        document.getElementById('roleDisplay').style.display = 'none';
-        document.getElementById('chatInputArea').style.display = 'none';
-        loadPrivateMessagesView();
-      });
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) { window.location.href = '/index.html'; return; }
+        currentUser = user;
+        const metadata = user.user_metadata || {};
+        currentUserFullName = metadata.full_name || 'User';
+        const jobRole = metadata.job_role;
 
-      // --- Logout ---
-      document.getElementById('logout').addEventListener('click', async () => {
-        if (messageSubscription) messageSubscription.unsubscribe();
-        if (typingSubscription) typingSubscription.unsubscribe();
-        if (presenceChannel) await presenceChannel.untrack();
-        if (globalDmSubscription) globalDmSubscription.unsubscribe();
-        editTimeouts.forEach(t => clearTimeout(t));
-        editTimeouts.clear();
-        await supabase.auth.signOut();
-        window.location.href = 'index.html';
-      });
-
-      document.getElementById('sendBtn').addEventListener('click', sendMessage);
-      document.getElementById('messageInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
-
-      window.addEventListener('scroll', () => modal.style.display = 'none', true);
-      document.addEventListener('click', (e) => {
-        if (!modal.contains(e.target)) modal.style.display = 'none';
-      });
-
-      // --- Initialization ---
-      async function init() {
-        try {
-          const { data: { user }, error: userError } = await supabase.auth.getUser();
-          if (userError || !user) { window.location.href = '/index.html'; return; }
-          currentUser = user;
-          const metadata = user.user_metadata || {};
-          currentUserFullName = metadata.full_name || 'User';
-          const jobRole = metadata.job_role;
-
-          if (!jobRole) {
-            document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">No job role assigned. Please contact admin.</div>';
-            return;
-          }
-
-          currentRole = jobRole;
-          isCEO = (currentRole === 'CEO');
-
-          await setupPresence();
-          subscribeToAllDirectMessages();
-
-          const messageInput = document.getElementById('messageInput');
-          let typingTimeout;
-          messageInput.addEventListener('input', () => {
-            if (typingTimeout) clearTimeout(typingTimeout);
-            sendTypingIndicator();
-            typingTimeout = setTimeout(() => {}, 2000);
-          });
-
-          if (isCEO) {
-            document.getElementById('groupTitle').innerText = 'Group Chat (CEO)';
-            document.getElementById('roleDisplay').style.display = 'none';
-            await updateTotalUnreadCount();
-            await buildGroupTabs();
-            subscribeToMessages();
-          } else {
-            document.getElementById('groupTitle').innerText = 'Group';
-            document.getElementById('roleDisplay').textContent = currentRole;
-            selectedGroupRole = currentRole;
-            document.getElementById('messageInput').disabled = false;
-            document.getElementById('sendBtn').disabled = false;
-            document.getElementById('voiceNoteBtn').disabled = false;
-            await loadMessages();
-            subscribeToMessages();
-          }
-        } catch (err) {
-          console.error('Init error:', err);
-          document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Failed to load chat. Please refresh.</div>';
+        if (!jobRole) {
+          document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">No job role assigned. Please contact admin.</div>';
+          return;
         }
-      }
 
-      init();
-    })();
-  </script>
+        currentRole = jobRole;
+        isCEO = (currentRole === 'CEO');
+
+        await setupPresence();
+        subscribeToAllDirectMessages();
+        setupMessageReadsSubscription();
+
+        const messageInput = document.getElementById('messageInput');
+        let typingTimeout;
+        messageInput.addEventListener('input', () => {
+          if (typingTimeout) clearTimeout(typingTimeout);
+          sendTypingIndicator();
+          typingTimeout = setTimeout(() => {}, 2000);
+        });
+
+        if (isCEO) {
+          document.getElementById('groupTitle').innerText = 'Group Chat (CEO)';
+          document.getElementById('roleDisplay').style.display = 'none';
+          await updateTotalUnreadCount();
+          await buildGroupTabs();
+        } else {
+          document.getElementById('groupTitle').innerText = 'Group';
+          document.getElementById('roleDisplay').textContent = currentRole;
+          selectedGroupRole = currentRole;
+          document.getElementById('messageInput').disabled = false;
+          document.getElementById('sendBtn').disabled = false;
+          document.getElementById('voiceNoteBtn').disabled = false;
+        }
+
+        await loadMessages();
+        setupGroupSubscription();
+      } catch (err) {
+        console.error('Init error:', err);
+        document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Failed to load chat. Please refresh.</div>';
+      }
+    }
+
+    init();
+  })();
+</script>
 </body>
 </html>
