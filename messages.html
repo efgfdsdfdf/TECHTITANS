@@ -239,7 +239,6 @@
       scroll-behavior: smooth;
     }
 
-    /* === NEW: sticky date separator === */
     .date-separator {
       display: flex;
       align-items: center;
@@ -248,7 +247,7 @@
       position: sticky;
       top: 0;
       z-index: 10;
-      background: #131c30; /* match chat background so it covers messages */
+      background: #131c30;
       padding: 0.3rem 0;
     }
     .date-separator span {
@@ -275,7 +274,6 @@
       justify-content: flex-end;
     }
 
-    /* Unread indicator: blue left border */
     .message-row.unread .message {
       border-left: 4px solid #428cff;
     }
@@ -299,6 +297,13 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.3);
       cursor: pointer;
       transition: transform 0.1s;
+      object-fit: cover;
+    }
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
     }
     .avatar:hover {
       transform: scale(1.05);
@@ -362,7 +367,6 @@
       white-space: nowrap;
     }
 
-    /* Audio player inside message */
     .message audio {
       max-width: 200px;
       height: 32px;
@@ -589,7 +593,6 @@
       cursor: not-allowed;
     }
 
-    /* Voice note button and recording UI */
     .voice-btn {
       background: #2f3a5a;
       border: none;
@@ -816,7 +819,7 @@
     #dmChatSendBtn { background:#428cff; border:none; color:white; width:3rem; height:3rem; border-radius:50%; cursor:pointer; font-size:1.2rem; transition:0.2s; flex-shrink:0; }
     #dmChatSendBtn:hover { background:#5f9eff; }
     .dm-voice-btn { background:#2f3a5a; border:none; color:white; width:3rem; height:3rem; border-radius:50%; cursor:pointer; font-size:1.2rem; transition:0.2s; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
-    .dm-msg-row { display:flex; margin-bottom:0.5rem; cursor:pointer; }
+    .dm-msg-row { display:flex; margin-bottom:0.5rem; cursor:pointer; align-items:flex-end; gap:0.5rem; }
     .dm-msg-row.sent { justify-content:flex-end; }
     .dm-msg-row.unread .dm-msg { border-left: 4px solid #428cff; }
     .dm-msg { max-width:60%; padding:0.8rem 1rem; border-radius:1.2rem; word-wrap:break-word; font-size:0.9rem; line-height:1.4; position:relative; }
@@ -936,7 +939,6 @@
       cursor: not-allowed;
     }
 
-    /* Call options modal (for DM) */
     .call-options-modal {
       position: fixed;
       top: 0;
@@ -982,7 +984,6 @@
     .call-option-btn.video { background: #428cff; }
     .call-option-btn.video:hover { background: #5f9eff; }
 
-    /* Incoming call modal */
     #incomingCallModal .call-modal-content {
       max-width: 400px;
       text-align: center;
@@ -1022,7 +1023,6 @@
         <span class="role-tag" id="roleDisplay"></span>
         <div class="online-count" id="onlineCount">0 online</div>
         <div id="groupTabs" class="group-tabs" style="display: none;"></div>
-        <!-- Group call button (visible only in group chat) -->
         <button id="groupCallBtn" class="voice-btn" style="display: none; background:#2f3a5a;" title="Join group call">📞</button>
       </div>
       <div class="messages-area" id="messagesArea" oncontextmenu="return false;"></div>
@@ -1038,7 +1038,6 @@
       
       <div class="chat-input-area" id="chatInputArea">
         <input type="text" id="messageInput" placeholder="Write a message..." disabled>
-        <!-- Voice note button (group) -->
         <button class="voice-btn" id="voiceNoteBtn" disabled>🎤</button>
         <button id="sendBtn" disabled>➤</button>
         <span id="recordingTimer" class="recording-timer" style="display: none;">0:00</span>
@@ -1095,6 +1094,27 @@
       </div>
     </div>
   </div>
+
+  <!-- Profile Modal -->
+  <div id="profileModal" class="call-modal" style="display: none;">
+    <div class="call-modal-content" style="max-width: 400px;">
+      <div class="call-modal-header">
+        <h3>User Profile</h3>
+        <button class="call-modal-close" id="closeProfileModal">&times;</button>
+      </div>
+      <div style="text-align: center; padding: 1rem;">
+        <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
+          <img id="modalAvatar" src="" alt="Avatar" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; background: #1f2a44; display: none;">
+          <div id="modalAvatarPlaceholder" style="width: 100px; height: 100px; border-radius: 50%; background: #428cff; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: white; display: none;">👤</div>
+        </div>
+        <h2 id="modalName" style="color: white; margin-bottom: 0.5rem;">-</h2>
+        <p id="modalRole" style="color: #9aa4bf; margin-bottom: 0.5rem;">-</p>
+        <p id="modalJoined" style="color: #9aa4bf; font-size: 0.9rem;">-</p>
+        <button id="modalSendDM" class="btn" style="margin-top: 1rem; width: auto; padding: 0.6rem 2rem;">Send Message</button>
+      </div>
+    </div>
+  </div>
+
 <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
 <script>
   (function() {
@@ -1131,16 +1151,20 @@
     let openDMUserId = null;
     let globalDmSubscription = null;
     let dmSubscription = null;
-    let dmDeleteSubscription = null;          // NEW: subscription for DM deletions
+    let dmDeleteSubscription = null;
     let dmObserver = null;
     let currentRecipientId = null;
     // Online presence
     let presenceChannel = null;
     let onlineUsers = new Map();
-    // Typing
+    // Typing (group)
     let typingTimeouts = {};
     let activeTypers = new Set();
     let typingSubscription = null;
+    // Typing (DM)
+    let dmTypingSubscription = null;
+    let dmTypingTimeouts = {};
+    let dmActiveTypers = new Set();
 
     // Voice recording (group)
     let mediaRecorder = null;
@@ -1195,8 +1219,15 @@
     const remoteVideoLabel = document.getElementById('remoteVideoLabel');
     const incomingCallerName = document.getElementById('incomingCallerName');
     const incomingCallType = document.getElementById('incomingCallType');
+    const profileModal = document.getElementById('profileModal');
+    const modalAvatar = document.getElementById('modalAvatar');
+    const modalAvatarPlaceholder = document.getElementById('modalAvatarPlaceholder');
+    const modalName = document.getElementById('modalName');
+    const modalRole = document.getElementById('modalRole');
+    const modalJoined = document.getElementById('modalJoined');
+    const modalSendDM = document.getElementById('modalSendDM');
 
-    // --- Helper functions (unchanged) ---
+    // --- Helper functions ---
     function formatDateHeader(date) {
       const now = new Date();
       const msgDate = new Date(date);
@@ -1243,7 +1274,7 @@
       }, 3000);
     }
 
-    // --- Online presence ---
+    // --- Online presence (unchanged) ---
     async function setupPresence() {
       if (!currentUser) return;
       presenceChannel = supabase.channel('online-users', {
@@ -1438,9 +1469,10 @@
       `;
     }
 
-    // --- Render a single message (supports audio) ---
-    function renderMessage(message, isSent, senderName, senderId, messageRole, isUnread = false, seenCount = 0) {
-      const initials = getInitials(senderName);
+    // --- NEW: Render a single message with avatar image support ---
+    function renderMessage(message, isSent, sender, messageRole, isUnread = false, seenCount = 0) {
+      const senderName = sender?.full_name || 'Unknown';
+      const avatarUrl = sender?.avatar_url;
       const avatarColor = stringToColor(senderName);
       const timeStr = formatTimeOnly(message.created_at);
       const unreadClass = isUnread ? 'unread' : '';
@@ -1460,23 +1492,33 @@
         contentHtml = escapeHtml(message.content);
       }
 
+      // Build avatar HTML
+      let avatarHtml = '';
+      if (!isSent) {
+        if (avatarUrl) {
+          avatarHtml = `<img src="${escapeHtml(avatarUrl)}" class="avatar" alt="${escapeHtml(senderName)}" data-user-id="${sender.id}" data-user-name="${escapeHtml(senderName)}" data-user-role="${escapeHtml(messageRole)}">`;
+        } else {
+          avatarHtml = `<div class="avatar" style="background-color: ${avatarColor};" data-user-id="${sender.id}" data-user-name="${escapeHtml(senderName)}" data-user-role="${escapeHtml(messageRole)}">${getInitials(senderName)}</div>`;
+        }
+      }
+
       if (isSent) {
         return `
-          <div class="message-row sent ${unreadClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${senderId}">
+          <div class="message-row sent ${unreadClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${sender.id}">
             <div class="message-bubble">
               <div class="message sent">
                 ${contentHtml}
                 <small>${timeStr}</small>
               </div>
-              ${renderMessageActions(message.id, message.content, message.created_at, senderId, !!message.audio_url)}
+              ${renderMessageActions(message.id, message.content, message.created_at, sender.id, !!message.audio_url)}
               ${seenHtml}
             </div>
           </div>
         `;
       } else {
         return `
-          <div class="message-row ${unreadClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${senderId}">
-            <div class="avatar" style="background-color: ${avatarColor};" data-user-id="${senderId}" data-user-name="${escapeHtml(senderName)}" data-user-role="${escapeHtml(messageRole)}">${initials}</div>
+          <div class="message-row ${unreadClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${sender.id}">
+            ${avatarHtml}
             <div class="message-bubble">
               <div class="sender-name">
                 ${escapeHtml(senderName)} ${roleBadge}
@@ -1502,7 +1544,7 @@
       return '';
     }
 
-    // --- Load messages for the selected group (with scroll to first unread at top) ---
+    // --- Load messages for the selected group (with avatar join) ---
     async function loadMessages() {
       try {
         if (isCEO && selectedGroupRole === null) {
@@ -1511,7 +1553,7 @@
         }
         let query = supabase
           .from('group_messages')
-          .select(`*, sender:profiles!sender_id (full_name)`)
+          .select(`*, sender:profiles!sender_id (id, full_name, avatar_url)`)
           .order('created_at', { ascending: true });
 
         if (!isCEO) {
@@ -1555,7 +1597,6 @@
         let firstUnreadMessageId = null;
         for (const msg of data) {
           const isSent = msg.sender_id === currentUser.id;
-          const senderName = msg.sender?.full_name || 'Unknown';
           const isUnread = !isSent && !readMessageIds.has(msg.id);
           if (isSent) readMessageIds.add(msg.id);
 
@@ -1563,7 +1604,7 @@
           lastDate = msg.created_at;
 
           const seenCount = seenCounts[msg.id] || 0;
-          html += renderMessage(msg, isSent, senderName, msg.sender_id, msg.role, isUnread, seenCount);
+          html += renderMessage(msg, isSent, msg.sender, msg.role, isUnread, seenCount);
 
           if (isUnread && !firstUnreadMessageId) {
             firstUnreadMessageId = msg.id;
@@ -1580,7 +1621,6 @@
         attachMessageHandlers();
         setupObserver();
 
-        // Scroll to first unread message if exists, otherwise to bottom
         if (firstUnreadMessageId) {
           const targetRow = document.querySelector(`.message-row[data-message-id="${firstUnreadMessageId}"]`);
           if (targetRow) {
@@ -1791,7 +1831,7 @@
         btn.removeEventListener('click', handleDeleteClick);
         btn.addEventListener('click', handleDeleteClick);
       });
-      document.querySelectorAll('.avatar').forEach(avatar => {
+      document.querySelectorAll('.avatar, .avatar img').forEach(avatar => {
         avatar.removeEventListener('click', onAvatarClick);
         avatar.addEventListener('click', onAvatarClick);
       });
@@ -1807,20 +1847,48 @@
       }
     }
 
-    function onAvatarClick(e) {
+    // --- NEW: Avatar click handler with profile modal ---
+    async function onAvatarClick(e) {
       e.stopPropagation();
       const avatar = e.currentTarget;
       const userId = avatar.dataset.userId;
       const userName = avatar.dataset.userName;
       const userRole = avatar.dataset.userRole;
-      document.getElementById('dmNavLink').click();
-      setTimeout(() => {
-        const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${userId}"]`);
-        if (targetItem) targetItem.click();
-      }, 300);
+
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('full_name, job_role, avatar_url, created_at')
+        .eq('id', userId)
+        .single();
+
+      if (error || !profile) {
+        console.error('Failed to load profile', error);
+        return;
+      }
+
+      modalName.textContent = profile.full_name || userName;
+      modalRole.textContent = profile.job_role || userRole || '—';
+      modalJoined.textContent = profile.created_at 
+        ? `Joined ${new Date(profile.created_at).toLocaleDateString()}` 
+        : '—';
+
+      if (profile.avatar_url) {
+        modalAvatar.src = profile.avatar_url;
+        modalAvatar.style.display = 'block';
+        modalAvatarPlaceholder.style.display = 'none';
+      } else {
+        modalAvatar.style.display = 'none';
+        modalAvatarPlaceholder.style.display = 'flex';
+        modalAvatarPlaceholder.textContent = getInitials(profile.full_name || userName);
+      }
+
+      modalSendDM.dataset.userId = userId;
+      modalSendDM.dataset.userName = profile.full_name || userName;
+
+      profileModal.style.display = 'flex';
     }
 
-    // --- Edit/Delete handlers (group) ---
+    // --- Edit/Delete handlers (group) unchanged ---
     async function handleEditClick(e) {
       e.stopPropagation();
       const btn = e.currentTarget;
@@ -1956,7 +2024,7 @@
       updateUnreadBadges();
     }
 
-    // --- Right-click read receipts ---
+    // --- Right-click read receipts (unchanged) ---
     async function onRightClick(e) {
       e.preventDefault();
       const row = e.currentTarget;
@@ -2018,8 +2086,8 @@
       setTimeout(() => document.addEventListener('click', hideModal), 0);
     }
 
-    // --- Append new message to UI (for received messages only) ---
-    function appendMessageToUI(message, isSent, senderName, senderId, messageRole, isUnread = false) {
+    // --- Append new message to UI (for received messages) with avatar ---
+    function appendMessageToUI(message, isSent, sender, messageRole, isUnread = false) {
       if (document.querySelector(`.message-row[data-message-id="${message.id}"]`)) return;
       if (isCEO) {
         if (selectedGroupRole && messageRole !== selectedGroupRole) return;
@@ -2033,7 +2101,7 @@
       const separatorHtml = maybeAppendDateSeparator(lastDate, message.created_at);
       const isScrolledToBottom = area.scrollHeight - area.scrollTop <= area.clientHeight + 50;
       if (separatorHtml) area.insertAdjacentHTML('beforeend', separatorHtml);
-      const msgHtml = renderMessage(message, isSent, senderName, senderId, messageRole, isUnread);
+      const msgHtml = renderMessage(message, isSent, sender, messageRole, isUnread);
       area.insertAdjacentHTML('beforeend', msgHtml);
       if (isScrolledToBottom) area.scrollTop = area.scrollHeight;
       attachMessageHandlers();
@@ -2051,7 +2119,9 @@
       let lastDate = lastMessageRow ? lastMessageRow.dataset.createdAt : null;
       const separatorHtml = maybeAppendDateSeparator(lastDate, message.created_at);
       if (separatorHtml) area.insertAdjacentHTML('beforeend', separatorHtml);
-      const msgHtml = renderMessage(message, true, currentUserFullName, currentUser.id, message.role, false);
+      // For sent message, we don't have a sender object in the same way; use current user
+      const sender = { id: currentUser.id, full_name: currentUserFullName, avatar_url: null };
+      const msgHtml = renderMessage(message, true, sender, message.role, false);
       area.insertAdjacentHTML('beforeend', msgHtml);
       readMessageIds.add(message.id);
       const isScrolledToBottom = area.scrollHeight - area.scrollTop <= area.clientHeight + 50;
@@ -2059,7 +2129,7 @@
       attachMessageHandlers();
     }
 
-    // --- Typing indicator ---
+    // --- Typing indicator (group) ---
     function updateTypingIndicator() {
       if (activeTypers.size === 0) {
         typingContainer.style.display = 'none';
@@ -2108,7 +2178,7 @@
         .subscribe();
     }
 
-    // --- Group subscription management ---
+    // --- Group subscription management (updated to fetch avatar) ---
     function setupGroupSubscription() {
       if (messageSubscription) {
         messageSubscription.unsubscribe();
@@ -2129,14 +2199,15 @@
 
             const { data: senderProfile } = await supabase
               .from('profiles')
-              .select('full_name')
+              .select('id, full_name, avatar_url')
               .eq('id', newMsg.sender_id)
               .single();
-            const senderName = senderProfile?.full_name || 'Unknown';
+            if (!senderProfile) return;
+            const enrichedMsg = { ...newMsg, sender: senderProfile };
 
             const shouldShow = selectedGroupRole === null || newMsg.role === selectedGroupRole;
             if (shouldShow) {
-              appendMessageToUI(newMsg, false, senderName, newMsg.sender_id, newMsg.role, true);
+              appendMessageToUI(enrichedMsg, false, senderProfile, newMsg.role, true);
               currentUnreadCount++;
             }
             totalUnreadCount++;
@@ -2168,12 +2239,13 @@
 
             const { data: senderProfile } = await supabase
               .from('profiles')
-              .select('full_name')
+              .select('id, full_name, avatar_url')
               .eq('id', newMsg.sender_id)
               .single();
-            const senderName = senderProfile?.full_name || 'Unknown';
+            if (!senderProfile) return;
+            const enrichedMsg = { ...newMsg, sender: senderProfile };
 
-            appendMessageToUI(newMsg, false, senderName, newMsg.sender_id, newMsg.role, true);
+            appendMessageToUI(enrichedMsg, false, senderProfile, newMsg.role, true);
             currentUnreadCount++;
             updateUnreadBadges();
           })
@@ -2194,7 +2266,7 @@
       }
     }
 
-    // --- Subscribe to message_reads for realtime seen updates ---
+    // --- Subscribe to message_reads for realtime seen updates (unchanged) ---
     function setupMessageReadsSubscription() {
       if (messageReadsSubscription) {
         messageReadsSubscription.unsubscribe();
@@ -2223,7 +2295,7 @@
         });
     }
 
-    // --- Send group message (text) ---
+    // --- Send group message (text) unchanged ---
     async function sendMessage() {
       const input = document.getElementById('messageInput');
       const content = input.value.trim();
@@ -2262,7 +2334,7 @@
       } catch (readErr) {}
     }
 
-    // --- Voice Note Functions (Group) ---
+    // --- Voice Note Functions (Group) unchanged ---
     const voiceBtn = document.getElementById('voiceNoteBtn');
     const recordingTimer = document.getElementById('recordingTimer');
 
@@ -2372,63 +2444,7 @@
       } catch (readErr) {}
     }
 
-    // --- NEW: DM Delete Functions ---
-    async function deletePrivateMessage(messageId) {
-      try {
-        // Only sender (or CEO) can delete
-        let query = supabase.from('private_messages').delete().eq('id', messageId);
-        if (!isCEO) {
-          query = query.eq('sender_id', currentUser.id);
-        }
-        const { error } = await query;
-        if (error) throw error;
-        removePrivateMessageFromUI(messageId);
-      } catch (err) {
-        console.error('Delete DM error:', err);
-        alert('Failed to delete message: ' + err.message);
-      }
-    }
-
-    function removePrivateMessageFromUI(messageId) {
-      const msgRow = document.querySelector(`.dm-msg-row[data-message-id="${messageId}"]`);
-      if (!msgRow) return;
-
-      // If it was an unread received message, update unread counts
-      if (msgRow.classList.contains('received') && msgRow.classList.contains('unread')) {
-        const senderId = msgRow.dataset.senderId;
-        if (senderId && dmUnreadBySender[senderId] > 0) {
-          dmUnreadBySender[senderId]--;
-          if (dmUnreadBySender[senderId] === 0) delete dmUnreadBySender[senderId];
-        }
-        updateDMBadge();
-
-        // Also update the conversation list badge if visible
-        if (document.getElementById('dmNavLink').classList.contains('active')) {
-          const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${senderId}"]`);
-          if (targetItem) {
-            const badge = targetItem.querySelector('.dm-unread-badge');
-            if (badge) {
-              const newCount = dmUnreadBySender[senderId] || 0;
-              if (newCount > 0) {
-                badge.textContent = newCount;
-              } else {
-                badge.remove();
-              }
-            }
-          }
-        }
-      }
-
-      msgRow.remove();
-
-      // If chat area becomes empty, show placeholder
-      const messagesDiv = document.getElementById('dmChatMessages');
-      if (messagesDiv && messagesDiv.children.length === 0) {
-        messagesDiv.innerHTML = '<div style="color:#9aa4bf; text-align:center; padding:2rem;">No messages yet. Say hello!</div>';
-      }
-    }
-
-    // --- DM FUNCTIONS with both call and voice note buttons ---
+    // --- DM FUNCTIONS (updated with avatars, typing, and fallback for joins) ---
     async function loadPrivateMessagesView() {
       try {
         if (messageSubscription) messageSubscription.unsubscribe();
@@ -2439,7 +2455,7 @@
         document.getElementById('groupTabs').style.display = 'none';
         document.getElementById('messageInput').disabled = true;
         document.getElementById('sendBtn').disabled = true;
-        document.getElementById('voiceNoteBtn').style.display = 'none'; // hide group voice btn
+        document.getElementById('voiceNoteBtn').style.display = 'none';
 
         const { data: allProfiles, error: profilesError } = await supabase
           .from('profiles')
@@ -2493,6 +2509,14 @@
                 <span class="dm-chat-title"></span>
               </div>
               <div id="dmChatMessages" class="dm-chat-messages"></div>
+              <div id="dmTypingContainer" class="typing-container" style="display: none;">
+                <div class="typing-indicator">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span class="typing-text" id="dmTypingText">Someone is typing...</span>
+                </div>
+              </div>
               <div class="dm-chat-input">
                 <input type="text" id="dmChatInput" placeholder="Type a message...">
                 <button class="voice-btn" id="dmCallPlusBtn" style="background:#2f3a5a;">➕</button>
@@ -2515,7 +2539,7 @@
           callOptionsModal.style.display = 'flex';
         });
 
-        // DM voice recording
+        // DM voice recording (unchanged)
         const dmVoiceBtn = document.getElementById('dmVoiceNoteBtn');
         const dmRecordingTimer = document.getElementById('dmRecordingTimer');
         dmVoiceBtn.addEventListener('click', async () => {
@@ -2604,8 +2628,31 @@
       }
     }
 
+    // --- DM typing indicator functions ---
+    function updateDmTypingIndicator() {
+      const container = document.getElementById('dmTypingContainer');
+      const textEl = document.getElementById('dmTypingText');
+      if (!container || !textEl) return;
+      if (dmActiveTypers.size === 0) {
+        container.style.display = 'none';
+        return;
+      }
+      const names = Array.from(dmActiveTypers);
+      let text = '';
+      if (names.length === 1) text = `${names[0]} is typing...`;
+      else if (names.length === 2) text = `${names[0]} and ${names[1]} are typing...`;
+      else text = `${names.length} people are typing...`;
+      textEl.textContent = text;
+      container.style.display = 'block';
+    }
+
+    // --- Open private chat with avatar support, typing, and fallback for join failures ---
     async function openPrivateChat(otherUserId, otherProfile) {
       currentRecipientId = otherUserId;
+
+      // Clean up previous DM typing subscription
+      if (dmTypingSubscription) dmTypingSubscription.unsubscribe();
+      dmActiveTypers.clear();
 
       const chatArea = document.getElementById('dmChatArea');
       const headerTitle = document.querySelector('.dm-chat-title');
@@ -2618,13 +2665,38 @@
       input.focus();
 
       try {
-        const { data, error } = await supabase
+        // Try to fetch messages with sender join
+        let { data, error } = await supabase
           .from('private_messages')
-          .select('*')
+          .select(`*, sender:profiles!sender_id (id, full_name, avatar_url)`)
           .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`)
           .order('created_at', { ascending: true });
 
-        if (error) throw error;
+        // If join fails (e.g., missing foreign key), fallback to separate profile fetching
+        if (error && error.message && error.message.includes('Could not find a relationship')) {
+          console.warn('Join failed, falling back to separate profile fetch:', error.message);
+          // Get messages without join
+          const { data: msgs, error: msgsError } = await supabase
+            .from('private_messages')
+            .select('*')
+            .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`)
+            .order('created_at', { ascending: true });
+
+          if (msgsError) throw msgsError;
+
+          // For each message, fetch sender profile
+          data = await Promise.all(msgs.map(async (msg) => {
+            const senderId = msg.sender_id;
+            const { data: sender } = await supabase
+              .from('profiles')
+              .select('id, full_name, avatar_url')
+              .eq('id', senderId)
+              .single();
+            return { ...msg, sender };
+          }));
+        } else if (error) {
+          throw error;
+        }
 
         let html = '';
         let lastDate = null;
@@ -2654,12 +2726,27 @@
             contentHtml = escapeHtml(msg.content);
           }
 
-          // Add delete button only for sent messages (or CEO)
           const deleteBtn = (isSent || isCEO) ? `<button class="dm-delete-btn" data-id="${msg.id}">🗑️</button>` : '';
 
           const isUnread = !isSent && !msg.read_at;
+
+          // Build avatar for received messages
+          let avatarHtml = '';
+          if (!isSent) {
+            const sender = msg.sender;
+            const senderName = sender?.full_name || 'Unknown';
+            const avatarUrl = sender?.avatar_url;
+            const avatarColor = stringToColor(senderName);
+            if (avatarUrl) {
+              avatarHtml = `<img src="${escapeHtml(avatarUrl)}" class="avatar" alt="${escapeHtml(senderName)}" data-user-id="${sender.id}" data-user-name="${escapeHtml(senderName)}" data-user-role="${msg.role || ''}">`;
+            } else {
+              avatarHtml = `<div class="avatar" style="background-color: ${avatarColor};" data-user-id="${sender.id}" data-user-name="${escapeHtml(senderName)}" data-user-role="${msg.role || ''}">${getInitials(senderName)}</div>`;
+            }
+          }
+
           html += `
             <div class="dm-msg-row ${isSent ? 'sent' : 'received'} ${isUnread ? 'unread' : ''}" data-message-id="${msg.id}" data-created-at="${msg.created_at}" data-sender-id="${msg.sender_id}">
+              ${avatarHtml}
               <div class="dm-msg ${isSent ? 'sent' : 'received'}">
                 ${contentHtml}
                 <small>${timeStr}</small>
@@ -2677,7 +2764,6 @@
         }
         messagesDiv.innerHTML = html || '<div style="color:#9aa4bf; text-align:center; padding:2rem;">No messages yet. Say hello!</div>';
         
-        // Scroll to first unread DM if exists
         if (firstUnreadMessageId) {
           const targetRow = messagesDiv.querySelector(`.dm-msg-row[data-message-id="${firstUnreadMessageId}"]`);
           if (targetRow) {
@@ -2702,9 +2788,44 @@
             }
           });
         });
+        // Avatar click
+        document.querySelectorAll('.dm-msg-row .avatar, .dm-msg-row .avatar img').forEach(el => {
+          el.addEventListener('click', onAvatarClick);
+        });
 
         sendBtn.onclick = () => sendPrivateMessage(otherUserId);
         input.onkeypress = (e) => { if (e.key === 'Enter') sendPrivateMessage(otherUserId); };
+
+        // Set up DM typing subscription
+        const typingChannel = `typing-dm-${Math.min(currentUser.id, otherUserId)}-${Math.max(currentUser.id, otherUserId)}`;
+        dmTypingSubscription = supabase
+          .channel(typingChannel)
+          .on('broadcast', { event: 'typing' }, (payload) => {
+            const { userId, userName, timestamp } = payload.payload;
+            if (userId === currentUser.id) return;
+            if (dmTypingTimeouts[userId]) clearTimeout(dmTypingTimeouts[userId]);
+            dmActiveTypers.add(userName);
+            updateDmTypingIndicator();
+            dmTypingTimeouts[userId] = setTimeout(() => {
+              dmActiveTypers.delete(userName);
+              updateDmTypingIndicator();
+              delete dmTypingTimeouts[userId];
+            }, 3000);
+          })
+          .subscribe();
+
+        // Send typing events when user types
+        let dmTypingTimeout;
+        input.addEventListener('input', () => {
+          if (dmTypingTimeout) clearTimeout(dmTypingTimeout);
+          supabase.channel(typingChannel).send({
+            type: 'broadcast',
+            event: 'typing',
+            payload: { userId: currentUser.id, userName: currentUserFullName, timestamp: Date.now() }
+          });
+          dmTypingTimeout = setTimeout(() => {}, 2000);
+        });
+
         input.value = '';
 
       } catch (err) {
@@ -2713,6 +2834,7 @@
       }
     }
 
+    // --- sendPrivateMessage (unchanged) ---
     async function sendPrivateMessage(otherUserId) {
       const input = document.getElementById('dmChatInput');
       const content = input.value.trim();
@@ -2742,7 +2864,6 @@
         messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-        // Attach delete handler to the new button
         const newBtn = messagesDiv.querySelector(`.dm-delete-btn[data-id="${data.id}"]`);
         if (newBtn) {
           newBtn.addEventListener('click', async (e) => {
@@ -2758,6 +2879,7 @@
       }
     }
 
+    // --- sendPrivateVoiceNote (unchanged) ---
     async function sendPrivateVoiceNote(audioBlob, otherUserId) {
       if (!otherUserId) {
         alert('Recipient not specified.');
@@ -2818,6 +2940,7 @@
       }
     }
 
+    // --- markDirectMessageAsRead (unchanged) ---
     async function markDirectMessageAsRead(messageId, senderId) {
       try {
         await supabase
@@ -2833,6 +2956,59 @@
       scheduleUnreadBorderRemoval(messageId);
     }
 
+    // --- DM Delete Functions (unchanged) ---
+    async function deletePrivateMessage(messageId) {
+      try {
+        let query = supabase.from('private_messages').delete().eq('id', messageId);
+        if (!isCEO) {
+          query = query.eq('sender_id', currentUser.id);
+        }
+        const { error } = await query;
+        if (error) throw error;
+        removePrivateMessageFromUI(messageId);
+      } catch (err) {
+        console.error('Delete DM error:', err);
+        alert('Failed to delete message: ' + err.message);
+      }
+    }
+
+    function removePrivateMessageFromUI(messageId) {
+      const msgRow = document.querySelector(`.dm-msg-row[data-message-id="${messageId}"]`);
+      if (!msgRow) return;
+
+      if (msgRow.classList.contains('received') && msgRow.classList.contains('unread')) {
+        const senderId = msgRow.dataset.senderId;
+        if (senderId && dmUnreadBySender[senderId] > 0) {
+          dmUnreadBySender[senderId]--;
+          if (dmUnreadBySender[senderId] === 0) delete dmUnreadBySender[senderId];
+        }
+        updateDMBadge();
+
+        if (document.getElementById('dmNavLink').classList.contains('active')) {
+          const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${senderId}"]`);
+          if (targetItem) {
+            const badge = targetItem.querySelector('.dm-unread-badge');
+            if (badge) {
+              const newCount = dmUnreadBySender[senderId] || 0;
+              if (newCount > 0) {
+                badge.textContent = newCount;
+              } else {
+                badge.remove();
+              }
+            }
+          }
+        }
+      }
+
+      msgRow.remove();
+
+      const messagesDiv = document.getElementById('dmChatMessages');
+      if (messagesDiv && messagesDiv.children.length === 0) {
+        messagesDiv.innerHTML = '<div style="color:#9aa4bf; text-align:center; padding:2rem;">No messages yet. Say hello!</div>';
+      }
+    }
+
+    // --- DM Subscriptions (updated to fetch avatar for new messages) ---
     function subscribeToAllDirectMessages() {
       if (globalDmSubscription) globalDmSubscription.unsubscribe();
       if (!currentUser) return;
@@ -2847,14 +3023,34 @@
             if (activeItem && activeItem.dataset.userId === newMsg.sender_id) {
               const messagesDiv = document.getElementById('dmChatMessages');
               const timeStr = formatTimeOnly(newMsg.created_at);
+
+              // Fetch sender profile for avatar
+              const { data: senderProfile } = await supabase
+                .from('profiles')
+                .select('id, full_name, avatar_url')
+                .eq('id', newMsg.sender_id)
+                .single();
+              const sender = senderProfile || { full_name: 'Unknown', avatar_url: null };
+
               let contentHtml = '';
               if (newMsg.audio_url) {
                 contentHtml = `<audio controls src="${escapeHtml(newMsg.audio_url)}"></audio>`;
               } else {
                 contentHtml = escapeHtml(newMsg.content);
               }
+
+              // Build avatar
+              let avatarHtml = '';
+              if (sender.avatar_url) {
+                avatarHtml = `<img src="${escapeHtml(sender.avatar_url)}" class="avatar" alt="${escapeHtml(sender.full_name)}" data-user-id="${sender.id}" data-user-name="${escapeHtml(sender.full_name)}" data-user-role="">`;
+              } else {
+                const avatarColor = stringToColor(sender.full_name);
+                avatarHtml = `<div class="avatar" style="background-color: ${avatarColor};" data-user-id="${sender.id}" data-user-name="${escapeHtml(sender.full_name)}" data-user-role="">${getInitials(sender.full_name)}</div>`;
+              }
+
               const msgHtml = `
                 <div class="dm-msg-row received unread" data-message-id="${newMsg.id}" data-created-at="${newMsg.created_at}" data-sender-id="${newMsg.sender_id}">
+                  ${avatarHtml}
                   <div class="dm-msg received">
                     ${contentHtml}
                     <small>${timeStr}</small>
@@ -2906,7 +3102,6 @@
         .channel('dm-deletes')
         .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'private_messages' }, (payload) => {
           const deletedMsg = payload.old;
-          // Only act if the current user is the sender or the recipient
           if (deletedMsg.sender_id === currentUser.id || deletedMsg.recipient_id === currentUser.id) {
             removePrivateMessageFromUI(deletedMsg.id);
           }
@@ -3095,7 +3290,7 @@
       callActive = false;
     }
 
-    // --- Navigation ---
+    // --- Navigation (unchanged) ---
     document.getElementById('chatNavLink').addEventListener('click', (e) => {
       e.preventDefault();
       document.getElementById('chatNavLink').classList.add('active');
@@ -3138,14 +3333,14 @@
       alert(`Group call feature is under construction. Would open a call with everyone in group ${group}.`);
     });
 
-    // --- Logout ---
+    // --- Logout (unchanged) ---
     document.getElementById('logout').addEventListener('click', async () => {
       if (messageSubscription) messageSubscription.unsubscribe();
       if (messageReadsSubscription) messageReadsSubscription.unsubscribe();
       if (typingSubscription) typingSubscription.unsubscribe();
       if (presenceChannel) await presenceChannel.untrack();
       if (globalDmSubscription) globalDmSubscription.unsubscribe();
-      if (dmDeleteSubscription) dmDeleteSubscription.unsubscribe(); // NEW
+      if (dmDeleteSubscription) dmDeleteSubscription.unsubscribe();
       if (userChannel) userChannel.unsubscribe();
       if (callActive) endCall();
       editTimeouts.forEach(t => clearTimeout(t));
@@ -3164,7 +3359,24 @@
       if (!modal.contains(e.target)) modal.style.display = 'none';
     });
 
-    // Call modal event listeners
+    // Profile modal close
+    document.getElementById('closeProfileModal').addEventListener('click', () => {
+      profileModal.style.display = 'none';
+    });
+
+    // Send Message from profile modal
+    modalSendDM.addEventListener('click', () => {
+      const userId = modalSendDM.dataset.userId;
+      const userName = modalSendDM.dataset.userName;
+      profileModal.style.display = 'none';
+      document.getElementById('dmNavLink').click();
+      setTimeout(() => {
+        const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${userId}"]`);
+        if (targetItem) targetItem.click();
+      }, 300);
+    });
+
+    // Call modal event listeners (unchanged)
     document.getElementById('startVideoCallBtn').addEventListener('click', () => {
       if (!currentRecipientId) return;
       const activeItem = document.querySelector('.dm-conversation-item.active');
@@ -3199,7 +3411,7 @@
       }
     });
 
-    // --- Initialization ---
+    // --- Initialization (unchanged) ---
     async function init() {
       try {
         document.getElementById('chatNavLink').classList.add('active');
