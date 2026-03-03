@@ -351,6 +351,17 @@
       white-space: nowrap;
     }
 
+    /* Audio player inside message */
+    .message audio {
+      max-width: 200px;
+      height: 32px;
+      margin-top: 0.3rem;
+      border-radius: 1rem;
+    }
+    .message.sent audio {
+      filter: invert(0.1);
+    }
+
     .seen-indicator {
       font-size: 0.7rem;
       color: #9aa4bf;
@@ -527,6 +538,7 @@
       z-index: 5;
       position: relative;
       bottom: 0;
+      align-items: center;
     }
 
     .chat-input-area input {
@@ -566,7 +578,43 @@
       cursor: not-allowed;
     }
 
-    /* ===== MOBILE & DM LAYOUT (professional, sensible) ===== */
+    /* Voice note button and recording UI */
+    .voice-btn {
+      background: #2f3a5a;
+      border: none;
+      color: white;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: 0.2s;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .voice-btn.recording {
+      background: #ff4d4d;
+      animation: pulse 1s infinite;
+    }
+    .voice-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    .recording-timer {
+      color: #ff4d4d;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+
+    /* ===== MOBILE & DM LAYOUT ===== */
     @media (max-width: 768px) {
       body { 
         flex-direction: column; 
@@ -674,12 +722,12 @@
         padding: 0.7rem 1rem;
       }
 
-      .chat-input-area button {
+      .chat-input-area button,
+      .voice-btn {
         width: 2.8rem;
         height: 2.8rem;
       }
 
-      /* DM layout – stays within panel, no full‑screen overlay */
       .dm-layout {
         flex-direction: column;
       }
@@ -690,7 +738,7 @@
       }
       .dm-chat-area {
         width: 100%;
-        display: none; /* hidden by default */
+        display: none;
       }
       .dm-chat-area.active {
         display: flex;
@@ -749,19 +797,21 @@
     .dm-unread-badge { background:#428cff; color:white; padding:0.2rem 0.5rem; border-radius:1rem; font-size:0.75rem; font-weight:600; min-width:20px; text-align:center; margin-left:auto; }
     .dm-chat-area { flex:1; display:flex; flex-direction:column; background:#131c30; }
     .dm-chat-header { padding:1rem; border-bottom:1px solid #263154; color:white; font-weight:500; background:#131c30; display:flex; align-items:center; }
-    .dm-chat-header .dm-back-btn { display:none; } /* hidden on desktop */
+    .dm-chat-header .dm-back-btn { display:none; }
     .dm-chat-messages { flex:1; overflow-y:auto; padding:1rem; display:flex; flex-direction:column; gap:0.5rem; }
-    .dm-chat-input { display:flex; padding:1rem; background:#131c30; border-top:1px solid #263154; gap:0.5rem; }
+    .dm-chat-input { display:flex; padding:1rem; background:#131c30; border-top:1px solid #263154; gap:0.5rem; align-items:center; }
     #dmChatInput { flex:1; background:#0f172f; border:1px solid #263154; border-radius:2rem; padding:0.8rem 1.2rem; color:white; outline:none; }
     #dmChatInput:focus { border-color:#428cff; }
     #dmChatSendBtn { background:#428cff; border:none; color:white; width:3rem; height:3rem; border-radius:50%; cursor:pointer; font-size:1.2rem; transition:0.2s; flex-shrink:0; }
     #dmChatSendBtn:hover { background:#5f9eff; }
+    .dm-voice-btn { background:#2f3a5a; border:none; color:white; width:3rem; height:3rem; border-radius:50%; cursor:pointer; font-size:1.2rem; transition:0.2s; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
     .dm-msg-row { display:flex; margin-bottom:0.5rem; cursor:pointer; }
     .dm-msg-row.sent { justify-content:flex-end; }
     .dm-msg { max-width:60%; padding:0.8rem 1rem; border-radius:1.2rem; word-wrap:break-word; font-size:0.9rem; line-height:1.4; position:relative; }
     .dm-msg.sent { background:#428cff; color:white; }
     .dm-msg.received { background:#1f2a44; color:#e0e7ff; }
     .dm-msg small { display:block; font-size:0.75rem; opacity:0.7; margin-top:0.3rem; }
+    .dm-msg audio { max-width:200px; height:32px; margin-top:0.3rem; border-radius:1rem; }
     .dm-seen-indicator { font-size:0.7rem; color:#9aa4bf; margin-top:0.2rem; text-align:right; }
 
     .toast {
@@ -820,7 +870,10 @@
       
       <div class="chat-input-area" id="chatInputArea">
         <input type="text" id="messageInput" placeholder="Write a message..." disabled>
+        <!-- Voice note button (group) -->
+        <button class="voice-btn" id="voiceNoteBtn" disabled>🎤</button>
         <button id="sendBtn" disabled>➤</button>
+        <span id="recordingTimer" class="recording-timer" style="display: none;">0:00</span>
       </div>
     </div>
   </div>
@@ -863,7 +916,7 @@
       let globalDmSubscription = null;
       let dmSubscription = null;
       let dmObserver = null;
-      let currentRecipientId = null;
+      let currentRecipientId = null;       // <-- store active DM recipient
       // Online presence
       let presenceChannel = null;
       let onlineUsers = new Map();
@@ -872,12 +925,19 @@
       let activeTypers = new Set();
       let typingSubscription = null;
 
+      // Voice recording
+      let mediaRecorder = null;
+      let audioChunks = [];
+      let recordingStartTime = null;
+      let recordingTimerInterval = null;
+      let isRecording = false;
+
       const modal = document.getElementById('receiptsModal');
       const toast = document.getElementById('toast');
       const typingContainer = document.getElementById('typingIndicatorContainer');
       const typingText = document.getElementById('typingText');
 
-      // --- Helper functions ---
+      // --- Helper functions (unchanged) ---
       function formatDateHeader(date) {
         const now = new Date();
         const msgDate = new Date(date);
@@ -924,7 +984,7 @@
         }, 3000);
       }
 
-      // --- Online presence ---
+      // --- Online presence (unchanged) ---
       async function setupPresence() {
         if (!currentUser) return;
         presenceChannel = supabase.channel('online-users', {
@@ -1074,8 +1134,10 @@
         document.querySelectorAll('.message-row.unread').forEach(row => observer.observe(row));
       }
 
-      // --- Render message actions (edit/delete) ---
-      function renderMessageActions(messageId, currentContent, createdAt, senderId) {
+      // --- Render message actions (edit/delete) - unchanged ---
+      function renderMessageActions(messageId, currentContent, createdAt, senderId, hasAudio) {
+        // Voice notes cannot be edited
+        if (hasAudio) return '';
         const msgTime = new Date(createdAt).getTime();
         const now = Date.now();
         const age = now - msgTime;
@@ -1099,7 +1161,7 @@
         `;
       }
 
-      // --- Render a single message ---
+      // --- Render a single message (supports audio) ---
       function renderMessage(message, isSent, senderName, senderId, messageRole, isUnread = false, seenCount = 0) {
         const initials = getInitials(senderName);
         const avatarColor = stringToColor(senderName);
@@ -1114,15 +1176,23 @@
           seenHtml = `<div class="seen-indicator"><span class="double-tick">✓✓</span> Seen</div>`;
         }
 
+        // Audio content
+        let contentHtml = '';
+        if (message.audio_url) {
+          contentHtml = `<audio controls src="${escapeHtml(message.audio_url)}"></audio>`;
+        } else {
+          contentHtml = escapeHtml(message.content);
+        }
+
         if (isSent) {
           return `
             <div class="message-row sent ${unreadClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${senderId}">
               <div class="message-bubble">
                 <div class="message sent">
-                  ${escapeHtml(message.content)}
+                  ${contentHtml}
                   <small>${timeStr}</small>
                 </div>
-                ${renderMessageActions(message.id, message.content, message.created_at, senderId)}
+                ${renderMessageActions(message.id, message.content, message.created_at, senderId, !!message.audio_url)}
                 ${seenHtml}
               </div>
             </div>
@@ -1136,7 +1206,7 @@
                   ${escapeHtml(senderName)} ${roleBadge}
                 </div>
                 <div class="message received">
-                  ${escapeHtml(message.content)}
+                  ${contentHtml}
                   <small>${timeStr}</small>
                 </div>
               </div>
@@ -1377,6 +1447,7 @@
         if (selectedGroupRole === null && roles.length > 0) {
           document.getElementById('messageInput').disabled = true;
           document.getElementById('sendBtn').disabled = true;
+          document.getElementById('voiceNoteBtn').disabled = true;
           await loadMessages();
         } else if (!selectedGroupRole && roles.length > 0) {
           selectedGroupRole = roles[0];
@@ -1385,6 +1456,7 @@
           });
           document.getElementById('messageInput').disabled = false;
           document.getElementById('sendBtn').disabled = false;
+          document.getElementById('voiceNoteBtn').disabled = false;
           await loadMessages();
         }
       }
@@ -1402,6 +1474,7 @@
           const disabled = selectedGroupRole === null;
           document.getElementById('messageInput').disabled = disabled;
           document.getElementById('sendBtn').disabled = disabled;
+          document.getElementById('voiceNoteBtn').disabled = disabled;
           if (selectedGroupRole === null) {
             await buildGroupTabs();
           }
@@ -1783,7 +1856,7 @@
         }
       }
 
-      // --- Send group message ---
+      // --- Send group message (text) ---
       async function sendMessage() {
         const input = document.getElementById('messageInput');
         const content = input.value.trim();
@@ -1805,7 +1878,8 @@
           content: content,
           created_at: new Date().toISOString(),
           sender_id: currentUser.id,
-          role: messageRole
+          role: messageRole,
+          audio_url: null
         };
         appendMessageToUI(optimisticMessage, true, currentUserFullName, currentUser.id, messageRole, false);
         input.value = '';
@@ -1834,7 +1908,130 @@
         } catch (readErr) {}
       }
 
-      // --- DM FUNCTIONS with professional mobile transition ---
+      // --- Voice Note Functions (Group) ---
+      const voiceBtn = document.getElementById('voiceNoteBtn');
+      const recordingTimer = document.getElementById('recordingTimer');
+
+      voiceBtn.addEventListener('click', toggleRecording);
+
+      async function toggleRecording() {
+        if (isRecording) {
+          stopRecording();
+        } else {
+          await startRecording();
+        }
+      }
+
+      async function startRecording() {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+          mediaRecorder.ondataavailable = event => {
+            audioChunks.push(event.data);
+          };
+          mediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            await uploadVoiceNote(audioBlob);
+            stream.getTracks().forEach(track => track.stop());
+          };
+          mediaRecorder.start();
+          isRecording = true;
+          voiceBtn.classList.add('recording');
+          voiceBtn.textContent = '🔴';
+          recordingStartTime = Date.now();
+          recordingTimer.style.display = 'inline';
+          updateRecordingTimer();
+        } catch (err) {
+          console.error('Microphone access error:', err);
+          alert('Could not access microphone. Please check permissions.');
+        }
+      }
+
+      function stopRecording() {
+        if (mediaRecorder && isRecording) {
+          mediaRecorder.stop();
+          isRecording = false;
+          voiceBtn.classList.remove('recording');
+          voiceBtn.textContent = '🎤';
+          recordingTimer.style.display = 'none';
+          if (recordingTimerInterval) {
+            clearInterval(recordingTimerInterval);
+            recordingTimerInterval = null;
+          }
+        }
+      }
+
+      function updateRecordingTimer() {
+        recordingTimerInterval = setInterval(() => {
+          if (!isRecording) return;
+          const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+          const minutes = Math.floor(elapsed / 60);
+          const seconds = elapsed % 60;
+          recordingTimer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }, 1000);
+      }
+
+      async function uploadVoiceNote(audioBlob) {
+        let messageRole;
+        if (isCEO) {
+          if (!selectedGroupRole) { alert('Please select a group first.'); return; }
+          messageRole = selectedGroupRole;
+        } else {
+          messageRole = currentRole;
+        }
+
+        const fileName = `${currentUser.id}/${Date.now()}.webm`;
+        const { error: uploadError } = await supabase.storage
+          .from('voice_notes')
+          .upload(fileName, audioBlob, { contentType: 'audio/webm' });
+
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          alert('Failed to upload voice note: ' + uploadError.message);
+          return;
+        }
+
+        const { data: urlData } = supabase.storage
+          .from('voice_notes')
+          .getPublicUrl(fileName);
+        const audioUrl = urlData.publicUrl;
+
+        const tempId = 'temp-' + Date.now();
+        const optimisticMessage = {
+          id: tempId,
+          content: '',
+          created_at: new Date().toISOString(),
+          sender_id: currentUser.id,
+          role: messageRole,
+          audio_url: audioUrl
+        };
+        appendMessageToUI(optimisticMessage, true, currentUserFullName, currentUser.id, messageRole, false);
+
+ const { data, error } = await supabase
+  .from('group_messages')
+  .insert({ role: messageRole, sender_id: currentUser.id, content: '', audio_url: audioUrl })
+  .select()
+  .single();
+        if (error) {
+          console.error('Insert error:', error);
+          document.querySelector(`.message-row[data-message-id="${tempId}"]`)?.remove();
+          alert('Failed to send voice note: ' + error.message);
+          return;
+        }
+
+        const tempRow = document.querySelector(`.message-row[data-message-id="${tempId}"]`);
+        if (tempRow) tempRow.dataset.messageId = data.id;
+
+        try {
+          await supabase
+            .from('message_reads')
+            .insert({ message_id: data.id, user_id: currentUser.id });
+          readMessageIds.add(data.id);
+        } catch (readErr) {}
+      }
+
+      // --- DM FUNCTIONS with voice notes (FIXED) ---
       async function loadPrivateMessagesView() {
         try {
           if (messageSubscription) messageSubscription.unsubscribe();
@@ -1845,6 +2042,7 @@
           document.getElementById('groupTabs').style.display = 'none';
           document.getElementById('messageInput').disabled = true;
           document.getElementById('sendBtn').disabled = true;
+          document.getElementById('voiceNoteBtn').style.display = 'none'; // hide group voice btn
 
           const { data: allProfiles, error: profilesError } = await supabase
             .from('profiles')
@@ -1900,11 +2098,73 @@
                 <div id="dmChatMessages" class="dm-chat-messages"></div>
                 <div class="dm-chat-input">
                   <input type="text" id="dmChatInput" placeholder="Type a message...">
+                  <button class="dm-voice-btn" id="dmVoiceNoteBtn">🎤</button>
                   <button id="dmChatSendBtn">➤</button>
+                  <span id="dmRecordingTimer" class="recording-timer" style="display: none;">0:00</span>
                 </div>
               </div>
             </div>
           `;
+
+          // DM voice recording variables
+          let dmMediaRecorder = null;
+          let dmAudioChunks = [];
+          let dmIsRecording = false;
+          let dmRecordingStartTime = null;
+          let dmRecordingTimerInterval = null;
+          const dmVoiceBtn = document.getElementById('dmVoiceNoteBtn');
+          const dmRecordingTimer = document.getElementById('dmRecordingTimer');
+
+          dmVoiceBtn.addEventListener('click', async () => {
+            if (dmIsRecording) {
+              if (dmMediaRecorder) {
+                dmMediaRecorder.stop();
+                dmIsRecording = false;
+                dmVoiceBtn.textContent = '🎤';
+                dmVoiceBtn.classList.remove('recording');
+                dmRecordingTimer.style.display = 'none';
+                if (dmRecordingTimerInterval) {
+                  clearInterval(dmRecordingTimerInterval);
+                  dmRecordingTimerInterval = null;
+                }
+              }
+            } else {
+              try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                dmMediaRecorder = new MediaRecorder(stream);
+                dmAudioChunks = [];
+                dmMediaRecorder.ondataavailable = event => {
+                  dmAudioChunks.push(event.data);
+                };
+                dmMediaRecorder.onstop = async () => {
+                  const audioBlob = new Blob(dmAudioChunks, { type: 'audio/webm' });
+                  // FIX: use currentRecipientId (set when opening a DM chat)
+                  if (!currentRecipientId) {
+                    alert('No chat selected. Please open a conversation first.');
+                    return;
+                  }
+                  await sendPrivateVoiceNote(audioBlob, currentRecipientId);
+                  stream.getTracks().forEach(track => track.stop());
+                };
+                dmMediaRecorder.start();
+                dmIsRecording = true;
+                dmVoiceBtn.classList.add('recording');
+                dmVoiceBtn.textContent = '🔴';
+                dmRecordingStartTime = Date.now();
+                dmRecordingTimer.style.display = 'inline';
+                dmRecordingTimerInterval = setInterval(() => {
+                  if (!dmIsRecording) return;
+                  const elapsed = Math.floor((Date.now() - dmRecordingStartTime) / 1000);
+                  const minutes = Math.floor(elapsed / 60);
+                  const seconds = elapsed % 60;
+                  dmRecordingTimer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }, 1000);
+              } catch (err) {
+                console.error('DM mic error:', err);
+                alert('Could not access microphone.');
+              }
+            }
+          });
 
           // Attach click handlers
           document.querySelectorAll('.dm-conversation-item').forEach(item => {
@@ -1921,7 +2181,6 @@
                 delete dmUnreadBySender[userId];
                 updateDMBadge();
               }
-              // On mobile, hide list and show chat with back button
               if (window.innerWidth <= 768) {
                 document.getElementById('dmConversationsList').style.display = 'none';
                 document.getElementById('dmChatArea').classList.add('active');
@@ -1930,11 +2189,11 @@
             });
           });
 
-          // Back button functionality
           document.getElementById('dmBackBtn').addEventListener('click', () => {
             document.getElementById('dmConversationsList').style.display = 'block';
             document.getElementById('dmChatArea').classList.remove('active');
             document.getElementById('dmBackBtn').style.display = 'none';
+            currentRecipientId = null; // clear recipient when leaving chat
           });
 
         } catch (err) {
@@ -1944,6 +2203,8 @@
       }
 
       async function openPrivateChat(otherUserId, otherProfile) {
+        currentRecipientId = otherUserId;   // <-- FIX: store recipient ID
+
         const chatArea = document.getElementById('dmChatArea');
         const headerTitle = document.querySelector('.dm-chat-title');
         const messagesDiv = document.getElementById('dmChatMessages');
@@ -1972,7 +2233,6 @@
             if (dateHeader) html += dateHeader.replace('date-separator', 'dm-date-separator');
             lastDate = msg.created_at;
 
-            // Seen indicator for sent messages
             let seenHtml = '';
             if (isSent && msg.read_at) {
               const { data: reader } = await supabase
@@ -1984,10 +2244,17 @@
               seenHtml = `<div class="dm-seen-indicator"><span class="double-tick">✓✓</span> Seen by ${escapeHtml(readerName)} at ${formatTimeOnly(msg.read_at)}</div>`;
             }
 
+            let contentHtml = '';
+            if (msg.audio_url) {
+              contentHtml = `<audio controls src="${escapeHtml(msg.audio_url)}"></audio>`;
+            } else {
+              contentHtml = escapeHtml(msg.content);
+            }
+
             html += `
               <div class="dm-msg-row ${isSent ? 'sent' : 'received'}" data-message-id="${msg.id}" data-created-at="${msg.created_at}">
                 <div class="dm-msg ${isSent ? 'sent' : 'received'}">
-                  ${escapeHtml(msg.content)}
+                  ${contentHtml}
                   <small>${timeStr}</small>
                   ${seenHtml}
                 </div>
@@ -2000,7 +2267,6 @@
           messagesDiv.innerHTML = html || '<div style="color:#9aa4bf; text-align:center; padding:2rem;">No messages yet. Say hello!</div>';
           messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-          // Attach right-click to DM messages
           document.querySelectorAll('.dm-msg-row').forEach(row => {
             row.addEventListener('contextmenu', onRightClick);
           });
@@ -2022,11 +2288,11 @@
         input.value = '';
 
         try {
-          const { data, error } = await supabase
-            .from('private_messages')
-            .insert({ sender_id: currentUser.id, recipient_id: otherUserId, content: content })
-            .select()
-            .single();
+const { data, error } = await supabase
+  .from('private_messages')
+  .insert({ sender_id: currentUser.id, recipient_id: otherUserId, content: '', audio_url: audioUrl })
+  .select()
+  .single();
 
           if (error) throw error;
 
@@ -2045,6 +2311,55 @@
         } catch (err) {
           console.error('Send private message error:', err);
           alert('Failed to send: ' + err.message);
+        }
+      }
+
+      async function sendPrivateVoiceNote(audioBlob, otherUserId) {
+        if (!otherUserId) {
+          alert('Recipient not specified.');
+          return;
+        }
+
+        const fileName = `${currentUser.id}/${Date.now()}.webm`;
+        const { error: uploadError } = await supabase.storage
+          .from('voice_notes')
+          .upload(fileName, audioBlob, { contentType: 'audio/webm' });
+
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          alert('Failed to upload voice note: ' + uploadError.message);
+          return;
+        }
+
+        const { data: urlData } = supabase.storage
+          .from('voice_notes')
+          .getPublicUrl(fileName);
+        const audioUrl = urlData.publicUrl;
+
+        try {
+          const { data, error } = await supabase
+            .from('private_messages')
+            .insert({ sender_id: currentUser.id, recipient_id: otherUserId, audio_url: audioUrl })
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          const messagesDiv = document.getElementById('dmChatMessages');
+          const timeStr = formatTimeOnly(data.created_at);
+          const msgHtml = `
+            <div class="dm-msg-row sent" data-message-id="${data.id}" data-created-at="${data.created_at}">
+              <div class="dm-msg sent">
+                <audio controls src="${escapeHtml(audioUrl)}"></audio>
+                <small>${timeStr}</small>
+              </div>
+            </div>
+          `;
+          messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        } catch (err) {
+          console.error('Insert private voice note error:', err);
+          alert('Failed to send voice note: ' + err.message);
         }
       }
 
@@ -2074,13 +2389,18 @@
             if (document.getElementById('dmNavLink').classList.contains('active')) {
               const activeItem = document.querySelector('.dm-conversation-item.active');
               if (activeItem && activeItem.dataset.userId === newMsg.sender_id) {
-                // Chat open – append and mark read
                 const messagesDiv = document.getElementById('dmChatMessages');
                 const timeStr = formatTimeOnly(newMsg.created_at);
+                let contentHtml = '';
+                if (newMsg.audio_url) {
+                  contentHtml = `<audio controls src="${escapeHtml(newMsg.audio_url)}"></audio>`;
+                } else {
+                  contentHtml = escapeHtml(newMsg.content);
+                }
                 const msgHtml = `
                   <div class="dm-msg-row received" data-message-id="${newMsg.id}" data-created-at="${newMsg.created_at}">
                     <div class="dm-msg received">
-                      ${escapeHtml(newMsg.content)}
+                      ${contentHtml}
                       <small>${timeStr}</small>
                     </div>
                   </div>
@@ -2133,8 +2453,10 @@
         document.getElementById('groupTabs').style.display = isCEO ? 'flex' : 'none';
         document.getElementById('roleDisplay').style.display = isCEO ? 'none' : 'inline';
         document.getElementById('chatInputArea').style.display = 'flex';
+        document.getElementById('voiceNoteBtn').style.display = 'flex'; // show group voice btn
         document.getElementById('messageInput').disabled = isCEO && !selectedGroupRole;
         document.getElementById('sendBtn').disabled = isCEO && !selectedGroupRole;
+        document.getElementById('voiceNoteBtn').disabled = isCEO && !selectedGroupRole;
         loadMessages();
       });
 
@@ -2209,6 +2531,7 @@
             selectedGroupRole = currentRole;
             document.getElementById('messageInput').disabled = false;
             document.getElementById('sendBtn').disabled = false;
+            document.getElementById('voiceNoteBtn').disabled = false;
             await loadMessages();
             subscribeToMessages();
           }
