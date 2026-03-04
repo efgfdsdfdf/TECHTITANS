@@ -444,12 +444,12 @@
     <div class="logo">TECH<span>TITANS</span></div>
 
     <div class="nav">
-      <a href="/dashboard.html" class="active"><i class="fas fa-chart-pie"></i> Dashboard</a>
-      <a href="/messages.html" id="chatNavLink"><i class="fas fa-comments"></i> GROUP CHAT
+      <a href="dashboard.html" class="active"><i class="fas fa-chart-pie"></i> Dashboard</a>
+      <a href="messages.html" id="chatNavLink"><i class="fas fa-comments"></i> GROUP CHAT
         <span class="sidebar-unread" id="sidebarUnreadBadge" style="display: none;">0</span>
       </a>
-      <a href="/resources.html"><i class="fas fa-book-open"></i> Resources</a>
-      <a href="/profile.html"><i class="fas fa-user-cog"></i> Profile</a>
+      <a href="resources.html"><i class="fas fa-book-open"></i> Resources</a>
+      <a href="profile.html"><i class="fas fa-user-cog"></i> Profile</a>
     </div>
     <button class="logout-btn" id="logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </div>
@@ -976,7 +976,7 @@
         if (refreshInterval) clearInterval(refreshInterval);
         if (announcementsChannel) announcementsChannel.unsubscribe();
         await supabase.auth.signOut();
-        window.location.href = '/index.html';
+        window.location.href = 'index.html';
       });
 
       // --- Initialise ---
@@ -990,3 +990,4 @@
   -->
 </body>
 </html>
+
