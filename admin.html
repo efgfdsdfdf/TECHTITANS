@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TECH TITANS · Admin Panel</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    /* (keep all existing styles, then add these new ones) */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body {
+      background: radial-gradient(circle at 10% 20%, #141b2b, #0a0f1a);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      color: #eef2fb;
+    }
+    .sidebar { /* unchanged from original, keep it */ }
+    .main { flex: 1; padding: 2rem; overflow-y: auto; }
+    .tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid #2f3a5a;
+      padding-bottom: 0.5rem;
+    }
+    .tab {
+      padding: 0.6rem 1.5rem;
+      border-radius: 2rem;
+      cursor: pointer;
+      transition: 0.2s;
+      color: #9aa4bf;
+    }
+    .tab.active {
+      background: #428cff;
+      color: white;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: #1f2a44;
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+    }
+    .stat-value { font-size: 2rem; font-weight: 700; color: white; }
+    .stat-label { color: #9aa4bf; font-size: 0.9rem; }
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 1rem 0.5rem; color: #8f9fc9; border-bottom: 1px solid #2f3a5a; }
+    td { padding: 1rem 0.5rem; border-bottom: 1px solid #1f2a44; }
+    .role-badge {
+      background: #2a3650; padding: 0.3rem 0.8rem; border-radius: 2rem; font-size: 0.85rem;
+    }
+    .role-badge.admin { background: #428cff30; color: #90c0ff; border: 1px solid #428cff; }
+    .warning-icon { color: #ffaa4d; margin-left: 0.5rem; cursor: help; }
+    .edit-btn, .delete-btn {
+      background: transparent; border: 1px solid #428cff; color: #428cff;
+      padding: 0.4rem 1rem; border-radius: 2rem; cursor: pointer; font-size: 0.85rem;
+      margin-right: 0.5rem;
+    }
+    .delete-btn { border-color: #ff4d4d; color: #ff4d4d; }
+    .modal {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7); align-items: center; justify-content: center;
+      z-index: 1000;
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: #1a2335; border: 1px solid #428cff; border-radius: 2rem; padding: 2rem;
+      width: 400px; max-width: 90%;
+    }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; }
+    .save-btn { background: #428cff; color: white; padding: 0.7rem 1.5rem; border-radius: 2rem; border: none; cursor: pointer; }
+    .cancel-btn { background: transparent; border: 1px solid #5b6b92; color: #a5b3d1; padding: 0.7rem 1.5rem; border-radius: 2rem; cursor: pointer; }
+    .pagination {
+      display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;
+    }
+    .page-btn {
+      background: #1f2a44; color: white; border: none; width: 2.5rem; height: 2.5rem;
+      border-radius: 50%; cursor: pointer;
+    }
+    .page-btn.active { background: #428cff; }
+    .loading-skeleton {
+      background: #1f2a44; height: 2rem; border-radius: 1rem; animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; flex-direction: row; padding: 1rem; }
+      .main { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="logo">TECH<span>TITANS</span></div>
+    <div class="nav" id="sidebarNav">
+      <a href="/dashboard.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
+      <a href="/messages.html"><i class="fas fa-comments"></i> Messages</a>
+      <a href="/resources.html"><i class="fas fa-book-open"></i> Resources</a>
+      <a href="/profile.html"><i class="fas fa-user-cog"></i> Profile</a>
+    </div>
+    <button class="logout-btn" id="logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
+
+  <div class="main">
+    <!-- Admin Tabs -->
+    <div class="tabs">
+      <div class="tab active" data-tab="users"><i class="fas fa-users"></i> Users</div>
+      <div class="tab" data-tab="announcements"><i class="fas fa-bullhorn"></i> Announcements</div>
+      <div class="tab" data-tab="roles"><i class="fas fa-tags"></i> Roles</div>
+      <div class="tab" data-tab="stats"><i class="fas fa-chart-bar"></i> Stats</div>
+    </div>
+
+    <!-- ========== USERS TAB ========== -->
+    <div class="tab-content active" id="tab-users">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="totalUsers">0</div>
+          <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalAdmins">0</div>
+          <div class="stat-label">Admins</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalMessages">0</div>
+          <div class="stat-label">Group Messages</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+        <div class="search-box" style="flex:1;">
+          <i class="fas fa-search"></i>
+          <input type="text" id="searchUsers" placeholder="Search users...">
+        </div>
+        <select id="roleFilter" style="background: #1f2a44; color: white; border: 1px solid #2f3a5a; border-radius: 2rem; padding: 0 1rem;">
+          <option value="all">All roles</option>
+          <option value="admin">Admin</option>
+          <option value="member">Member</option>
+        </select>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr><th>Name</th><th>Email</th><th>Job Role</th><th>System Role</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="usersTableBody"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="usersPagination"></div>
+    </div>
+
+    <!-- ========== ANNOUNCEMENTS TAB ========== -->
+    <div class="tab-content" id="tab-announcements">
+      <div style="margin-bottom: 1rem;">
+        <button class="save-btn" id="newAnnouncementBtn"><i class="fas fa-plus"></i> New Announcement</button>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead><tr><th>Date</th><th>Author</th><th>Content</th><th>Attachment</th><th>Actions</th></tr></thead>
+          <tbody id="announcementsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========== ROLES TAB ========== -->
+    <div class="tab-content" id="tab-roles">
+      <div style="margin-bottom: 1rem; display: flex; gap: 1rem;">
+        <input type="text" id="newRoleName" placeholder="New role name" style="background: #1f2a44; border: 1px solid #2f3a5a; border-radius: 2rem; padding: 0.5rem 1rem; color: white; flex:1;">
+        <button class="save-btn" id="addRoleBtn">Add Role</button>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead><tr><th>Role</th><th>Users</th><th>Actions</th></tr></thead>
+          <tbody id="rolesBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========== STATS TAB ========== -->
+    <div class="tab-content" id="tab-stats">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="statGroups">0</div><div class="stat-label">Active Groups</div></div>
+        <div class="stat-card"><div class="stat-value" id="statDMs">0</div><div class="stat-label">Private Messages</div></div>
+        <div class="stat-card"><div class="stat-value" id="statAnnounce">0</div><div class="stat-label">Announcements</div></div>
+      </div>
+      <!-- Placeholder for charts -->
+    </div>
+  </div>
+
+  <!-- Edit User Modal -->
+  <div class="modal" id="editUserModal">
+    <div class="modal-content">
+      <h3><i class="fas fa-user-edit"></i> Edit User</h3>
+      <label>Full Name</label><input type="text" id="editName" readonly disabled>
+      <label>Email</label><input type="email" id="editEmail" readonly disabled>
+      <label>Job Role</label><input type="text" id="editJobRole" placeholder="e.g. CEO, Developer">
+      <label>System Role</label>
+      <select id="editSysRole"><option value="member">Member</option><option value="admin">Admin</option></select>
+      <div class="modal-actions">
+        <button class="cancel-btn" id="cancelEditUser">Cancel</button>
+        <button class="save-btn" id="saveEditUser">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal" id="confirmModal">
+    <div class="modal-content">
+      <h3><i class="fas fa-exclamation-triangle"></i> Confirm</h3>
+      <p id="confirmMessage"></p>
+      <div class="modal-actions">
+        <button class="cancel-btn" id="confirmCancel">No</button>
+        <button class="save-btn" id="confirmOk" style="background:#ff4d4d;">Yes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Announcement Edit Modal -->
+  <div class="modal" id="announcementModal">
+    <div class="modal-content">
+      <h3><i class="fas fa-edit"></i> <span id="annModalTitle">New Announcement</span></h3>
+      <textarea id="annContent" rows="4" style="width:100%; background:#0f172f; border:1px solid #2f3a5a; border-radius:1rem; padding:0.8rem; color:white; margin-bottom:1rem;"></textarea>
+      <input type="file" id="annFile" accept="*/*">
+      <div class="modal-actions">
+        <button class="cancel-btn" id="cancelAnn">Cancel</button>
+        <button class="save-btn" id="saveAnn">Post</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+
+      if (!window.supabase) { alert('Supabase failed to load'); return; }
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      let currentUser = null;
+      let allProfiles = [];
+      let allAnnouncements = [];
+      let allRoles = [];
+      let currentTab = 'users';
+      let usersPage = 1;
+      const pageSize = 10;
+
+      // DOM elements
+      const tabs = document.querySelectorAll('.tab');
+      const tabContents = document.querySelectorAll('.tab-content');
+      const usersTbody = document.getElementById('usersTableBody');
+      const announcementsBody = document.getElementById('announcementsBody');
+      const rolesBody = document.getElementById('rolesBody');
+      const searchUsers = document.getElementById('searchUsers');
+      const roleFilter = document.getElementById('roleFilter');
+      const logoutBtn = document.getElementById('logout');
+
+      // Modals
+      const editUserModal = document.getElementById('editUserModal');
+      const confirmModal = document.getElementById('confirmModal');
+      const annModal = document.getElementById('announcementModal');
+      let currentAction = null; // for confirm modal
+
+      // ---------- Check admin and load data ----------
+      async function init() {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error || !user) { window.location.href = '/index.html'; return; }
+        currentUser = user;
+
+        // Verify admin role
+        const { data: profile, error: pErr } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        if (pErr || profile?.role !== 'admin') {
+          window.location.href = '/dashboard.html';
+          return;
+        }
+
+        // Add Admin link to sidebar
+        document.getElementById('sidebarNav').insertAdjacentHTML('beforeend',
+          '<a href="/admin.html" class="active"><i class="fas fa-user-cog"></i> Admin Panel</a>');
+
+        loadAllData();
+      }
+
+      async function loadAllData() {
+        await Promise.all([loadUsers(), loadAnnouncements(), loadRoles(), loadStats()]);
+      }
+
+      // ---------- USERS ----------
+      async function loadUsers() {
+        // Fetch profiles and then emails via function
+        const { data: profiles, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (error) { console.error(error); return; }
+
+        // Enrich with email (call function for each user)
+        for (let p of profiles) {
+          const { data: email, error: eErr } = await supabase.rpc('get_auth_user_email', { user_id: p.id });
+          if (!eErr) p.email = email;
+        }
+        allProfiles = profiles;
+        filterAndRenderUsers();
+      }
+
+      
+
+      function filterAndRenderUsers() {
+        let filtered = [...allProfiles];
+        const search = searchUsers.value.toLowerCase();
+        if (search) {
+          filtered = filtered.filter(p => (p.full_name?.toLowerCase().includes(search) || p.email?.toLowerCase().includes(search)));
+        }
+        const role = roleFilter.value;
+        if (role !== 'all') filtered = filtered.filter(p => p.role === role);
+
+        // Paginate
+        const start = (usersPage - 1) * pageSize;
+        const paginated = filtered.slice(start, start + pageSize);
+
+        renderUsers(paginated);
+        renderUsersPagination(filtered.length);
+        updateStats(filtered.length);
+      }
+
+      function renderUsers(users) {
+        if (!users.length) { usersTbody.innerHTML = '<tr><td colspan="6" class="empty-state">No users</td></tr>'; return; }
+        usersTbody.innerHTML = users.map(u => {
+          const mismatch = (u.job_role?.toUpperCase().includes('CEO') && u.role !== 'admin');
+          return `
+            <tr>
+              <td>${escapeHtml(u.full_name || '—')}</td>
+              <td>${escapeHtml(u.email || '—')}</td>
+              <td>${escapeHtml(u.job_role || '—')} ${mismatch ? '<i class="fas fa-exclamation-triangle warning-icon" title="CEO should be admin?"></i>' : ''}</td>
+              <td><span class="role-badge ${u.role === 'admin' ? 'admin' : ''}">${u.role || 'member'}</span></td>
+              <td>
+                <button class="edit-btn" data-id="${u.id}" data-name="${escapeHtml(u.full_name)}" data-email="${escapeHtml(u.email)}" data-job="${escapeHtml(u.job_role)}" data-role="${u.role}"><i class="fas fa-pen"></i> Edit</button>
+                <button class="delete-btn" data-id="${u.id}" data-name="${escapeHtml(u.full_name)}"><i class="fas fa-trash"></i> Del</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+        attachUserActions();
+      }
+
+      function attachUserActions() {
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.getElementById('editName').value = btn.dataset.name;
+            document.getElementById('editEmail').value = btn.dataset.email;
+            document.getElementById('editJobRole').value = btn.dataset.job;
+            document.getElementById('editSysRole').value = btn.dataset.role;
+            editUserModal.dataset.userId = btn.dataset.id;
+            editUserModal.classList.add('active');
+          });
+        });
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            currentAction = { type: 'deleteUser', userId: btn.dataset.id, name: btn.dataset.name };
+            document.getElementById('confirmMessage').innerText = `Delete user ${btn.dataset.name}? This action cannot be undone.`;
+            confirmModal.classList.add('active');
+          });
+        });
+      }
+
+      // ---------- ANNOUNCEMENTS ----------
+      async function loadAnnouncements() {
+        const { data, error } = await supabase
+          .from('announcements')
+          .select('*, profiles!created_by(full_name)')
+          .order('created_at', { ascending: false });
+        if (error) { console.error(error); return; }
+        allAnnouncements = data || [];
+        renderAnnouncements();
+      }
+
+      function renderAnnouncements() {
+        if (!allAnnouncements.length) {
+          announcementsBody.innerHTML = '<tr><td colspan="5" class="empty-state">No announcements</td></tr>';
+          return;
+        }
+        announcementsBody.innerHTML = allAnnouncements.map(a => `
+          <tr>
+            <td>${new Date(a.created_at).toLocaleString()}</td>
+            <td>${escapeHtml(a.profiles?.full_name || 'CEO')}</td>
+            <td>${escapeHtml(a.content || '')}</td>
+            <td>${a.file_url ? `<a href="${a.file_url}" target="_blank">📎</a>` : '—'}</td>
+            <td>
+              <button class="edit-btn" data-id="${a.id}" data-content="${escapeHtml(a.content)}"><i class="fas fa-pen"></i> Edit</button>
+              <button class="delete-btn" data-id="${a.id}"><i class="fas fa-trash"></i> Del</button>
+            </td>
+          </tr>
+        `).join('');
+        document.querySelectorAll('#announcementsBody .edit-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.getElementById('annModalTitle').innerText = 'Edit Announcement';
+            document.getElementById('annContent').value = btn.dataset.content;
+            annModal.dataset.id = btn.dataset.id;
+            annModal.classList.add('active');
+          });
+        });
+        document.querySelectorAll('#announcementsBody .delete-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            currentAction = { type: 'deleteAnnouncement', id: btn.dataset.id };
+            document.getElementById('confirmMessage').innerText = 'Delete this announcement?';
+            confirmModal.classList.add('active');
+          });
+        });
+      }
+
+      // ---------- ROLES ----------
+      async function loadRoles() {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('job_role');
+        if (error) return;
+        const roles = [...new Set(data.map(p => p.job_role).filter(Boolean))].sort();
+        allRoles = roles;
+        renderRoles();
+      }
+
+      async function renderRoles() {
+        const counts = {};
+        for (let role of allRoles) {
+          const { count } = await supabase
+            .from('profiles')
+            .select('*', { count: 'exact', head: true })
+            .eq('job_role', role);
+          counts[role] = count;
+        }
+        rolesBody.innerHTML = allRoles.map(role => `
+          <tr>
+            <td>${escapeHtml(role)}</td>
+            <td>${counts[role] || 0}</td>
+            <td>
+              <button class="delete-btn" data-role="${escapeHtml(role)}" ${counts[role] > 0 ? 'disabled style="opacity:0.3;"' : ''}>Delete</button>
+            </td>
+          </tr>
+        `).join('');
+        document.querySelectorAll('#rolesBody .delete-btn:not([disabled])').forEach(btn => {
+          btn.addEventListener('click', () => {
+            currentAction = { type: 'deleteRole', role: btn.dataset.role };
+            document.getElementById('confirmMessage').innerText = `Delete role "${btn.dataset.role}"? This will not affect existing users.`;
+            confirmModal.classList.add('active');
+          });
+        });
+      }
+
+      // ---------- STATS ----------
+      async function loadStats() {
+        const { count: msgCount } = await supabase.from('group_messages').select('*', { count: 'exact', head: true });
+        const { count: dmCount } = await supabase.from('private_messages').select('*', { count: 'exact', head: true });
+        const { count: annCount } = await supabase.from('announcements').select('*', { count: 'exact', head: true });
+        const { data: roles } = await supabase.from('profiles').select('job_role');
+        const groups = [...new Set(roles.map(r => r.job_role).filter(Boolean))].length;
+        document.getElementById('statGroups').innerText = groups;
+        document.getElementById('statDMs').innerText = dmCount || 0;
+        document.getElementById('statAnnounce').innerText = annCount || 0;
+      }
+
+      // ---------- Handlers for modals ----------
+      document.getElementById('cancelEditUser').addEventListener('click', () => editUserModal.classList.remove('active'));
+      document.getElementById('saveEditUser').addEventListener('click', async () => {
+        const id = editUserModal.dataset.userId;
+        const job = document.getElementById('editJobRole').value.trim();
+        const role = document.getElementById('editSysRole').value;
+        const { error } = await supabase
+          .from('profiles')
+          .update({ job_role: job || null, role })
+          .eq('id', id);
+        if (error) alert('Error: ' + error.message);
+        else {
+          editUserModal.classList.remove('active');
+          loadUsers();
+        }
+      });
+
+      // Confirm modal actions
+      document.getElementById('confirmCancel').addEventListener('click', () => confirmModal.classList.remove('active'));
+      document.getElementById('confirmOk').addEventListener('click', async () => {
+        if (!currentAction) return;
+        if (currentAction.type === 'deleteUser') {
+          // Delete from auth.users (cascades to profiles)
+          const { error } = await supabase.auth.admin.deleteUser(currentAction.userId);
+          if (error) alert(error.message);
+          else loadUsers();
+        } else if (currentAction.type === 'deleteAnnouncement') {
+          const { error } = await supabase.from('announcements').delete().eq('id', currentAction.id);
+          if (!error) loadAnnouncements();
+        } else if (currentAction.type === 'deleteRole') {
+          // Role deletion is just informational; we don't actually delete from profiles.
+          alert('Role deletion not implemented to avoid data loss. You can manually reassign users.');
+        }
+        confirmModal.classList.remove('active');
+      });
+
+      // New announcement
+      document.getElementById('newAnnouncementBtn').addEventListener('click', () => {
+        document.getElementById('annModalTitle').innerText = 'New Announcement';
+        document.getElementById('annContent').value = '';
+        document.getElementById('annFile').value = '';
+        delete annModal.dataset.id;
+        annModal.classList.add('active');
+      });
+      document.getElementById('cancelAnn').addEventListener('click', () => annModal.classList.remove('active'));
+      document.getElementById('saveAnn').addEventListener('click', async () => {
+        const content = document.getElementById('annContent').value.trim();
+        const file = document.getElementById('annFile').files[0];
+        let fileUrl = null;
+        if (file) {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${currentUser.id}/${Date.now()}.${fileExt}`;
+          const { error: uploadError } = await supabase.storage
+            .from('announcements')
+            .upload(fileName, file);
+          if (uploadError) { alert('Upload error: ' + uploadError.message); return; }
+          const { data: urlData } = supabase.storage.from('announcements').getPublicUrl(fileName);
+          fileUrl = urlData.publicUrl;
+        }
+        const id = annModal.dataset.id;
+        if (id) {
+          // Update existing
+          const { error } = await supabase
+            .from('announcements')
+            .update({ content, file_url: fileUrl })
+            .eq('id', id);
+          if (error) alert(error.message);
+        } else {
+          // Insert new
+          const { error } = await supabase
+            .from('announcements')
+            .insert({ content, file_url: fileUrl, created_by: currentUser.id });
+          if (error) alert(error.message);
+        }
+        annModal.classList.remove('active');
+        loadAnnouncements();
+      });
+
+      // Add role
+      document.getElementById('addRoleBtn').addEventListener('click', async () => {
+        const newRole = document.getElementById('newRoleName').value.trim();
+        if (!newRole) return;
+        // Roles are just job_role values; we don't have a separate table. Inform user.
+        alert(`Role "${newRole}" will be available when users are assigned it. No database change needed.`);
+        document.getElementById('newRoleName').value = '';
+        loadRoles(); // refresh list
+      });
+
+      // Tab switching
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          tabContents.forEach(c => c.classList.remove('active'));
+          document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+          if (tab.dataset.tab === 'announcements') loadAnnouncements();
+          if (tab.dataset.tab === 'roles') loadRoles();
+          if (tab.dataset.tab === 'stats') loadStats();
+        });
+      });
+
+      // Search and filter
+      searchUsers.addEventListener('input', () => { usersPage = 1; filterAndRenderUsers(); });
+      roleFilter.addEventListener('change', () => { usersPage = 1; filterAndRenderUsers(); });
+
+      // Pagination
+      function renderUsersPagination(total) {
+        const pages = Math.ceil(total / pageSize);
+        let html = '';
+        for (let i = 1; i <= pages; i++) {
+          html += `<button class="page-btn ${i === usersPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
+        }
+        document.getElementById('usersPagination').innerHTML = html;
+        document.querySelectorAll('.page-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            usersPage = Number(btn.dataset.page);
+            filterAndRenderUsers();
+          });
+        });
+      }
+
+      function updateStats(total) {
+        document.getElementById('totalUsers').innerText = total;
+        document.getElementById('totalAdmins').innerText = allProfiles.filter(p => p.role === 'admin').length;
+      }
+
+      // Logout
+      logoutBtn.addEventListener('click', async () => {
+        await supabase.auth.signOut();
+        window.location.href = '/index.html';
+      });
+
+      // Escape HTML helper
+      function escapeHtml(unsafe) {
+        if (!unsafe) return '';
+        return String(unsafe).replace(/[&<>"]/g, function(m) {
+          if (m === '&') return '&amp;';
+          if (m === '<') return '&lt;';
+          if (m === '>') return '&gt;';
+          if (m === '"') return '&quot;';
+          return m;
+        });
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>

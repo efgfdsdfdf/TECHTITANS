@@ -1,0 +1,1974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>TECH TITANS · Direct Messages</title>
+  <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background: #0b0f17;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* === SIDEBAR (desktop first) === */
+.sidebar {
+  width: 260px;
+  background: rgba(10, 16, 28, 0.95);
+  backdrop-filter: blur(10px);
+  border-right: 1px solid #1f2a44;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  flex-shrink: 0;
+}
+
+.logo {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  padding-left: 1rem;
+}
+.logo span { color: #428cff; }
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.nav a {
+  color: #9aa4bf;
+  text-decoration: none;
+  padding: 0.9rem 1rem;
+  border-radius: 1.2rem;
+  transition: 0.2s;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  position: relative;
+}
+.nav a:hover,
+.nav a.active {
+  background: #1f2a44;
+  color: white;
+}
+.nav a.active {
+  background: #428cff;
+  color: white;
+  box-shadow: 0 8px 16px -8px #428cff;
+}
+
+.sidebar-unread {
+  background: #ff4d4d;
+  color: white;
+  border-radius: 2rem;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-left: auto;
+  line-height: 1.3;
+  box-shadow: 0 0 0 1px #0b0f17;
+}
+
+.logout-btn {
+  margin-top: auto;
+  background: transparent;
+  border: 1px solid #2f3a5a;
+  color: #ff9f9f;
+  padding: 0.9rem;
+  border-radius: 1.2rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s;
+}
+.logout-btn:hover {
+  background: #ff4d4d20;
+  border-color: #ff4d4d;
+}
+
+/* === MAIN DM AREA === */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.chat-panel {
+  flex: 1;
+  background: #131c30;
+  border-radius: 2rem;
+  border: 1px solid #263154;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+}
+
+.chat-header {
+  padding: 1.2rem 1.8rem;
+  border-bottom: 1px solid #263154;
+  color: white;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  background: #131c30;
+  z-index: 5;
+}
+
+.online-count {
+  background: #1f2a44;
+  padding: 0.2rem 0.8rem;
+  border-radius: 2rem;
+  font-size: 0.8rem;
+  color: #8affb8;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: auto;
+}
+.online-count::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: #2ecc71;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* DM layout (full width) */
+.dm-layout {
+  display: flex;
+  height: 100%;
+  gap: 0;
+}
+
+.dm-conversations-list {
+  width: 280px;
+  border-right: 1px solid #263154;
+  overflow-y: auto;
+  background: #0f172f;
+  flex-shrink: 0;
+}
+
+.dm-list-header {
+  padding: 1rem;
+  font-weight: 600;
+  color: #9aa4bf;
+  border-bottom: 1px solid #263154;
+  font-size: 0.9rem;
+}
+
+.dm-conversation-item {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid #1f2a44;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.dm-conversation-item:hover {
+  background: #1f2a44;
+}
+.dm-conversation-item.active {
+  background: #2a3a60;
+  border-left: 3px solid #428cff;
+}
+
+.dm-conv-content {
+  flex: 1;
+  min-width: 0;
+}
+.dm-conv-name {
+  color: white;
+  font-weight: 500;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dm-conv-role {
+  color: #9aa4bf;
+  font-size: 0.75rem;
+  margin-top: 0.2rem;
+}
+
+.status-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: #444;
+  flex-shrink: 0;
+}
+.status-dot.online {
+  background: #2ecc71;
+}
+
+.dm-unread-badge {
+  background: #428cff;
+  color: white;
+  padding: 0.2rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  min-width: 20px;
+  text-align: center;
+  margin-left: auto;
+}
+
+.dm-chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #131c30;
+}
+
+.dm-chat-header {
+  padding: 1rem;
+  border-bottom: 1px solid #263154;
+  color: white;
+  font-weight: 500;
+  background: #131c30;
+  display: flex;
+  align-items: center;
+}
+.dm-chat-header .dm-back-btn {
+  display: none;
+}
+
+.dm-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dm-chat-input {
+  display: flex;
+  padding: 1rem;
+  background: #131c30;
+  border-top: 1px solid #263154;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+#dmChatInput {
+  flex: 1;
+  background: #0f172f;
+  border: 1px solid #263154;
+  border-radius: 2rem;
+  padding: 0.8rem 1.2rem;
+  color: white;
+  outline: none;
+}
+#dmChatInput:focus {
+  border-color: #428cff;
+}
+
+#dmChatSendBtn {
+  background: #428cff;
+  border: none;
+  color: white;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: 0.2s;
+  flex-shrink: 0;
+}
+
+.dm-voice-btn {
+  background: #2f3a5a;
+  border: none;
+  color: white;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: 0.2s;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dm-msg-row {
+  display: flex;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+.dm-msg-row.sent {
+  justify-content: flex-end;
+}
+.dm-msg-row.unread .dm-msg {
+  border-left: 4px solid #428cff;
+}
+
+.dm-msg {
+  max-width: 60%;
+  padding: 0.8rem 1rem;
+  border-radius: 1.2rem;
+  word-wrap: break-word;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  position: relative;
+}
+.dm-msg.sent {
+  background: #428cff;
+  color: white;
+}
+.dm-msg.received {
+  background: #1f2a44;
+  color: #e0e7ff;
+}
+.dm-msg small {
+  display: block;
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin-top: 0.3rem;
+}
+.dm-msg audio {
+  max-width: 200px;
+  height: 32px;
+  margin-top: 0.3rem;
+  border-radius: 1rem;
+}
+
+.dm-seen-indicator {
+  font-size: 0.7rem;
+  color: #9aa4bf;
+  margin-top: 0.2rem;
+  text-align: right;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #428cff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: transform 0.1s;
+  object-fit: cover;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.avatar:hover {
+  transform: scale(1.05);
+}
+
+.typing-container {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0 1.5rem;
+}
+
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.5rem 1rem;
+  background: #1f2a44;
+  border-radius: 2rem;
+  width: fit-content;
+  margin-bottom: 0.5rem;
+}
+.typing-indicator span {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: #9aa4bf;
+  border-radius: 50%;
+  animation: typingBounce 1.4s infinite ease-in-out;
+}
+.typing-indicator span:nth-child(1) { animation-delay: 0s; }
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-0.5rem); }
+}
+
+.typing-text {
+  color: #9aa4bf;
+  font-size: 0.85rem;
+  margin-left: 0.5rem;
+}
+
+.recording-timer {
+  color: #ff4d4d;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.voice-btn.recording {
+  background: #ff4d4d;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* === Call modal styles (DM calls) === */
+.call-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.call-modal-content {
+  background: #1f2a44;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  max-width: 800px;
+  width: 90%;
+  color: white;
+}
+.call-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.call-modal-header h3 { font-size: 1.2rem; }
+.call-modal-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+.call-videos {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+.video-container {
+  background: #0b0f17;
+  border-radius: 1rem;
+  overflow: hidden;
+  width: 300px;
+  height: 200px;
+  position: relative;
+}
+.video-container video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.video-label {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0.5rem;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+}
+.call-controls {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+.call-controls button {
+  background: #428cff;
+  border: none;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 2rem;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.call-controls button.hangup { background: #ff4d4d; }
+.call-controls button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.call-options-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1500;
+}
+.call-options-content {
+  background: #1f2a44;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  width: 300px;
+  color: white;
+  text-align: center;
+}
+.call-options-content h3 { margin-bottom: 1rem; }
+.call-option-btn {
+  background: #2f3a5a;
+  border: none;
+  color: white;
+  padding: 1rem;
+  margin: 0.5rem 0;
+  width: 100%;
+  border-radius: 2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background 0.2s;
+}
+.call-option-btn:hover { background: #428cff; }
+.call-option-btn.video { background: #428cff; }
+.call-option-btn.video:hover { background: #5f9eff; }
+
+#incomingCallModal .call-modal-content {
+  max-width: 400px;
+  text-align: center;
+}
+#incomingCallModal .call-controls { margin-top: 1.5rem; }
+#acceptCallBtn { background: #2ecc71; }
+#declineCallBtn { background: #ff4d4d; }
+
+.read-receipts-modal {
+  position: absolute;
+  background: #1f2a44;
+  border: 1px solid #428cff;
+  border-radius: 1.2rem;
+  padding: 1rem 1.2rem;
+  color: white;
+  font-size: 0.9rem;
+  z-index: 1000;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.7);
+  min-width: 260px;
+  max-width: 320px;
+  backdrop-filter: blur(4px);
+}
+.read-receipts-modal h4 {
+  margin-bottom: 0.8rem;
+  color: #b0c8ff;
+  border-bottom: 1px solid #334155;
+  padding-bottom: 0.4rem;
+}
+.read-receipts-modal ul {
+  list-style: none;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.read-receipts-modal li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #263154;
+}
+.read-receipts-modal li:last-child { border-bottom: none; }
+.reader-name { color: white; font-weight: 500; }
+.reader-time { color: #9aa4bf; font-size: 0.75rem; }
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #1f2a44;
+  color: #fff;
+  padding: 0.8rem 1.2rem;
+  border-radius: 0.8rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  opacity: 0.9;
+  z-index: 3000;
+  font-size: 0.9rem;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.toast.hide { opacity: 0; }
+
+/* ===== MOBILE & TABLET RESPONSIVE ===== */
+@media (max-width: 768px) {
+  body {
+    flex-direction: column;
+    height: 100dvh;
+  }
+
+  /* Sidebar becomes a top bar */
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    border-right: none;
+    border-top: 1px solid #1f2a44;
+    order: 2; /* places it at bottom visually? Actually order might need adjustment depending on DOM order. Better to set .main order:1, .sidebar order:2 */
+    gap: 0.5rem;
+    background: rgba(10, 16, 28, 0.98);
+    min-height: auto;
+  }
+
+  .logo {
+    display: none;
+  }
+
+  .nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    flex: 1 1 auto;
+    gap: 0.3rem;
+  }
+
+  .nav a {
+    padding: 0.6rem 0.8rem;
+    border-radius: 1.5rem;
+    font-size: 0.8rem;
+    justify-content: center;
+    flex: 0 1 auto;
+    min-width: 44px; /* touch target */
+  }
+
+  .sidebar-unread {
+    position: static;
+    margin-left: 0.2rem;
+    font-size: 0.6rem;
+    padding: 0.1rem 0.4rem;
+  }
+
+  .logout-btn {
+    margin-top: 0;
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    border-radius: 2rem;
+  }
+
+  .main {
+    padding: 0.5rem;
+    order: 1;
+    flex: 1 1 0;
+    height: auto;
+    overflow: hidden;
+  }
+
+  .chat-header {
+    padding: 0.8rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .online-count {
+    margin-left: 0;
+  }
+
+  /* DM layout adjustments */
+  .dm-layout {
+    flex-direction: column;
+  }
+
+  .dm-conversations-list {
+    width: 100%;
+    max-width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #263154;
+  }
+
+  .dm-chat-area {
+    width: 100%;
+    display: none;
+  }
+
+  .dm-chat-area.active {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dm-back-btn {
+    display: inline-block;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.8rem; /* larger for touch */
+    line-height: 1;
+    cursor: pointer;
+    margin-right: 0.5rem;
+    padding: 0 0.2rem;
+  }
+
+  /* Make message bubbles take more width on small screens */
+  .dm-msg {
+    max-width: 80%;
+  }
+
+  /* Input area buttons slightly smaller but still tappable */
+  #dmChatSendBtn,
+  .dm-voice-btn {
+    width: 2.8rem;
+    height: 2.8rem;
+    font-size: 1.1rem;
+  }
+
+  #dmChatInput {
+    padding: 0.7rem 1rem;
+    font-size: 16px; /* prevents zoom on iOS */
+  }
+}
+
+/* Extra small screens (max-width: 480px) */
+@media (max-width: 480px) {
+  .nav a span:not(.sidebar-unread) {
+    display: none; /* hide text, only icons */
+  }
+
+  .nav a {
+    font-size: 1.2rem;
+    padding: 0.5rem;
+    min-width: 48px;
+  }
+
+  .sidebar-unread {
+    top: -2px;
+    right: -2px;
+  }
+
+  .logout-btn {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.7rem;
+    min-width: 56px;
+  }
+
+  .group-tab {
+    padding: 0.3rem 0.8rem;
+    font-size: 0.75rem;
+  }
+
+  .dm-msg {
+    max-width: 90%;
+  }
+}
+.dm-chat-area {
+  min-height: 0;  /* allows children to shrink below content height */
+}
+
+.dm-chat-messages {
+  min-height: 0;  /* ensures overflow works correctly */
+}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="notifications.js"></script>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="logo">TECH<span>TITANS</span></div>
+    <div class="nav">
+      <a href="dashboard.html">📊 <span>Dashboard</span></a>
+      <a href="messages.html" id="chatNavLink">💬 <span>Group Chat</span>
+        <span class="sidebar-unread" id="sidebarUnreadBadge" style="display: none;">0</span>
+      </a>
+      <a href="dm.html" class="active" id="dmNavLink">📩 <span>Direct Messages</span>
+        <span class="sidebar-unread" id="dmUnreadBadge" style="display: none;">0</span>
+      </a>
+      <a href="profile.html">⚙️ <span>Profile</span></a>
+    </div>
+    <button class="logout-btn" id="logout">✕ <span>Logout</span></button>
+  </div>
+
+  <div class="main">
+    <div class="chat-panel">
+      <div class="chat-header">
+        <span>📩 Direct Messages</span>
+        <div class="online-count" id="onlineCount">0 online</div>
+      </div>
+      <div class="messages-area" id="messagesArea" oncontextmenu="return false;"></div>
+      <!-- DM layout will be injected here by JS -->
+    </div>
+  </div>
+
+  <div id="receiptsModal" class="read-receipts-modal" style="display: none;"></div>
+  <div id="toast" class="toast hide" style="display: none;"></div>
+
+  <!-- Call options modal (for DM) -->
+  <div id="callOptionsModal" class="call-options-modal" style="display: none;">
+    <div class="call-options-content">
+      <h3>Start a call with <span id="callWithUserName"></span></h3>
+      <button class="call-option-btn video" id="startVideoCallBtn">📹 Video Call</button>
+      <button class="call-option-btn" id="startVoiceCallBtn">🎤 Voice Call</button>
+      <button class="call-option-btn" id="cancelCallOptionsBtn" style="background:#ff4d4d;">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Active call modal (DM) -->
+  <div id="callModal" class="call-modal" style="display: none;">
+    <div class="call-modal-content">
+      <div class="call-modal-header">
+        <h3 id="callModalTitle">Call with ...</h3>
+        <button class="call-modal-close" id="closeCallModalBtn">&times;</button>
+      </div>
+      <div class="call-videos">
+        <div class="video-container">
+          <video id="localVideo" autoplay muted playsinline></video>
+          <div class="video-label">You</div>
+        </div>
+        <div class="video-container">
+          <video id="remoteVideo" autoplay playsinline></video>
+          <div class="video-label" id="remoteVideoLabel">Remote</div>
+        </div>
+      </div>
+      <div class="call-controls">
+        <button id="muteAudioBtn" title="Mute">🎤</button>
+        <button id="muteVideoBtn" title="Stop video">📹</button>
+        <button id="hangupCallBtn" class="hangup">📞 Hang Up</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Incoming call modal -->
+  <div id="incomingCallModal" class="call-modal" style="display: none;">
+    <div class="call-modal-content">
+      <h3>Incoming call from <span id="incomingCallerName"></span></h3>
+      <p id="incomingCallType"></p>
+      <div class="call-controls">
+        <button id="acceptCallBtn">Accept</button>
+        <button id="declineCallBtn">Decline</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Modal -->
+  <div id="profileModal" class="call-modal" style="display: none;">
+    <div class="call-modal-content" style="max-width: 400px;">
+      <div class="call-modal-header">
+        <h3>User Profile</h3>
+        <button class="call-modal-close" id="closeProfileModal">&times;</button>
+      </div>
+      <div style="text-align: center; padding: 1rem;">
+        <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
+          <img id="modalAvatar" src="" alt="Avatar" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; background: #1f2a44; display: none;">
+          <div id="modalAvatarPlaceholder" style="width: 100px; height: 100px; border-radius: 50%; background: #428cff; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: white; display: none;">👤</div>
+        </div>
+        <h2 id="modalName" style="color: white; margin-bottom: 0.5rem;">-</h2>
+        <p id="modalRole" style="color: #9aa4bf; margin-bottom: 0.5rem;">-</p>
+        <p id="modalJoined" style="color: #9aa4bf; font-size: 0.9rem;">-</p>
+        <button id="modalSendDM" class="btn" style="margin-top: 1rem; width: auto; padding: 0.6rem 2rem;">Send Message</button>
+      </div>
+    </div>
+  </div>
+
+<script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>TECH TITANS · Direct Messages</title>
+  <style>
+    /* ... (keep all existing styles exactly as they were) ... */
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+  <!-- ... (keep all HTML exactly as it was) ... -->
+
+<script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+<script>
+  (function() {
+    const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kcXF0c2RpYnR2eW1mZ250c3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTI1NjIsImV4cCI6MjA4Nzg4ODU2Mn0.hS-7kmoyFljnhkJEkw7nmgimw9ioQreidyu27_NXYyo';
+    const AGORA_APP_ID = 'cf82ae26325e48ea87d2a36f17629591';
+
+    let supabase;
+    try {
+      if (!window.supabase) throw new Error('Supabase library failed to load.');
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch (e) {
+      console.error(e);
+      document.body.innerHTML = '<p style="color:white;padding:2rem;">Service unavailable. Please refresh.</p>';
+      return;
+    }
+
+    // --- Global state ---
+    let currentUser = null;
+    let currentUserFullName = 'User';
+    let currentRole = null;
+    let isCEO = false;
+    let dmUnreadBySender = {};
+    let globalDmSubscription = null;
+    let dmDeleteSubscription = null;
+    let presenceChannel = null;
+    let onlineUsers = new Map();
+    let currentRecipientId = null;
+    let dmTypingSubscription = null;
+    let dmTypingTimeouts = {};
+    let dmActiveTypers = new Set();
+
+    // Voice recording (DM)
+    let dmMediaRecorder = null;
+    let dmAudioChunks = [];
+    let dmIsRecording = false;
+    let dmRecordingStartTime = null;
+    let dmRecordingTimerInterval = null;
+
+    // Agora DM call variables
+    let agoraClient = null;
+    let localStream = null;
+    let callType = null;
+    let callTarget = null;
+    let callActive = false;
+    let pendingCall = null;
+
+    // Observer for marking messages as read when scrolled into view
+    let dmObserver = null;
+
+    // DOM elements
+    const modal = document.getElementById('receiptsModal');
+    const toast = document.getElementById('toast');
+    const callOptionsModal = document.getElementById('callOptionsModal');
+    const callModal = document.getElementById('callModal');
+    const incomingCallModal = document.getElementById('incomingCallModal');
+    const localVideo = document.getElementById('localVideo');
+    const remoteVideo = document.getElementById('remoteVideo');
+    const callWithUserNameSpan = document.getElementById('callWithUserName');
+    const callModalTitle = document.getElementById('callModalTitle');
+    const remoteVideoLabel = document.getElementById('remoteVideoLabel');
+    const incomingCallerName = document.getElementById('incomingCallerName');
+    const incomingCallType = document.getElementById('incomingCallType');
+    const profileModal = document.getElementById('profileModal');
+    const modalAvatar = document.getElementById('modalAvatar');
+    const modalAvatarPlaceholder = document.getElementById('modalAvatarPlaceholder');
+    const modalName = document.getElementById('modalName');
+    const modalRole = document.getElementById('modalRole');
+    const modalJoined = document.getElementById('modalJoined');
+    const modalSendDM = document.getElementById('modalSendDM');
+
+    // ==================== HELPER FUNCTIONS ====================
+    function formatDateHeader(date) {
+      const now = new Date();
+      const msgDate = new Date(date);
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const msgDay = new Date(msgDate.getFullYear(), msgDate.getMonth(), msgDate.getDate());
+      if (msgDay.getTime() === today.getTime()) return 'Today';
+      else if (msgDay.getTime() === yesterday.getTime()) return 'Yesterday';
+      else return msgDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    function formatTimeOnly(date) {
+      return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function stringToColor(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      const hue = Math.abs(hash % 360);
+      return `hsl(${hue}, 70%, 50%)`;
+    }
+
+    function getInitials(name) {
+      if (!name) return '?';
+      const parts = name.trim().split(/\s+/);
+      if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+      return (parts[0].charAt(0) + parts[parts.length-1].charAt(0)).toUpperCase();
+    }
+
+    function escapeHtml(unsafe) {
+      return unsafe.replace(/[&<>"']/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        if (m === '"') return '&quot;';
+        if (m === "'") return '&#039;';
+        return m;
+      });
+    }
+
+    function showToast(text) {
+      toast.textContent = text;
+      toast.style.display = 'block';
+      toast.classList.remove('hide');
+      setTimeout(() => {
+        toast.classList.add('hide');
+        setTimeout(() => toast.style.display = 'none', 300);
+      }, 3000);
+    }
+
+    function maybeAppendDateSeparator(prevDate, currentDate) {
+      if (!prevDate) return '';
+      const prevDay = new Date(prevDate).toDateString();
+      const currDay = new Date(currentDate).toDateString();
+      if (prevDay !== currDay) {
+        return `<div class="date-separator"><span>${formatDateHeader(currentDate)}</span></div>`;
+      }
+      return '';
+    }
+
+    // ==================== PRESENCE ====================
+    async function setupPresence() {
+      if (!currentUser) return;
+      presenceChannel = supabase.channel('online-users', { config: { presence: { key: currentUser.id } } });
+      presenceChannel
+        .on('presence', { event: 'sync' }, () => {
+          const state = presenceChannel.presenceState();
+          onlineUsers.clear();
+          Object.values(state).forEach(presences => {
+            presences.forEach(p => { if (p.userId !== currentUser.id) onlineUsers.set(p.userId, { name: p.name, role: p.role }); });
+          });
+          document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
+          // Update status dots in conversation list
+          document.querySelectorAll('.dm-conversation-item').forEach(item => {
+            const uid = item.dataset.userId;
+            const dot = item.querySelector('.status-dot');
+            if (dot) {
+              if (onlineUsers.has(uid)) dot.classList.add('online');
+              else dot.classList.remove('online');
+            }
+          });
+        })
+        .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+          newPresences.forEach(p => { if (p.userId !== currentUser.id) onlineUsers.set(p.userId, { name: p.name, role: p.role }); });
+          document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
+        })
+        .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+          leftPresences.forEach(p => onlineUsers.delete(p.userId));
+          document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
+        })
+        .subscribe(async (status) => {
+          if (status === 'SUBSCRIBED') {
+            await presenceChannel.track({ userId: currentUser.id, name: currentUserFullName, role: currentRole, online_at: new Date().toISOString() });
+          }
+        });
+    }
+
+    // ==================== UNREAD BADGE ====================
+    function updateDMBadge() {
+      const total = Object.values(dmUnreadBySender).reduce((a,b)=>a+b,0);
+      const dmBadge = document.getElementById('dmUnreadBadge');
+      if (total > 0) { dmBadge.style.display = 'inline-block'; dmBadge.textContent = total; }
+      else { dmBadge.style.display = 'none'; }
+    }
+
+    // ==================== MARK DM AS READ (with observer support) ====================
+    async function markDirectMessageAsRead(messageId, senderId) {
+      try {
+        await supabase
+          .from('private_messages')
+          .update({ read_at: new Date().toISOString() })
+          .eq('id', messageId)
+          .eq('recipient_id', currentUser.id);
+      } catch (err) { console.error('Mark DM read error:', err); }
+
+      // Remove from unread counter and update UI
+      if (senderId && dmUnreadBySender[senderId]) {
+        dmUnreadBySender[senderId] = Math.max(0, dmUnreadBySender[senderId] - 1);
+        if (dmUnreadBySender[senderId] === 0) delete dmUnreadBySender[senderId];
+        updateDMBadge();
+
+        // Update the conversation list badge
+        const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${senderId}"]`);
+        if (targetItem) {
+          const badge = targetItem.querySelector('.dm-unread-badge');
+          const newCount = dmUnreadBySender[senderId] || 0;
+          if (newCount > 0) badge.textContent = newCount;
+          else if (badge) badge.remove();
+        }
+      }
+
+      // Remove the 'unread' class from the message row
+      const msgRow = document.querySelector(`.dm-msg-row[data-message-id="${messageId}"]`);
+      if (msgRow) msgRow.classList.remove('unread');
+    }
+
+    // ==================== OBSERVER FOR AUTO-MARK READ ====================
+    function setupDmObserver() {
+      if (dmObserver) dmObserver.disconnect();
+      dmObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const row = entry.target;
+            const messageId = row.dataset.messageId;
+            const senderId = row.dataset.senderId;
+            // Only mark received messages that are still unread
+            if (messageId && senderId && row.classList.contains('received') && row.classList.contains('unread')) {
+              markDirectMessageAsRead(messageId, senderId);
+            }
+          }
+        });
+      }, { threshold: 0.5 });
+
+      // Observe all current unread received messages
+      document.querySelectorAll('.dm-msg-row.received.unread').forEach(row => dmObserver.observe(row));
+    }
+
+    // ==================== LOAD DM VIEW ====================
+    async function loadPrivateMessagesView() {
+      try {
+        const area = document.getElementById('messagesArea');
+        area.innerHTML = ''; // Clear
+
+        const { data: allProfiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, full_name, job_role')
+          .neq('id', currentUser.id);
+
+        if (profilesError) throw profilesError;
+
+        // Get unread counts
+        const unreadCounts = {};
+        for (const profile of allProfiles) {
+          const { count, error: countError } = await supabase
+            .from('private_messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('sender_id', profile.id)
+            .eq('recipient_id', currentUser.id)
+            .is('read_at', null);
+          if (!countError && count > 0) {
+            unreadCounts[profile.id] = count;
+          }
+        }
+        dmUnreadBySender = unreadCounts;
+        updateDMBadge();
+
+        const conversationsHtml = allProfiles.map(profile => {
+          const unread = unreadCounts[profile.id] || 0;
+          const unreadBadge = unread > 0 ? `<span class="dm-unread-badge">${unread}</span>` : '';
+          const onlineClass = onlineUsers.has(profile.id) ? 'online' : '';
+          return `
+            <div class="dm-conversation-item" data-user-id="${profile.id}" data-user-name="${escapeHtml(profile.full_name)}" data-user-role="${escapeHtml(profile.job_role)}">
+              <span class="status-dot ${onlineClass}"></span>
+              <div class="dm-conv-content">
+                <div class="dm-conv-name">${escapeHtml(profile.full_name)}</div>
+                <div class="dm-conv-role">${escapeHtml(profile.job_role)}</div>
+              </div>
+              ${unreadBadge}
+            </div>
+          `;
+        }).join('');
+
+        area.innerHTML = `
+          <div class="dm-layout">
+            <div class="dm-conversations-list" id="dmConversationsList">
+              <div class="dm-list-header">All Members</div>
+              ${conversationsHtml}
+            </div>
+            <div class="dm-chat-area" id="dmChatArea">
+              <div class="dm-chat-header">
+                <button class="dm-back-btn" id="dmBackBtn" style="display:none;">←</button>
+                <span class="dm-chat-title"></span>
+              </div>
+              <div id="dmChatMessages" class="dm-chat-messages"></div>
+              <div id="dmTypingContainer" class="typing-container" style="display: none;">
+                <div class="typing-indicator">
+                  <span></span><span></span><span></span>
+                  <span class="typing-text" id="dmTypingText">Someone is typing...</span>
+                </div>
+              </div>
+              <div class="dm-chat-input">
+                <input type="text" id="dmChatInput" placeholder="Type a message...">
+                <button class="voice-btn" id="dmCallPlusBtn" style="background:#2f3a5a;">➕</button>
+                <button class="voice-btn" id="dmVoiceNoteBtn" style="background:#2f3a5a;">🎤</button>
+                <button id="dmChatSendBtn">➤</button>
+                <span id="dmRecordingTimer" class="recording-timer" style="display: none;">0:00</span>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Attach conversation click handlers
+        document.querySelectorAll('.dm-conversation-item').forEach(item => {
+          item.addEventListener('click', async () => {
+            const userId = item.dataset.userId;
+            const userName = item.dataset.userName;
+            const userRole = item.dataset.userRole;
+            await openPrivateChat(userId, { full_name: userName, job_role: userRole });
+            document.querySelectorAll('.dm-conversation-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            const badge = item.querySelector('.dm-unread-badge');
+            if (badge) {
+              badge.remove();
+              delete dmUnreadBySender[userId];
+              updateDMBadge();
+            }
+            if (window.innerWidth <= 768) {
+              document.getElementById('dmConversationsList').style.display = 'none';
+              document.getElementById('dmChatArea').classList.add('active');
+              document.getElementById('dmBackBtn').style.display = 'inline-block';
+            }
+          });
+        });
+
+        document.getElementById('dmBackBtn').addEventListener('click', () => {
+          document.getElementById('dmConversationsList').style.display = 'block';
+          document.getElementById('dmChatArea').classList.remove('active');
+          document.getElementById('dmBackBtn').style.display = 'none';
+          currentRecipientId = null;
+        });
+
+        // Call plus button
+        document.getElementById('dmCallPlusBtn').addEventListener('click', () => {
+          if (!currentRecipientId) { alert('Please select a conversation first.'); return; }
+          const activeItem = document.querySelector('.dm-conversation-item.active');
+          const userName = activeItem ? activeItem.dataset.userName : 'this user';
+          callWithUserNameSpan.textContent = userName;
+          callOptionsModal.style.display = 'flex';
+        });
+
+        // DM voice recording
+        const dmVoiceBtn = document.getElementById('dmVoiceNoteBtn');
+        const dmRecordingTimer = document.getElementById('dmRecordingTimer');
+        dmVoiceBtn.addEventListener('click', async () => {
+          if (dmIsRecording) {
+            if (dmMediaRecorder) {
+              dmMediaRecorder.stop();
+              dmIsRecording = false;
+              dmVoiceBtn.textContent = '🎤';
+              dmVoiceBtn.classList.remove('recording');
+              dmRecordingTimer.style.display = 'none';
+              if (dmRecordingTimerInterval) { clearInterval(dmRecordingTimerInterval); dmRecordingTimerInterval = null; }
+            }
+          } else {
+            try {
+              const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+              dmMediaRecorder = new MediaRecorder(stream);
+              dmAudioChunks = [];
+              dmMediaRecorder.ondataavailable = event => { dmAudioChunks.push(event.data); };
+              dmMediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(dmAudioChunks, { type: 'audio/webm' });
+                if (!currentRecipientId) { alert('No chat selected. Please open a conversation first.'); return; }
+                await sendPrivateVoiceNote(audioBlob, currentRecipientId);
+                stream.getTracks().forEach(track => track.stop());
+              };
+              dmMediaRecorder.start();
+              dmIsRecording = true;
+              dmVoiceBtn.classList.add('recording');
+              dmVoiceBtn.textContent = '🔴';
+              dmRecordingStartTime = Date.now();
+              dmRecordingTimer.style.display = 'inline';
+              dmRecordingTimerInterval = setInterval(() => {
+                if (!dmIsRecording) return;
+                const elapsed = Math.floor((Date.now() - dmRecordingStartTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                dmRecordingTimer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+              }, 1000);
+            } catch (err) { console.error('DM mic error:', err); alert('Could not access microphone.'); }
+          }
+        });
+
+        // If URL has ?user=id, auto-open that conversation
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetUserId = urlParams.get('user');
+        if (targetUserId) {
+          const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${targetUserId}"]`);
+          if (targetItem) targetItem.click();
+        }
+      } catch (err) {
+        console.error('Load DM view error:', err);
+        document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Failed to load direct messages.</div>';
+      }
+    }
+
+    // ==================== DM TYPING INDICATOR ====================
+    function updateDmTypingIndicator() {
+      const container = document.getElementById('dmTypingContainer');
+      const textEl = document.getElementById('dmTypingText');
+      if (!container || !textEl) return;
+      if (dmActiveTypers.size === 0) { container.style.display = 'none'; return; }
+      const names = Array.from(dmActiveTypers);
+      let text = '';
+      if (names.length === 1) text = `${names[0]} is typing...`;
+      else if (names.length === 2) text = `${names[0]} and ${names[1]} are typing...`;
+      else text = `${names.length} people are typing...`;
+      textEl.textContent = text;
+      container.style.display = 'block';
+    }
+
+    // ==================== OPEN PRIVATE CHAT ====================
+    async function openPrivateChat(otherUserId, otherProfile) {
+      currentRecipientId = otherUserId;
+      if (dmTypingSubscription) dmTypingSubscription.unsubscribe();
+      dmActiveTypers.clear();
+
+      const chatArea = document.getElementById('dmChatArea');
+      const headerTitle = document.querySelector('.dm-chat-title');
+      const messagesDiv = document.getElementById('dmChatMessages');
+      const input = document.getElementById('dmChatInput');
+      const sendBtn = document.getElementById('dmChatSendBtn');
+
+      headerTitle.innerHTML = `${escapeHtml(otherProfile.full_name)} <span style="font-size:0.85rem;color:#9aa4bf;">(${escapeHtml(otherProfile.job_role)})</span>`;
+      chatArea.style.display = 'flex';
+      input.focus();
+
+      try {
+        let { data, error } = await supabase
+          .from('private_messages')
+          .select(`*, sender:profiles!sender_id (id, full_name, avatar_url)`)
+          .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`)
+          .order('created_at', { ascending: true });
+
+        if (error && error.message && error.message.includes('Could not find a relationship')) {
+          console.warn('Join failed, falling back to separate profile fetch:', error.message);
+          const { data: msgs, error: msgsError } = await supabase
+            .from('private_messages')
+            .select('*')
+            .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`)
+            .order('created_at', { ascending: true });
+          if (msgsError) throw msgsError;
+          data = await Promise.all(msgs.map(async (msg) => {
+            const senderId = msg.sender_id;
+            const { data: sender } = await supabase.from('profiles').select('id, full_name, avatar_url').eq('id', senderId).single();
+            return { ...msg, sender };
+          }));
+        } else if (error) { throw error; }
+
+        let html = '';
+        let lastDate = null;
+        for (const msg of data) {
+          const isSent = msg.sender_id === currentUser.id;
+          const timeStr = formatTimeOnly(msg.created_at);
+          const dateHeader = maybeAppendDateSeparator(lastDate, msg.created_at);
+          if (dateHeader) html += dateHeader.replace('date-separator', 'dm-date-separator');
+          lastDate = msg.created_at;
+
+          let seenHtml = '';
+          if (isSent && msg.read_at) {
+            const { data: reader } = await supabase.from('profiles').select('full_name').eq('id', otherUserId).single();
+            const readerName = reader?.full_name || 'User';
+            seenHtml = `<div class="dm-seen-indicator"><span class="double-tick">✓✓</span> Seen by ${escapeHtml(readerName)} at ${formatTimeOnly(msg.read_at)}</div>`;
+          }
+
+          let contentHtml = '';
+          if (msg.audio_url) contentHtml = `<audio controls src="${escapeHtml(msg.audio_url)}"></audio>`;
+          else contentHtml = escapeHtml(msg.content);
+
+          const deleteBtn = (isSent || isCEO) ? `<button class="dm-delete-btn" data-id="${msg.id}">🗑️</button>` : '';
+          const isUnread = !isSent && !msg.read_at;
+
+          let avatarHtml = '';
+          if (!isSent) {
+            const sender = msg.sender;
+            const senderName = sender?.full_name || 'Unknown';
+            const avatarUrl = sender?.avatar_url;
+            const avatarColor = stringToColor(senderName);
+            if (avatarUrl) {
+              avatarHtml = `<img src="${escapeHtml(avatarUrl)}" class="avatar" alt="${escapeHtml(senderName)}" data-user-id="${sender.id}" data-user-name="${escapeHtml(senderName)}" data-user-role="${msg.role || ''}">`;
+            } else {
+              avatarHtml = `<div class="avatar" style="background-color: ${avatarColor};" data-user-id="${sender.id}" data-user-name="${escapeHtml(senderName)}" data-user-role="${msg.role || ''}">${getInitials(senderName)}</div>`;
+            }
+          }
+
+          html += `
+            <div class="dm-msg-row ${isSent ? 'sent' : 'received'} ${isUnread ? 'unread' : ''}" data-message-id="${msg.id}" data-created-at="${msg.created_at}" data-sender-id="${msg.sender_id}">
+              ${avatarHtml}
+              <div class="dm-msg ${isSent ? 'sent' : 'received'}">
+                ${contentHtml}
+                <small>${timeStr}</small>
+                ${seenHtml}
+                ${deleteBtn}
+              </div>
+            </div>
+          `;
+        }
+        messagesDiv.innerHTML = html || '<div style="color:#9aa4bf; text-align:center; padding:2rem;">No messages yet. Say hello!</div>';
+
+        // Attach right-click and delete handlers
+        document.querySelectorAll('.dm-msg-row').forEach(row => row.addEventListener('contextmenu', onRightClick));
+        document.querySelectorAll('.dm-delete-btn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const messageId = btn.dataset.id;
+            if (confirm('Delete this message?')) await deletePrivateMessage(messageId);
+          });
+        });
+        document.querySelectorAll('.dm-msg-row .avatar, .dm-msg-row .avatar img').forEach(el => el.addEventListener('click', onAvatarClick));
+
+        // Setup observer to mark unread messages as read when scrolled into view
+        setupDmObserver();
+
+        sendBtn.onclick = () => sendPrivateMessage(otherUserId);
+        input.onkeypress = (e) => { if (e.key === 'Enter') sendPrivateMessage(otherUserId); };
+
+        // Set up DM typing subscription
+        const typingChannel = `typing-dm-${Math.min(currentUser.id, otherUserId)}-${Math.max(currentUser.id, otherUserId)}`;
+        dmTypingSubscription = supabase
+          .channel(typingChannel)
+          .on('broadcast', { event: 'typing' }, (payload) => {
+            const { userId, userName, timestamp } = payload.payload;
+            if (userId === currentUser.id) return;
+            if (dmTypingTimeouts[userId]) clearTimeout(dmTypingTimeouts[userId]);
+            dmActiveTypers.add(userName);
+            updateDmTypingIndicator();
+            dmTypingTimeouts[userId] = setTimeout(() => {
+              dmActiveTypers.delete(userName);
+              updateDmTypingIndicator();
+              delete dmTypingTimeouts[userId];
+            }, 3000);
+          })
+          .subscribe();
+
+        let dmTypingTimeout;
+        input.addEventListener('input', () => {
+          if (dmTypingTimeout) clearTimeout(dmTypingTimeout);
+          supabase.channel(typingChannel).send({
+            type: 'broadcast',
+            event: 'typing',
+            payload: { userId: currentUser.id, userName: currentUserFullName, timestamp: Date.now() }
+          });
+          dmTypingTimeout = setTimeout(() => {}, 2000);
+        });
+
+        // Scroll to bottom
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        input.value = '';
+      } catch (err) {
+        console.error('Load private chat error:', err);
+        messagesDiv.innerHTML = '<div style="color:#ff628c;">Failed to load messages.</div>';
+      }
+    }
+
+    // ==================== SEND PRIVATE MESSAGE ====================
+    async function sendPrivateMessage(otherUserId) {
+      const input = document.getElementById('dmChatInput');
+      const content = input.value.trim();
+      if (!content) return;
+      input.value = '';
+
+      try {
+        const { data, error } = await supabase
+          .from('private_messages')
+          .insert({ sender_id: currentUser.id, recipient_id: otherUserId, content: content })
+          .select()
+          .single();
+        if (error) throw error;
+
+        const messagesDiv = document.getElementById('dmChatMessages');
+        const timeStr = formatTimeOnly(data.created_at);
+        const msgHtml = `
+          <div class="dm-msg-row sent" data-message-id="${data.id}" data-created-at="${data.created_at}" data-sender-id="${currentUser.id}">
+            <div class="dm-msg sent">
+              ${escapeHtml(data.content)}
+              <small>${timeStr}</small>
+              <button class="dm-delete-btn" data-id="${data.id}">🗑️</button>
+            </div>
+          </div>
+        `;
+        messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+        const newBtn = messagesDiv.querySelector(`.dm-delete-btn[data-id="${data.id}"]`);
+        if (newBtn) {
+          newBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (confirm('Delete this message?')) await deletePrivateMessage(data.id);
+          });
+        }
+      } catch (err) { console.error('Send private message error:', err); alert('Failed to send: ' + err.message); }
+    }
+
+    // ==================== SEND PRIVATE VOICE NOTE ====================
+    async function sendPrivateVoiceNote(audioBlob, otherUserId) {
+      if (!otherUserId) { alert('Recipient not specified.'); return; }
+      const fileName = `${currentUser.id}/${Date.now()}.webm`;
+      const { error: uploadError } = await supabase.storage
+        .from('voice_notes')
+        .upload(fileName, audioBlob, { contentType: 'audio/webm' });
+      if (uploadError) { console.error('Upload error:', uploadError); alert('Failed to upload voice note: ' + uploadError.message); return; }
+
+      const { data: urlData } = supabase.storage.from('voice_notes').getPublicUrl(fileName);
+      const audioUrl = urlData.publicUrl;
+
+      try {
+        const { data, error } = await supabase
+          .from('private_messages')
+          .insert({ sender_id: currentUser.id, recipient_id: otherUserId, content: '', audio_url: audioUrl })
+          .select()
+          .single();
+        if (error) throw error;
+
+        const messagesDiv = document.getElementById('dmChatMessages');
+        const timeStr = formatTimeOnly(data.created_at);
+        const msgHtml = `
+          <div class="dm-msg-row sent" data-message-id="${data.id}" data-created-at="${data.created_at}" data-sender-id="${currentUser.id}">
+            <div class="dm-msg sent">
+              <audio controls src="${escapeHtml(audioUrl)}"></audio>
+              <small>${timeStr}</small>
+              <button class="dm-delete-btn" data-id="${data.id}">🗑️</button>
+            </div>
+          </div>
+        `;
+        messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+        const newBtn = messagesDiv.querySelector(`.dm-delete-btn[data-id="${data.id}"]`);
+        if (newBtn) newBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          if (confirm('Delete this message?')) await deletePrivateMessage(data.id);
+        });
+      } catch (err) { console.error('Insert private voice note error:', err); alert('Failed to send voice note: ' + err.message); }
+    }
+
+    // ==================== DELETE PRIVATE MESSAGE ====================
+    async function deletePrivateMessage(messageId) {
+      try {
+        let query = supabase.from('private_messages').delete().eq('id', messageId);
+        if (!isCEO) query = query.eq('sender_id', currentUser.id);
+        const { error } = await query;
+        if (error) throw error;
+        removePrivateMessageFromUI(messageId);
+      } catch (err) { console.error('Delete DM error:', err); alert('Failed to delete message: ' + err.message); }
+    }
+
+    function removePrivateMessageFromUI(messageId) {
+      const msgRow = document.querySelector(`.dm-msg-row[data-message-id="${messageId}"]`);
+      if (!msgRow) return;
+      if (msgRow.classList.contains('received') && msgRow.classList.contains('unread')) {
+        const senderId = msgRow.dataset.senderId;
+        if (senderId && dmUnreadBySender[senderId] > 0) {
+          dmUnreadBySender[senderId]--;
+          if (dmUnreadBySender[senderId] === 0) delete dmUnreadBySender[senderId];
+        }
+        updateDMBadge();
+        const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${senderId}"]`);
+        if (targetItem) {
+          const badge = targetItem.querySelector('.dm-unread-badge');
+          const newCount = dmUnreadBySender[senderId] || 0;
+          if (newCount > 0) badge.textContent = newCount;
+          else if (badge) badge.remove();
+        }
+      }
+      if (dmObserver) dmObserver.unobserve(msgRow);
+      msgRow.remove();
+      const messagesDiv = document.getElementById('dmChatMessages');
+      if (messagesDiv && messagesDiv.children.length === 0) {
+        messagesDiv.innerHTML = '<div style="color:#9aa4bf; text-align:center; padding:2rem;">No messages yet. Say hello!</div>';
+      }
+    }
+
+    // ==================== RIGHT-CLICK READ RECEIPTS ====================
+    async function onRightClick(e) {
+      e.preventDefault();
+      const row = e.currentTarget;
+      const messageId = row.dataset.messageId;
+      modal.style.display = 'none';
+
+      const { data: msg, error } = await supabase
+        .from('private_messages')
+        .select('sender_id, recipient_id, read_at, profiles!sender_id(full_name), profiles!recipient_id(full_name)')
+        .eq('id', messageId)
+        .single();
+      if (error || !msg) { console.error('fetch DM readers error:', error); return; }
+
+      const readerName = (msg.sender_id === currentUser.id) ? msg.profiles_recipient_id?.full_name : msg.profiles_sender_id?.full_name;
+      const readTime = msg.read_at ? new Date(msg.read_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
+      if (msg.read_at) {
+        modal.innerHTML = `<h4>Read receipt</h4><p style="padding:0.5rem 0;">Seen by ${escapeHtml(readerName)} at ${readTime}</p>`;
+      } else {
+        modal.innerHTML = '<h4>Read receipt</h4><p style="padding:0.5rem 0;">Not seen yet.</p>';
+      }
+      modal.style.left = e.pageX + 10 + 'px';
+      modal.style.top = e.pageY + 10 + 'px';
+      modal.style.display = 'block';
+      const hideModal = (ev) => { if (!modal.contains(ev.target)) { modal.style.display = 'none'; document.removeEventListener('click', hideModal); } };
+      setTimeout(() => document.addEventListener('click', hideModal), 0);
+    }
+
+    // ==================== AVATAR CLICK (PROFILE MODAL) ====================
+    async function onAvatarClick(e) {
+      e.stopPropagation();
+      const avatar = e.currentTarget;
+      const userId = avatar.dataset.userId;
+      const userName = avatar.dataset.userName;
+      const userRole = avatar.dataset.userRole;
+
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('full_name, job_role, avatar_url, created_at')
+        .eq('id', userId)
+        .single();
+
+      if (error || !profile) { console.error('Failed to load profile', error); return; }
+
+      modalName.textContent = profile.full_name || userName;
+      modalRole.textContent = profile.job_role || userRole || '—';
+      modalJoined.textContent = profile.created_at ? `Joined ${new Date(profile.created_at).toLocaleDateString()}` : '—';
+
+      if (profile.avatar_url) {
+        modalAvatar.src = profile.avatar_url;
+        modalAvatar.style.display = 'block';
+        modalAvatarPlaceholder.style.display = 'none';
+      } else {
+        modalAvatar.style.display = 'none';
+        modalAvatarPlaceholder.style.display = 'flex';
+        modalAvatarPlaceholder.textContent = getInitials(profile.full_name || userName);
+      }
+
+      modalSendDM.dataset.userId = userId;
+      modalSendDM.dataset.userName = profile.full_name || userName;
+
+      profileModal.style.display = 'flex';
+    }
+
+    // ==================== DM SUBSCRIPTIONS ====================
+    function subscribeToAllDirectMessages() {
+      if (globalDmSubscription) globalDmSubscription.unsubscribe();
+      if (!currentUser) return;
+      globalDmSubscription = supabase
+        .channel(`dm-global-${currentUser.id}`)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'private_messages', filter: `recipient_id=eq.${currentUser.id}` }, async (payload) => {
+          const newMsg = payload.new;
+          if (newMsg.sender_id === currentUser.id) return;
+
+          // If we are currently in that conversation, append to UI
+          if (currentRecipientId === newMsg.sender_id) {
+            const messagesDiv = document.getElementById('dmChatMessages');
+            const timeStr = formatTimeOnly(newMsg.created_at);
+
+            const { data: senderProfile } = await supabase
+              .from('profiles')
+              .select('id, full_name, avatar_url')
+              .eq('id', newMsg.sender_id)
+              .single();
+            const sender = senderProfile || { full_name: 'Unknown', avatar_url: null };
+
+            let contentHtml = '';
+            if (newMsg.audio_url) contentHtml = `<audio controls src="${escapeHtml(newMsg.audio_url)}"></audio>`;
+            else contentHtml = escapeHtml(newMsg.content);
+
+            let avatarHtml = '';
+            if (sender.avatar_url) {
+              avatarHtml = `<img src="${escapeHtml(sender.avatar_url)}" class="avatar" alt="${escapeHtml(sender.full_name)}" data-user-id="${sender.id}" data-user-name="${escapeHtml(sender.full_name)}" data-user-role="">`;
+            } else {
+              const avatarColor = stringToColor(sender.full_name);
+              avatarHtml = `<div class="avatar" style="background-color: ${avatarColor};" data-user-id="${sender.id}" data-user-name="${escapeHtml(sender.full_name)}" data-user-role="">${getInitials(sender.full_name)}</div>`;
+            }
+
+            const msgHtml = `
+              <div class="dm-msg-row received unread" data-message-id="${newMsg.id}" data-created-at="${newMsg.created_at}" data-sender-id="${newMsg.sender_id}">
+                ${avatarHtml}
+                <div class="dm-msg received">
+                  ${contentHtml}
+                  <small>${timeStr}</small>
+                </div>
+              </div>
+            `;
+            messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            // Observe the new message for auto-read
+            const newRow = messagesDiv.lastElementChild;
+            if (dmObserver) dmObserver.observe(newRow);
+            return;
+          }
+
+          // Otherwise just update unread count and badge
+          dmUnreadBySender[newMsg.sender_id] = (dmUnreadBySender[newMsg.sender_id] || 0) + 1;
+          updateDMBadge();
+
+          // Update conversation list badge
+          const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${newMsg.sender_id}"]`);
+          if (targetItem) {
+            let badge = targetItem.querySelector('.dm-unread-badge');
+            const currentCount = dmUnreadBySender[newMsg.sender_id];
+            if (badge) badge.textContent = currentCount;
+            else {
+              badge = document.createElement('span');
+              badge.className = 'dm-unread-badge';
+              badge.textContent = currentCount;
+              targetItem.appendChild(badge);
+            }
+          }
+
+          let senderName = 'Someone';
+          try { const { data: prof } = await supabase.from('profiles').select('full_name').eq('id', newMsg.sender_id).single(); if (prof) senderName = prof.full_name; } catch (e) {}
+          showToast(`New DM from ${senderName}`);
+
+          // Trigger push notification
+          if (window.TechTitansNotifications) {
+            window.TechTitansNotifications.display(`New DM from ${senderName}`, {
+              body: newMsg.content ? newMsg.content.substring(0, 50) + (newMsg.content.length > 50 ? '...' : '') : 'Sent a voice note',
+              url: 'dm.html'
+            });
+          }
+        })
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'private_messages', filter: `recipient_id=eq.${currentUser.id}` }, (payload) => {
+          const updated = payload.new;
+          if (updated.read_at && dmUnreadBySender[updated.sender_id]) {
+            dmUnreadBySender[updated.sender_id]--;
+            if (dmUnreadBySender[updated.sender_id] <= 0) delete dmUnreadBySender[updated.sender_id];
+            updateDMBadge();
+            const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${updated.sender_id}"]`);
+            if (targetItem) {
+              const badge = targetItem.querySelector('.dm-unread-badge');
+              const newCount = dmUnreadBySender[updated.sender_id] || 0;
+              if (newCount > 0) badge.textContent = newCount;
+              else if (badge) badge.remove();
+            }
+
+            // Also update the message row in the current chat if open
+            if (currentRecipientId === updated.sender_id) {
+              const msgRow = document.querySelector(`.dm-msg-row[data-message-id="${updated.id}"]`);
+              if (msgRow) msgRow.classList.remove('unread');
+            }
+          }
+        })
+        .subscribe();
+
+      if (dmDeleteSubscription) dmDeleteSubscription.unsubscribe();
+      dmDeleteSubscription = supabase
+        .channel('dm-deletes')
+        .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'private_messages' }, (payload) => {
+          const deletedMsg = payload.old;
+          if (deletedMsg.sender_id === currentUser.id || deletedMsg.recipient_id === currentUser.id) {
+            removePrivateMessageFromUI(deletedMsg.id);
+          }
+        })
+        .subscribe();
+    }
+
+    // ==================== AGORA DM CALL FUNCTIONS ====================
+    function getDmChannelName(userA, userB) {
+      const sorted = [userA, userB].sort();
+      return `dm_${sorted[0]}_${sorted[1]}`;
+    }
+
+    async function startDMCall(targetUserId, targetUserName, mode) {
+      callType = mode;
+      callTarget = targetUserId;
+
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: mode === 'video' });
+        localVideo.srcObject = localStream;
+      } catch (err) { console.error('Failed to get media:', err); alert('Could not access camera/microphone.'); return; }
+
+      agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+
+      agoraClient.on('user-published', async (user, mediaType) => {
+        await agoraClient.subscribe(user, mediaType);
+        if (mediaType === 'video') { const remoteVideoTrack = user.videoTrack; remoteVideoTrack.play('remoteVideo'); }
+        if (mediaType === 'audio') user.audioTrack.play();
+        remoteVideoLabel.textContent = targetUserName;
+      });
+
+      const channelName = getDmChannelName(currentUser.id, targetUserId);
+      await agoraClient.join(AGORA_APP_ID, channelName, null, currentUser.id);
+
+      const audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+      let videoTrack = null;
+      if (mode === 'video') {
+        videoTrack = await AgoraRTC.createCameraVideoTrack();
+        await agoraClient.publish([audioTrack, videoTrack]);
+        videoTrack.play('localVideo');
+      } else {
+        await agoraClient.publish([audioTrack]);
+      }
+
+      await supabase.channel(`user-${targetUserId}`).send({
+        type: 'broadcast',
+        event: 'call-offer',
+        payload: {
+          callerId: currentUser.id,
+          callerName: currentUserFullName,
+          callChannelName: channelName,
+          callType: mode
+        }
+      });
+
+      callOptionsModal.style.display = 'none';
+      callModalTitle.textContent = `Calling ${targetUserName}...`;
+      callModal.style.display = 'flex';
+      callActive = true;
+    }
+
+    async function acceptDMCall() {
+      if (!pendingCall) return;
+      incomingCallModal.style.display = 'none';
+
+      const { callerId, callerName, callChannelName, callType } = pendingCall;
+      callType = callType;
+      callTarget = callerId;
+
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: callType === 'video' });
+        localVideo.srcObject = localStream;
+      } catch (err) { console.error('Failed to get media:', err); return; }
+
+      agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+
+      agoraClient.on('user-published', async (user, mediaType) => {
+        await agoraClient.subscribe(user, mediaType);
+        if (mediaType === 'video') { const remoteVideoTrack = user.videoTrack; remoteVideoTrack.play('remoteVideo'); }
+        if (mediaType === 'audio') user.audioTrack.play();
+        remoteVideoLabel.textContent = callerName;
+      });
+
+      await agoraClient.join(AGORA_APP_ID, callChannelName, null, currentUser.id);
+
+      const audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+      let videoTrack = null;
+      if (callType === 'video') {
+        videoTrack = await AgoraRTC.createCameraVideoTrack();
+        await agoraClient.publish([audioTrack, videoTrack]);
+        videoTrack.play('localVideo');
+      } else {
+        await agoraClient.publish([audioTrack]);
+      }
+
+      callModalTitle.textContent = `Call with ${callerName}`;
+      callModal.style.display = 'flex';
+      callActive = true;
+    }
+
+    async function hangUpCall() {
+      if (agoraClient) { await agoraClient.leave(); agoraClient = null; }
+      if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+      localVideo.srcObject = null;
+      remoteVideo.srcObject = null;
+      callModal.style.display = 'none';
+      callActive = false;
+    }
+
+    function setupUserChannel() {
+      const userChannel = supabase.channel(`user-${currentUser.id}`);
+      userChannel
+        .on('broadcast', { event: 'call-offer' }, ({ payload }) => {
+          const { callerId, callerName, callChannelName, callType } = payload;
+          pendingCall = { callerId, callerName, callChannelName, callType };
+          incomingCallerName.textContent = callerName;
+          incomingCallType.textContent = callType === 'video' ? '📹 Video call' : '🎤 Voice call';
+          incomingCallModal.style.display = 'flex';
+        })
+        .subscribe();
+      return userChannel;
+    }
+    let userChannel = null;
+
+    // ==================== MUTE CONTROLS ====================
+    let audioEnabled = true, videoEnabled = true;
+    document.getElementById('muteAudioBtn').addEventListener('click', () => {
+      if (localStream) { localStream.getAudioTracks().forEach(t => t.enabled = !t.enabled); audioEnabled = !audioEnabled; document.getElementById('muteAudioBtn').textContent = audioEnabled ? '🎤' : '🔇'; }
+    });
+    document.getElementById('muteVideoBtn').addEventListener('click', () => {
+      if (localStream) { localStream.getVideoTracks().forEach(t => t.enabled = !t.enabled); videoEnabled = !videoEnabled; document.getElementById('muteVideoBtn').textContent = videoEnabled ? '📹' : '🚫'; }
+    });
+
+    // ==================== NAVIGATION & EVENT LISTENERS ====================
+    document.getElementById('logout').addEventListener('click', async () => {
+      if (globalDmSubscription) globalDmSubscription.unsubscribe();
+      if (dmDeleteSubscription) dmDeleteSubscription.unsubscribe();
+      if (userChannel) userChannel.unsubscribe();
+      if (presenceChannel) await presenceChannel.untrack();
+      if (callActive) hangUpCall();
+      await supabase.auth.signOut();
+      window.location.href = 'index.html';
+    });
+
+    document.getElementById('closeProfileModal').addEventListener('click', () => { profileModal.style.display = 'none'; });
+    modalSendDM.addEventListener('click', () => {
+      const userId = modalSendDM.dataset.userId;
+      profileModal.style.display = 'none';
+      const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${userId}"]`);
+      if (targetItem) targetItem.click();
+    });
+
+    // Call modal listeners
+    document.getElementById('startVideoCallBtn').addEventListener('click', () => {
+      if (!currentRecipientId) return;
+      const activeItem = document.querySelector('.dm-conversation-item.active');
+      const userName = activeItem ? activeItem.dataset.userName : 'User';
+      startDMCall(currentRecipientId, userName, 'video');
+    });
+    document.getElementById('startVoiceCallBtn').addEventListener('click', () => {
+      if (!currentRecipientId) return;
+      const activeItem = document.querySelector('.dm-conversation-item.active');
+      const userName = activeItem ? activeItem.dataset.userName : 'User';
+      startDMCall(currentRecipientId, userName, 'audio');
+    });
+    document.getElementById('cancelCallOptionsBtn').addEventListener('click', () => { callOptionsModal.style.display = 'none'; });
+    document.getElementById('acceptCallBtn').addEventListener('click', acceptDMCall);
+    document.getElementById('declineCallBtn').addEventListener('click', () => { incomingCallModal.style.display = 'none'; pendingCall = null; });
+    document.getElementById('closeCallModalBtn').addEventListener('click', hangUpCall);
+    document.getElementById('hangupCallBtn').addEventListener('click', hangUpCall);
+
+    window.addEventListener('scroll', () => modal.style.display = 'none', true);
+    document.addEventListener('click', (e) => { if (!modal.contains(e.target)) modal.style.display = 'none'; });
+
+    // ==================== INITIALIZATION ====================
+    async function init() {
+      try {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) { window.location.href = 'index.html'; return; }
+        currentUser = user;
+        const metadata = user.user_metadata || {};
+        currentUserFullName = metadata.full_name || 'User';
+        currentRole = metadata.job_role;
+        isCEO = (currentRole === 'CEO');
+
+        await setupPresence();
+        subscribeToAllDirectMessages();
+        userChannel = setupUserChannel();
+
+        await loadPrivateMessagesView();
+      } catch (err) {
+        console.error('Init error:', err);
+        document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Failed to load DMs. Please refresh.</div>';
+      }
+    }
+
+    init();
+  })();
+</script>
+</body>
+</html>
+</body>
+</html>

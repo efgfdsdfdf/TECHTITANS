@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TECH TITANS · Dashboard</title>
+  <!-- Font Awesome Icons (v6 free) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Chart.js for message trend -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="notifications.js"></script>
+  <style>
+    /* (styles unchanged from your original – kept exactly as provided) */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at 10% 20%, #141b2b, #0a0f1a);
+      min-height: 100vh;
+      display: flex;
+      color: #eef2fb;
+    }
+
+    /* ---------- SIDEBAR ---------- */
+    .sidebar {
+      width: 280px;
+      background: rgba(18, 26, 40, 0.8);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-right: 1px solid rgba(66, 140, 255, 0.15);
+      padding: 2rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+      box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      padding-left: 0.5rem;
+      background: linear-gradient(135deg, #fff 0%, #a0c0ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .logo span { background: none; -webkit-text-fill-color: #428cff; }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .nav a {
+      color: #a5b3d1;
+      text-decoration: none;
+      padding: 0.9rem 1.2rem;
+      border-radius: 1.5rem;
+      transition: all 0.2s ease;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: relative;
+      border: 1px solid transparent;
+    }
+    .nav a i { width: 1.5rem; font-size: 1.2rem; }
+    .nav a:hover {
+      background: rgba(66, 140, 255, 0.1);
+      border-color: rgba(66, 140, 255, 0.3);
+      color: white;
+    }
+    .nav a.active {
+      background: linear-gradient(145deg, #428cff, #2a5bbf);
+      color: white;
+      box-shadow: 0 10px 20px -8px #428cff;
+    }
+
+    .sidebar-unread {
+      background: #ff4d4d;
+      color: white;
+      border-radius: 2rem;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      margin-left: auto;
+      box-shadow: 0 0 0 2px #0f1a2f;
+    }
+
+    .logout-btn {
+      margin-top: auto;
+      background: transparent;
+      border: 1px solid #3e4a6b;
+      color: #ffb4b4;
+      padding: 0.9rem;
+      border-radius: 1.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .logout-btn:hover {
+      background: rgba(255, 77, 77, 0.1);
+      border-color: #ff4d4d;
+      color: #fff;
+    }
+
+    /* ---------- MAIN CONTENT ---------- */
+    .main {
+      flex: 1;
+      padding: 2rem 2.5rem;
+      overflow-y: auto;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    .user-greeting {
+      background: rgba(26, 35, 53, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 0.7rem 2rem;
+      border-radius: 3rem;
+      border: 1px solid rgba(66, 140, 255, 0.3);
+      font-weight: 500;
+      color: #d3e0ff;
+    }
+    .user-greeting i { margin-right: 0.5rem; color: #428cff; }
+    .user-greeting span { color: white; font-weight: 600; }
+
+    /* dashboard grid (user info cards) – now only 3 cards */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.8rem;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: rgba(18, 26, 40, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(66, 140, 255, 0.2);
+      border-radius: 2.2rem;
+      padding: 1.8rem 1.5rem;
+      transition: 0.2s;
+      box-shadow: 0 15px 30px -15px rgba(0, 0, 0, 0.6);
+    }
+    .card:hover {
+      border-color: #428cff80;
+      box-shadow: 0 20px 35px -15px #428cff;
+      transform: translateY(-3px);
+    }
+    .card-title {
+      color: #8f9fc9;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.7rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .card-value {
+      color: white;
+      font-size: 1.8rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 0.2rem;
+      word-break: break-word;
+    }
+    .card-label {
+      color: #5b6b92;
+      font-size: 0.9rem;
+    }
+
+    /* ---------- ANNOUNCEMENTS SECTION ---------- */
+    .announcements-section {
+      background: rgba(18, 26, 40, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(66, 140, 255, 0.2);
+      border-radius: 2.2rem;
+      padding: 1.8rem;
+      margin-bottom: 2rem;
+    }
+    .announcements-header {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      color: white;
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+    .announcements-header i { color: #428cff; }
+
+    /* CEO form */
+    .announcement-form {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border: 1px solid #2f3f6a;
+    }
+    .announcement-form textarea {
+      width: 100%;
+      background: #0f1a2f;
+      border: 1px solid #2f3f6a;
+      border-radius: 1.2rem;
+      padding: 1rem;
+      color: white;
+      font-size: 1rem;
+      resize: vertical;
+      margin-bottom: 1rem;
+    }
+    .announcement-form textarea:focus {
+      outline: none;
+      border-color: #428cff;
+    }
+    .form-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+    }
+    .file-label {
+      background: #1f2f4a;
+      color: #aab9e0;
+      padding: 0.6rem 1.2rem;
+      border-radius: 2rem;
+      cursor: pointer;
+      border: 1px solid #3e4f75;
+      transition: 0.2s;
+      font-size: 0.9rem;
+    }
+    .file-label:hover {
+      background: #2a3a60;
+      color: white;
+    }
+    #announcementFile {
+      display: none;
+    }
+    .post-btn {
+      background: #428cff;
+      border: none;
+      color: white;
+      padding: 0.6rem 2rem;
+      border-radius: 2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 0.95rem;
+      margin-left: auto;
+    }
+    .post-btn:hover {
+      background: #5f9eff;
+      transform: scale(1.02);
+    }
+    .post-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* announcements list */
+    .announcements-list {
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+    .announcement-card {
+      background: rgba(10, 18, 30, 0.7);
+      border-left: 4px solid #ffaa33;
+      border-radius: 1rem;
+      padding: 1.2rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+    .announcement-meta {
+      display: flex;
+      justify-content: space-between;
+      color: #8f9fc9;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+    .announcement-author {
+      font-weight: 600;
+      color: #d0dfff;
+    }
+    .announcement-date {
+      color: #6b7fb1;
+    }
+    .announcement-content {
+      color: #eef2fb;
+      font-size: 1rem;
+      margin-bottom: 0.7rem;
+      white-space: pre-wrap;
+    }
+    .announcement-attachment a {
+      color: #8ab4ff;
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .announcement-attachment a:hover {
+      text-decoration: underline;
+    }
+    /* delete button for CEO */
+    .delete-announcement {
+      position: absolute;
+      top: 0.8rem;
+      right: 0.8rem;
+      background: rgba(255, 77, 77, 0.2);
+      border: none;
+      color: #ff8a8a;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 1rem;
+    }
+    .delete-announcement:hover {
+      background: #ff4d4d;
+      color: white;
+    }
+
+    /* chart & activity row */
+    .row-duo {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 1.8rem;
+      margin-top: 1rem;
+    }
+    .chart-container, .activity-feed {
+      background: rgba(18, 26, 40, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(66, 140, 255, 0.2);
+      border-radius: 2.2rem;
+      padding: 1.8rem;
+    }
+    .chart-container h3, .activity-feed h3 {
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .chart-container h3 i, .activity-feed h3 i { color: #428cff; }
+    canvas { max-height: 200px; width: 100% !important; }
+
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 0.8rem 0;
+      border-bottom: 1px solid rgba(66, 140, 255, 0.1);
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-avatar {
+      width: 36px; height: 36px;
+      background: #1f2f4a;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #428cff;
+      font-weight: bold;
+    }
+    .activity-details {
+      flex: 1;
+    }
+    .activity-name {
+      font-weight: 600;
+      color: white;
+    }
+    .activity-msg {
+      color: #aab9e0;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
+    }
+    .activity-time {
+      font-size: 0.7rem;
+      color: #5f73a3;
+    }
+
+    /* loading state */
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+
+    /* ---------- RESPONSIVE ---------- */
+    @media (max-width: 1000px) {
+      .row-duo { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        padding: 1rem;
+        gap: 1rem;
+        backdrop-filter: blur(16px);
+      }
+      .nav { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+      .nav a { padding: 0.6rem 1rem; font-size: 0.9rem; }
+      .sidebar-unread { position: absolute; top: -2px; right: -2px; }
+      .main { padding: 1rem; }
+      .dashboard-grid { gap: 1rem; }
+      .announcements-list { max-height: 300px; }
+      .form-actions { flex-direction: column; align-items: stretch; }
+      .post-btn { margin-left: 0; }
+    }
+    @media (max-width: 480px) {
+      .card-value { font-size: 1.6rem; }
+      .announcement-form { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="logo">TECH<span>TITANS</span></div>
+
+    <div class="nav">
+      <a href="/dashboard.html" class="active"><i class="fas fa-chart-pie"></i> Dashboard</a>
+      <a href="/messages.html" id="chatNavLink"><i class="fas fa-comments"></i> GROUP CHAT
+        <span class="sidebar-unread" id="sidebarUnreadBadge" style="display: none;">0</span>
+      </a>
+      <a href="/resources.html"><i class="fas fa-book-open"></i> Resources</a>
+      <a href="/profile.html"><i class="fas fa-user-cog"></i> Profile</a>
+    </div>
+    <button class="logout-btn" id="logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
+
+  <div class="main">
+    <div class="top-bar">
+        
+      <div class="user-greeting"><i class="fas fa-hand-peace"></i> Hello, <span id="userName"></span></div>
+    </div>
+
+      <!-- ========== ANNOUNCEMENTS SECTION ========== -->
+    <div class="announcements-section" id="announcementsSection">
+      <div class="announcements-header">
+        <i class="fas fa-bullhorn"></i> Announcements
+      </div>
+      <!-- CEO form (hidden for non-CEO) -->
+      <div id="ceoAnnouncementForm" style="display: none;" class="announcement-form">
+        <textarea id="announcementContent" placeholder="Write an important announcement..."></textarea>
+        <div class="form-actions">
+          <label for="announcementFile" class="file-label"><i class="fas fa-paperclip"></i> Attach file</label>
+          <input type="file" id="announcementFile" accept="*/*">
+          <button class="post-btn" id="postAnnouncementBtn"><i class="fas fa-paper-plane"></i> Post</button>
+        </div>
+      </div>
+      <!-- announcements list container -->
+      <div id="announcementsList" class="announcements-list">
+        <div class="loading">Loading announcements...</div>
+      </div>
+    </div>
+
+    <!-- Compact user info cards (3 only) -->
+    <div class="dashboard-grid" id="userInfoGrid">
+      <!-- filled by js -->
+    </div>
+
+  
+
+    <!-- extended stats + chart + activity -->
+    <div class="row-duo">
+      <!-- message trend chart -->
+      <div class="chart-container">
+        <h3><i class="fas fa-chart-line"></i> Message activity (7 days)</h3>
+        <canvas id="messageChart"></canvas>
+        <p class="card-label" style="margin-top: 0.8rem; text-align: center;">messages per day</p>
+      </div>
+      <!-- recent activity feed -->
+      <div class="activity-feed">
+        <h3><i class="fas fa-clock"></i> Recent activity</h3>
+        <div id="recentActivityList">
+          <div class="activity-item loading">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // --- Supabase config ---
+      const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kcXF0c2RpYnR2eW1mZ250c3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTI1NjIsImV4cCI6MjA4Nzg4ODU2Mn0.hS-7kmoyFljnhkJEkw7nmgimw9ioQreidyu27_NXYyo';
+
+      if (!window.supabase) {
+        document.body.innerHTML = '<p style="color:white;padding:2rem;">Failed to load Supabase. Refresh.</p>';
+        return;
+      }
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      let currentUser = null;
+      let currentRole = null;
+      let isCEO = false;
+      let unreadCount = 0;
+      let refreshInterval = null;
+      let messageChart = null;
+      let announcementsChannel = null;
+
+      // --- Helper: update badge ---
+      function updateBadge(count) {
+        const badge = document.getElementById('sidebarUnreadBadge');
+        if (!badge) return;
+        if (count > 0) {
+          badge.style.display = 'inline-block';
+          badge.textContent = count;
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+
+      // --- Fetch unread count ---
+      async function fetchUnreadCount() {
+        if (!currentUser || !currentRole) return 0;
+        try {
+          let query = supabase.from('group_messages').select('id, sender_id');
+          if (!isCEO) query = query.eq('role', currentRole);
+          const { data: messages, error: msgError } = await query;
+          if (msgError) throw msgError;
+          const messageIds = messages.map(m => m.id);
+          let readSet = new Set();
+          if (messageIds.length) {
+            const { data: reads } = await supabase
+              .from('message_reads')
+              .select('message_id')
+              .eq('user_id', currentUser.id)
+              .in('message_id', messageIds);
+            if (reads) readSet = new Set(reads.map(r => r.message_id));
+          }
+          return messages.filter(msg => !readSet.has(msg.id) && msg.sender_id !== currentUser.id).length;
+        } catch (err) {
+          console.error('unread error:', err);
+          return 0;
+        }
+      }
+
+      // --- Refresh badge ---
+      async function refreshUnreadBadge() {
+        unreadCount = await fetchUnreadCount();
+        updateBadge(unreadCount);
+      }
+
+      // --- Fetch total messages ---
+      async function fetchTotalMessages() {
+        try {
+          let query = supabase.from('group_messages').select('*', { count: 'exact', head: true });
+          if (!isCEO && currentRole) query = query.eq('role', currentRole);
+          const { count, error } = await query;
+          return error ? 0 : count;
+        } catch { return 0; }
+      }
+
+      // --- Fetch total resources ---
+      async function fetchTotalResources() {
+        try {
+          const { count, error } = await supabase.from('resources').select('*', { count: 'exact', head: true });
+          return error ? 0 : count;
+        } catch { return 0; }
+      }
+
+      // --- Fetch last 3 messages for activity feed ---
+      async function fetchRecentMessages() {
+        try {
+          let query = supabase
+            .from('group_messages')
+            .select('id, content, created_at, sender_id, profiles!inner(full_name)')
+            .order('created_at', { ascending: false })
+            .limit(3);
+          if (!isCEO && currentRole) query = query.eq('role', currentRole);
+          const { data, error } = await query;
+          if (error) throw error;
+          return data || [];
+        } catch (err) {
+          console.error('recent messages error:', err);
+          return [];
+        }
+      }
+
+      // --- Fetch daily counts for chart ---
+      async function fetchDailyCounts() {
+        try {
+          const now = new Date();
+          const sevenDaysAgo = new Date(now);
+          sevenDaysAgo.setDate(now.getDate() - 7);
+          const start = sevenDaysAgo.toISOString();
+
+          let query = supabase
+            .from('group_messages')
+            .select('created_at')
+            .gte('created_at', start);
+          if (!isCEO && currentRole) query = query.eq('role', currentRole);
+          const { data, error } = await query;
+          if (error) throw error;
+
+          const counts = {};
+          for (let i = 0; i < 7; i++) {
+            const d = new Date(now);
+            d.setDate(now.getDate() - i);
+            const ymd = d.toISOString().split('T')[0];
+            counts[ymd] = 0;
+          }
+          data.forEach(msg => {
+            const day = msg.created_at.split('T')[0];
+            if (counts.hasOwnProperty(day)) counts[day]++;
+          });
+          return Object.keys(counts).sort().map(date => ({ date, count: counts[date] }));
+        } catch (err) {
+          console.error('daily counts error:', err);
+          return [];
+        }
+      }
+
+      // --- Render chart ---
+      async function renderChart() {
+        const daily = await fetchDailyCounts();
+        const ctx = document.getElementById('messageChart').getContext('2d');
+        if (messageChart) messageChart.destroy();
+        messageChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: daily.map(d => d.date.slice(5)),
+            datasets: [{
+              label: 'messages',
+              data: daily.map(d => d.count),
+              backgroundColor: '#428cff80',
+              borderRadius: 6,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, grid: { color: '#2f3f66' }, ticks: { color: '#a0b0d0' } },
+                     x: { ticks: { color: '#a0b0d0' } } }
+          }
+        });
+      }
+
+      // --- Render activity feed ---
+      async function renderActivity() {
+        const recent = await fetchRecentMessages();
+        const container = document.getElementById('recentActivityList');
+        if (!recent.length) {
+          container.innerHTML = '<div class="activity-item">No recent messages</div>';
+          return;
+        }
+        container.innerHTML = recent.map(msg => {
+          const name = msg.profiles?.full_name || 'User';
+          const initial = name.charAt(0).toUpperCase();
+          const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          return `
+            <div class="activity-item">
+              <div class="activity-avatar">${initial}</div>
+              <div class="activity-details">
+                <span class="activity-name">${name}</span>
+                <div class="activity-msg">${msg.content || '📎 file'}</div>
+                <span class="activity-time">${time}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // --- Update stats cards (total messages, unread, resources) ---
+      async function updateStatsCards() {
+        const [totalMsg, unread, totalRes] = await Promise.all([
+          fetchTotalMessages(),
+          fetchUnreadCount(),
+          fetchTotalResources()
+        ]);
+        const grid = document.getElementById('userInfoGrid');
+        document.querySelectorAll('.stats-card').forEach(el => el.remove());
+        const statsHTML = `
+          <div class="card stats-card">
+            <div class="card-title"><i class="fas fa-envelope"></i> Total messages</div>
+            <div class="card-value">${totalMsg}</div>
+            <div class="card-label">in current scope</div>
+          </div>
+          <div class="card stats-card">
+            <div class="card-title"><i class="fas fa-bell"></i> Unread</div>
+            <div class="card-value">${unread}</div>
+            <div class="card-label">messages waiting</div>
+          </div>
+          <div class="card stats-card">
+            <div class="card-title"><i class="fas fa-archive"></i> Resources</div>
+            <div class="card-value">${totalRes}</div>
+            <div class="card-label">available files</div>
+          </div>
+        `;
+        grid.insertAdjacentHTML('beforeend', statsHTML);
+      }
+
+      // --- ANNOUNCEMENT FUNCTIONS (updated for 24h expiration and CEO delete) ---
+
+      // Delete announcements older than 24 hours (only if CEO)
+      async function deleteOldAnnouncements() {
+        if (!isCEO) return;
+        const oneDayAgo = new Date(Date.now() - 24*60*60*1000).toISOString();
+        const { error } = await supabase
+          .from('announcements')
+          .delete()
+          .lt('created_at', oneDayAgo);
+        if (error) console.error('Failed to delete old announcements:', error);
+      }
+
+      // Delete a single announcement (CEO only)
+      async function deleteAnnouncement(id) {
+        if (!isCEO) return;
+        if (!confirm('Delete this announcement?')) return;
+        const { error } = await supabase
+          .from('announcements')
+          .delete()
+          .eq('id', id);
+        if (error) {
+          alert('Failed to delete: ' + error.message);
+        } else {
+          // Remove from DOM
+          document.querySelector(`.announcement-card[data-id="${id}"]`)?.remove();
+        }
+      }
+
+      async function fetchAnnouncements() {
+        try {
+          const oneDayAgo = new Date(Date.now() - 24*60*60*1000).toISOString();
+          const { data, error } = await supabase
+            .from('announcements')
+            .select('*, profiles!created_by(full_name)')
+            .gte('created_at', oneDayAgo)
+            .order('created_at', { ascending: false });
+          if (error) throw error;
+          return data || [];
+        } catch (err) {
+          console.error('fetch announcements error:', err);
+          return [];
+        }
+      }
+
+      function escapeHtml(unsafe) {
+        if (!unsafe) return '';
+        return unsafe.replace(/[&<>"']/g, function(m) {
+          if(m === '&') return '&amp;';
+          if(m === '<') return '&lt;';
+          if(m === '>') return '&gt;';
+          if(m === '"') return '&quot;';
+          if(m === "'") return '&#039;';
+          return m;
+        });
+      }
+
+      function renderAnnouncements(announcements) {
+        const container = document.getElementById('announcementsList');
+        if (!announcements.length) {
+          container.innerHTML = '<div style="color:#9aa4bf; text-align:center; padding:1rem;">No announcements yet.</div>';
+          return;
+        }
+        container.innerHTML = announcements.map(a => {
+          const date = new Date(a.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+          const fileLink = a.file_url ? `<div class="announcement-attachment"><a href="${a.file_url}" target="_blank"><i class="fas fa-paperclip"></i> Attachment</a></div>` : '';
+          const deleteBtn = isCEO ? `<button class="delete-announcement" onclick="deleteAnnouncement('${a.id}')"><i class="fas fa-trash"></i></button>` : '';
+          return `
+            <div class="announcement-card" data-id="${a.id}">
+              ${deleteBtn}
+              <div class="announcement-meta">
+                <span class="announcement-author"><i class="fas fa-user-circle"></i> ${escapeHtml(a.profiles?.full_name || 'CEO')}</span>
+                <span class="announcement-date">${date}</span>
+              </div>
+              <div class="announcement-content">${escapeHtml(a.content)}</div>
+              ${fileLink}
+            </div>
+          `;
+        }).join('');
+      }
+
+      async function loadAnnouncements() {
+        const announcements = await fetchAnnouncements();
+        renderAnnouncements(announcements);
+      }
+
+      async function postAnnouncement() {
+        const content = document.getElementById('announcementContent').value.trim();
+        const fileInput = document.getElementById('announcementFile');
+        const file = fileInput.files[0];
+        if (!content && !file) return;
+
+        const postBtn = document.getElementById('postAnnouncementBtn');
+        postBtn.disabled = true;
+        postBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Posting...';
+
+        let fileUrl = null;
+        if (file) {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${currentUser.id}/${Date.now()}.${fileExt}`;
+          const { error: uploadError } = await supabase.storage
+            .from('announcements')
+            .upload(fileName, file);
+          if (uploadError) {
+            alert('Upload failed: ' + uploadError.message);
+            postBtn.disabled = false;
+            postBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Post';
+            return;
+          }
+          const { data: urlData } = supabase.storage.from('announcements').getPublicUrl(fileName);
+          fileUrl = urlData.publicUrl;
+        }
+
+        const { error } = await supabase
+          .from('announcements')
+          .insert({ content, file_url: fileUrl, created_by: currentUser.id });
+
+        postBtn.disabled = false;
+        postBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Post';
+
+        if (error) {
+          alert('Failed to post: ' + error.message);
+          return;
+        }
+
+        document.getElementById('announcementContent').value = '';
+        fileInput.value = '';
+
+        // After posting, delete any announcements older than 24 hours (CEO only)
+        await deleteOldAnnouncements();
+
+        // Announcement will appear via realtime (no need to reload)
+      }
+
+      function subscribeToAnnouncements() {
+        if (announcementsChannel) announcementsChannel.unsubscribe();
+        announcementsChannel = supabase
+          .channel('announcements-channel')
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'announcements' }, async (payload) => {
+            // Fetch full announcement with profile
+            const { data, error } = await supabase
+              .from('announcements')
+              .select('*, profiles!created_by(full_name)')
+              .eq('id', payload.new.id)
+              .single();
+            if (!error && data) {
+              // Insert at top
+              const container = document.getElementById('announcementsList');
+              const date = new Date(data.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+              const fileLink = data.file_url ? `<div class="announcement-attachment"><a href="${data.file_url}" target="_blank"><i class="fas fa-paperclip"></i> Attachment</a></div>` : '';
+              const deleteBtn = isCEO ? `<button class="delete-announcement" onclick="deleteAnnouncement('${data.id}')"><i class="fas fa-trash"></i></button>` : '';
+              const newCard = document.createElement('div');
+              newCard.className = 'announcement-card';
+              newCard.setAttribute('data-id', data.id);
+              newCard.innerHTML = `
+                ${deleteBtn}
+                <div class="announcement-meta">
+                  <span class="announcement-author"><i class="fas fa-user-circle"></i> ${escapeHtml(data.profiles?.full_name || 'CEO')}</span>
+                  <span class="announcement-date">${date}</span>
+                </div>
+                <div class="announcement-content">${escapeHtml(data.content)}</div>
+                ${fileLink}
+              `;
+              container.insertBefore(newCard, container.firstChild);
+
+              // Trigger push notification
+              if (window.TechTitansNotifications && data.created_by !== currentUser.id) {
+                window.TechTitansNotifications.display(`New Announcement`, {
+                  body: data.content.substring(0, 50) + (data.content.length > 50 ? '...' : ''),
+                  url: 'dashboard.html'
+                });
+              }
+            }
+          })
+          .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'announcements' }, (payload) => {
+            // Remove deleted announcement from UI (for CEO deletes)
+            document.querySelector(`.announcement-card[data-id="${payload.old.id}"]`)?.remove();
+          })
+          .subscribe();
+      }
+
+      // --- Load user and populate dashboard ---
+      async function loadDashboard() {
+        try {
+          const { data: { user }, error } = await supabase.auth.getUser();
+          if (error || !user) {
+            window.location.href = '/index.html';
+            return;
+          }
+          currentUser = user;
+          const metadata = user.user_metadata || {};
+          const fullName = metadata.full_name || 'User';
+          const jobRole = metadata.job_role || 'Not specified';
+          const firstName = fullName.split(' ')[0] || 'User';
+          const email = user.email || '—';
+          const createdAt = user.created_at 
+            ? new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) 
+            : '—';
+
+          currentRole = jobRole;
+          isCEO = (currentRole === 'CEO');
+
+          document.getElementById('userName').textContent = firstName;
+
+          // Compact user info cards (3 only)
+          const grid = document.getElementById('userInfoGrid');
+          grid.innerHTML = `
+            <div class="card">
+              <div class="card-title"><i class="fas fa-user"></i> User</div>
+              <div class="card-value">${fullName}</div>
+              <div class="card-label">${jobRole}</div>
+            </div>
+            <div class="card">
+              <div class="card-title"><i class="fas fa-envelope"></i> Email</div>
+              <div class="card-value" style="font-size:1.4rem;">${email}</div>
+              <div class="card-label">contact</div>
+            </div>
+            <div class="card">
+              <div class="card-title"><i class="fas fa-calendar"></i> Member since</div>
+              <div class="card-value" style="font-size:1.4rem;">${createdAt}</div>
+              <div class="card-label">join date</div>
+            </div>
+          `;
+
+          // Show/hide CEO announcement form
+          const ceoForm = document.getElementById('ceoAnnouncementForm');
+          if (isCEO) {
+            ceoForm.style.display = 'block';
+            document.getElementById('postAnnouncementBtn').addEventListener('click', postAnnouncement);
+            // Delete any announcements older than 24 hours on load
+            await deleteOldAnnouncements();
+          } else {
+            ceoForm.style.display = 'none';
+          }
+
+          // Load announcements (only last 24h)
+          await loadAnnouncements();
+          subscribeToAnnouncements();
+
+          // Make deleteAnnouncement globally accessible for inline onclick
+          window.deleteAnnouncement = deleteAnnouncement;
+
+          // Start periodic unread sync
+          refreshUnreadBadge();
+          refreshInterval = setInterval(refreshUnreadBadge, 10000);
+          document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) refreshUnreadBadge();
+          });
+
+          // Load extended stats & chart & activity
+          await Promise.all([
+            updateStatsCards(),
+            renderChart(),
+            renderActivity()
+          ]);
+
+        } catch (err) {
+          console.error('Dashboard load error:', err);
+        }
+      }
+
+      // --- Logout ---
+      document.getElementById('logout').addEventListener('click', async () => {
+        if (refreshInterval) clearInterval(refreshInterval);
+        if (announcementsChannel) announcementsChannel.unsubscribe();
+        await supabase.auth.signOut();
+        window.location.href = '/index.html';
+      });
+
+      // --- Initialise ---
+      loadDashboard();
+    })();
+  </script>
+  <!-- 
+    Note: For automatic 24-hour deletion without relying on CEO actions,
+    create a Supabase cron job (pg_cron) that runs daily:
+    DELETE FROM announcements WHERE created_at < NOW() - INTERVAL '24 hours';
+  -->
+</body>
+</html>
