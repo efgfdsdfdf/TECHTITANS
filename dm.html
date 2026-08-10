@@ -839,66 +839,18 @@ body {
 @media (max-width: 768px) {
   body {
     flex-direction: column;
-    height: 100dvh;
+    height: 100vh;
   }
 
-  /* Sidebar becomes a top bar */
   .sidebar {
-    width: 100%;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 0.75rem;
-    border-right: none;
-    border-top: 1px solid #1f2a44;
-    order: 2; /* places it at bottom visually? Actually order might need adjustment depending on DOM order. Better to set .main order:1, .sidebar order:2 */
-    gap: 0.5rem;
-    background: rgba(10, 16, 28, 0.98);
-    min-height: auto;
-  }
-
-  .logo {
     display: none;
-  }
-
-  .nav {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    flex: 1 1 auto;
-    gap: 0.3rem;
-  }
-
-  .nav a {
-    padding: 0.6rem 0.8rem;
-    border-radius: 1.5rem;
-    font-size: 0.8rem;
-    justify-content: center;
-    flex: 0 1 auto;
-    min-width: 44px; /* touch target */
-  }
-
-  .sidebar-unread {
-    position: static;
-    margin-left: 0.2rem;
-    font-size: 0.6rem;
-    padding: 0.1rem 0.4rem;
-  }
-
-  .logout-btn {
-    margin-top: 0;
-    padding: 0.6rem 1rem;
-    font-size: 0.8rem;
-    white-space: nowrap;
-    border-radius: 2rem;
   }
 
   .main {
     padding: 0;
     order: 1;
     flex: 1 1 0;
-    height: auto;
+    height: 100%;
     overflow: hidden;
   }
 
@@ -907,12 +859,21 @@ body {
     border-left: none;
     border-right: none;
     border-top: none;
+    height: 100%;
+    padding: 0;
   }
 
   .chat-header {
-    padding: 0.85rem 1rem;
-    flex-wrap: nowrap;
-    gap: 0.5rem;
+    display: none;
+  }
+
+  .messages-area {
+    height: 100%;
+    width: 100%;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
   .online-count {
@@ -922,32 +883,40 @@ body {
   /* DM layout adjustments */
   .dm-layout {
     flex-direction: row;
-    width: 200%;
+    width: 200vw;
+    min-width: 200vw;
     height: 100%;
+    overflow: hidden;
     transform: translateX(0);
     transition: transform 0.26s ease;
     will-change: transform;
   }
 
+  .dm-conversations-list,
+  .dm-chat-area {
+    width: 100vw;
+    flex: 0 0 100vw;
+    max-width: 100vw;
+    min-width: 100vw;
+    height: 100%;
+  }
+
   .dm-conversations-list {
-    width: 50%;
-    flex: 0 0 50%;
-    max-width: 100%;
     border-right: none;
-    border-bottom: none;
+    border-bottom: 1px solid #263154;
     min-height: 0;
     -webkit-overflow-scrolling: touch;
   }
 
   .dm-chat-area {
-    width: 50%;
-    flex: 0 0 50%;
     display: flex;
+    flex-direction: column;
     min-height: 0;
+    height: 100%;
   }
 
   .dm-layout.chat-open {
-    transform: translateX(-50%);
+    transform: translateX(-100vw);
   }
 
   .dm-chat-header .dm-back-btn {
@@ -964,6 +933,16 @@ body {
 
   .dm-chat-messages {
     -webkit-overflow-scrolling: touch;
+  }
+
+  .dm-chat-header .hamburger-btn {
+    display: inline-flex;
+    width: 2.7rem;
+    height: 2.7rem;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+    padding: 0;
   }
 
   .dm-chat-actions .dm-icon-btn {
@@ -997,30 +976,8 @@ body {
 
 /* Extra small screens (max-width: 480px) */
 @media (max-width: 480px) {
-  .nav a span:not(.sidebar-unread) {
-    display: none; /* hide text, only icons */
-  }
-
-  .nav a {
-    font-size: 1.2rem;
-    padding: 0.5rem;
-    min-width: 48px;
-  }
-
-  .sidebar-unread {
-    top: -2px;
-    right: -2px;
-  }
-
-  .logout-btn {
-    padding: 0.5rem 0.8rem;
-    font-size: 0.7rem;
-    min-width: 56px;
-  }
-
-  .group-tab {
-    padding: 0.3rem 0.8rem;
-    font-size: 0.75rem;
+  .sidebar {
+    display: none;
   }
 
   .dm-msg {
@@ -1063,6 +1020,19 @@ body {
       </div>
       <div class="messages-area" id="messagesArea" oncontextmenu="return false;"></div>
       <!-- DM layout will be injected here by JS -->
+    </div>
+  </div>
+
+  <div id="mobileNavOverlay" class="mobile-nav-overlay" aria-hidden="true">
+    <div class="mobile-nav-panel">
+      <button class="close-btn" id="mobileNavClose" aria-label="Close menu">&times;</button>
+      <nav class="mobile-nav-links" aria-label="Mobile navigation">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="messages.html">Group Chat</a>
+        <a href="dm.html">Direct Messages</a>
+        <a href="profile.html">Profile</a>
+      </nav>
+      <button class="logout-btn" id="mobileLogout">Logout</button>
     </div>
   </div>
 
@@ -1565,6 +1535,7 @@ body {
             <div class="dm-chat-area" id="dmChatArea">
               <div class="dm-chat-header">
                 <div class="dm-chat-peer">
+                  <button class="hamburger-btn dm-icon-btn" id="mobileNavToggle" title="Menu">☰</button>
                   <button class="dm-back-btn dm-icon-btn" id="dmBackBtn" title="Back">&lt;</button>
                   <div id="dmPeerAvatar" class="avatar" style="display:none;"></div>
                   <div class="dm-peer-copy">
@@ -1622,6 +1593,36 @@ body {
           setDmMobileChatOpen(false);
           currentRecipientId = null;
         });
+
+        const mobileNavToggle = document.getElementById('mobileNavToggle');
+        const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+        const mobileNavClose = document.getElementById('mobileNavClose');
+        const mobileLogout = document.getElementById('mobileLogout');
+        if (mobileNavToggle && mobileNavOverlay) {
+          mobileNavToggle.addEventListener('click', () => {
+            mobileNavOverlay.style.display = 'flex';
+            mobileNavOverlay.setAttribute('aria-hidden', 'false');
+          });
+        }
+        if (mobileNavClose && mobileNavOverlay) {
+          mobileNavClose.addEventListener('click', () => {
+            mobileNavOverlay.style.display = 'none';
+            mobileNavOverlay.setAttribute('aria-hidden', 'true');
+          });
+        }
+        if (mobileNavOverlay) {
+          mobileNavOverlay.addEventListener('click', event => {
+            if (event.target === mobileNavOverlay) {
+              mobileNavOverlay.style.display = 'none';
+              mobileNavOverlay.setAttribute('aria-hidden', 'true');
+            }
+          });
+        }
+        if (mobileLogout) {
+          mobileLogout.addEventListener('click', () => {
+            document.getElementById('logout').click();
+          });
+        }
 
         document.getElementById('dmHeaderVoiceCallBtn').addEventListener('click', () => {
           if (!currentRecipientId) return;
@@ -2174,6 +2175,36 @@ body {
       }
     }
 
+    async function sendCallPushNotification(callId, recipientId, action = 'incoming') {
+      if (!callId || !recipientId) return;
+      try {
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !sessionData?.session?.access_token) return;
+
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/send-call-notification`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionData.session.access_token}`
+          },
+          body: JSON.stringify({ callId, recipientId, action })
+        });
+
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          console.warn('Call push notification failed:', result.error || response.status);
+          return;
+        }
+        console.info('Call push notification processed', {
+          action,
+          sent: result.sent || 0,
+          failed: result.failed || 0
+        });
+      } catch (error) {
+        console.warn('Unable to send call push notification:', error);
+      }
+    }
+
     async function cleanupLocalCallMedia() {
       if (localAudioTrack) {
         localAudioTrack.stop();
@@ -2265,6 +2296,7 @@ body {
         } catch (participantError) {
           console.warn('Unable to insert call participants:', participantError);
         }
+        await sendCallPushNotification(callData.id, targetUserId, 'incoming');
       }
 
       await sendUserBroadcast(targetUserId, 'call-offer', {
@@ -2363,6 +2395,7 @@ body {
           });
           await supabase.from('calls').update({ status: 'ended', ended_at: new Date().toISOString() }).eq('id', currentDMCallId);
           if (callTarget && shouldNotifyPeer) {
+            await sendCallPushNotification(currentDMCallId, callTarget, 'cancelled');
             await sendUserBroadcast(callTarget, 'call-ended', {
               callId: currentDMCallId,
               endedBy: currentUser.id,
