@@ -5,27 +5,37 @@ import { RtcRole, RtcTokenBuilder } from "npm:agora-access-token@2.0.4";
 const allowedHeaders = "authorization, x-client-info, apikey, content-type";
 const allowedMethods = "POST, OPTIONS";
 const defaultAllowedOrigins = [
+  "https://techtitans-snowy.vercel.app",
+  "https://efgfdsdfdf.github.io",
   "http://127.0.0.1:8080",
   "http://localhost:8080",
   "http://127.0.0.1:5500",
   "http://localhost:5500",
 ];
 
-function getCorsHeaders(request: Request) {
-  const origin = request.headers.get("origin") || "";
+function getAllowedOrigins() {
   const configuredOrigins = (Deno.env.get("ALLOWED_ORIGINS") || "")
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
-  const allowedOrigins = configuredOrigins.length > 0 ? configuredOrigins : defaultAllowedOrigins;
-  const allowOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
 
-  return {
-    "Access-Control-Allow-Origin": allowOrigin,
+  return configuredOrigins.length > 0 ? configuredOrigins : defaultAllowedOrigins;
+}
+
+function getCorsHeaders(request: Request) {
+  const origin = request.headers.get("origin") || "";
+  const allowedOrigins = getAllowedOrigins();
+  const headers: Record<string, string> = {
     "Access-Control-Allow-Headers": allowedHeaders,
     "Access-Control-Allow-Methods": allowedMethods,
     "Vary": "Origin",
   };
+
+  if (origin && allowedOrigins.includes(origin)) {
+    headers["Access-Control-Allow-Origin"] = origin;
+  }
+
+  return headers;
 }
 
 function jsonResponse(request: Request, status: number, body: Record<string, unknown>) {

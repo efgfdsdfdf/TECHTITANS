@@ -2058,6 +2058,32 @@
       return window.TechTitansAgora.isValidChannelName(channelName);
     }
 
+    function getCallUserMessage(error) {
+      const message = String(error?.message || error?.name || '').toLowerCase();
+      if (message.includes('notallowed') || message.includes('permission') || message.includes('denied')) {
+        return 'Microphone or camera permission is blocked. Please allow access for TechTitans and try again.';
+      }
+      if (message.includes('notreadable') || message.includes('could not start audio source')) {
+        return 'Microphone or camera is unavailable. Close other apps using it, check app permissions, and try again.';
+      }
+      if (message.includes('notfound') || message.includes('device not found')) {
+        return 'No microphone or camera was found on this device.';
+      }
+      if (message.includes('overconstrained')) {
+        return 'This device cannot start the requested microphone or camera settings.';
+      }
+      if (message.includes('token') || message.includes('fetch') || message.includes('network')) {
+        return 'Unable to connect to the calling service. Please check your connection and try again.';
+      }
+      return 'Unable to connect to the call. Please try again.';
+    }
+
+    function showCallError(error) {
+      const userMessage = getCallUserMessage(error);
+      if (typeof showToast === 'function') showToast(userMessage);
+      else alert(userMessage);
+    }
+
     async function getAgoraToken(channelName) {
       if (!currentUser?.id) {
         throw new Error('You must be signed in to start a call.');
@@ -2071,17 +2097,24 @@
         throw new Error('Authentication expired. Please log in again.');
       }
 
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/agora-token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionData.session.access_token}`
-        },
-        body: JSON.stringify({
-          channelName,
-          uid: currentUser.id
-        })
-      });
+      let response;
+      try {
+        console.info('Agora token request started');
+        response = await fetch(`${SUPABASE_URL}/functions/v1/agora-token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionData.session.access_token}`
+          },
+          body: JSON.stringify({
+            channelName,
+            uid: currentUser.id
+          })
+        });
+      } catch (error) {
+        console.error('Agora token request failed:', error);
+        throw new Error('Unable to connect to the calling service. Please check your connection and try again.');
+      }
 
       let data = {};
       try {
@@ -2097,6 +2130,7 @@
         throw new Error('Token server did not return an Agora token.');
       }
 
+      console.info('Agora token received');
       return data.token;
     }
 
@@ -2157,18 +2191,23 @@
         groupCallChannelName = await window.TechTitansAgora.compactChannelName('group', role);
         setupAgoraTokenRefresh(client, () => groupCallChannelName);
         const token = await getAgoraToken(groupCallChannelName);
+        console.info('Agora group join started');
         await client.join(AGORA_APP_ID, groupCallChannelName, token, currentUser.id);
+        console.info('Agora group join succeeded');
         joinedAgoraChannelName = groupCallChannelName;
+        console.info('Agora group media initialization started');
         localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
         localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+        console.info('Agora group publish started');
         await client.publish([localAudioTrack, localVideoTrack]);
+        console.info('Agora group publish succeeded');
         localVideoTrack.play('localVideo');
         callActive = true;
         callStarting = false;
       } catch (err) {
         console.error('Failed to join group call:', err);
         await hangUpCall();
-        alert(err.message || 'Could not access camera/microphone or join the call.');
+        showCallError(err);
         return;
       }
 
@@ -2203,7 +2242,11 @@
     }
 
     async function hangUpCall() {
-      if (groupAgoraClient) { await groupAgoraClient.leave(); groupAgoraClient = null; }
+      const client = groupAgoraClient;
+      groupAgoraClient = null;
+      if (client) {
+        try { await client.leave(); } catch (leaveError) { console.warn('Agora group leave skipped:', leaveError); }
+      }
       await cleanupGroupCallMedia();
       callModal.style.display = 'none';
       callActive = false;

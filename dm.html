@@ -895,16 +895,23 @@ body {
   }
 
   .main {
-    padding: 0.5rem;
+    padding: 0;
     order: 1;
     flex: 1 1 0;
     height: auto;
     overflow: hidden;
   }
 
+  .chat-panel {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+  }
+
   .chat-header {
-    padding: 0.8rem 1rem;
-    flex-wrap: wrap;
+    padding: 0.85rem 1rem;
+    flex-wrap: nowrap;
     gap: 0.5rem;
   }
 
@@ -914,31 +921,37 @@ body {
 
   /* DM layout adjustments */
   .dm-layout {
-    flex-direction: column;
+    flex-direction: row;
+    width: 200%;
+    height: 100%;
+    transform: translateX(0);
+    transition: transform 0.26s ease;
+    will-change: transform;
   }
 
   .dm-conversations-list {
-    width: 100%;
+    width: 50%;
+    flex: 0 0 50%;
     max-width: 100%;
     border-right: none;
-    border-bottom: 1px solid #263154;
-    flex: 1;
+    border-bottom: none;
     min-height: 0;
+    -webkit-overflow-scrolling: touch;
   }
 
   .dm-chat-area {
-    width: 100%;
-    display: none;
+    width: 50%;
+    flex: 0 0 50%;
+    display: flex;
     min-height: 0;
   }
 
-  .dm-chat-area.active {
-    display: flex;
-    flex-direction: column;
+  .dm-layout.chat-open {
+    transform: translateX(-50%);
   }
 
-  .dm-back-btn {
-    display: inline-block;
+  .dm-chat-header .dm-back-btn {
+    display: inline-flex;
     background: none;
     border: none;
     color: white;
@@ -948,6 +961,20 @@ body {
     margin-right: 0.5rem;
     padding: 0 0.2rem;
   }
+
+  .dm-chat-messages {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dm-chat-actions .dm-icon-btn {
+    min-width: 2.7rem;
+    width: 2.7rem;
+    padding: 0;
+    font-size: 0;
+  }
+
+  #dmHeaderVoiceCallBtn::before { content: 'Call'; font-size: 0.72rem; }
+  #dmHeaderVideoCallBtn::before { content: 'Video'; font-size: 0.72rem; }
 
   /* Make message bubbles take more width on small screens */
   .dm-msg {
@@ -1475,6 +1502,19 @@ body {
     }
 
     // ==================== LOAD DM VIEW ====================
+    function setDmMobileChatOpen(isOpen) {
+      const layout = document.querySelector('.dm-layout');
+      const list = document.getElementById('dmConversationsList');
+      const chatArea = document.getElementById('dmChatArea');
+      const backBtn = document.getElementById('dmBackBtn');
+      if (!layout || !list || !chatArea || !backBtn) return;
+
+      layout.classList.toggle('chat-open', Boolean(isOpen));
+      list.style.display = '';
+      chatArea.style.display = '';
+      backBtn.style.display = '';
+    }
+
     async function loadPrivateMessagesView() {
       try {
         const area = document.getElementById('messagesArea');
@@ -1525,7 +1565,7 @@ body {
             <div class="dm-chat-area" id="dmChatArea">
               <div class="dm-chat-header">
                 <div class="dm-chat-peer">
-                  <button class="dm-back-btn dm-icon-btn" id="dmBackBtn" style="display:none;" title="Back">&lt;</button>
+                  <button class="dm-back-btn dm-icon-btn" id="dmBackBtn" title="Back">&lt;</button>
                   <div id="dmPeerAvatar" class="avatar" style="display:none;"></div>
                   <div class="dm-peer-copy">
                     <span class="dm-chat-title">Select a conversation</span>
@@ -1573,17 +1613,13 @@ body {
               updateDMBadge();
             }
             if (window.innerWidth <= 768) {
-              document.getElementById('dmConversationsList').style.display = 'none';
-              document.getElementById('dmChatArea').classList.add('active');
-              document.getElementById('dmBackBtn').style.display = 'inline-block';
+              setDmMobileChatOpen(true);
             }
           });
         });
 
         document.getElementById('dmBackBtn').addEventListener('click', () => {
-          document.getElementById('dmConversationsList').style.display = 'block';
-          document.getElementById('dmChatArea').classList.remove('active');
-          document.getElementById('dmBackBtn').style.display = 'none';
+          setDmMobileChatOpen(false);
           currentRecipientId = null;
         });
 
@@ -2032,6 +2068,32 @@ body {
       return mode === 'video' ? 'video' : 'voice';
     }
 
+    function getCallUserMessage(error) {
+      const message = String(error?.message || error?.name || '').toLowerCase();
+      if (message.includes('notallowed') || message.includes('permission') || message.includes('denied')) {
+        return 'Microphone or camera permission is blocked. Please allow access for TechTitans and try again.';
+      }
+      if (message.includes('notreadable') || message.includes('could not start audio source')) {
+        return 'Microphone is unavailable. Close other apps using it, check Android app permissions, and try again.';
+      }
+      if (message.includes('notfound') || message.includes('device not found')) {
+        return 'No microphone or camera was found on this device.';
+      }
+      if (message.includes('overconstrained')) {
+        return 'This device cannot start the requested microphone or camera settings.';
+      }
+      if (message.includes('token') || message.includes('fetch') || message.includes('network')) {
+        return 'Unable to connect to the calling service. Please check your connection and try again.';
+      }
+      return 'Unable to connect to the call. Please try again.';
+    }
+
+    function showCallError(error) {
+      const userMessage = getCallUserMessage(error);
+      if (typeof showToast === 'function') showToast(userMessage);
+      else alert(userMessage);
+    }
+
     async function getAgoraToken(channelName) {
       if (!currentUser?.id) {
         throw new Error('You must be signed in to start a call.');
@@ -2045,17 +2107,24 @@ body {
         throw new Error('Authentication expired. Please log in again.');
       }
 
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/agora-token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionData.session.access_token}`
-        },
-        body: JSON.stringify({
-          channelName,
-          uid: currentUser.id
-        })
-      });
+      let response;
+      try {
+        console.info('Agora token request started');
+        response = await fetch(`${SUPABASE_URL}/functions/v1/agora-token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionData.session.access_token}`
+          },
+          body: JSON.stringify({
+            channelName,
+            uid: currentUser.id
+          })
+        });
+      } catch (error) {
+        console.error('Agora token request failed:', error);
+        throw new Error('Unable to connect to the calling service. Please check your connection and try again.');
+      }
 
       let data = {};
       try {
@@ -2071,6 +2140,7 @@ body {
         throw new Error('Token server did not return an Agora token.');
       }
 
+      console.info('Agora token received');
       return data.token;
     }
 
@@ -2127,6 +2197,7 @@ body {
         throw new Error('Call client is not available.');
       }
 
+      console.info('Agora media initialization started', { mode });
       localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
       const tracks = [localAudioTrack];
 
@@ -2136,7 +2207,9 @@ body {
         localVideoTrack.play('localVideo');
       }
 
+      console.info('Agora publish started');
       await client.publish(tracks);
+      console.info('Agora publish succeeded');
     }
 
     async function startDMCall(targetUserId, targetUserName, mode) {
@@ -2162,7 +2235,9 @@ body {
         channelName = await getDmChannelName(currentUser.id, targetUserId);
         setupAgoraTokenRefresh(client, () => channelName);
         const token = await getAgoraToken(channelName);
+        console.info('Agora DM join started');
         await client.join(AGORA_APP_ID, channelName, token, currentUser.id);
+        console.info('Agora DM join succeeded');
         joinedAgoraChannelName = channelName;
         await publishLocalTracks(client, callType);
         callActive = true;
@@ -2170,7 +2245,7 @@ body {
       } catch (err) {
         console.error('Failed to start call:', err);
         await hangUpCall(false);
-        alert(err.message || 'Could not access camera/microphone or join the call.');
+        showCallError(err);
         return;
       }
 
@@ -2251,7 +2326,9 @@ body {
       try {
         setupAgoraTokenRefresh(client, () => callChannelName);
         const token = await getAgoraToken(callChannelName);
+        console.info('Agora DM accept join started');
         await client.join(AGORA_APP_ID, callChannelName, token, currentUser.id);
+        console.info('Agora DM accept join succeeded');
         joinedAgoraChannelName = callChannelName;
         await publishLocalTracks(client, callType);
         if (callTarget) {
@@ -2265,7 +2342,7 @@ body {
       } catch (err) {
         console.error('Failed to accept call:', err);
         await hangUpCall(false);
-        alert(err.message || 'Could not access camera/microphone or join the call.');
+        showCallError(err);
         return;
       }
 
@@ -2298,7 +2375,11 @@ body {
         }
       }
 
-      if (agoraClient) { await agoraClient.leave(); agoraClient = null; }
+      const client = agoraClient;
+      agoraClient = null;
+      if (client) {
+        try { await client.leave(); } catch (leaveError) { console.warn('Agora DM leave skipped:', leaveError); }
+      }
       await cleanupLocalCallMedia();
       callModal.style.display = 'none';
       incomingCallModal.style.display = 'none';
