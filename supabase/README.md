@@ -72,12 +72,14 @@ Backend support added:
 
 - `supabase/functions/register-call-device`
   - Platform-neutral authenticated endpoint for Android FCM and iOS PushKit VoIP token registration.
+  - Stores a hash of the native install secret when `deviceSecret` is supplied, so a closed-app native layer can later prove device identity without storing a password.
   - Request body:
     ```json
     {
       "provider": "fcm",
       "token": "device-push-token",
       "deviceIdentifier": "stable-install-id",
+      "deviceSecret": "native-generated-random-secret",
       "platform": "android",
       "appVersion": "1.0.0"
     }
@@ -88,6 +90,17 @@ Backend support added:
   - Reads authoritative call state from `calls` and `call_participants`.
   - Sends only safe call metadata through FCM/APNs: call id, call type, room id, caller id, and action.
   - Does not send Agora tokens, Supabase tokens, service-role keys, or the Agora App Certificate.
+
+- `supabase/functions/call-device-action`
+  - Allows a previously registered native device to accept, decline, or cancel a call by presenting its stable install id and native-generated device secret.
+  - Uses the existing `calls` and `call_participants` tables as authoritative call state.
+  - Does not issue Agora tokens. The web/call UI still fetches Agora tokens from `agora-token` after the app opens.
+
+- `supabase/functions/send-push-notification`
+  - Central dispatcher for normal persisted notifications.
+  - Reads the authoritative `notifications` row and sends safe payloads to registered `web_push`, `fcm`, and future `apns` devices.
+  - Supports direct messages, group messages, announcements, friend/request notifications, resource notifications, and system notifications as rows in `notifications`.
+  - Does not send incoming calls through the normal notification channel; calls use `send-call-notification`.
 
 Required Supabase secrets for Android FCM:
 
@@ -117,6 +130,8 @@ Deploy:
 npx supabase functions deploy register-call-device
 npx supabase functions deploy register-fcm-device
 npx supabase functions deploy send-call-notification
+npx supabase functions deploy send-push-notification
+npx supabase functions deploy call-device-action
 ```
 
 Android APK requirements still live in the native APK project, which is not present in this repository:

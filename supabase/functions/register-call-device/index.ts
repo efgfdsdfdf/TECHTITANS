@@ -6,12 +6,14 @@ const allowedMethods = "POST, OPTIONS";
 const defaultAllowedOrigins = [
   "https://techtitans-snowy.vercel.app",
   "https://efgfdsdfdf.github.io",
+  "capacitor://localhost",
+  "http://localhost",
   "http://127.0.0.1:8080",
   "http://localhost:8080",
   "http://127.0.0.1:5500",
   "http://localhost:5500",
 ];
-const supportedProviders = ["fcm", "apns_voip"] as const;
+const supportedProviders = ["fcm", "apns", "apns_voip"] as const;
 
 function getAllowedOrigins() {
   const configuredOrigins = (Deno.env.get("ALLOWED_ORIGINS") || "")
@@ -73,6 +75,7 @@ serve(async (request) => {
     deviceIdentifier?: unknown;
     platform?: unknown;
     appVersion?: unknown;
+    deviceSecret?: unknown;
   };
 
   try {
@@ -104,6 +107,12 @@ serve(async (request) => {
     : payload.token;
   const isAndroid = provider === "fcm";
   const defaultPlatform = isAndroid ? "android" : "ios";
+  const secretHash = typeof payload.deviceSecret === "string" && payload.deviceSecret.length >= 32
+    ? await crypto.subtle.digest("SHA-256", new TextEncoder().encode(payload.deviceSecret))
+    : null;
+  const secretHashHex = secretHash
+    ? Array.from(new Uint8Array(secretHash), (byte) => byte.toString(16).padStart(2, "0")).join("")
+    : null;
 
   const deviceRecord = {
     user_id: data.user.id,
@@ -114,6 +123,7 @@ serve(async (request) => {
     push_provider: provider,
     platform: typeof payload.platform === "string" ? payload.platform.slice(0, 64) : defaultPlatform,
     app_version: typeof payload.appVersion === "string" ? payload.appVersion.slice(0, 64) : null,
+    device_secret_hash: secretHashHex,
     is_active: true,
     last_seen_at: new Date().toISOString(),
   };

@@ -3,3 +3,10 @@
 server.out.log
 server.err.log
 supabase/.temp/
+node_modules/
+www/
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/app/google-services.json

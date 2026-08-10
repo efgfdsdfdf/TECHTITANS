@@ -25,6 +25,8 @@ const allowedMethods = "POST, OPTIONS";
 const defaultAllowedOrigins = [
   "https://techtitans-snowy.vercel.app",
   "https://efgfdsdfdf.github.io",
+  "capacitor://localhost",
+  "http://localhost",
   "http://127.0.0.1:8080",
   "http://localhost:8080",
   "http://127.0.0.1:5500",
@@ -209,6 +211,7 @@ function buildAndroidMessage(token: string, action: string, call: CallRecord, ca
       callType: call.type,
       roomId: call.room_id,
       callerId: call.initiated_by,
+      callerName,
       action,
     },
     android: {

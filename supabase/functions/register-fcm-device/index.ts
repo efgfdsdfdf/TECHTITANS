@@ -6,6 +6,8 @@ const allowedMethods = "POST, OPTIONS";
 const defaultAllowedOrigins = [
   "https://techtitans-snowy.vercel.app",
   "https://efgfdsdfdf.github.io",
+  "capacitor://localhost",
+  "http://localhost",
   "http://127.0.0.1:8080",
   "http://localhost:8080",
   "http://127.0.0.1:5500",
