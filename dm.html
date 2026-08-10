@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>TECH TITANS · Direct Messages</title>
+  <title>TECH TITANS - Direct Messages</title>
   <style>
 * {
   margin: 0;
@@ -117,6 +117,7 @@ body {
   flex-direction: column;
   overflow: hidden;
   height: 100%;
+  min-height: 0;
 }
 
 .chat-header {
@@ -153,27 +154,41 @@ body {
   display: inline-block;
 }
 
+.messages-area {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+}
+
 /* DM layout (full width) */
 .dm-layout {
   display: flex;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
   gap: 0;
 }
 
 .dm-conversations-list {
-  width: 280px;
+  width: min(360px, 34vw);
   border-right: 1px solid #263154;
   overflow-y: auto;
-  background: #0f172f;
+  min-height: 0;
+  background: #0d1426;
   flex-shrink: 0;
 }
 
 .dm-list-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   padding: 1rem;
   font-weight: 600;
-  color: #9aa4bf;
+  color: #d7def5;
   border-bottom: 1px solid #263154;
   font-size: 0.9rem;
+  background: #0d1426;
 }
 
 .dm-conversation-item {
@@ -186,10 +201,10 @@ body {
   gap: 0.8rem;
 }
 .dm-conversation-item:hover {
-  background: #1f2a44;
+  background: #18233b;
 }
 .dm-conversation-item.active {
-  background: #2a3a60;
+  background: #203257;
   border-left: 3px solid #428cff;
 }
 
@@ -238,48 +253,130 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #131c30;
+  background:
+    radial-gradient(circle at 18px 18px, rgba(255,255,255,0.035) 1px, transparent 1px) 0 0 / 36px 36px,
+    linear-gradient(180deg, #111a2c 0%, #0d1525 100%);
+  min-width: 0;
+  min-height: 0;
 }
 
 .dm-chat-header {
-  padding: 1rem;
+  min-height: 72px;
+  padding: 0.9rem 1.1rem;
   border-bottom: 1px solid #263154;
   color: white;
   font-weight: 500;
-  background: #131c30;
+  background: rgba(17, 26, 44, 0.94);
+  backdrop-filter: blur(14px);
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 .dm-chat-header .dm-back-btn {
   display: none;
+}
+.dm-chat-peer {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-width: 0;
+}
+.dm-peer-copy {
+  min-width: 0;
+}
+.dm-chat-title {
+  display: block;
+  color: #f8fbff;
+  font-size: 1rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dm-chat-subtitle {
+  display: block;
+  color: #91a0c7;
+  font-size: 0.78rem;
+  margin-top: 0.15rem;
+}
+.dm-chat-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+.dm-icon-btn {
+  min-width: 2.55rem;
+  height: 2.55rem;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 50%;
+  background: #18233b;
+  color: #eaf0ff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.dm-chat-actions .dm-icon-btn {
+  width: auto;
+  min-width: 4rem;
+  padding: 0 0.8rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.dm-icon-btn:hover {
+  background: #203257;
+  transform: translateY(-1px);
+}
+.dm-icon-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .dm-chat-messages {
   flex: 1;
   overflow-y: auto;
-  padding: 1rem;
+  padding: 1rem 1.2rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.35rem;
+  scroll-behavior: smooth;
 }
 
 .dm-chat-input {
   display: flex;
-  padding: 1rem;
-  background: #131c30;
+  padding: 0.85rem 1rem;
+  background: rgba(17, 26, 44, 0.96);
+  backdrop-filter: blur(14px);
   border-top: 1px solid #263154;
   gap: 0.5rem;
   align-items: center;
 }
+.dm-composer-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+.dm-input-wrap {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
 
 #dmChatInput {
-  flex: 1;
-  background: #0f172f;
+  width: 100%;
+  background: #0b1221;
   border: 1px solid #263154;
-  border-radius: 2rem;
+  border-radius: 999px;
   padding: 0.8rem 1.2rem;
   color: white;
   outline: none;
+  min-width: 0;
 }
 #dmChatInput:focus {
   border-color: #428cff;
@@ -298,6 +395,7 @@ body {
   flex-shrink: 0;
 }
 
+.voice-btn,
 .dm-voice-btn {
   background: #2f3a5a;
   border: none;
@@ -329,40 +427,131 @@ body {
 }
 
 .dm-msg {
-  max-width: 60%;
-  padding: 0.8rem 1rem;
-  border-radius: 1.2rem;
+  max-width: min(68%, 720px);
+  padding: 0.72rem 0.82rem 0.42rem;
+  border-radius: 1rem;
   word-wrap: break-word;
   font-size: 0.9rem;
   line-height: 1.4;
   position: relative;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+}
+.dm-msg-text {
+  white-space: pre-wrap;
+}
+.dm-msg-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  margin-top: 0.32rem;
+  font-size: 0.68rem;
+  line-height: 1;
+  opacity: 0.76;
+}
+.dm-msg-status {
+  color: #bde7ff;
+  font-weight: 800;
+  letter-spacing: 0;
 }
 .dm-msg.sent {
-  background: #428cff;
+  background: linear-gradient(135deg, #2979ff, #1f9f7a);
   color: white;
+  border-bottom-right-radius: 0.25rem;
 }
 .dm-msg.received {
-  background: #1f2a44;
+  background: #202b43;
   color: #e0e7ff;
+  border-bottom-left-radius: 0.25rem;
 }
-.dm-msg small {
-  display: block;
-  font-size: 0.75rem;
-  opacity: 0.7;
-  margin-top: 0.3rem;
-}
-.dm-msg audio {
-  max-width: 200px;
-  height: 32px;
-  margin-top: 0.3rem;
-  border-radius: 1rem;
-}
-
 .dm-seen-indicator {
-  font-size: 0.7rem;
-  color: #9aa4bf;
-  margin-top: 0.2rem;
+  font-size: 0.68rem;
+  color: #8fa0c5;
+  margin-top: 0.25rem;
   text-align: right;
+}
+.dm-voice-note {
+  display: grid;
+  grid-template-columns: auto minmax(130px, 1fr) auto;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: min(300px, 62vw);
+}
+.dm-audio-btn {
+  min-width: 3.2rem;
+  padding: 0 0.6rem;
+  height: 2.35rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.16);
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.dm-wave {
+  height: 1.8rem;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.dm-wave span {
+  width: 3px;
+  height: var(--h);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.48);
+}
+.dm-audio-duration {
+  font-size: 0.76rem;
+  opacity: 0.82;
+  min-width: 2.6rem;
+  text-align: right;
+}
+.dm-audio-progress {
+  grid-column: 2 / 4;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.18);
+  overflow: hidden;
+}
+.dm-audio-progress span {
+  display: block;
+  width: 0%;
+  height: 100%;
+  background: #ffffff;
+}
+.dm-msg.received .dm-audio-btn {
+  background: rgba(66,140,255,0.22);
+}
+.dm-msg.received .dm-wave span {
+  background: rgba(190,210,255,0.58);
+}
+.dm-empty-state {
+  margin: auto;
+  max-width: 360px;
+  color: #9aa4bf;
+  text-align: center;
+  padding: 2rem;
+  line-height: 1.5;
+}
+.dm-delete-btn {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.4rem;
+  border: 0;
+  background: rgba(0,0,0,0.18);
+  color: inherit;
+  border-radius: 999px;
+  padding: 0.2rem 0.45rem;
+  font-size: 0.66rem;
+  opacity: 0;
+  cursor: pointer;
+}
+.dm-msg:hover .dm-delete-btn {
+  opacity: 0.85;
 }
 
 .avatar {
@@ -501,6 +690,16 @@ body {
 .video-container video {
   width: 100%;
   height: 100%;
+  object-fit: cover;
+}
+.rtc-video-slot {
+  width: 100%;
+  height: 100%;
+  background: #090d15;
+}
+.rtc-video-slot > * {
+  width: 100% !important;
+  height: 100% !important;
   object-fit: cover;
 }
 .video-label {
@@ -723,11 +922,14 @@ body {
     max-width: 100%;
     border-right: none;
     border-bottom: 1px solid #263154;
+    flex: 1;
+    min-height: 0;
   }
 
   .dm-chat-area {
     width: 100%;
     display: none;
+    min-height: 0;
   }
 
   .dm-chat-area.active {
@@ -808,27 +1010,28 @@ body {
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="notifications.js"></script>
+  <script src="agora-utils.js"></script>
 </head>
 <body>
   <div class="sidebar">
     <div class="logo">TECH<span>TITANS</span></div>
     <div class="nav">
-      <a href="dashboard.html">📊 <span>Dashboard</span></a>
-      <a href="messages.html" id="chatNavLink">💬 <span>Group Chat</span>
+      <a href="dashboard.html"><span>Dashboard</span></a>
+      <a href="messages.html" id="chatNavLink"><span>Group Chat</span>
         <span class="sidebar-unread" id="sidebarUnreadBadge" style="display: none;">0</span>
       </a>
-      <a href="dm.html" class="active" id="dmNavLink">📩 <span>Direct Messages</span>
+      <a href="dm.html" class="active" id="dmNavLink"><span>Direct Messages</span>
         <span class="sidebar-unread" id="dmUnreadBadge" style="display: none;">0</span>
       </a>
-      <a href="profile.html">⚙️ <span>Profile</span></a>
+      <a href="profile.html"><span>Profile</span></a>
     </div>
-    <button class="logout-btn" id="logout">✕ <span>Logout</span></button>
+    <button class="logout-btn" id="logout"><span>Logout</span></button>
   </div>
 
   <div class="main">
     <div class="chat-panel">
       <div class="chat-header">
-        <span>📩 Direct Messages</span>
+        <span>Direct Messages</span>
         <div class="online-count" id="onlineCount">0 online</div>
       </div>
       <div class="messages-area" id="messagesArea" oncontextmenu="return false;"></div>
@@ -843,8 +1046,8 @@ body {
   <div id="callOptionsModal" class="call-options-modal" style="display: none;">
     <div class="call-options-content">
       <h3>Start a call with <span id="callWithUserName"></span></h3>
-      <button class="call-option-btn video" id="startVideoCallBtn">📹 Video Call</button>
-      <button class="call-option-btn" id="startVoiceCallBtn">🎤 Voice Call</button>
+      <button class="call-option-btn video" id="startVideoCallBtn">Video Call</button>
+      <button class="call-option-btn" id="startVoiceCallBtn">Voice Call</button>
       <button class="call-option-btn" id="cancelCallOptionsBtn" style="background:#ff4d4d;">Cancel</button>
     </div>
   </div>
@@ -858,18 +1061,18 @@ body {
       </div>
       <div class="call-videos">
         <div class="video-container">
-          <video id="localVideo" autoplay muted playsinline></video>
+          <div id="localVideo" class="rtc-video-slot"></div>
           <div class="video-label">You</div>
         </div>
         <div class="video-container">
-          <video id="remoteVideo" autoplay playsinline></video>
+          <div id="remoteVideo" class="rtc-video-slot"></div>
           <div class="video-label" id="remoteVideoLabel">Remote</div>
         </div>
       </div>
       <div class="call-controls">
-        <button id="muteAudioBtn" title="Mute">🎤</button>
-        <button id="muteVideoBtn" title="Stop video">📹</button>
-        <button id="hangupCallBtn" class="hangup">📞 Hang Up</button>
+        <button id="muteAudioBtn" title="Mute">Mic</button>
+        <button id="muteVideoBtn" title="Stop video">Video</button>
+        <button id="hangupCallBtn" class="hangup">Hang Up</button>
       </div>
     </div>
   </div>
@@ -896,7 +1099,7 @@ body {
       <div style="text-align: center; padding: 1rem;">
         <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
           <img id="modalAvatar" src="" alt="Avatar" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; background: #1f2a44; display: none;">
-          <div id="modalAvatarPlaceholder" style="width: 100px; height: 100px; border-radius: 50%; background: #428cff; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: white; display: none;">👤</div>
+          <div id="modalAvatarPlaceholder" style="width: 100px; height: 100px; border-radius: 50%; background: #428cff; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: white; display: none;">TT</div>
         </div>
         <h2 id="modalName" style="color: white; margin-bottom: 0.5rem;">-</h2>
         <p id="modalRole" style="color: #9aa4bf; margin-bottom: 0.5rem;">-</p>
@@ -905,21 +1108,6 @@ body {
       </div>
     </div>
   </div>
-
-<script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>TECH TITANS · Direct Messages</title>
-  <style>
-    /* ... (keep all existing styles exactly as they were) ... */
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-</head>
-<body>
-  <!-- ... (keep all HTML exactly as it was) ... -->
 
 <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
 <script>
@@ -932,6 +1120,9 @@ body {
     try {
       if (!window.supabase) throw new Error('Supabase library failed to load.');
       supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      if (window.TechTitansNotifications) {
+        window.TechTitansNotifications.connect(supabase);
+      }
     } catch (e) {
       console.error(e);
       document.body.innerHTML = '<p style="color:white;padding:2rem;">Service unavailable. Please refresh.</p>';
@@ -962,11 +1153,16 @@ body {
 
     // Agora DM call variables
     let agoraClient = null;
-    let localStream = null;
+    let localAudioTrack = null;
+    let localVideoTrack = null;
     let callType = null;
     let callTarget = null;
+    let currentDMCallId = null;
     let callActive = false;
+    let callStarting = false;
+    let joinedAgoraChannelName = null;
     let pendingCall = null;
+    let userChannel = null;
 
     // Observer for marking messages as read when scrolled into view
     let dmObserver = null;
@@ -1009,6 +1205,14 @@ body {
       return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
+    function formatAudioTime(seconds) {
+      if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+      const rounded = Math.floor(seconds);
+      const minutes = Math.floor(rounded / 60);
+      const secs = rounded % 60;
+      return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    }
+
     function stringToColor(str) {
       let hash = 0;
       for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
@@ -1024,7 +1228,8 @@ body {
     }
 
     function escapeHtml(unsafe) {
-      return unsafe.replace(/[&<>"']/g, function(m) {
+      if (unsafe === null || unsafe === undefined) return '';
+      return String(unsafe).replace(/[&<>"']/g, function(m) {
         if (m === '&') return '&amp;';
         if (m === '<') return '&lt;';
         if (m === '>') return '&gt;';
@@ -1032,6 +1237,124 @@ body {
         if (m === "'") return '&#039;';
         return m;
       });
+    }
+
+    function renderVoiceNote(audioUrl, messageId) {
+      const bars = [12, 20, 15, 26, 18, 30, 14, 24, 17, 28, 13, 22, 16, 25]
+        .map(height => `<span style="--h:${height}px"></span>`)
+        .join('');
+      return `
+        <div class="dm-voice-note" data-audio-url="${escapeHtml(audioUrl)}" data-message-id="${escapeHtml(messageId)}">
+          <button type="button" class="dm-audio-btn" aria-label="Play voice note">Play</button>
+          <div class="dm-wave">${bars}</div>
+          <span class="dm-audio-duration">0:00</span>
+          <div class="dm-audio-progress"><span></span></div>
+        </div>
+      `;
+    }
+
+    function renderMessageBubble(msg, options = {}) {
+      const isSent = options.isSent ?? msg.sender_id === currentUser.id;
+      const sender = msg.sender || options.sender || {};
+      const senderName = sender.full_name || options.senderName || 'Unknown';
+      const senderRole = sender.job_role || options.senderRole || '';
+      const isUnread = !isSent && !msg.read_at;
+      const timeStr = formatTimeOnly(msg.created_at || new Date());
+      const contentHtml = msg.audio_url
+        ? renderVoiceNote(msg.audio_url, msg.id)
+        : `<div class="dm-msg-text">${escapeHtml(msg.content)}</div>`;
+      const deleteBtn = (isSent || isCEO) ? `<button class="dm-delete-btn" title="Delete message" data-id="${msg.id}">Delete</button>` : '';
+      const seenHtml = isSent && msg.read_at
+        ? `<div class="dm-seen-indicator">Seen ${formatTimeOnly(msg.read_at)}</div>`
+        : '';
+      const statusHtml = isSent ? `<span class="dm-msg-status">${msg.read_at ? 'Seen' : 'Sent'}</span>` : '';
+
+      let avatarHtml = '';
+      if (!isSent) {
+        if (sender.avatar_url) {
+          avatarHtml = `<img src="${escapeHtml(sender.avatar_url)}" class="avatar" alt="${escapeHtml(senderName)}" data-user-id="${sender.id || msg.sender_id}" data-user-name="${escapeHtml(senderName)}" data-user-role="${escapeHtml(senderRole)}">`;
+        } else {
+          avatarHtml = `<div class="avatar" style="background-color: ${stringToColor(senderName)};" data-user-id="${sender.id || msg.sender_id}" data-user-name="${escapeHtml(senderName)}" data-user-role="${escapeHtml(senderRole)}">${getInitials(senderName)}</div>`;
+        }
+      }
+
+      return `
+        <div class="dm-msg-row ${isSent ? 'sent' : 'received'} ${isUnread ? 'unread' : ''}" data-message-id="${msg.id}" data-created-at="${msg.created_at}" data-sender-id="${msg.sender_id}">
+          ${avatarHtml}
+          <div class="dm-msg ${isSent ? 'sent' : 'received'}">
+            ${contentHtml}
+            <div class="dm-msg-meta">
+              <span>${timeStr}</span>
+              ${statusHtml}
+            </div>
+            ${seenHtml}
+            ${deleteBtn}
+          </div>
+        </div>
+      `;
+    }
+
+    function attachMessageInteractions(root = document) {
+      root.querySelectorAll('.dm-msg-row').forEach(row => row.addEventListener('contextmenu', onRightClick));
+      root.querySelectorAll('.dm-delete-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const messageId = btn.dataset.id;
+          if (confirm('Delete this message?')) await deletePrivateMessage(messageId);
+        });
+      });
+      root.querySelectorAll('.dm-msg-row .avatar, .dm-msg-row .avatar img').forEach(el => el.addEventListener('click', onAvatarClick));
+      root.querySelectorAll('.dm-voice-note').forEach(setupVoiceNoteControl);
+    }
+
+    function appendRenderedMessage(messagesDiv, msg, options = {}) {
+      const emptyState = messagesDiv.querySelector('.dm-empty-state');
+      if (emptyState) emptyState.remove();
+      messagesDiv.insertAdjacentHTML('beforeend', renderMessageBubble(msg, options));
+      const newRow = messagesDiv.lastElementChild;
+      attachMessageInteractions(newRow);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      return newRow;
+    }
+
+    function setupVoiceNoteControl(note) {
+      if (note.dataset.ready === 'true') return;
+      note.dataset.ready = 'true';
+      const audio = new Audio(note.dataset.audioUrl);
+      const button = note.querySelector('.dm-audio-btn');
+      const duration = note.querySelector('.dm-audio-duration');
+      const progress = note.querySelector('.dm-audio-progress span');
+
+      audio.addEventListener('loadedmetadata', () => {
+        duration.textContent = formatAudioTime(audio.duration);
+      });
+      audio.addEventListener('timeupdate', () => {
+        const percent = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+        progress.style.width = `${percent}%`;
+        duration.textContent = formatAudioTime(audio.duration ? audio.duration - audio.currentTime : audio.currentTime);
+      });
+      audio.addEventListener('ended', () => {
+        button.textContent = 'Play';
+        progress.style.width = '0%';
+        duration.textContent = formatAudioTime(audio.duration);
+      });
+      button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        document.querySelectorAll('.dm-voice-note').forEach(other => {
+          if (other !== note && other._audio) {
+            other._audio.pause();
+            other.querySelector('.dm-audio-btn').textContent = 'Play';
+          }
+        });
+        if (audio.paused) {
+          audio.play();
+          button.textContent = 'Pause';
+        } else {
+          audio.pause();
+          button.textContent = 'Play';
+        }
+      });
+      note._audio = audio;
     }
 
     function showToast(text) {
@@ -1164,18 +1487,15 @@ body {
 
         if (profilesError) throw profilesError;
 
-        // Get unread counts
         const unreadCounts = {};
-        for (const profile of allProfiles) {
-          const { count, error: countError } = await supabase
-            .from('private_messages')
-            .select('*', { count: 'exact', head: true })
-            .eq('sender_id', profile.id)
-            .eq('recipient_id', currentUser.id)
-            .is('read_at', null);
-          if (!countError && count > 0) {
-            unreadCounts[profile.id] = count;
-          }
+        const { data: unreadRows, error: unreadError } = await supabase
+          .from('private_messages')
+          .select('sender_id')
+          .eq('recipient_id', currentUser.id)
+          .is('read_at', null);
+        if (unreadError) console.warn('Unable to load unread counts:', unreadError);
+        for (const row of unreadRows || []) {
+          unreadCounts[row.sender_id] = (unreadCounts[row.sender_id] || 0) + 1;
         }
         dmUnreadBySender = unreadCounts;
         updateDMBadge();
@@ -1204,10 +1524,20 @@ body {
             </div>
             <div class="dm-chat-area" id="dmChatArea">
               <div class="dm-chat-header">
-                <button class="dm-back-btn" id="dmBackBtn" style="display:none;">←</button>
-                <span class="dm-chat-title"></span>
+                <div class="dm-chat-peer">
+                  <button class="dm-back-btn dm-icon-btn" id="dmBackBtn" style="display:none;" title="Back">&lt;</button>
+                  <div id="dmPeerAvatar" class="avatar" style="display:none;"></div>
+                  <div class="dm-peer-copy">
+                    <span class="dm-chat-title">Select a conversation</span>
+                    <span class="dm-chat-subtitle">Messages and calls stay private here</span>
+                  </div>
+                </div>
+                <div class="dm-chat-actions">
+                  <button class="dm-icon-btn" id="dmHeaderVoiceCallBtn" title="Voice call" disabled>Call</button>
+                  <button class="dm-icon-btn" id="dmHeaderVideoCallBtn" title="Video call" disabled>Video</button>
+                </div>
               </div>
-              <div id="dmChatMessages" class="dm-chat-messages"></div>
+              <div id="dmChatMessages" class="dm-chat-messages"><div class="dm-empty-state">Pick a member to start a direct conversation.</div></div>
               <div id="dmTypingContainer" class="typing-container" style="display: none;">
                 <div class="typing-indicator">
                   <span></span><span></span><span></span>
@@ -1215,16 +1545,18 @@ body {
                 </div>
               </div>
               <div class="dm-chat-input">
-                <input type="text" id="dmChatInput" placeholder="Type a message...">
-                <button class="voice-btn" id="dmCallPlusBtn" style="background:#2f3a5a;">➕</button>
-                <button class="voice-btn" id="dmVoiceNoteBtn" style="background:#2f3a5a;">🎤</button>
-                <button id="dmChatSendBtn">➤</button>
+                <div class="dm-composer-tools">
+                  <button class="voice-btn" id="dmVoiceNoteBtn" title="Record voice note">Mic</button>
+                </div>
+                <div class="dm-input-wrap">
+                  <input type="text" id="dmChatInput" placeholder="Message">
+                </div>
+                <button id="dmChatSendBtn">Send</button>
                 <span id="dmRecordingTimer" class="recording-timer" style="display: none;">0:00</span>
               </div>
             </div>
           </div>
         `;
-
         // Attach conversation click handlers
         document.querySelectorAll('.dm-conversation-item').forEach(item => {
           item.addEventListener('click', async () => {
@@ -1255,15 +1587,18 @@ body {
           currentRecipientId = null;
         });
 
-        // Call plus button
-        document.getElementById('dmCallPlusBtn').addEventListener('click', () => {
-          if (!currentRecipientId) { alert('Please select a conversation first.'); return; }
+        document.getElementById('dmHeaderVoiceCallBtn').addEventListener('click', () => {
+          if (!currentRecipientId) return;
           const activeItem = document.querySelector('.dm-conversation-item.active');
-          const userName = activeItem ? activeItem.dataset.userName : 'this user';
-          callWithUserNameSpan.textContent = userName;
-          callOptionsModal.style.display = 'flex';
+          const userName = activeItem ? activeItem.dataset.userName : 'User';
+          startDMCall(currentRecipientId, userName, 'voice');
         });
-
+        document.getElementById('dmHeaderVideoCallBtn').addEventListener('click', () => {
+          if (!currentRecipientId) return;
+          const activeItem = document.querySelector('.dm-conversation-item.active');
+          const userName = activeItem ? activeItem.dataset.userName : 'User';
+          startDMCall(currentRecipientId, userName, 'video');
+        });
         // DM voice recording
         const dmVoiceBtn = document.getElementById('dmVoiceNoteBtn');
         const dmRecordingTimer = document.getElementById('dmRecordingTimer');
@@ -1272,7 +1607,7 @@ body {
             if (dmMediaRecorder) {
               dmMediaRecorder.stop();
               dmIsRecording = false;
-              dmVoiceBtn.textContent = '🎤';
+              dmVoiceBtn.textContent = 'Mic';
               dmVoiceBtn.classList.remove('recording');
               dmRecordingTimer.style.display = 'none';
               if (dmRecordingTimerInterval) { clearInterval(dmRecordingTimerInterval); dmRecordingTimerInterval = null; }
@@ -1292,7 +1627,7 @@ body {
               dmMediaRecorder.start();
               dmIsRecording = true;
               dmVoiceBtn.classList.add('recording');
-              dmVoiceBtn.textContent = '🔴';
+              dmVoiceBtn.textContent = 'Stop';
               dmRecordingStartTime = Date.now();
               dmRecordingTimer.style.display = 'inline';
               dmRecordingTimerInterval = setInterval(() => {
@@ -1342,109 +1677,79 @@ body {
 
       const chatArea = document.getElementById('dmChatArea');
       const headerTitle = document.querySelector('.dm-chat-title');
+      const headerSubtitle = document.querySelector('.dm-chat-subtitle');
+      const peerAvatar = document.getElementById('dmPeerAvatar');
       const messagesDiv = document.getElementById('dmChatMessages');
       const input = document.getElementById('dmChatInput');
       const sendBtn = document.getElementById('dmChatSendBtn');
+      const voiceCallBtn = document.getElementById('dmHeaderVoiceCallBtn');
+      const videoCallBtn = document.getElementById('dmHeaderVideoCallBtn');
 
-      headerTitle.innerHTML = `${escapeHtml(otherProfile.full_name)} <span style="font-size:0.85rem;color:#9aa4bf;">(${escapeHtml(otherProfile.job_role)})</span>`;
+      const safeName = otherProfile.full_name || 'Unknown';
+      const safeRole = otherProfile.job_role || 'Member';
+      headerTitle.textContent = safeName;
+      headerSubtitle.textContent = `${safeRole} • ${onlineUsers.has(otherUserId) ? 'online' : 'offline'}`;
+      peerAvatar.style.display = 'flex';
+      peerAvatar.style.backgroundColor = stringToColor(safeName);
+      peerAvatar.textContent = getInitials(safeName);
+      voiceCallBtn.disabled = false;
+      videoCallBtn.disabled = false;
       chatArea.style.display = 'flex';
       input.focus();
+      messagesDiv.innerHTML = '<div class="dm-empty-state">Loading conversation...</div>';
 
       try {
         let { data, error } = await supabase
           .from('private_messages')
-          .select(`*, sender:profiles!sender_id (id, full_name, avatar_url)`)
+          .select(`*, sender:profiles!sender_id (id, full_name, job_role, avatar_url)`)
           .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`)
           .order('created_at', { ascending: true });
 
         if (error && error.message && error.message.includes('Could not find a relationship')) {
-          console.warn('Join failed, falling back to separate profile fetch:', error.message);
+          console.warn('Join failed, falling back to selected profile data:', error.message);
           const { data: msgs, error: msgsError } = await supabase
             .from('private_messages')
             .select('*')
             .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`)
             .order('created_at', { ascending: true });
           if (msgsError) throw msgsError;
-          data = await Promise.all(msgs.map(async (msg) => {
-            const senderId = msg.sender_id;
-            const { data: sender } = await supabase.from('profiles').select('id, full_name, avatar_url').eq('id', senderId).single();
-            return { ...msg, sender };
+          data = (msgs || []).map((msg) => ({
+            ...msg,
+            sender: msg.sender_id === currentUser.id
+              ? { id: currentUser.id, full_name: currentUserFullName, job_role: currentRole }
+              : { id: otherUserId, full_name: safeName, job_role: safeRole }
           }));
         } else if (error) { throw error; }
 
         let html = '';
         let lastDate = null;
-        for (const msg of data) {
-          const isSent = msg.sender_id === currentUser.id;
-          const timeStr = formatTimeOnly(msg.created_at);
+        for (const msg of data || []) {
           const dateHeader = maybeAppendDateSeparator(lastDate, msg.created_at);
           if (dateHeader) html += dateHeader.replace('date-separator', 'dm-date-separator');
           lastDate = msg.created_at;
-
-          let seenHtml = '';
-          if (isSent && msg.read_at) {
-            const { data: reader } = await supabase.from('profiles').select('full_name').eq('id', otherUserId).single();
-            const readerName = reader?.full_name || 'User';
-            seenHtml = `<div class="dm-seen-indicator"><span class="double-tick">✓✓</span> Seen by ${escapeHtml(readerName)} at ${formatTimeOnly(msg.read_at)}</div>`;
-          }
-
-          let contentHtml = '';
-          if (msg.audio_url) contentHtml = `<audio controls src="${escapeHtml(msg.audio_url)}"></audio>`;
-          else contentHtml = escapeHtml(msg.content);
-
-          const deleteBtn = (isSent || isCEO) ? `<button class="dm-delete-btn" data-id="${msg.id}">🗑️</button>` : '';
-          const isUnread = !isSent && !msg.read_at;
-
-          let avatarHtml = '';
-          if (!isSent) {
-            const sender = msg.sender;
-            const senderName = sender?.full_name || 'Unknown';
-            const avatarUrl = sender?.avatar_url;
-            const avatarColor = stringToColor(senderName);
-            if (avatarUrl) {
-              avatarHtml = `<img src="${escapeHtml(avatarUrl)}" class="avatar" alt="${escapeHtml(senderName)}" data-user-id="${sender.id}" data-user-name="${escapeHtml(senderName)}" data-user-role="${msg.role || ''}">`;
-            } else {
-              avatarHtml = `<div class="avatar" style="background-color: ${avatarColor};" data-user-id="${sender.id}" data-user-name="${escapeHtml(senderName)}" data-user-role="${msg.role || ''}">${getInitials(senderName)}</div>`;
-            }
-          }
-
-          html += `
-            <div class="dm-msg-row ${isSent ? 'sent' : 'received'} ${isUnread ? 'unread' : ''}" data-message-id="${msg.id}" data-created-at="${msg.created_at}" data-sender-id="${msg.sender_id}">
-              ${avatarHtml}
-              <div class="dm-msg ${isSent ? 'sent' : 'received'}">
-                ${contentHtml}
-                <small>${timeStr}</small>
-                ${seenHtml}
-                ${deleteBtn}
-              </div>
-            </div>
-          `;
-        }
-        messagesDiv.innerHTML = html || '<div style="color:#9aa4bf; text-align:center; padding:2rem;">No messages yet. Say hello!</div>';
-
-        // Attach right-click and delete handlers
-        document.querySelectorAll('.dm-msg-row').forEach(row => row.addEventListener('contextmenu', onRightClick));
-        document.querySelectorAll('.dm-delete-btn').forEach(btn => {
-          btn.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            const messageId = btn.dataset.id;
-            if (confirm('Delete this message?')) await deletePrivateMessage(messageId);
+          html += renderMessageBubble(msg, {
+            isSent: msg.sender_id === currentUser.id,
+            sender: msg.sender || { id: otherUserId, full_name: safeName, job_role: safeRole }
           });
-        });
-        document.querySelectorAll('.dm-msg-row .avatar, .dm-msg-row .avatar img').forEach(el => el.addEventListener('click', onAvatarClick));
+        }
+        messagesDiv.innerHTML = html || '<div class="dm-empty-state">No messages yet. Send the first one.</div>';
+        attachMessageInteractions(messagesDiv);
 
-        // Setup observer to mark unread messages as read when scrolled into view
         setupDmObserver();
 
         sendBtn.onclick = () => sendPrivateMessage(otherUserId);
-        input.onkeypress = (e) => { if (e.key === 'Enter') sendPrivateMessage(otherUserId); };
+        input.onkeydown = (e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendPrivateMessage(otherUserId);
+          }
+        };
 
-        // Set up DM typing subscription
         const typingChannel = `typing-dm-${Math.min(currentUser.id, otherUserId)}-${Math.max(currentUser.id, otherUserId)}`;
         dmTypingSubscription = supabase
           .channel(typingChannel)
           .on('broadcast', { event: 'typing' }, (payload) => {
-            const { userId, userName, timestamp } = payload.payload;
+            const { userId, userName } = payload.payload;
             if (userId === currentUser.id) return;
             if (dmTypingTimeouts[userId]) clearTimeout(dmTypingTimeouts[userId]);
             dmActiveTypers.add(userName);
@@ -1458,7 +1763,7 @@ body {
           .subscribe();
 
         let dmTypingTimeout;
-        input.addEventListener('input', () => {
+        input.oninput = () => {
           if (dmTypingTimeout) clearTimeout(dmTypingTimeout);
           supabase.channel(typingChannel).send({
             type: 'broadcast',
@@ -1466,17 +1771,15 @@ body {
             payload: { userId: currentUser.id, userName: currentUserFullName, timestamp: Date.now() }
           });
           dmTypingTimeout = setTimeout(() => {}, 2000);
-        });
+        };
 
-        // Scroll to bottom
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
         input.value = '';
       } catch (err) {
         console.error('Load private chat error:', err);
-        messagesDiv.innerHTML = '<div style="color:#ff628c;">Failed to load messages.</div>';
+        messagesDiv.innerHTML = '<div style="color:#ff628c; padding: 1rem;">Failed to load messages.</div>';
       }
     }
-
     // ==================== SEND PRIVATE MESSAGE ====================
     async function sendPrivateMessage(otherUserId) {
       const input = document.getElementById('dmChatInput');
@@ -1493,26 +1796,7 @@ body {
         if (error) throw error;
 
         const messagesDiv = document.getElementById('dmChatMessages');
-        const timeStr = formatTimeOnly(data.created_at);
-        const msgHtml = `
-          <div class="dm-msg-row sent" data-message-id="${data.id}" data-created-at="${data.created_at}" data-sender-id="${currentUser.id}">
-            <div class="dm-msg sent">
-              ${escapeHtml(data.content)}
-              <small>${timeStr}</small>
-              <button class="dm-delete-btn" data-id="${data.id}">🗑️</button>
-            </div>
-          </div>
-        `;
-        messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-        const newBtn = messagesDiv.querySelector(`.dm-delete-btn[data-id="${data.id}"]`);
-        if (newBtn) {
-          newBtn.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            if (confirm('Delete this message?')) await deletePrivateMessage(data.id);
-          });
-        }
+        appendRenderedMessage(messagesDiv, data, { isSent: true });
       } catch (err) { console.error('Send private message error:', err); alert('Failed to send: ' + err.message); }
     }
 
@@ -1537,24 +1821,7 @@ body {
         if (error) throw error;
 
         const messagesDiv = document.getElementById('dmChatMessages');
-        const timeStr = formatTimeOnly(data.created_at);
-        const msgHtml = `
-          <div class="dm-msg-row sent" data-message-id="${data.id}" data-created-at="${data.created_at}" data-sender-id="${currentUser.id}">
-            <div class="dm-msg sent">
-              <audio controls src="${escapeHtml(audioUrl)}"></audio>
-              <small>${timeStr}</small>
-              <button class="dm-delete-btn" data-id="${data.id}">🗑️</button>
-            </div>
-          </div>
-        `;
-        messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-        const newBtn = messagesDiv.querySelector(`.dm-delete-btn[data-id="${data.id}"]`);
-        if (newBtn) newBtn.addEventListener('click', async (e) => {
-          e.stopPropagation();
-          if (confirm('Delete this message?')) await deletePrivateMessage(data.id);
-        });
+        appendRenderedMessage(messagesDiv, data, { isSent: true });
       } catch (err) { console.error('Insert private voice note error:', err); alert('Failed to send voice note: ' + err.message); }
     }
 
@@ -1640,8 +1907,8 @@ body {
       if (error || !profile) { console.error('Failed to load profile', error); return; }
 
       modalName.textContent = profile.full_name || userName;
-      modalRole.textContent = profile.job_role || userRole || '—';
-      modalJoined.textContent = profile.created_at ? `Joined ${new Date(profile.created_at).toLocaleDateString()}` : '—';
+      modalRole.textContent = profile.job_role || userRole || '-';
+      modalJoined.textContent = profile.created_at ? `Joined ${new Date(profile.created_at).toLocaleDateString()}` : '-';
 
       if (profile.avatar_url) {
         modalAvatar.src = profile.avatar_url;
@@ -1672,41 +1939,16 @@ body {
           // If we are currently in that conversation, append to UI
           if (currentRecipientId === newMsg.sender_id) {
             const messagesDiv = document.getElementById('dmChatMessages');
-            const timeStr = formatTimeOnly(newMsg.created_at);
 
             const { data: senderProfile } = await supabase
               .from('profiles')
-              .select('id, full_name, avatar_url')
+              .select('id, full_name, job_role, avatar_url')
               .eq('id', newMsg.sender_id)
               .single();
             const sender = senderProfile || { full_name: 'Unknown', avatar_url: null };
 
-            let contentHtml = '';
-            if (newMsg.audio_url) contentHtml = `<audio controls src="${escapeHtml(newMsg.audio_url)}"></audio>`;
-            else contentHtml = escapeHtml(newMsg.content);
+            const newRow = appendRenderedMessage(messagesDiv, { ...newMsg, sender }, { isSent: false, sender });
 
-            let avatarHtml = '';
-            if (sender.avatar_url) {
-              avatarHtml = `<img src="${escapeHtml(sender.avatar_url)}" class="avatar" alt="${escapeHtml(sender.full_name)}" data-user-id="${sender.id}" data-user-name="${escapeHtml(sender.full_name)}" data-user-role="">`;
-            } else {
-              const avatarColor = stringToColor(sender.full_name);
-              avatarHtml = `<div class="avatar" style="background-color: ${avatarColor};" data-user-id="${sender.id}" data-user-name="${escapeHtml(sender.full_name)}" data-user-role="">${getInitials(sender.full_name)}</div>`;
-            }
-
-            const msgHtml = `
-              <div class="dm-msg-row received unread" data-message-id="${newMsg.id}" data-created-at="${newMsg.created_at}" data-sender-id="${newMsg.sender_id}">
-                ${avatarHtml}
-                <div class="dm-msg received">
-                  ${contentHtml}
-                  <small>${timeStr}</small>
-                </div>
-              </div>
-            `;
-            messagesDiv.insertAdjacentHTML('beforeend', msgHtml);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-            // Observe the new message for auto-read
-            const newRow = messagesDiv.lastElementChild;
             if (dmObserver) dmObserver.observe(newRow);
             return;
           }
@@ -1777,131 +2019,366 @@ body {
     }
 
     // ==================== AGORA DM CALL FUNCTIONS ====================
-    function getDmChannelName(userA, userB) {
+    async function getDmChannelName(userA, userB) {
       const sorted = [userA, userB].sort();
-      return `dm_${sorted[0]}_${sorted[1]}`;
+      return window.TechTitansAgora.compactChannelName('dm', sorted.join('_'));
+    }
+
+    function isValidAgoraChannelName(channelName) {
+      return window.TechTitansAgora.isValidChannelName(channelName);
+    }
+
+    function normalizeCallType(mode) {
+      return mode === 'video' ? 'video' : 'voice';
+    }
+
+    async function getAgoraToken(channelName) {
+      if (!currentUser?.id) {
+        throw new Error('You must be signed in to start a call.');
+      }
+      if (!isValidAgoraChannelName(channelName)) {
+        throw new Error('Invalid call channel name.');
+      }
+
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !sessionData?.session?.access_token) {
+        throw new Error('Authentication expired. Please log in again.');
+      }
+
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/agora-token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionData.session.access_token}`
+        },
+        body: JSON.stringify({
+          channelName,
+          uid: currentUser.id
+        })
+      });
+
+      let data = {};
+      try {
+        data = await response.json();
+      } catch (error) {
+        throw new Error('Token server returned an invalid response.');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Unable to get Agora token.');
+      }
+      if (!data.token) {
+        throw new Error('Token server did not return an Agora token.');
+      }
+
+      return data.token;
+    }
+
+    function setupAgoraTokenRefresh(client, getChannelName) {
+      if (!client?.on) return;
+      const renewToken = async () => {
+        try {
+          const freshToken = await getAgoraToken(getChannelName());
+          if (typeof client.renewToken === 'function') {
+            await client.renewToken(freshToken);
+          }
+        } catch (error) {
+          console.error('Unable to renew Agora token:', error);
+        }
+      };
+      client.on('token-privilege-will-expire', renewToken);
+      client.on('token-privilege-did-expire', renewToken);
+    }
+
+    async function sendUserBroadcast(userId, event, payload) {
+      const channel = supabase.channel(`user-${userId}`);
+      await new Promise((resolve) => {
+        channel.subscribe((status) => {
+          if (status === 'SUBSCRIBED' || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') resolve();
+        });
+      });
+      try {
+        await channel.send({ type: 'broadcast', event, payload });
+      } finally {
+        try { channel.unsubscribe(); } catch (err) {}
+      }
+    }
+
+    async function cleanupLocalCallMedia() {
+      if (localAudioTrack) {
+        localAudioTrack.stop();
+        localAudioTrack.close();
+        localAudioTrack = null;
+      }
+      if (localVideoTrack) {
+        localVideoTrack.stop();
+        localVideoTrack.close();
+        localVideoTrack = null;
+      }
+      localVideo.innerHTML = '';
+      remoteVideo.innerHTML = '';
+    }
+
+    async function publishLocalTracks(client, mode) {
+      if (!window.AgoraRTC) {
+        throw new Error('Calling service did not load. Check your internet connection and refresh.');
+      }
+      if (!client) {
+        throw new Error('Call client is not available.');
+      }
+
+      localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+      const tracks = [localAudioTrack];
+
+      if (mode === 'video') {
+        localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+        tracks.push(localVideoTrack);
+        localVideoTrack.play('localVideo');
+      }
+
+      await client.publish(tracks);
     }
 
     async function startDMCall(targetUserId, targetUserName, mode) {
-      callType = mode;
+      if (callActive || callStarting) { alert('You are already joining or in a call.'); return; }
+      callStarting = true;
+      callType = normalizeCallType(mode);
       callTarget = targetUserId;
+      audioEnabled = true;
+      videoEnabled = true;
 
-      try {
-        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: mode === 'video' });
-        localVideo.srcObject = localStream;
-      } catch (err) { console.error('Failed to get media:', err); alert('Could not access camera/microphone.'); return; }
+      const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+      agoraClient = client;
 
-      agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-
-      agoraClient.on('user-published', async (user, mediaType) => {
-        await agoraClient.subscribe(user, mediaType);
+      client.on('user-published', async (user, mediaType) => {
+        await client.subscribe(user, mediaType);
         if (mediaType === 'video') { const remoteVideoTrack = user.videoTrack; remoteVideoTrack.play('remoteVideo'); }
         if (mediaType === 'audio') user.audioTrack.play();
         remoteVideoLabel.textContent = targetUserName;
       });
 
-      const channelName = getDmChannelName(currentUser.id, targetUserId);
-      await agoraClient.join(AGORA_APP_ID, channelName, null, currentUser.id);
-
-      const audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-      let videoTrack = null;
-      if (mode === 'video') {
-        videoTrack = await AgoraRTC.createCameraVideoTrack();
-        await agoraClient.publish([audioTrack, videoTrack]);
-        videoTrack.play('localVideo');
-      } else {
-        await agoraClient.publish([audioTrack]);
+      let channelName = null;
+      try {
+        channelName = await getDmChannelName(currentUser.id, targetUserId);
+        setupAgoraTokenRefresh(client, () => channelName);
+        const token = await getAgoraToken(channelName);
+        await client.join(AGORA_APP_ID, channelName, token, currentUser.id);
+        joinedAgoraChannelName = channelName;
+        await publishLocalTracks(client, callType);
+        callActive = true;
+        callStarting = false;
+      } catch (err) {
+        console.error('Failed to start call:', err);
+        await hangUpCall(false);
+        alert(err.message || 'Could not access camera/microphone or join the call.');
+        return;
       }
 
-      await supabase.channel(`user-${targetUserId}`).send({
-        type: 'broadcast',
-        event: 'call-offer',
-        payload: {
-          callerId: currentUser.id,
-          callerName: currentUserFullName,
-          callChannelName: channelName,
-          callType: mode
+      const { data: callData, error: callError } = await supabase.from('calls')
+        .insert({ initiated_by: currentUser.id, type: callType, status: 'ringing', room_id: channelName })
+        .select()
+        .single();
+      if (callError || !callData) {
+        console.error('Unable to create call record:', callError);
+      } else {
+        currentDMCallId = callData.id;
+        try {
+          await supabase.from('call_participants').insert([
+            { call_id: callData.id, user_id: currentUser.id, status: 'joined' },
+            { call_id: callData.id, user_id: targetUserId, status: 'invited' }
+          ]);
+        } catch (participantError) {
+          console.warn('Unable to insert call participants:', participantError);
         }
+      }
+
+      await sendUserBroadcast(targetUserId, 'call-offer', {
+        callerId: currentUser.id,
+        callerName: currentUserFullName,
+        callChannelName: channelName,
+        callType,
+        callId: currentDMCallId
       });
 
       callOptionsModal.style.display = 'none';
       callModalTitle.textContent = `Calling ${targetUserName}...`;
       callModal.style.display = 'flex';
       callActive = true;
+      callStarting = false;
     }
 
     async function acceptDMCall() {
       if (!pendingCall) return;
+      if (callActive || callStarting) { alert('You are already joining or in a call.'); return; }
+      callStarting = true;
       incomingCallModal.style.display = 'none';
 
-      const { callerId, callerName, callChannelName, callType } = pendingCall;
-      callType = callType;
+      const { callerId, callerName, callChannelName, callType: incomingType, callId } = pendingCall;
+      callType = normalizeCallType(incomingType);
       callTarget = callerId;
+      currentDMCallId = callId || null;
+      audioEnabled = true;
+      videoEnabled = true;
 
-      try {
-        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: callType === 'video' });
-        localVideo.srcObject = localStream;
-      } catch (err) { console.error('Failed to get media:', err); return; }
+      if (callId) {
+        try {
+          await supabase.from('call_participants')
+            .update({ status: 'accepted' })
+            .eq('call_id', callId)
+            .eq('user_id', currentUser.id);
+          await supabase.from('call_events').insert({
+            call_id: callId,
+            event_type: 'call_accepted',
+            user_id: currentUser.id,
+            metadata: { callType, room_id: callChannelName }
+          });
+          await supabase.from('calls').update({ status: 'active', started_at: new Date().toISOString() }).eq('id', callId);
+        } catch (eventError) {
+          console.warn('Unable to record call accept event:', eventError);
+        }
+      }
 
-      agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+      const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+      agoraClient = client;
 
-      agoraClient.on('user-published', async (user, mediaType) => {
-        await agoraClient.subscribe(user, mediaType);
+      client.on('user-published', async (user, mediaType) => {
+        await client.subscribe(user, mediaType);
         if (mediaType === 'video') { const remoteVideoTrack = user.videoTrack; remoteVideoTrack.play('remoteVideo'); }
         if (mediaType === 'audio') user.audioTrack.play();
         remoteVideoLabel.textContent = callerName;
       });
 
-      await agoraClient.join(AGORA_APP_ID, callChannelName, null, currentUser.id);
-
-      const audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-      let videoTrack = null;
-      if (callType === 'video') {
-        videoTrack = await AgoraRTC.createCameraVideoTrack();
-        await agoraClient.publish([audioTrack, videoTrack]);
-        videoTrack.play('localVideo');
-      } else {
-        await agoraClient.publish([audioTrack]);
+      try {
+        setupAgoraTokenRefresh(client, () => callChannelName);
+        const token = await getAgoraToken(callChannelName);
+        await client.join(AGORA_APP_ID, callChannelName, token, currentUser.id);
+        joinedAgoraChannelName = callChannelName;
+        await publishLocalTracks(client, callType);
+        if (callTarget) {
+          await sendUserBroadcast(callTarget, 'call-accepted', {
+            callId: currentDMCallId,
+            acceptedBy: currentUser.id,
+            calleeName: currentUserFullName,
+            callType
+          });
+        }
+      } catch (err) {
+        console.error('Failed to accept call:', err);
+        await hangUpCall(false);
+        alert(err.message || 'Could not access camera/microphone or join the call.');
+        return;
       }
 
       callModalTitle.textContent = `Call with ${callerName}`;
       callModal.style.display = 'flex';
       callActive = true;
+      callStarting = false;
     }
 
-    async function hangUpCall() {
+    async function hangUpCall(shouldNotifyPeer = true) {
+      if (currentDMCallId) {
+        try {
+          await supabase.from('call_events').insert({
+            call_id: currentDMCallId,
+            event_type: 'call_ended',
+            user_id: currentUser.id,
+            metadata: { ended_by: currentUser.id, callType, callerName: currentUserFullName }
+          });
+          await supabase.from('calls').update({ status: 'ended', ended_at: new Date().toISOString() }).eq('id', currentDMCallId);
+          if (callTarget && shouldNotifyPeer) {
+            await sendUserBroadcast(callTarget, 'call-ended', {
+              callId: currentDMCallId,
+              endedBy: currentUser.id,
+              callType,
+              callerName: currentUserFullName
+            });
+          }
+        } catch (endError) {
+          console.warn('Unable to record DM call end event:', endError);
+        }
+      }
+
       if (agoraClient) { await agoraClient.leave(); agoraClient = null; }
-      if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
-      localVideo.srcObject = null;
-      remoteVideo.srcObject = null;
+      await cleanupLocalCallMedia();
       callModal.style.display = 'none';
+      incomingCallModal.style.display = 'none';
       callActive = false;
+      callStarting = false;
+      joinedAgoraChannelName = null;
+      currentDMCallId = null;
+      callTarget = null;
+      pendingCall = null;
+      if (window.TechTitansNotifications) {
+        window.TechTitansNotifications.display('Call ended', {
+          body: 'Your direct call has ended.',
+          url: 'dm.html'
+        });
+      }
     }
 
     function setupUserChannel() {
-      const userChannel = supabase.channel(`user-${currentUser.id}`);
-      userChannel
+      const channel = supabase.channel(`user-${currentUser.id}`);
+      channel
         .on('broadcast', { event: 'call-offer' }, ({ payload }) => {
-          const { callerId, callerName, callChannelName, callType } = payload;
-          pendingCall = { callerId, callerName, callChannelName, callType };
+          const { callerId, callerName, callChannelName, callType, callId } = payload;
+          if (callActive) {
+            sendUserBroadcast(callerId, 'call-missed', {
+              callId,
+              missedBy: currentUser.id,
+              callType,
+              calleeName: currentUserFullName,
+              reason: 'busy'
+            });
+            return;
+          }
+
+          pendingCall = { callerId, callerName, callChannelName, callType, callId };
           incomingCallerName.textContent = callerName;
-          incomingCallType.textContent = callType === 'video' ? '📹 Video call' : '🎤 Voice call';
+          incomingCallType.textContent = callType === 'video' ? 'Video call' : 'Voice call';
           incomingCallModal.style.display = 'flex';
+
+          if (window.TechTitansNotifications) {
+            window.TechTitansNotifications.display(`Incoming ${callType} call from ${callerName}`, {
+              body: `${callerName} is calling you. Answer in DM to join.`,
+              url: 'dm.html'
+            });
+          }
+        })
+        .on('broadcast', { event: 'call-accepted' }, ({ payload }) => {
+          if (!currentDMCallId || payload.callId !== currentDMCallId) return;
+          callModalTitle.textContent = `Call with ${payload.calleeName || 'teammate'}`;
+          showToast(`${payload.calleeName || 'Your teammate'} joined the call`);
+        })
+        .on('broadcast', { event: 'call-ended' }, async ({ payload }) => {
+          if (currentDMCallId && payload.callId && payload.callId !== currentDMCallId) return;
+          showToast('Call ended');
+          await hangUpCall(false);
+        })
+        .on('broadcast', { event: 'call-missed' }, async ({ payload }) => {
+          if (currentDMCallId && payload.callId && payload.callId !== currentDMCallId) return;
+          showToast(payload.reason === 'busy' ? 'User is busy on another call' : 'Call declined or missed');
+          await hangUpCall(false);
         })
         .subscribe();
-      return userChannel;
+      return channel;
     }
-    let userChannel = null;
 
     // ==================== MUTE CONTROLS ====================
     let audioEnabled = true, videoEnabled = true;
-    document.getElementById('muteAudioBtn').addEventListener('click', () => {
-      if (localStream) { localStream.getAudioTracks().forEach(t => t.enabled = !t.enabled); audioEnabled = !audioEnabled; document.getElementById('muteAudioBtn').textContent = audioEnabled ? '🎤' : '🔇'; }
+    document.getElementById('muteAudioBtn').addEventListener('click', async () => {
+      if (localAudioTrack) {
+        audioEnabled = !audioEnabled;
+        await localAudioTrack.setEnabled(audioEnabled);
+        document.getElementById('muteAudioBtn').textContent = audioEnabled ? 'Mic' : 'Muted';
+      }
     });
-    document.getElementById('muteVideoBtn').addEventListener('click', () => {
-      if (localStream) { localStream.getVideoTracks().forEach(t => t.enabled = !t.enabled); videoEnabled = !videoEnabled; document.getElementById('muteVideoBtn').textContent = videoEnabled ? '📹' : '🚫'; }
+    document.getElementById('muteVideoBtn').addEventListener('click', async () => {
+      if (localVideoTrack) {
+        videoEnabled = !videoEnabled;
+        await localVideoTrack.setEnabled(videoEnabled);
+        document.getElementById('muteVideoBtn').textContent = videoEnabled ? 'Video' : 'Video off';
+      }
     });
-
     // ==================== NAVIGATION & EVENT LISTENERS ====================
     document.getElementById('logout').addEventListener('click', async () => {
       if (globalDmSubscription) globalDmSubscription.unsubscribe();
@@ -1932,11 +2409,42 @@ body {
       if (!currentRecipientId) return;
       const activeItem = document.querySelector('.dm-conversation-item.active');
       const userName = activeItem ? activeItem.dataset.userName : 'User';
-      startDMCall(currentRecipientId, userName, 'audio');
+      startDMCall(currentRecipientId, userName, 'voice');
     });
     document.getElementById('cancelCallOptionsBtn').addEventListener('click', () => { callOptionsModal.style.display = 'none'; });
     document.getElementById('acceptCallBtn').addEventListener('click', acceptDMCall);
-    document.getElementById('declineCallBtn').addEventListener('click', () => { incomingCallModal.style.display = 'none'; pendingCall = null; });
+    document.getElementById('declineCallBtn').addEventListener('click', async () => {
+      if (pendingCall && pendingCall.callId) {
+        try {
+          await supabase.from('call_participants')
+            .update({ status: 'declined' })
+            .eq('call_id', pendingCall.callId)
+            .eq('user_id', currentUser.id);
+          await supabase.from('call_events').insert({
+            call_id: pendingCall.callId,
+            event_type: 'call_declined',
+            user_id: currentUser.id,
+            metadata: { callerId: pendingCall.callerId, missed: true, callType: pendingCall.callType, callerName: currentUserFullName }
+          });
+          await sendUserBroadcast(pendingCall.callerId, 'call-missed', {
+            callId: pendingCall.callId,
+            missedBy: currentUser.id,
+            callType: pendingCall.callType,
+            calleeName: currentUserFullName
+          });
+        } catch (declineError) {
+          console.warn('Unable to record call decline event:', declineError);
+        }
+      }
+      incomingCallModal.style.display = 'none';
+      pendingCall = null;
+      if (window.TechTitansNotifications) {
+        window.TechTitansNotifications.display('Missed call', {
+          body: 'You missed an incoming call.',
+          url: 'dm.html'
+        });
+      }
+    });
     document.getElementById('closeCallModalBtn').addEventListener('click', hangUpCall);
     document.getElementById('hangupCallBtn').addEventListener('click', hangUpCall);
 
@@ -1970,5 +2478,4 @@ body {
 </script>
 </body>
 </html>
-</body>
-</html>
+

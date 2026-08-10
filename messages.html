@@ -707,6 +707,16 @@
       height: 100%;
       object-fit: cover;
     }
+    .rtc-video-slot {
+      width: 100%;
+      height: 100%;
+      background: #090d15;
+    }
+    .rtc-video-slot > * {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover;
+    }
     .video-label {
       position: absolute;
       bottom: 0.5rem;
@@ -756,6 +766,7 @@
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="notifications.js"></script>
+  <script src="agora-utils.js"></script>
 </head>
 <body>
   <div class="sidebar">
@@ -812,11 +823,11 @@
       </div>
       <div class="call-videos">
         <div class="video-container">
-          <video id="localVideo" autoplay muted playsinline></video>
+          <div id="localVideo" class="rtc-video-slot"></div>
           <div class="video-label">You</div>
         </div>
         <div class="video-container">
-          <video id="remoteVideo" autoplay playsinline></video>
+          <div id="remoteVideo" class="rtc-video-slot"></div>
           <div class="video-label" id="remoteVideoLabel">Remote</div>
         </div>
       </div>
@@ -859,6 +870,9 @@
     try {
       if (!window.supabase) throw new Error('Supabase library failed to load.');
       supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      if (window.TechTitansNotifications) {
+        window.TechTitansNotifications.connect(supabase);
+      }
     } catch (e) {
       console.error(e);
       document.body.innerHTML = '<p style="color:white;padding:2rem;">Service unavailable. Please refresh.</p>';
@@ -874,6 +888,7 @@
     let availableRoles = [];
     let messageSubscription = null;
     let messageReadsSubscription = null;
+    let groupCallSubscription = null;
     let readMessageIds = new Set();
     let currentUnreadCount = 0;
     let totalUnreadCount = 0;
@@ -900,8 +915,11 @@
 
     // Agora group call variables
     let groupAgoraClient = null;
-    let localStream = null;
+    let localAudioTrack = null;
+    let localVideoTrack = null;
     let callActive = false;
+    let callStarting = false;
+    let joinedAgoraChannelName = null;
     let groupCallChannelName = null;
 
     // DOM elements
@@ -1771,6 +1789,34 @@
 
     function setupGroupSubscription() {
       if (messageSubscription) { messageSubscription.unsubscribe(); messageSubscription = null; }
+      if (groupCallSubscription) { groupCallSubscription.unsubscribe(); groupCallSubscription = null; }
+
+      const groupCallRole = isCEO ? selectedGroupRole : currentRole;
+      if (groupCallRole) {
+        groupCallSubscription = supabase
+          .channel(`group-call-${groupCallRole}`)
+          .on('broadcast', { event: 'group-call-started' }, ({ payload }) => {
+            if (!payload || payload.callerId === currentUser.id) return;
+            showToast(`Group call started for ${groupCallRole} by ${payload.callerName}`);
+            if (window.TechTitansNotifications) {
+              window.TechTitansNotifications.display(`Group call started for ${groupCallRole}`, {
+                body: `${payload.callerName} has started a call for ${groupCallRole}.`,
+                url: 'messages.html'
+              });
+            }
+          })
+          .on('broadcast', { event: 'group-call-ended' }, ({ payload }) => {
+            if (!payload || payload.endedBy === currentUser.id) return;
+            showToast(`Group call ended for ${groupCallRole}`);
+            if (window.TechTitansNotifications) {
+              window.TechTitansNotifications.display(`Group call ended for ${groupCallRole}`, {
+                body: `${payload.callerName || 'Someone'} ended the call.`,
+                url: 'messages.html'
+              });
+            }
+          })
+          .subscribe();
+      }
 
       if (isCEO) {
         messageSubscription = supabase
@@ -2008,25 +2054,98 @@
     }
 
     // --- Agora group call functions ---
+    function isValidAgoraChannelName(channelName) {
+      return window.TechTitansAgora.isValidChannelName(channelName);
+    }
+
+    async function getAgoraToken(channelName) {
+      if (!currentUser?.id) {
+        throw new Error('You must be signed in to start a call.');
+      }
+      if (!isValidAgoraChannelName(channelName)) {
+        throw new Error('Invalid call channel name.');
+      }
+
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !sessionData?.session?.access_token) {
+        throw new Error('Authentication expired. Please log in again.');
+      }
+
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/agora-token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionData.session.access_token}`
+        },
+        body: JSON.stringify({
+          channelName,
+          uid: currentUser.id
+        })
+      });
+
+      let data = {};
+      try {
+        data = await response.json();
+      } catch (error) {
+        throw new Error('Token server returned an invalid response.');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Unable to get Agora token.');
+      }
+      if (!data.token) {
+        throw new Error('Token server did not return an Agora token.');
+      }
+
+      return data.token;
+    }
+
+    function setupAgoraTokenRefresh(client, getChannelName) {
+      if (!client?.on) return;
+      const renewToken = async () => {
+        try {
+          const freshToken = await getAgoraToken(getChannelName());
+          if (typeof client.renewToken === 'function') {
+            await client.renewToken(freshToken);
+          }
+        } catch (error) {
+          console.error('Unable to renew Agora token:', error);
+        }
+      };
+      client.on('token-privilege-will-expire', renewToken);
+      client.on('token-privilege-did-expire', renewToken);
+    }
+
+    async function cleanupGroupCallMedia() {
+      if (localAudioTrack) {
+        localAudioTrack.stop();
+        localAudioTrack.close();
+        localAudioTrack = null;
+      }
+      if (localVideoTrack) {
+        localVideoTrack.stop();
+        localVideoTrack.close();
+        localVideoTrack = null;
+      }
+      localVideo.innerHTML = '';
+      remoteVideo.innerHTML = '';
+    }
+
     async function joinGroupCall() {
-      if (callActive) { alert('You are already in a group call.'); return; }
+      if (callActive || callStarting) { alert('You are already joining or in a group call.'); return; }
       if (!selectedGroupRole && !currentRole) { alert('No group selected.'); return; }
       const role = isCEO ? selectedGroupRole : currentRole;
       if (!role) { alert('Cannot determine group role.'); return; }
+      if (!window.AgoraRTC) { alert('Calling service did not load. Check your connection and refresh.'); return; }
+      callStarting = true;
 
-      try {
-        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-        localVideo.srcObject = localStream;
-      } catch (err) { console.error('Failed to get media:', err); alert('Could not access camera/microphone.'); return; }
+      const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+      groupAgoraClient = client;
 
-      groupAgoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-      groupCallChannelName = `group_${role}`;
-
-      groupAgoraClient.on('user-published', async (user, mediaType) => {
-        await groupAgoraClient.subscribe(user, mediaType);
+      client.on('user-published', async (user, mediaType) => {
+        await client.subscribe(user, mediaType);
         if (mediaType === 'video') {
-          const remoteVideoTrack = user.videoTrack;
-          remoteVideoTrack.play('remoteVideo');
+          user.videoTrack.play('remoteVideo');
         }
         if (mediaType === 'audio') {
           user.audioTrack.play();
@@ -2034,36 +2153,80 @@
         remoteVideoLabel.textContent = `Group member ${user.uid}`;
       });
 
-      await groupAgoraClient.join(AGORA_APP_ID, groupCallChannelName, null, currentUser.id);
+      try {
+        groupCallChannelName = await window.TechTitansAgora.compactChannelName('group', role);
+        setupAgoraTokenRefresh(client, () => groupCallChannelName);
+        const token = await getAgoraToken(groupCallChannelName);
+        await client.join(AGORA_APP_ID, groupCallChannelName, token, currentUser.id);
+        joinedAgoraChannelName = groupCallChannelName;
+        localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+        localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+        await client.publish([localAudioTrack, localVideoTrack]);
+        localVideoTrack.play('localVideo');
+        callActive = true;
+        callStarting = false;
+      } catch (err) {
+        console.error('Failed to join group call:', err);
+        await hangUpCall();
+        alert(err.message || 'Could not access camera/microphone or join the call.');
+        return;
+      }
 
-      const audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-      const videoTrack = await AgoraRTC.createCameraVideoTrack();
-      await groupAgoraClient.publish([audioTrack, videoTrack]);
-      videoTrack.play('localVideo');
+      try {
+        await supabase.channel(`group-call-${role}`).send({
+          type: 'broadcast',
+          event: 'group-call-started',
+          payload: {
+            callerId: currentUser.id,
+            callerName: currentUserFullName,
+            role,
+            callChannelName: groupCallChannelName
+          }
+        });
+      } catch (broadcastError) {
+        console.warn('Unable to broadcast group call start:', broadcastError);
+      }
+
+      if (window.TechTitansNotifications) {
+        window.TechTitansNotifications.display(`Group call started for ${role}`, {
+          body: `${currentUserFullName} has started a call for ${role}.`,
+          url: 'messages.html'
+        });
+      }
 
       callModalTitle.textContent = `Group call: ${role}`;
       callModal.style.display = 'flex';
       callActive = true;
+      callStarting = false;
+      audioEnabled = true;
+      videoEnabled = true;
     }
 
     async function hangUpCall() {
       if (groupAgoraClient) { await groupAgoraClient.leave(); groupAgoraClient = null; }
-      if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
-      localVideo.srcObject = null;
-      remoteVideo.srcObject = null;
+      await cleanupGroupCallMedia();
       callModal.style.display = 'none';
       callActive = false;
+      callStarting = false;
+      joinedAgoraChannelName = null;
     }
 
-    // --- Mute controls (simplified) ---
+    // --- Mute controls ---
     let audioEnabled = true, videoEnabled = true;
-    document.getElementById('muteAudioBtn').addEventListener('click', () => {
-      if (localStream) { localStream.getAudioTracks().forEach(t => t.enabled = !t.enabled); audioEnabled = !audioEnabled; document.getElementById('muteAudioBtn').textContent = audioEnabled ? '🎤' : '🔇'; }
+    document.getElementById('muteAudioBtn').addEventListener('click', async () => {
+      if (localAudioTrack) {
+        audioEnabled = !audioEnabled;
+        await localAudioTrack.setEnabled(audioEnabled);
+        document.getElementById('muteAudioBtn').textContent = audioEnabled ? 'Mic' : 'Muted';
+      }
     });
-    document.getElementById('muteVideoBtn').addEventListener('click', () => {
-      if (localStream) { localStream.getVideoTracks().forEach(t => t.enabled = !t.enabled); videoEnabled = !videoEnabled; document.getElementById('muteVideoBtn').textContent = videoEnabled ? '📹' : '🚫'; }
+    document.getElementById('muteVideoBtn').addEventListener('click', async () => {
+      if (localVideoTrack) {
+        videoEnabled = !videoEnabled;
+        await localVideoTrack.setEnabled(videoEnabled);
+        document.getElementById('muteVideoBtn').textContent = videoEnabled ? 'Video' : 'Video off';
+      }
     });
-
     // --- Navigation (only logout and profile modal) ---
     document.getElementById('logout').addEventListener('click', async () => {
       if (messageSubscription) messageSubscription.unsubscribe();
@@ -2150,3 +2313,4 @@
 </script>
 </body>
 </html>
+

@@ -443,13 +443,13 @@
   <div class="sidebar">
     <div class="logo">TECH<span>TITANS</span></div>
 
-    <div class="nav">
-      <a href="/dashboard.html" class="active"><i class="fas fa-chart-pie"></i> Dashboard</a>
-      <a href="/messages.html" id="chatNavLink"><i class="fas fa-comments"></i> GROUP CHAT
+    <div id="sidebarNav" class="nav">
+      <a href="dashboard.html" class="active"><i class="fas fa-chart-pie"></i> Dashboard</a>
+      <a href="messages.html" id="chatNavLink"><i class="fas fa-comments"></i> GROUP CHAT
         <span class="sidebar-unread" id="sidebarUnreadBadge" style="display: none;">0</span>
       </a>
-      <a href="/resources.html"><i class="fas fa-book-open"></i> Resources</a>
-      <a href="/profile.html"><i class="fas fa-user-cog"></i> Profile</a>
+      <a href="resources.html"><i class="fas fa-book-open"></i> Resources</a>
+      <a href="profile.html"><i class="fas fa-user-cog"></i> Profile</a>
     </div>
     <button class="logout-btn" id="logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </div>
@@ -516,6 +516,9 @@
         return;
       }
       const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      if (window.TechTitansNotifications) {
+        window.TechTitansNotifications.connect(supabase);
+      }
 
       let currentUser = null;
       let currentRole = null;
@@ -904,7 +907,7 @@
         try {
           const { data: { user }, error } = await supabase.auth.getUser();
           if (error || !user) {
-            window.location.href = '/index.html';
+            window.location.href = 'index.html';
             return;
           }
           currentUser = user;
@@ -917,8 +920,25 @@
             ? new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) 
             : '—';
 
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+          const metadataRole = user.user_metadata?.role;
+          const effectiveRole = profile?.role || metadataRole || (jobRole === 'CEO' ? 'admin' : null);
+          const isAdmin = effectiveRole === 'admin';
           currentRole = jobRole;
           isCEO = (currentRole === 'CEO');
+
+          if (isAdmin) {
+            const sidebarNav = document.getElementById('sidebarNav');
+            if (sidebarNav && !sidebarNav.querySelector('a[href="admin.html"]')) {
+              sidebarNav.insertAdjacentHTML('beforeend',
+                '<a href="admin.html"><i class="fas fa-user-cog"></i> Admin Panel</a>');
+            }
+          }
 
           document.getElementById('userName').textContent = firstName;
 
@@ -984,7 +1004,7 @@
         if (refreshInterval) clearInterval(refreshInterval);
         if (announcementsChannel) announcementsChannel.unsubscribe();
         await supabase.auth.signOut();
-        window.location.href = '/index.html';
+        window.location.href = 'index.html';
       });
 
       // --- Initialise ---

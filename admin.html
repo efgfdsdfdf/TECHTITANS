@@ -16,14 +16,105 @@
       overflow: hidden;
       color: #eef2fb;
     }
-    .sidebar { /* unchanged from original, keep it */ }
-    .main { flex: 1; padding: 2rem; overflow-y: auto; }
+    .sidebar {
+      width: 260px;
+      min-width: 260px;
+      background: rgba(10, 14, 31, 0.96);
+      border-right: 1px solid rgba(66, 140, 255, 0.18);
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+      justify-content: space-between;
+      box-shadow: inset -1px 0 0 rgba(255,255,255,0.04);
+    }
+    .logo {
+      font-size: 1.55rem;
+      font-weight: 900;
+      color: #eef2fb;
+      letter-spacing: 0.12em;
+    }
+    .logo span { color: #428cff; }
+    .nav { display: flex; flex-direction: column; gap: 0.75rem; }
+    .nav a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.9rem 1rem;
+      border-radius: 1.2rem;
+      color: #d7e0f5;
+      text-decoration: none;
+      transition: background 0.2s ease, color 0.2s ease;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .nav a:hover, .nav a.active {
+      background: rgba(66, 140, 255, 0.14);
+      color: #ffffff;
+      border-color: rgba(66, 140, 255, 0.28);
+    }
+    .logout-btn {
+      width: 100%;
+      border: none;
+      background: #15203d;
+      color: #d7e0f5;
+      padding: 0.95rem 1rem;
+      border-radius: 1.2rem;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background 0.2s ease;
+    }
+    .logout-btn:hover { background: #1e2c56; }
+    .main { flex: 1; padding: 2rem; overflow-y: auto; min-height: 100vh; }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+    .admin-header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: #eef2fb;
+    }
+    .admin-subtitle {
+      color: #a3b0d5;
+      max-width: 700px;
+      line-height: 1.6;
+    }
+    .admin-status {
+      margin: 1rem 0 1.5rem;
+      padding: 1rem 1.25rem;
+      border-radius: 1.25rem;
+      background: rgba(66, 140, 255, 0.08);
+      border: 1px solid rgba(66, 140, 255, 0.16);
+      color: #d7e0f5;
+      font-size: 0.95rem;
+    }
+    .admin-status.error {
+      background: rgba(255, 77, 77, 0.08);
+      border-color: rgba(255, 77, 77, 0.18);
+      color: #ffb3b3;
+    }
+    .admin-user {
+      border: 1px solid rgba(66, 140, 255, 0.22);
+      background: rgba(66, 140, 255, 0.08);
+      color: #e9f2ff;
+      padding: 1rem 1.25rem;
+      border-radius: 1.25rem;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
     .tabs {
       display: flex;
       gap: 1rem;
       margin-bottom: 2rem;
       border-bottom: 1px solid #2f3a5a;
       padding-bottom: 0.5rem;
+      flex-wrap: wrap;
     }
     .tab {
       padding: 0.6rem 1.5rem;
@@ -44,17 +135,87 @@
       gap: 1.5rem;
       margin-bottom: 2rem;
     }
-    .stat-card {
-      background: #1f2a44;
+    .overview-grid,
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .overview-grid {
+      margin-top: 1rem;
+    }
+    .stat-card,
+    .section-card {
+      background: rgba(22, 33, 60, 0.95);
       border-radius: 1.5rem;
       padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: 0 18px 45px rgba(0,0,0,0.12);
+    }
+    .stat-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      justify-content: center;
+    }
+    .stat-value {
+      font-size: 2.25rem;
+      font-weight: 700;
+      color: white;
+    }
+    .stat-label {
+      color: #9aa4bf;
+      font-size: 0.95rem;
+    }
+    .summary-tag {
+      color: #9aa4bf;
+      font-size: 0.88rem;
+      margin-top: 0.65rem;
+    }
+    .section-card h2 {
+      font-size: 1.1rem;
+    }
+    .stat-card {
+      background: rgba(22, 33, 60, 0.95);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: 0 18px 45px rgba(0,0,0,0.12);
+    }
+    .section-card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+      color: #d7dff7;
     }
     .stat-value { font-size: 2rem; font-weight: 700; color: white; }
     .stat-label { color: #9aa4bf; font-size: 0.9rem; }
+    .toolbar {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      align-items: center;
+    }
+    .toolbar .controls { display: flex; gap: 1rem; flex-wrap: wrap; width: 100%; }
+    .toolbar .page-info { color: #9aa4bf; font-size: 0.95rem; min-width: 200px; text-align: right; }
+    .table-card { background: rgba(14, 22, 41, 0.96); border: 1px solid rgba(66, 140, 255, 0.18); border-radius: 1.5rem; padding: 1rem; }
     .table-container { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; }
+    table { width: 100%; border-collapse: collapse; min-width: 900px; }
+    thead th {
+      text-align: left;
+      padding: 1rem 0.75rem;
+      color: #8f9fc9;
+      border-bottom: 1px solid #2f3a5a;
+      position: sticky;
+      top: 0;
+      background: rgba(10, 14, 31, 0.98);
+      z-index: 2;
+    }
     th { text-align: left; padding: 1rem 0.5rem; color: #8f9fc9; border-bottom: 1px solid #2f3a5a; }
-    td { padding: 1rem 0.5rem; border-bottom: 1px solid #1f2a44; }
+    td { padding: 1rem 0.75rem; border-bottom: 1px solid #1f2a44; }
+    td small { color: #9aa4bf; }
     .role-badge {
       background: #2a3650; padding: 0.3rem 0.8rem; border-radius: 2rem; font-size: 0.85rem;
     }
@@ -86,6 +247,17 @@
       background: #1f2a44; color: white; border: none; width: 2.5rem; height: 2.5rem;
       border-radius: 50%; cursor: pointer;
     }
+    .page-btn:hover { background: rgba(66, 140, 255, 0.4); }
+    tr:hover { background: rgba(66, 140, 255, 0.08); }
+    td { padding: 1rem 0.75rem; border-bottom: 1px solid #1f2a44; }
+    td small { color: #9aa4bf; }
+    .badge-light {
+      background: rgba(255,255,255,0.08);
+      color: #d7e0f5;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+    }
     .page-btn.active { background: #428cff; }
     .loading-skeleton {
       background: #1f2a44; height: 2rem; border-radius: 1rem; animation: pulse 1.5s infinite;
@@ -102,15 +274,42 @@
   <div class="sidebar">
     <div class="logo">TECH<span>TITANS</span></div>
     <div class="nav" id="sidebarNav">
-      <a href="/dashboard.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
-      <a href="/messages.html"><i class="fas fa-comments"></i> Messages</a>
-      <a href="/resources.html"><i class="fas fa-book-open"></i> Resources</a>
-      <a href="/profile.html"><i class="fas fa-user-cog"></i> Profile</a>
+      <a href="dashboard.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
+      <a href="messages.html"><i class="fas fa-comments"></i> Messages</a>
+      <a href="resources.html"><i class="fas fa-book-open"></i> Resources</a>
+      <a href="profile.html"><i class="fas fa-user-cog"></i> Profile</a>
     </div>
     <button class="logout-btn" id="logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </div>
 
   <div class="main">
+    <div class="admin-header">
+      <div>
+        <h1>Admin Control Center</h1>
+        <p class="admin-subtitle">Review users, manage announcements, and oversee role assignments. All pages use static navigation so this panel loads cleanly from any path.</p>
+      </div>
+      <div class="admin-user"><i class="fas fa-shield-alt"></i> Admin access enabled</div>
+    </div>
+    <div class="admin-status" id="adminStatus">Initializing admin view...</div>
+    <div class="overview-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="totalUsers">0</div>
+        <div class="stat-label">Total users in app</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="totalAdmins">0</div>
+        <div class="stat-label">Active admins</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="totalRoles">0</div>
+        <div class="stat-label">Distinct roles</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="totalAnnouncements">0</div>
+        <div class="stat-label">Announcements</div>
+      </div>
+    </div>
+
     <!-- Admin Tabs -->
     <div class="tabs">
       <div class="tab active" data-tab="users"><i class="fas fa-users"></i> Users</div>
@@ -121,45 +320,47 @@
 
     <!-- ========== USERS TAB ========== -->
     <div class="tab-content active" id="tab-users">
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-value" id="totalUsers">0</div>
-          <div class="stat-label">Total Users</div>
+        <div class="toolbar">
+        <div class="controls">
+          <div class="search-box" style="flex:1; min-width: 240px;">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchUsers" placeholder="Search by name, email or role...">
+          </div>
+          <select id="roleFilter" style="background: #1f2a44; color: white; border: 1px solid #2f3a5a; border-radius: 2rem; padding: 0 1rem; min-width: 180px;">
+            <option value="all">All roles</option>
+            <option value="admin">Admin</option>
+            <option value="member">Member</option>
+          </select>
+          <select id="pageSizeSelect" style="background: #1f2a44; color: white; border: 1px solid #2f3a5a; border-radius: 2rem; padding: 0 1rem; min-width: 140px;">
+            <option value="25">25 / page</option>
+            <option value="50">50 / page</option>
+            <option value="100">100 / page</option>
+            <option value="0">Show all</option>
+          </select>
+          <button class="save-btn" id="refreshUsersBtn" style="height: 44px;"><i class="fas fa-sync-alt"></i> Refresh</button>
         </div>
-        <div class="stat-card">
-          <div class="stat-value" id="totalAdmins">0</div>
-          <div class="stat-label">Admins</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="totalMessages">0</div>
-          <div class="stat-label">Group Messages</div>
+            <div class="page-info" id="usersPageInfo">Showing 0 of 0 users</div>
         </div>
       </div>
 
-      <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-        <div class="search-box" style="flex:1;">
-          <i class="fas fa-search"></i>
-          <input type="text" id="searchUsers" placeholder="Search users...">
+      <div class="table-card">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Job Role</th>
+                <th>System Role</th>
+                <th>Joined</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody"></tbody>
+          </table>
         </div>
-        <select id="roleFilter" style="background: #1f2a44; color: white; border: 1px solid #2f3a5a; border-radius: 2rem; padding: 0 1rem;">
-          <option value="all">All roles</option>
-          <option value="admin">Admin</option>
-          <option value="member">Member</option>
-        </select>
+        <div class="pagination" id="usersPagination"></div>
       </div>
-
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr><th>Name</th><th>Email</th><th>Job Role</th><th>System Role</th><th>Actions</th></tr>
-          </thead>
-          <tbody id="usersTableBody"></tbody>
-        </table>
-      </div>
-      <div class="pagination" id="usersPagination"></div>
-    </div>
-
-    <!-- ========== ANNOUNCEMENTS TAB ========== -->
     <div class="tab-content" id="tab-announcements">
       <div style="margin-bottom: 1rem;">
         <button class="save-btn" id="newAnnouncementBtn"><i class="fas fa-plus"></i> New Announcement</button>
@@ -241,10 +442,16 @@
   <script>
     (function() {
       const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kcXF0c2RpYnR2eW1mZ250c3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTI1NjIsImV4cCI6MjA4Nzg4ODU2Mn0.hS-7kmoyFljnhkJEkw7nmgimw9ioQreidyu27_NXYyo';
 
       if (!window.supabase) { alert('Supabase failed to load'); return; }
-      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true
+        }
+      });
 
       let currentUser = null;
       let allProfiles = [];
@@ -252,7 +459,7 @@
       let allRoles = [];
       let currentTab = 'users';
       let usersPage = 1;
-      const pageSize = 10;
+      let pageSize = 25;
 
       // DOM elements
       const tabs = document.querySelectorAll('.tab');
@@ -262,6 +469,9 @@
       const rolesBody = document.getElementById('rolesBody');
       const searchUsers = document.getElementById('searchUsers');
       const roleFilter = document.getElementById('roleFilter');
+      const pageSizeSelect = document.getElementById('pageSizeSelect');
+      const usersPageInfo = document.getElementById('usersPageInfo');
+      const adminStatus = document.getElementById('adminStatus');
       const logoutBtn = document.getElementById('logout');
 
       // Modals
@@ -272,26 +482,62 @@
 
       // ---------- Check admin and load data ----------
       async function init() {
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error || !user) { window.location.href = '/index.html'; return; }
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        console.log('Admin init session:', session, sessionError);
+        if (sessionError) {
+          console.warn('Session fetch error:', sessionError.message);
+        }
+
+        let user = session?.user;
+        if (!user) {
+          const getUserRes = await supabase.auth.getUser();
+          console.log('Admin init fallback getUser:', getUserRes);
+          user = getUserRes.data?.user;
+        }
+
+        if (!user) {
+          window.location.href = 'index.html';
+          return;
+        }
         currentUser = user;
 
-        // Verify admin role
+        // Verify admin role using profile row first, then fallback to auth metadata.
         const { data: profile, error: pErr } = await supabase
           .from('profiles')
-          .select('role')
+          .select('role, full_name, job_role')
           .eq('id', user.id)
           .single();
-        if (pErr || profile?.role !== 'admin') {
-          window.location.href = '/dashboard.html';
+
+        const metadataRole = user.user_metadata?.role;
+        const metadataJobRole = user.user_metadata?.job_role;
+        const effectiveRole = profile?.role || metadataRole || (metadataJobRole === 'CEO' ? 'admin' : null);
+
+        if (pErr && !effectiveRole) {
+          console.warn('Profile row unavailable, falling back to auth metadata.');
+        }
+
+        if (!effectiveRole) {
+          console.warn('No role found for user, redirecting to dashboard.');
+          window.location.href = 'dashboard.html';
           return;
+        }
+
+        if (effectiveRole !== 'admin') {
+          console.warn('User role is not admin:', effectiveRole);
+          window.location.href = 'dashboard.html';
+          return;
+        }
+
+        if (!profile && user.user_metadata) {
+          currentUser.full_name = user.user_metadata.full_name || currentUser.email;
         }
 
         // Add Admin link to sidebar
         document.getElementById('sidebarNav').insertAdjacentHTML('beforeend',
-          '<a href="/admin.html" class="active"><i class="fas fa-user-cog"></i> Admin Panel</a>');
+          '<a href="admin.html" class="active"><i class="fas fa-user-cog"></i> Admin Panel</a>');
 
-        loadAllData();
+        setAdminStatus('Admin verified. Fetching application data...');
+        await loadAllData();
       }
 
       async function loadAllData() {
@@ -299,21 +545,63 @@
       }
 
       // ---------- USERS ----------
+      function setAdminStatus(message, isError = false) {
+        if (!adminStatus) return;
+        adminStatus.textContent = message;
+        adminStatus.classList.toggle('error', Boolean(isError));
+      }
+
       async function loadUsers() {
-        // Fetch profiles and then emails via function
-        const { data: profiles, error } = await supabase
+        setAdminStatus('Loading users from profiles...');
+
+        let { data: profiles, error } = await supabase
           .from('profiles')
           .select('*')
           .order('created_at', { ascending: false });
-        if (error) { console.error(error); return; }
 
-        // Enrich with email (call function for each user)
-        for (let p of profiles) {
-          const { data: email, error: eErr } = await supabase.rpc('get_auth_user_email', { user_id: p.id });
-          if (!eErr) p.email = email;
+        if (error) {
+          console.warn('Profiles query failed, retrying without created_at ordering:', error.message || error);
+          const byId = await supabase
+            .from('profiles')
+            .select('*')
+            .order('id', { ascending: false });
+          profiles = byId.data;
+          error = byId.error;
         }
+
+        if (error) {
+          console.error('Unable to load profiles:', error);
+          usersTbody.innerHTML = `<tr><td colspan="6" class="empty-state">Unable to load users: ${escapeHtml(error.message || 'Unknown error')}</td></tr>`;
+          allProfiles = [];
+          updateStats();
+          setAdminStatus('Failed to load profiles. Check database permissions and profile schema.', true);
+          return;
+        }
+
+        if (!profiles || profiles.length === 0) {
+          allProfiles = [];
+          usersPage = 1;
+          filterAndRenderUsers();
+          setAdminStatus('No profiles were found in the database. Add users to the profiles table or check your auth setup.');
+          return;
+        }
+
+        // Enrich emails only when a row doesn't already contain one.
+        for (let p of profiles) {
+          if (!p.email && p.id) {
+            try {
+              const { data: email, error: eErr } = await supabase.rpc('get_auth_user_email', { user_id: p.id });
+              if (!eErr && email) p.email = email;
+            } catch (rpcErr) {
+              console.warn('RPC get_auth_user_email failed for profile', p.id, rpcErr);
+            }
+          }
+        }
+
         allProfiles = profiles;
+        usersPage = 1;
         filterAndRenderUsers();
+        setAdminStatus(`Loaded ${allProfiles.length} users. Use the filters and page size control to inspect the roster.`);
       }
 
       
@@ -327,13 +615,19 @@
         const role = roleFilter.value;
         if (role !== 'all') filtered = filtered.filter(p => p.role === role);
 
-        // Paginate
-        const start = (usersPage - 1) * pageSize;
-        const paginated = filtered.slice(start, start + pageSize);
+        // Paginate or show all
+        let paginated;
+        if (pageSize === 0) {
+          paginated = filtered;
+        } else {
+          const start = (usersPage - 1) * pageSize;
+          paginated = filtered.slice(start, start + pageSize);
+        }
 
         renderUsers(paginated);
         renderUsersPagination(filtered.length);
         updateStats(filtered.length);
+        updatePageInfo(filtered.length, paginated.length);
       }
 
       function renderUsers(users) {
@@ -342,10 +636,14 @@
           const mismatch = (u.job_role?.toUpperCase().includes('CEO') && u.role !== 'admin');
           return `
             <tr>
-              <td>${escapeHtml(u.full_name || '—')}</td>
+              <td>
+                <strong>${escapeHtml(u.full_name || '—')}</strong><br>
+                <small>${escapeHtml(u.email || '—')}</small>
+              </td>
               <td>${escapeHtml(u.email || '—')}</td>
-              <td>${escapeHtml(u.job_role || '—')} ${mismatch ? '<i class="fas fa-exclamation-triangle warning-icon" title="CEO should be admin?"></i>' : ''}</td>
-              <td><span class="role-badge ${u.role === 'admin' ? 'admin' : ''}">${u.role || 'member'}</span></td>
+              <td><span class="badge-light">${escapeHtml(u.job_role || '—')}</span></td>
+              <td><span class="role-badge ${u.role === 'admin' ? 'admin' : ''}">${escapeHtml(u.role || 'member')}</span></td>
+              <td>${u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}</td>
               <td>
                 <button class="edit-btn" data-id="${u.id}" data-name="${escapeHtml(u.full_name)}" data-email="${escapeHtml(u.email)}" data-job="${escapeHtml(u.job_role)}" data-role="${u.role}"><i class="fas fa-pen"></i> Edit</button>
                 <button class="delete-btn" data-id="${u.id}" data-name="${escapeHtml(u.full_name)}"><i class="fas fa-trash"></i> Del</button>
@@ -390,6 +688,7 @@
       function renderAnnouncements() {
         if (!allAnnouncements.length) {
           announcementsBody.innerHTML = '<tr><td colspan="5" class="empty-state">No announcements</td></tr>';
+          updateStats();
           return;
         }
         announcementsBody.innerHTML = allAnnouncements.map(a => `
@@ -419,6 +718,7 @@
             confirmModal.classList.add('active');
           });
         });
+        updateStats();
       }
 
       // ---------- ROLES ----------
@@ -575,15 +875,30 @@
       // Search and filter
       searchUsers.addEventListener('input', () => { usersPage = 1; filterAndRenderUsers(); });
       roleFilter.addEventListener('change', () => { usersPage = 1; filterAndRenderUsers(); });
+      pageSizeSelect.addEventListener('change', () => {
+        usersPage = 1;
+        pageSize = Number(pageSizeSelect.value);
+        filterAndRenderUsers();
+      });
+      document.getElementById('refreshUsersBtn').addEventListener('click', async () => { usersPage = 1; await loadUsers(); });
 
       // Pagination
       function renderUsersPagination(total) {
-        const pages = Math.ceil(total / pageSize);
+        const pagination = document.getElementById('usersPagination');
+        if (pageSize === 0) {
+          pagination.innerHTML = '';
+          return;
+        }
+        const pages = Math.max(1, Math.ceil(total / pageSize));
+        if (pages <= 1) {
+          pagination.innerHTML = '';
+          return;
+        }
         let html = '';
         for (let i = 1; i <= pages; i++) {
           html += `<button class="page-btn ${i === usersPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
         }
-        document.getElementById('usersPagination').innerHTML = html;
+        pagination.innerHTML = html;
         document.querySelectorAll('.page-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             usersPage = Number(btn.dataset.page);
@@ -592,15 +907,36 @@
         });
       }
 
+      function updatePageInfo(total, shown) {
+        if (total === 0) {
+          usersPageInfo.innerText = 'No users found';
+          return;
+        }
+        if (pageSize === 0) {
+          usersPageInfo.innerText = `Showing all ${shown} of ${total} users`;
+          return;
+        }
+        const start = (usersPage - 1) * pageSize + 1;
+        const end = start + shown - 1;
+        usersPageInfo.innerText = `Showing ${start}-${end} of ${total} users`;
+      }
+
       function updateStats(total) {
-        document.getElementById('totalUsers').innerText = total;
+        const userCount = allProfiles.length;
+        document.getElementById('totalUsers').innerText = userCount;
         document.getElementById('totalAdmins').innerText = allProfiles.filter(p => p.role === 'admin').length;
+        document.getElementById('totalRoles').innerText = new Set(allProfiles.map(p => p.job_role).filter(Boolean)).size;
+        document.getElementById('totalAnnouncements').innerText = allAnnouncements.length;
+
+        if (userCount === 0) {
+          setAdminStatus('No users loaded. Verify your profiles table and admin auth role.', true);
+        }
       }
 
       // Logout
       logoutBtn.addEventListener('click', async () => {
         await supabase.auth.signOut();
-        window.location.href = '/index.html';
+        window.location.href = 'index.html';
       });
 
       // Escape HTML helper
