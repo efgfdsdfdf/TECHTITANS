@@ -12,6 +12,7 @@ type CallRecord = {
 type DeviceRecord = {
   id: string;
   push_token: string;
+  push_provider: "fcm" | "apns_voip";
 };
 
 type ProfileRecord = {
@@ -155,6 +156,41 @@ function getFcmProjectId() {
   return serviceAccount.project_id || null;
 }
 
+async function getApnsAccessToken() {
+  const teamId = Deno.env.get("APNS_TEAM_ID");
+  const keyId = Deno.env.get("APNS_KEY_ID");
+  const privateKey = Deno.env.get("APNS_VOIP_PRIVATE_KEY");
+
+  if (!teamId || !keyId || !privateKey) {
+    throw new Error("APNs is not configured");
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  const header = { alg: "ES256", kid: keyId };
+  const claim = { iss: teamId, iat: now };
+  const unsignedJwt = `${base64UrlEncode(JSON.stringify(header))}.${base64UrlEncode(JSON.stringify(claim))}`;
+  const key = await crypto.subtle.importKey(
+    "pkcs8",
+    pemToArrayBuffer(privateKey),
+    { name: "ECDSA", namedCurve: "P-256" },
+    false,
+    ["sign"],
+  );
+  const signature = await crypto.subtle.sign(
+    { name: "ECDSA", hash: "SHA-256" },
+    key,
+    new TextEncoder().encode(unsignedJwt),
+  );
+
+  return `${unsignedJwt}.${base64UrlEncode(signature)}`;
+}
+
+function getApnsHost() {
+  return Deno.env.get("APNS_USE_SANDBOX") === "true"
+    ? "https://api.sandbox.push.apple.com"
+    : "https://api.push.apple.com";
+}
+
 function buildAndroidMessage(token: string, action: string, call: CallRecord, caller: ProfileRecord | null) {
   const callerName = caller?.full_name || "TechTitans";
   const isCancel = action === "cancelled";
@@ -188,6 +224,27 @@ function buildAndroidMessage(token: string, action: string, call: CallRecord, ca
   };
 }
 
+function buildApplePayload(action: string, call: CallRecord, caller: ProfileRecord | null) {
+  const callerName = caller?.full_name || "TechTitans";
+  const isCancel = action === "cancelled";
+
+  return {
+    aps: {
+      alert: isCancel
+        ? { title: "Call ended", body: "The incoming call has ended." }
+        : { title: callerName, body: `Incoming ${call.type} call` },
+      sound: "default",
+      "content-available": 1,
+    },
+    type: isCancel ? "call_cancelled" : "incoming_call",
+    callId: call.id,
+    callType: call.type,
+    roomId: call.room_id,
+    callerId: call.initiated_by,
+    action,
+  };
+}
+
 serve(async (request) => {
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: getCorsHeaders(request) });
@@ -200,9 +257,8 @@ serve(async (request) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const projectId = getFcmProjectId();
 
-  if (!supabaseUrl || !supabaseAnonKey || !serviceRoleKey || !projectId) {
+  if (!supabaseUrl || !supabaseAnonKey || !serviceRoleKey) {
     return jsonResponse(request, 500, { error: "Call notification service is unavailable" });
   }
 
@@ -296,10 +352,10 @@ serve(async (request) => {
 
   const { data: devices, error: devicesError } = await supabase
     .from("user_devices")
-    .select("id, push_token")
+    .select("id, push_token, push_provider")
     .eq("user_id", payload.recipientId)
     .eq("is_active", true)
-    .eq("push_provider", "fcm")
+    .in("push_provider", ["fcm", "apns_voip"])
     .returns<DeviceRecord[]>();
 
   if (devicesError) {
@@ -316,23 +372,63 @@ serve(async (request) => {
     .eq("id", call.initiated_by)
     .maybeSingle<ProfileRecord>();
 
-  let accessToken: string;
-  try {
-    accessToken = await getFcmAccessToken();
-  } catch (_error) {
-    return jsonResponse(request, 500, { error: "FCM authentication failed" });
-  }
+  let fcmAccessToken: string | null = null;
+  let apnsAccessToken: string | null = null;
+  const fcmProjectId = getFcmProjectId();
+  const apnsBundleId = Deno.env.get("APNS_BUNDLE_ID");
 
   let sent = 0;
   let failed = 0;
   let expired = 0;
+  let skipped = 0;
 
   await Promise.all(devices.map(async (device) => {
     try {
-      const response = await fetch(`https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`, {
+      if (device.push_provider === "apns_voip") {
+        if (!apnsBundleId) {
+          skipped += 1;
+          return;
+        }
+        apnsAccessToken ||= await getApnsAccessToken();
+        const response = await fetch(`${getApnsHost()}/3/device/${device.push_token}`, {
+          method: "POST",
+          headers: {
+            "authorization": `bearer ${apnsAccessToken}`,
+            "apns-topic": `${apnsBundleId}.voip`,
+            "apns-push-type": "voip",
+            "apns-priority": "10",
+            "apns-expiration": String(Math.floor(Date.now() / 1000) + 60),
+          },
+          body: JSON.stringify(buildApplePayload(action, call, caller || null)),
+        });
+
+        if (response.ok) {
+          sent += 1;
+          return;
+        }
+
+        failed += 1;
+        const data = await response.json().catch(() => ({}));
+        const reason = String(data.reason || "").toLowerCase();
+        if (response.status === 410 || reason.includes("baddevicetoken") || reason.includes("unregistered")) {
+          expired += 1;
+          await supabase
+            .from("user_devices")
+            .update({ is_active: false, updated_at: new Date().toISOString() })
+            .eq("id", device.id);
+        }
+        return;
+      }
+
+      if (!fcmProjectId) {
+        skipped += 1;
+        return;
+      }
+      fcmAccessToken ||= await getFcmAccessToken();
+      const response = await fetch(`https://fcm.googleapis.com/v1/projects/${fcmProjectId}/messages:send`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${accessToken}`,
+          "Authorization": `Bearer ${fcmAccessToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -360,5 +456,5 @@ serve(async (request) => {
     }
   }));
 
-  return jsonResponse(request, 200, { sent, failed, expired });
+  return jsonResponse(request, 200, { sent, failed, expired, skipped });
 });

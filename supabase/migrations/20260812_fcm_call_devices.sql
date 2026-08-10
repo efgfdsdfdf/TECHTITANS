@@ -8,15 +8,20 @@ ALTER TABLE IF EXISTS public.user_devices
 
 DO $$
 BEGIN
-  IF NOT EXISTS (
+  IF EXISTS (
     SELECT 1
     FROM pg_constraint
     WHERE conname = 'user_devices_push_provider_check'
       AND conrelid = to_regclass('public.user_devices')
   ) THEN
     ALTER TABLE public.user_devices
+      DROP CONSTRAINT user_devices_push_provider_check;
+  END IF;
+
+  IF to_regclass('public.user_devices') IS NOT NULL THEN
+    ALTER TABLE public.user_devices
       ADD CONSTRAINT user_devices_push_provider_check
-      CHECK (push_provider IN ('web_push', 'fcm'));
+      CHECK (push_provider IN ('web_push', 'fcm', 'apns_voip'));
   END IF;
 END;
 $$;
@@ -24,3 +29,7 @@ $$;
 CREATE INDEX IF NOT EXISTS idx_user_devices_fcm_active
   ON public.user_devices (user_id, push_provider, is_active)
   WHERE push_provider = 'fcm';
+
+CREATE INDEX IF NOT EXISTS idx_user_devices_apns_voip_active
+  ON public.user_devices (user_id, push_provider, is_active)
+  WHERE push_provider = 'apns_voip';

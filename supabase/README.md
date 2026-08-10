@@ -55,23 +55,28 @@ Phase 1 completion will continue with secure backend integration and token-gener
 - The UI also shows unread counts and can mark notifications as read.
 - Future work: add secure edge functions to create `notifications` rows for messages, calls, and announcements, and add push delivery via `user_devices` and `notification_preferences`.
 
-## Android FCM call notifications
+## Native call notifications
 
-True closed-app Android incoming calls require native Android Firebase Cloud Messaging handling. WebView JavaScript and Supabase Realtime are not reliable when the APK is closed, removed from recents, or the screen is locked.
+True closed-app mobile incoming calls require native push handling. WebView JavaScript and Supabase Realtime are not reliable when the app is closed, removed from recents, or the screen is locked.
 
 Backend support added:
 
 - `supabase/migrations/20260812_fcm_call_devices.sql`
   - Adds `push_provider`, `platform`, and `app_version` metadata to `user_devices`.
   - Keeps existing browser Web Push rows as `web_push`.
-  - Enables Android APK FCM tokens to be stored as `push_provider = 'fcm'`.
+  - Enables Android FCM tokens as `push_provider = 'fcm'`.
+  - Enables iOS PushKit VoIP tokens as `push_provider = 'apns_voip'`.
 
 - `supabase/functions/register-fcm-device`
-  - Authenticated Android APK endpoint for storing the current installation's FCM token.
+  - Backward-compatible authenticated Android endpoint for storing the current installation's FCM token.
+
+- `supabase/functions/register-call-device`
+  - Platform-neutral authenticated endpoint for Android FCM and iOS PushKit VoIP token registration.
   - Request body:
     ```json
     {
-      "token": "firebase-device-token",
+      "provider": "fcm",
+      "token": "device-push-token",
       "deviceIdentifier": "stable-install-id",
       "platform": "android",
       "appVersion": "1.0.0"
@@ -81,19 +86,35 @@ Backend support added:
 - `supabase/functions/send-call-notification`
   - Authenticated call notification sender.
   - Reads authoritative call state from `calls` and `call_participants`.
-  - Sends only safe call metadata through FCM: call id, call type, room id, caller id, and action.
+  - Sends only safe call metadata through FCM/APNs: call id, call type, room id, caller id, and action.
   - Does not send Agora tokens, Supabase tokens, service-role keys, or the Agora App Certificate.
 
-Required Supabase secrets:
+Required Supabase secrets for Android FCM:
 
 ```bash
 npx supabase secrets set FCM_SERVICE_ACCOUNT_JSON='<firebase-service-account-json>'
 npx supabase secrets set FCM_PROJECT_ID='<firebase-project-id>'
 ```
 
+Required Supabase secrets for iOS PushKit/APNs:
+
+```bash
+npx supabase secrets set APNS_TEAM_ID='<apple-team-id>'
+npx supabase secrets set APNS_KEY_ID='<apns-key-id>'
+npx supabase secrets set APNS_BUNDLE_ID='<ios-app-bundle-id>'
+npx supabase secrets set APNS_VOIP_PRIVATE_KEY='<contents-of-apns-auth-key-p8>'
+```
+
+For APNs sandbox testing only:
+
+```bash
+npx supabase secrets set APNS_USE_SANDBOX='true'
+```
+
 Deploy:
 
 ```bash
+npx supabase functions deploy register-call-device
 npx supabase functions deploy register-fcm-device
 npx supabase functions deploy send-call-notification
 ```
@@ -103,8 +124,17 @@ Android APK requirements still live in the native APK project, which is not pres
 - Add Android notification, microphone, camera, and internet permissions as appropriate.
 - Request Android 13+ notification permission.
 - Request microphone/camera runtime permissions before accepting calls.
-- Register each installation's FCM token by calling `/functions/v1/register-fcm-device` with the logged-in Supabase access token.
+- Register each installation's FCM token by calling `/functions/v1/register-call-device` with `provider: "fcm"` and the logged-in Supabase access token.
 - Handle `incoming_call` and `call_cancelled` FCM data messages natively.
 - Show an incoming-call notification channel with ringtone, vibration, Accept, and Decline actions.
 - On Accept, launch/resume TechTitans, restore the Supabase session, verify the call is still valid, fetch the Agora token, then join the call.
 - On Decline, update call state and cancel ringtone/vibration without exposing secrets.
+
+iOS requirements still live in the native iOS project, which is not present in this repository:
+
+- Register for PushKit VoIP pushes.
+- Register each installation's VoIP token by calling `/functions/v1/register-call-device` with `provider: "apns_voip"` and the logged-in Supabase access token.
+- Report incoming calls to CallKit immediately when a valid VoIP push arrives.
+- Use a unique CallKit UUID per call instance.
+- On CallKit Accept, verify the call, restore/open TechTitans, fetch the Agora token, then join the call.
+- On CallKit Decline or caller cancellation, end the CallKit call and update TechTitans call state without joining Agora.
