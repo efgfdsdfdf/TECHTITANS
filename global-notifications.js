@@ -62,6 +62,7 @@ const TechTitansGlobal = {
     this._setupAnnouncementListener();
     this._setupGlobalDmBadge();
     this._setupServiceWorkerRelay();
+    this._setupGlobalPresence();
   },
 
   // ─── User broadcast channel (incoming DM calls) ───────────────────
@@ -227,6 +228,33 @@ const TechTitansGlobal = {
         this._dismissCallOverlay();
       }
     });
+  },
+
+  // ─── Global Presence tracking ───────────────────────────────────────
+  
+  _setupGlobalPresence() {
+    if (!this._supabase || !this._userId) return;
+    
+    // We track presence on a global level so users appear online on any page.
+    const presenceChannel = this._supabase.channel('online-users', { 
+      config: { presence: { key: this._userId } } 
+    });
+    
+    presenceChannel.on('presence', { event: 'sync' }, () => {
+      // We don't necessarily need to render online users on every page,
+      // just being subscribed and tracked makes the user show as online to others!
+    }).subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await presenceChannel.track({ 
+          userId: this._userId, 
+          name: this._userFullName, 
+          role: this._userRole, 
+          online_at: new Date().toISOString() 
+        });
+      }
+    });
+    
+    this._globalPresenceChannel = presenceChannel;
   },
 
   // ─── Incoming call handling ───────────────────────────────────────
@@ -584,6 +612,10 @@ const TechTitansGlobal = {
     if (this._announcementChannel) {
       try { this._announcementChannel.unsubscribe(); } catch (e) {}
       this._announcementChannel = null;
+    }
+    if (this._globalPresenceChannel) {
+      try { this._globalPresenceChannel.unsubscribe(); } catch (e) {}
+      this._globalPresenceChannel = null;
     }
     this._dismissCallOverlay();
     this._initialized = false;
