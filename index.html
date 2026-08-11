@@ -1,389 +1,502 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>TECH TITANS · Login</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>TECH TITANS · Login</title>
+    <style>
+        /* ── Reset & base ── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
 
-    body {
-      background: #0b0f17;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-      position: relative;
-    }
+        body {
+            background: #0b0f17;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            position: relative;
+        }
 
-    .top-logo {
-      position: absolute;
-      top: 2rem;
-      left: 2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      color: white;
-      font-size: 1.8rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-    }
-    .top-logo img {
-      height: 2.5rem;
-      width: auto;
-      filter: drop-shadow(0 4px 8px rgba(66, 140, 255, 0.3));
-    }
-    .top-logo span {
-      color: #428cff;
-    }
+        /* ── Top logo ── */
+        .top-logo {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+        .top-logo img {
+            height: 2.5rem;
+            width: auto;
+            filter: drop-shadow(0 4px 8px rgba(66, 140, 255, 0.3));
+        }
+        .top-logo span {
+            color: #428cff;
+        }
 
-    .glass-card {
-      background: rgba(18, 25, 40, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(66, 140, 255, 0.15);
-      border-radius: 2rem;
-      padding: 2.5rem 2rem;
-      width: 100%;
-      max-width: 440px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(66, 140, 255, 0.1) inset;
-    }
+        /* ── Glass card ── */
+        .glass-card {
+            background: rgba(18, 25, 40, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(66, 140, 255, 0.15);
+            border-radius: 2rem;
+            padding: 2.5rem 2rem;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(66, 140, 255, 0.1) inset;
+            /* Hidden by default; shown only after session check */
+            display: none;
+        }
 
-    .sub {
-      color: #9aa4bf;
-      font-size: 0.95rem;
-      margin-bottom: 2rem;
-      border-left: 3px solid #428cff;
-      padding-left: 1rem;
-    }
+        .glass-card.visible {
+            display: block;
+        }
 
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
+        .sub {
+            color: #9aa4bf;
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+            border-left: 3px solid #428cff;
+            padding-left: 1rem;
+        }
 
-    label {
-      display: block;
-      color: #b8c3e0;
-      font-size: 0.9rem;
-      font-weight: 500;
-      margin-bottom: 0.4rem;
-    }
+        /* ── Form elements ── */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
 
-    input {
-      width: 100%;
-      background: #0f172f;
-      border: 1px solid #263154;
-      border-radius: 1.2rem;
-      padding: 0.9rem 1.2rem;
-      color: white;
-      font-size: 1rem;
-      outline: none;
-      transition: 0.2s;
-    }
+        label {
+            display: block;
+            color: #b8c3e0;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.4rem;
+        }
 
-    input:focus {
-      border-color: #428cff;
-      box-shadow: 0 0 0 3px rgba(66, 140, 255, 0.2);
-    }
+        input {
+            width: 100%;
+            background: #0f172f;
+            border: 1px solid #263154;
+            border-radius: 1.2rem;
+            padding: 0.9rem 1.2rem;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.2s;
+        }
 
-    .password-field {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
+        input:focus {
+            border-color: #428cff;
+            box-shadow: 0 0 0 3px rgba(66, 140, 255, 0.2);
+        }
 
-    .password-field input {
-      padding-right: 3.2rem;
-    }
+        .password-field {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
 
-    .password-toggle {
-      position: absolute;
-      right: 0.75rem;
-      width: 2.25rem;
-      height: 2.25rem;
-      border: none;
-      border-radius: 50%;
-      background: transparent;
-      color: #9aa4bf;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: 0.2s;
-    }
+        .password-field input {
+            padding-right: 3.2rem;
+        }
 
-    .password-toggle:hover,
-    .password-toggle:focus-visible {
-      background: #1f2a44;
-      color: #ffffff;
-      outline: none;
-    }
+        .password-toggle {
+            position: absolute;
+            right: 0.75rem;
+            width: 2.25rem;
+            height: 2.25rem;
+            border: none;
+            border-radius: 50%;
+            background: transparent;
+            color: #9aa4bf;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
 
-    .password-toggle svg {
-      width: 1.25rem;
-      height: 1.25rem;
-      stroke: currentColor;
-      stroke-width: 2;
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
+        .password-toggle:hover,
+        .password-toggle:focus-visible {
+            background: #1f2a44;
+            color: #ffffff;
+            outline: none;
+        }
 
-    .password-toggle .eye-off-icon {
-      display: none;
-    }
+        .password-toggle svg {
+            width: 1.25rem;
+            height: 1.25rem;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
 
-    .password-toggle.is-visible .eye-icon {
-      display: none;
-    }
+        .password-toggle .eye-off-icon {
+            display: none;
+        }
+        .password-toggle.is-visible .eye-icon {
+            display: none;
+        }
+        .password-toggle.is-visible .eye-off-icon {
+            display: block;
+        }
 
-    .password-toggle.is-visible .eye-off-icon {
-      display: block;
-    }
+        .btn {
+            background: #428cff;
+            border: none;
+            color: white;
+            width: 100%;
+            padding: 1rem;
+            border-radius: 1.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 1rem;
+            box-shadow: 0 8px 20px -8px #428cff80;
+        }
 
-    .btn {
-      background: #428cff;
-      border: none;
-      color: white;
-      width: 100%;
-      padding: 1rem;
-      border-radius: 1.5rem;
-      font-weight: 600;
-      font-size: 1.1rem;
-      cursor: pointer;
-      transition: 0.2s;
-      margin-top: 1rem;
-      box-shadow: 0 8px 20px -8px #428cff80;
-    }
+        .btn:hover {
+            background: #5f9eff;
+            transform: translateY(-2px);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
 
-    .btn:hover {
-      background: #5f9eff;
-      transform: translateY(-2px);
-    }
+        .error {
+            color: #ff628c;
+            background: #2f1a28;
+            border-radius: 1rem;
+            padding: 0.75rem 1rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            border: 1px solid #ff628c30;
+            display: none;
+        }
 
-    .btn:active {
-      transform: translateY(0);
-    }
+        .loading {
+            display: none;
+            color: #9aa4bf;
+            text-align: center;
+            margin-top: 1rem;
+        }
 
-    .error {
-      color: #ff628c;
-      background: #2f1a28;
-      border-radius: 1rem;
-      padding: 0.75rem 1rem;
-      margin-top: 1rem;
-      font-size: 0.9rem;
-      border: 1px solid #ff628c30;
-      display: none;
-    }
+        .forgot-link {
+            text-align: right;
+            margin-top: 0.5rem;
+        }
+        .forgot-link a {
+            color: #9aa4bf;
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+        .forgot-link a:hover {
+            color: #428cff;
+            text-decoration: underline;
+        }
 
-    .loading {
-      display: none;
-      color: #9aa4bf;
-      text-align: center;
-      margin-top: 1rem;
-    }
+        .link {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #9aa4bf;
+        }
+        .link a {
+            color: #428cff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .link a:hover {
+            text-decoration: underline;
+        }
 
-    .forgot-link {
-      text-align: right;
-      margin-top: 0.5rem;
-    }
-    .forgot-link a {
-      color: #9aa4bf;
-      font-size: 0.9rem;
-      text-decoration: none;
-    }
-    .forgot-link a:hover {
-      color: #428cff;
-      text-decoration: underline;
-    }
+        /* ── Session-check loading overlay ── */
+        .session-loader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            color: #9aa4bf;
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 440px;
+        }
 
-    .link {
-      text-align: center;
-      margin-top: 1.5rem;
-      color: #9aa4bf;
-    }
-    .link a {
-      color: #428cff;
-      text-decoration: none;
-      font-weight: 500;
-    }
-    .link a:hover {
-      text-decoration: underline;
-    }
+        .session-loader .spinner {
+            width: 44px;
+            height: 44px;
+            border: 3px solid #1f2a44;
+            border-top-color: #428cff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
 
-    @media (max-width: 600px) {
-      .top-logo {
-        top: 1rem;
-        left: 1rem;
-        font-size: 1.4rem;
-      }
-      .top-logo img {
-        height: 2rem;
-      }
-    }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="native-bridge.js"></script>
-  <script src="notifications.js"></script>
+        .session-loader p {
+            font-size: 0.95rem;
+            letter-spacing: 0.02em;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 600px) {
+            .top-logo {
+                top: 1rem;
+                left: 1rem;
+                font-size: 1.4rem;
+            }
+            .top-logo img {
+                height: 2rem;
+            }
+            .glass-card {
+                padding: 1.75rem 1.25rem;
+            }
+        }
+    </style>
+
+    <!-- Supabase & helpers -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
+    </script>
+    <script src="native-bridge.js">
+    </script>
+    <script src="notifications.js">
+    </script>
 </head>
 <body>
-  <div class="top-logo">
-    <!-- Verify that this image path is correct; you may use an inline SVG fallback -->
-    <img src="img/titans_logo2.png" alt="TECH TITANS">
-    <div>TECH<span>TITANS</span></div>
-  </div>
 
-  <div class="glass-card">
-    <div class="sub">internal · secure access</div>
-
-    <form id="loginForm">
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" id="email" placeholder="name@techtitans.com" autocomplete="email" required>
-      </div>
-      <div class="form-group">
-        <label>Password</label>
-        <div class="password-field">
-          <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required>
-          <button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password" aria-pressed="false">
-            <svg class="eye-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-            <svg class="eye-off-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M3 3l18 18"></path>
-              <path d="M10.6 10.6A2 2 0 0 0 12 14a2 2 0 0 0 1.4-.6"></path>
-              <path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a17.8 17.8 0 0 1-3.1 4.2"></path>
-              <path d="M6.6 6.6C3.6 8.7 2 12 2 12s3.5 7 10 7a10.8 10.8 0 0 0 4.4-.9"></path>
-            </svg>
-          </button>
-        </div>
-      </div>
-      <div class="forgot-link">
-        <a href="reset-password.html">Forgot password?</a>
-      </div>
-      <button type="submit" class="btn" id="submitBtn">Log in</button>
-    </form>
-
-    <div id="errorMessage" class="error"></div>
-    <div id="loadingMessage" class="loading">Processing…</div>
-
-    <div class="link">
-      Don't have an account? <a href="signup.html">Sign up</a>
+    <!-- ─── Top logo ─── -->
+    <div class="top-logo">
+        <img src="img/titans_logo2.png" alt="TECH TITANS" />
+        <div>TECH<span>TITANS</span></div>
     </div>
-  </div>
 
-  <script>
-    (function() {
-      // --- Supabase configuration ---
-      const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kcXF0c2RpYnR2eW1mZ250c3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTI1NjIsImV4cCI6MjA4Nzg4ODU2Mn0.hS-7kmoyFljnhkJEkw7nmgimw9ioQreidyu27_NXYyo';
+    <!-- ─── Session-check loader (shown while we verify auth) ─── -->
+    <div class="session-loader" id="sessionLoader">
+        <div class="spinner"></div>
+        <p>Checking session…</p>
+    </div>
 
-      // --- Initialize Supabase client with error handling ---
-      let supabase;
-      try {
-        if (!window.supabase) throw new Error('Supabase library failed to load. Please check your internet connection.');
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('Supabase client initialized');
-      } catch (e) {
-        console.error('Initialization error:', e);
-        const errorDiv = document.getElementById('errorMessage');
-        if (errorDiv) {
-          errorDiv.textContent = 'Authentication service is unavailable. Please refresh or try again later.';
-          errorDiv.style.display = 'block';
-        }
-        // Disable form to prevent further actions
-        document.querySelectorAll('input, button').forEach(el => el.disabled = true);
-        return;
-      }
+    <!-- ─── Login form (hidden until we confirm no session) ─── -->
+    <div class="glass-card" id="loginCard">
+        <div class="sub">internal · secure access</div>
 
-      // --- DOM elements ---
-      const form = document.getElementById('loginForm');
-      const emailInput = document.getElementById('email');
-      const passwordInput = document.getElementById('password');
-      const passwordToggle = document.getElementById('passwordToggle');
-      const submitBtn = document.getElementById('submitBtn');
-      const errorDiv = document.getElementById('errorMessage');
-      const loadingDiv = document.getElementById('loadingMessage');
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" placeholder="name@techtitans.com" autocomplete="email" required />
+            </div>
 
-      passwordToggle.addEventListener('click', () => {
-        const shouldShow = passwordInput.type === 'password';
-        passwordInput.type = shouldShow ? 'text' : 'password';
-        passwordToggle.classList.toggle('is-visible', shouldShow);
-        passwordToggle.setAttribute('aria-label', shouldShow ? 'Hide password' : 'Show password');
-        passwordToggle.setAttribute('aria-pressed', String(shouldShow));
-        passwordInput.focus();
-      });
+            <div class="form-group">
+                <label>Password</label>
+                <div class="password-field">
+                    <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required />
+                    <button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password" aria-pressed="false">
+                        <svg class="eye-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        <svg class="eye-off-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M3 3l18 18" />
+                            <path d="M10.6 10.6A2 2 0 0 0 12 14a2 2 0 0 0 1.4-.6" />
+                            <path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a17.8 17.8 0 0 1-3.1 4.2" />
+                            <path d="M6.6 6.6C3.6 8.7 2 12 2 12s3.5 7 10 7a10.8 10.8 0 0 0 4.4-.9" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
 
-   
-      // --- Login form submission ---
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
+            <div class="forgot-link">
+                <a href="reset-password.html">Forgot password?</a>
+            </div>
 
-        // Reset messages
-        errorDiv.style.display = 'none';
-        loadingDiv.style.display = 'block';
-        submitBtn.disabled = true;
+            <button type="submit" class="btn" id="submitBtn">Log in</button>
+        </form>
 
-        const email = emailInput.value.trim();
-        const password = passwordInput.value;
+        <div id="errorMessage" class="error"></div>
+        <div id="loadingMessage" class="loading">Processing…</div>
 
-        // Basic validation
-        if (!email || !password) {
-          showError('Please enter both email and password.');
-          return;
-        }
+        <div class="link">
+            Don't have an account? <a href="signup.html">Sign up</a>
+        </div>
+    </div>
 
-        try {
-          console.log('Attempting sign in for:', email);
-          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    <script>
+        (function() {
+            'use strict';
 
-          if (error) throw error;
+            // ─── Supabase config ─────────────────────────────────────────────
+            const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
+            const SUPABASE_ANON_KEY =
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kcXF0c2RpYnR2eW1mZ250c3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTI1NjIsImV4cCI6MjA4Nzg4ODU2Mn0.hS-7kmoyFljnhkJEkw7nmgimw9ioQreidyu27_NXYyo';
 
-          console.log('Sign in successful, redirecting...');
-          
-          // Request notification permission on successful login
-          try {
-            if (window.TechTitansNotifications) {
-              await window.TechTitansNotifications.requestPermission();
+            // ─── DOM refs ────────────────────────────────────────────────────
+            const sessionLoader = document.getElementById('sessionLoader');
+            const loginCard = document.getElementById('loginCard');
+            const form = document.getElementById('loginForm');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const passwordToggle = document.getElementById('passwordToggle');
+            const submitBtn = document.getElementById('submitBtn');
+            const errorDiv = document.getElementById('errorMessage');
+            const loadingDiv = document.getElementById('loadingMessage');
+
+            // ─── Init Supabase ──────────────────────────────────────────────
+            let supabase;
+            try {
+                if (!window.supabase) throw new Error('Supabase library failed to load.');
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log('[Login] Supabase client ready');
+            } catch (e) {
+                console.error('[Login] Init error:', e);
+                sessionLoader.innerHTML = `
+              <p style="color:#ff628c;">⚠️ Authentication service unavailable.<br>Please refresh or try again later.</p>
+            `;
+                // Still show the form but disable it
+                document.querySelectorAll('input, button').forEach(el => el.disabled = true);
+                loginCard.classList.add('visible');
+                sessionLoader.style.display = 'none';
+                return;
             }
-          } catch (e) {
-            console.warn('Notification permission request failed', e);
-          }
 
-          window.location.href = 'dashboard.html';
-        } catch (err) {
-          console.error('Login error:', err);
-          let message = err.message || 'Login failed. Please try again.';
-          // Friendly error messages
-          if (message.includes('Invalid login credentials')) {
-            message = 'Invalid email or password.';
-          } else if (message.includes('Email not confirmed')) {
-            message = 'Please verify your email address before logging in.';
-          } else if (message.includes('rate limit')) {
-            message = 'Too many attempts. Please wait a moment and try again.';
-          }
-          showError(message);
-        } finally {
-          loadingDiv.style.display = 'none';
-          submitBtn.disabled = false;
-        }
-      });
+            // ─── Check for existing session ────────────────────────────────
+            // This runs immediately and redirects if the user is already authenticated.
+            (async function checkSession() {
+                try {
+                    const { data: { user }, error } = await supabase.auth.getUser();
 
-      // Helper to display an error and re‑enable form
-      function showError(text) {
-        errorDiv.textContent = text;
-        errorDiv.style.display = 'block';
-        loadingDiv.style.display = 'none';
-        submitBtn.disabled = false;
-      }
-    })();
-  </script>
+                    if (error) {
+                        // If there's an error (e.g., no session, expired token), we simply
+                        // show the login form. We don't treat this as a critical error.
+                        console.log('[Login] No active session or error:', error.message);
+                        showLoginForm();
+                        return;
+                    }
+
+                    if (user) {
+                        // ─── User is authenticated → redirect instantly ──
+                        console.log('[Login] Active session found for:', user.email);
+                        // Request notification permission in the background (non-blocking)
+                        try {
+                            if (window.TechTitansNotifications) {
+                                await window.TechTitansNotifications.requestPermission();
+                            }
+                        } catch (_) { /* ignore */ }
+                        // Redirect – this happens in "split seconds"
+                        window.location.href = 'dashboard.html';
+                        return;
+                    }
+
+                    // No user → show login form
+                    showLoginForm();
+
+                } catch (err) {
+                    // Any unexpected error → show login form as fallback
+                    console.warn('[Login] Session check error:', err);
+                    showLoginForm();
+                }
+            })();
+
+            // ─── Show the login form and hide the loader ──────────────────
+            function showLoginForm() {
+                sessionLoader.style.display = 'none';
+                loginCard.classList.add('visible');
+            }
+
+            // ─── Password toggle ────────────────────────────────────────────
+            passwordToggle.addEventListener('click', () => {
+                const shouldShow = passwordInput.type === 'password';
+                passwordInput.type = shouldShow ? 'text' : 'password';
+                passwordToggle.classList.toggle('is-visible', shouldShow);
+                passwordToggle.setAttribute('aria-label', shouldShow ? 'Hide password' : 'Show password');
+                passwordToggle.setAttribute('aria-pressed', String(shouldShow));
+                passwordInput.focus();
+            });
+
+            // ─── Login form submission ─────────────────────────────────────
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                // Reset messages
+                errorDiv.style.display = 'none';
+                loadingDiv.style.display = 'block';
+                submitBtn.disabled = true;
+
+                const email = emailInput.value.trim();
+                const password = passwordInput.value;
+
+                if (!email || !password) {
+                    showError('Please enter both email and password.');
+                    return;
+                }
+
+                try {
+                    console.log('[Login] Signing in:', email);
+                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+                    if (error) throw error;
+
+                    console.log('[Login] Success, redirecting…');
+
+                    // Request notification permission (non-blocking)
+                    try {
+                        if (window.TechTitansNotifications) {
+                            await window.TechTitansNotifications.requestPermission();
+                        }
+                    } catch (_) { /* ignore */ }
+
+                    window.location.href = 'dashboard.html';
+
+                } catch (err) {
+                    console.error('[Login] Error:', err);
+                    let message = err.message || 'Login failed. Please try again.';
+                    if (message.includes('Invalid login credentials')) {
+                        message = 'Invalid email or password.';
+                    } else if (message.includes('Email not confirmed')) {
+                        message = 'Please verify your email address before logging in.';
+                    } else if (message.includes('rate limit')) {
+                        message = 'Too many attempts. Please wait a moment and try again.';
+                    }
+                    showError(message);
+                } finally {
+                    loadingDiv.style.display = 'none';
+                    submitBtn.disabled = false;
+                }
+            });
+
+            // ─── Helper: show error ────────────────────────────────────────
+            function showError(text) {
+                errorDiv.textContent = text;
+                errorDiv.style.display = 'block';
+                loadingDiv.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+
+        })();
+    </script>
+
 </body>
 </html>
