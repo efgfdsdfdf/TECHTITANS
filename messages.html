@@ -13,7 +13,7 @@
       height: 100vh;
       overflow: hidden;
     }
-    /* === SIDEBAR (same on both pages) === */
+    /* === SIDEBAR === */
     .sidebar {
       width: 260px;
       background: rgba(10, 16, 28, 0.95);
@@ -237,7 +237,6 @@
       100% { opacity: 0.3; }
     }
 
-    /* Groups list */
     .groups-list {
       display: flex;
       flex-wrap: wrap;
@@ -629,131 +628,68 @@
       font-weight: 600;
       margin-left: 0.5rem;
     }
-    /* === MOBILE ADAPTATIONS (kept minimal) === */
-    @media (max-width: 768px) {
-      body { flex-direction: column; height: 100dvh; }
-      .sidebar {
-        display: none;
-      }
-      .logo { display: none; }
-      .mobile-nav-toggle {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 3rem;
-        height: 3rem;
-        border: none;
-        background: rgba(255,255,255,0.07);
-        color: white;
-        border-radius: 50%;
-        cursor: pointer;
-        font-size: 1.4rem;
-      }
-      .chat-header {
-        justify-content: space-between;
-      }
-      .group-tabs {
-        order: 3;
-        width: 100%;
-        justify-content: flex-start;
-        overflow-x: auto;
-        padding-bottom: 0.3rem;
-        -webkit-overflow-scrolling: touch;
-      }
-      .group-tab { white-space: nowrap; }
-      .online-count { margin-left: 0; }
-      .messages-area { padding: 1rem; }
-      .avatar { width: 32px; height: 32px; font-size: 0.9rem; }
-      .chat-input-area { padding: 0.8rem; }
-      .chat-input-area input { font-size: 16px; padding: 0.7rem 1rem; }
-      .chat-input-area button,
-      .voice-btn { width: 2.8rem; height: 2.8rem; }
-      .main {
-        padding: 0.5rem;
-        order: 1;
-        flex: 1 1 0;
-        height: auto;
-        overflow: hidden;
-      }
-      .chat-header {
-        padding: 0.8rem 1rem;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-      }
-      .group-tabs {
-        order: 3;
-        width: 100%;
-        justify-content: flex-start;
-        overflow-x: auto;
-        padding-bottom: 0.3rem;
-        -webkit-overflow-scrolling: touch;
-      }
-      .group-tab { white-space: nowrap; }
-      .online-count { margin-left: 0; }
-      .messages-area { padding: 1rem; }
-      .avatar { width: 32px; height: 32px; font-size: 0.9rem; }
-      .chat-input-area { padding: 0.8rem; }
-      .chat-input-area input { font-size: 16px; padding: 0.7rem 1rem; }
-      .chat-input-area button, .voice-btn { width: 2.8rem; height: 2.8rem; }
-    }
-    /* === Call modal styles (shared) === */
+
+    /* === CALL MODAL - FULL SCREEN SQUARE TILES === */
     .call-modal {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0,0,0,0.92);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 2000;
+      backdrop-filter: blur(6px);
     }
     .call-modal-content {
-      background: #1f2a44;
-      border-radius: 1.5rem;
-      padding: 1.5rem;
-      max-width: 800px;
-      width: 90%;
-      color: white;
-      max-height: 90vh;
-      overflow-y: auto;
+      width: 100%;
+      height: 100%;
+      background: #131c30;
+      border-radius: 0;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
     .call-modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1rem;
+      margin-bottom: 0.5rem;
+      padding: 0 0.5rem;
+      flex-shrink: 0;
     }
-    .call-modal-header h3 { font-size: 1.2rem; }
+    .call-modal-header h3 { font-size: 1.2rem; color: white; }
     .call-modal-close {
       background: none;
       border: none;
       color: white;
-      font-size: 1.5rem;
+      font-size: 2rem;
       cursor: pointer;
+      padding: 0 0.5rem;
     }
     .call-videos {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      justify-content: center;
-      margin-bottom: 1rem;
-      background: #0b0f17;
-      border-radius: 1rem;
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.6rem;
       padding: 0.5rem;
-      min-height: 120px;
-    }
-    .video-container {
       background: #0b0f17;
       border-radius: 0.8rem;
+      overflow-y: auto;
+      align-content: start;
+    }
+    .video-container {
+      aspect-ratio: 1 / 1;
+      background: #0b0f17;
+      border-radius: 0.6rem;
       overflow: hidden;
-      width: 180px;
-      height: 140px;
       position: relative;
-      flex: 1 1 160px;
+      border: 2px solid #2f3a5a;
       min-width: 120px;
-      border: 1px solid #2f3a5a;
+      min-height: 120px;
     }
     .video-container video {
       width: 100%;
@@ -772,13 +708,13 @@
     }
     .video-label {
       position: absolute;
-      bottom: 0.3rem;
-      left: 0.3rem;
+      bottom: 0.4rem;
+      left: 0.4rem;
       background: rgba(0,0,0,0.6);
       color: white;
-      padding: 0.1rem 0.5rem;
+      padding: 0.15rem 0.6rem;
       border-radius: 0.4rem;
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       max-width: 90%;
       white-space: nowrap;
       overflow: hidden;
@@ -788,8 +724,9 @@
       display: flex;
       gap: 1rem;
       justify-content: center;
-      margin-top: 1rem;
+      margin-top: 0.8rem;
       flex-wrap: wrap;
+      flex-shrink: 0;
     }
     .call-controls button {
       background: #428cff;
@@ -805,6 +742,11 @@
     }
     .call-controls button.hangup { background: #ff4d4d; }
     .call-controls button:disabled { opacity: 0.5; cursor: not-allowed; }
+    #callParticipantCount {
+      color: #9aa4bf;
+      font-size: 0.9rem;
+    }
+
     .toast {
       position: fixed;
       bottom: 20px;
@@ -822,50 +764,22 @@
     }
     .toast.hide { opacity: 0; }
 
+    /* Mobile adjustments */
     @media (max-width: 768px) {
-      .sidebar {
-        display: none;
-      }
-      .mobile-menu-toggle {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 3rem;
-        height: 3rem;
-        border: none;
-        background: rgba(255,255,255,0.06);
-        color: white;
-        border-radius: 50%;
-        cursor: pointer;
-        font-size: 1.3rem;
-      }
-      .chat-header {
-        justify-content: space-between;
-      }
+      .sidebar { display: none; }
+      .main { padding: 0.5rem; }
+      .chat-header { padding: 0.8rem 1rem; flex-wrap: wrap; gap: 0.5rem; }
       .chat-header .online-count,
       .chat-header .role-tag,
-      .chat-header #groupTabs {
-        display: none;
-      }
-      .chat-panel {
-        border-radius: 0;
-      }
-      .messages-area {
-        padding: 0.8rem 0.9rem 0;
-      }
-      .ongoing-call-banner {
-        font-size: 0.75rem;
-        padding: 0.2rem 0.6rem;
-      }
-      .video-container {
-        width: 120px;
-        height: 90px;
-        flex: 1 1 100px;
-        min-width: 80px;
-      }
+      .chat-header #groupTabs { display: none; }
+      .chat-panel { border-radius: 0; }
+      .messages-area { padding: 0.8rem 0.9rem 0; }
+      .ongoing-call-banner { font-size: 0.75rem; padding: 0.2rem 0.6rem; }
+      .call-videos { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.4rem; }
+      .video-container { min-width: 80px; min-height: 80px; }
     }
 
-    /* === MOBILE NAV OVERLAY === */
+    /* Mobile nav overlay */
     .mobile-nav-overlay {
       display: none;
       position: fixed;
@@ -873,7 +787,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0,0,0,0.6);
       z-index: 1000;
       align-items: stretch;
       justify-content: flex-start;
@@ -884,12 +798,11 @@
       height: 100%;
       background: rgba(10, 16, 28, 0.98);
       backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
       padding: 2rem 1.2rem;
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
-      box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
+      box-shadow: 4px 0 30px rgba(0,0,0,0.5);
       animation: slideInNav 0.25s ease;
     }
     @keyframes slideInNav {
@@ -906,9 +819,7 @@
       line-height: 1;
       padding: 0.2rem;
     }
-    .mobile-nav-panel .close-btn:hover {
-      color: white;
-    }
+    .mobile-nav-panel .close-btn:hover { color: white; }
     .mobile-nav-links {
       display: flex;
       flex-direction: column;
@@ -954,6 +865,24 @@
     .mobile-nav-panel .logout-btn:hover {
       background: #ff4d4d20;
       border-color: #ff4d4d;
+    }
+    .mobile-nav-toggle {
+      display: none;
+    }
+    @media (max-width: 768px) {
+      .mobile-nav-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 3rem;
+        height: 3rem;
+        border: none;
+        background: rgba(255,255,255,0.07);
+        color: white;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 1.4rem;
+      }
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -1029,7 +958,7 @@
   <div id="receiptsModal" class="read-receipts-modal" style="display: none;"></div>
   <div id="toast" class="toast hide" style="display: none;"></div>
 
-  <!-- Active call modal (group calls) -->
+  <!-- Active call modal (group calls) - FULL SCREEN -->
   <div id="callModal" class="call-modal" style="display: none;">
     <div class="call-modal-content">
       <div class="call-modal-header">
@@ -1038,12 +967,12 @@
         <button class="call-modal-close" id="closeCallModalBtn">&times;</button>
       </div>
       <div id="callVideosContainer" class="call-videos">
-        <!-- Local video will be appended here -->
+        <!-- Local video tile -->
         <div id="localVideoContainer" class="video-container">
           <div id="localVideo" class="rtc-video-slot"></div>
           <div class="video-label" id="localVideoLabel">You</div>
         </div>
-        <!-- Remote videos will be dynamically added here -->
+        <!-- Remote videos will be appended here -->
       </div>
       <div class="call-controls">
         <button id="muteAudioBtn" title="Mute">🎤</button>
@@ -1055,7 +984,7 @@
 
   <!-- Profile Modal -->
   <div id="profileModal" class="call-modal" style="display: none;">
-    <div class="call-modal-content" style="max-width: 400px;">
+    <div class="call-modal-content" style="max-width: 400px; width: 90%; border-radius: 1.5rem; height: auto;">
       <div class="call-modal-header">
         <h3>User Profile</h3>
         <button class="call-modal-close" id="closeProfileModal">&times;</button>
@@ -1108,7 +1037,6 @@
     let totalUnreadCount = 0;
     let editTimeouts = new Map();
     let observer = null;
-    let dmUnreadCount = 0;
     let dmUnreadBySender = {};
     let globalDmSubscription = null;
     let presenceChannel = null;
@@ -1124,7 +1052,6 @@
     let recordingTimerInterval = null;
     let isRecording = false;
 
-    // Map to store 30-second timeouts for removing unread border
     let unreadBorderTimeouts = new Map();
 
     // Agora group call variables
@@ -1136,7 +1063,7 @@
     let joinedAgoraChannelName = null;
     let groupCallChannelName = null;
     let remoteUsers = new Map(); // uid -> { name, videoTrack, audioTrack, container }
-    let activeGroupCallId = null; // database id of active call
+    let activeGroupCallId = null;
 
     // DOM elements
     const modal = document.getElementById('receiptsModal');
@@ -1178,7 +1105,6 @@
     const remoteVideoContainer = document.getElementById('callVideosContainer');
     const callModalTitle = document.getElementById('callModalTitle');
     const callParticipantCount = document.getElementById('callParticipantCount');
-    const remoteVideoLabel = document.getElementById('remoteVideoLabel');
     const profileModal = document.getElementById('profileModal');
     const modalAvatar = document.getElementById('modalAvatar');
     const modalAvatarPlaceholder = document.getElementById('modalAvatarPlaceholder');
@@ -1717,6 +1643,8 @@
       await loadMessages();
       // Check ongoing call for this group
       checkOngoingCall();
+      // Update group call subscription for new role
+      setupGroupCallSubscription();
     }
 
     function attachMessageHandlers() {
@@ -2033,11 +1961,12 @@
         .subscribe();
     }
 
-    // --- Group call database and broadcast ---
+    // --- Check for ongoing call from DB ---
     async function checkOngoingCall() {
       const role = isCEO ? selectedGroupRole : currentRole;
       if (!role) {
         ongoingCallBanner.style.display = 'none';
+        activeGroupCallId = null;
         return;
       }
       try {
@@ -2058,8 +1987,6 @@
         callerNameDisplay.textContent = callerName;
         activeGroupCallId = data.id;
         ongoingCallBanner.style.display = 'flex';
-        // If user is already in the call, hide the banner? Actually keep it but disable join button? 
-        // We'll allow re-join if they left but call still active.
       } catch (e) {
         ongoingCallBanner.style.display = 'none';
         activeGroupCallId = null;
@@ -2174,14 +2101,12 @@
         localVideoTrack.close();
         localVideoTrack = null;
       }
-      // Remove remote video containers
       remoteUsers.forEach((user, uid) => {
         if (user.container) user.container.remove();
       });
       remoteUsers.clear();
     }
 
-    // Add remote user video container
     function addRemoteVideoContainer(uid, name) {
       const container = document.createElement('div');
       container.className = 'video-container';
@@ -2198,7 +2123,7 @@
     }
 
     function updateParticipantCount() {
-      const count = remoteUsers.size + 1; // +1 for local
+      const count = remoteUsers.size + 1;
       callParticipantCount.textContent = `${count} participants`;
     }
 
@@ -2214,13 +2139,10 @@
       const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
       groupAgoraClient = client;
 
-      // Event: remote user published
       client.on('user-published', async (user, mediaType) => {
         await client.subscribe(user, mediaType);
-        // Fetch user name from remoteUsers map or fallback
         let userName = remoteUsers.get(user.uid)?.name || `User ${user.uid}`;
         if (!remoteUsers.has(user.uid)) {
-          // Try to fetch from profiles
           try {
             const { data: profile } = await supabase
               .from('profiles')
@@ -2247,31 +2169,23 @@
       });
 
       client.on('user-unpublished', (user, mediaType) => {
-        if (mediaType === 'video') {
-          const userData = remoteUsers.get(user.uid);
-          if (userData && userData.videoTrack) {
-            userData.videoTrack.stop();
-            userData.videoTrack = null;
-          }
-        }
-        if (mediaType === 'audio') {
-          const userData = remoteUsers.get(user.uid);
-          if (userData && userData.audioTrack) {
-            userData.audioTrack.stop();
-            userData.audioTrack = null;
-          }
-        }
-        // If both audio and video are gone, remove container
         const userData = remoteUsers.get(user.uid);
-        if (userData && !userData.videoTrack && !userData.audioTrack) {
+        if (!userData) return;
+        if (mediaType === 'video' && userData.videoTrack) {
+          userData.videoTrack.stop();
+          userData.videoTrack = null;
+        }
+        if (mediaType === 'audio' && userData.audioTrack) {
+          userData.audioTrack.stop();
+          userData.audioTrack = null;
+        }
+        if (!userData.videoTrack && !userData.audioTrack) {
           if (userData.container) userData.container.remove();
           remoteUsers.delete(user.uid);
           updateParticipantCount();
         }
       });
 
-      // When remote user leaves the channel, Agora triggers user-unpublished for all tracks,
-      // but we also handle user-left event? Actually Agora RTC SDK v4 has 'user-left' event.
       client.on('user-left', (user) => {
         const userData = remoteUsers.get(user.uid);
         if (userData && userData.container) {
@@ -2306,7 +2220,6 @@
         return;
       }
 
-      // If we are starting a new call (no existingCallId), create DB record and broadcast
       if (!existingCallId) {
         try {
           const { data: callData, error: callError } = await supabase
@@ -2316,7 +2229,6 @@
             .single();
           if (callError) throw callError;
           activeGroupCallId = callData.id;
-          // Broadcast to group channel
           await supabase.channel(`group-call-${role}`).send({
             type: 'broadcast',
             event: 'group-call-started',
@@ -2328,10 +2240,8 @@
               callChannelName: groupCallChannelName
             }
           });
-          // Update banner
           callerNameDisplay.textContent = currentUserFullName;
           ongoingCallBanner.style.display = 'flex';
-          // Push notification
           if (window.TechTitansNotifications) {
             window.TechTitansNotifications.display(`Group call started for ${role}`, {
               body: `${currentUserFullName} has started a call for ${role}.`,
@@ -2342,8 +2252,6 @@
           console.warn('Failed to create group call record:', err);
         }
       } else {
-        // Joining existing call: just update the banner? It's already showing.
-        // Add participant count
         showToast('You joined the group call');
       }
 
@@ -2368,13 +2276,7 @@
       callStarting = false;
       joinedAgoraChannelName = null;
 
-      // If this user was the one who started the call (or we want to end the call when last person leaves)
-      // We'll end the call if we are the only participant (i.e., after leaving, no remote users)
-      // But we should check if others are still in the call. Since we don't have participant list from DB,
-      // we can use the remoteUsers map: if there are remote users, we don't end the call.
-      // However, if we are the last one, we should end the call and update DB.
       if (remoteUsers.size === 0 && activeGroupCallId) {
-        // End the call
         try {
           await supabase
             .from('group_calls')
@@ -2404,8 +2306,6 @@
           console.warn('Failed to end group call:', err);
         }
       } else {
-        // Notify others that this user left? We already left channel, that's enough.
-        // Optionally broadcast a message.
         const role = isCEO ? selectedGroupRole : currentRole;
         if (role) {
           await supabase.channel(`group-call-${role}`).send({
@@ -2454,11 +2354,9 @@
     document.getElementById('sendBtn').addEventListener('click', sendMessage);
     document.getElementById('messageInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
     document.getElementById('groupCallBtn').addEventListener('click', () => {
-      // Start a new call
       joinGroupCall(null);
     });
     joinOngoingCallBtn.addEventListener('click', () => {
-      // Join existing call
       if (activeGroupCallId) {
         joinGroupCall(activeGroupCallId);
       }
@@ -2613,7 +2511,21 @@
         .subscribe();
     }
 
-    // --- Group call subscription (broadcast) ---
+    // --- Group call realtime subscription (DB changes) ---
+    let groupCallDbSubscription = null;
+    function setupGroupCallDbSubscription() {
+      if (groupCallDbSubscription) groupCallDbSubscription.unsubscribe();
+      const role = isCEO ? selectedGroupRole : currentRole;
+      if (!role) return;
+      groupCallDbSubscription = supabase
+        .channel(`group-calls-db-${role}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'group_calls', filter: `role=eq.${role}` }, () => {
+          checkOngoingCall();
+        })
+        .subscribe();
+    }
+
+    // --- Group call broadcast subscription ---
     function setupGroupCallSubscription() {
       if (groupCallSubscription) groupCallSubscription.unsubscribe();
       const role = isCEO ? selectedGroupRole : currentRole;
@@ -2622,7 +2534,6 @@
         .channel(`group-call-${role}`)
         .on('broadcast', { event: 'group-call-started' }, async ({ payload }) => {
           if (!payload || payload.callerId === currentUser.id) return;
-          // Update banner
           callerNameDisplay.textContent = payload.callerName || 'Someone';
           activeGroupCallId = payload.callId || null;
           ongoingCallBanner.style.display = 'flex';
@@ -2647,7 +2558,7 @@
           }
         })
         .on('broadcast', { event: 'group-call-participant-left' }, ({ payload }) => {
-          // optional: show toast
+          // optional
         })
         .subscribe();
     }
@@ -2798,7 +2709,7 @@
         await loadMessages();
         setupGroupSubscription();
         setupGroupCallSubscription();
-        // Check for ongoing call
+        setupGroupCallDbSubscription();
         await checkOngoingCall();
       } catch (err) {
         console.error('Init error:', err);
