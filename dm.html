@@ -16,9 +16,10 @@
       box-sizing: border-box;
       font-family: 'Inter', sans-serif;
     }
-    body {
+    html, body {
       background: #0b0f17;
       display: flex;
+      height: 100%;
       height: 100vh;
       height: 100dvh;
       overflow: hidden;
@@ -1668,25 +1669,27 @@
 
       // ─── MOBILE CHAT TOGGLE ───
       function setDmMobileChatOpen(isOpen) {
+        if (window.innerWidth > 768) return;
         const layout = document.querySelector('.dm-layout');
-        const list = document.getElementById('dmConversationsList');
-        const chatArea = document.getElementById('dmChatArea');
-        const backBtn = document.getElementById('dmBackBtn');
+        const list = document.querySelector('.dm-conversations-list');
+        const chatArea = document.querySelector('.dm-chat-area');
+        const backBtn = document.querySelector('.dm-back-btn');
         const outerHeader = document.querySelector('.chat-panel > .chat-header');
-        if (!layout || !list || !chatArea || !backBtn) return;
+
         if (isOpen) {
-          layout.classList.add('mobile-chat-open');
-          list.style.display = 'none';
+          layout.classList.add('chat-open');
+          list.style.display = 'none'; // Force layout to only show chatArea
+          layout.style.transform = 'translateX(0)'; // Don't slide if list is hidden
           chatArea.style.display = 'flex';
+          chatArea.style.visibility = 'visible';
           backBtn.style.display = 'block';
           if (outerHeader && window.innerWidth <= 768) outerHeader.style.display = 'none';
         } else {
-          layout.classList.remove('mobile-chat-open');
-          list.style.display = 'block';
+          layout.classList.remove('chat-open');
+          list.style.display = 'flex';
           chatArea.style.display = 'none';
           backBtn.style.display = 'none';
-          if (outerHeader) outerHeader.style.display = 'flex';
-          document.querySelectorAll('.dm-conversation-item').forEach(i => i.classList.remove('active'));
+          if (outerHeader && window.innerWidth <= 768) outerHeader.style.display = 'flex';
         }
       }
 
