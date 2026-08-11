@@ -23,6 +23,9 @@ const entries = [
   'signup.html',
   'update-password.html',
   'verify-otp.html',
+  'global-notifications.js',
+  'ringtone.js',
+  'manifest.json'
 ];
 
 function removeDir(target) {
