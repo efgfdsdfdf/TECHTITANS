@@ -18,7 +18,7 @@
   <script src="ringtone.js"></script>
   <script src="global-notifications.js"></script>
   <style>
-    /* (styles unchanged from your original – kept exactly as provided) */
+    /* (styles unchanged – kept exactly as provided) */
     * {
       margin: 0;
       padding: 0;
@@ -464,11 +464,10 @@
 
   <div class="main">
     <div class="top-bar">
-        
       <div class="user-greeting"><i class="fas fa-hand-peace"></i> Hello, <span id="userName"></span></div>
     </div>
 
-      <!-- ========== ANNOUNCEMENTS SECTION ========== -->
+    <!-- ========== ANNOUNCEMENTS SECTION ========== -->
     <div class="announcements-section" id="announcementsSection">
       <div class="announcements-header">
         <i class="fas fa-bullhorn"></i> Announcements
@@ -493,8 +492,6 @@
       <!-- filled by js -->
     </div>
 
-  
-
     <!-- extended stats + chart + activity -->
     <div class="row-duo">
       <!-- message trend chart -->
@@ -514,510 +511,535 @@
   </div>
 
   <script>
-    (function() {
-      // --- Supabase config ---
-      const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kcXF0c2RpYnR2eW1mZ250c3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTI1NjIsImV4cCI6MjA4Nzg4ODU2Mn0.hS-7kmoyFljnhkJEkw7nmgimw9ioQreidyu27_NXYyo';
+   /**
+ * ⚠️ IMPORTANT: This code requires a `target_value` column in the `announcements` table.
+ * 
+ * Your database has a trigger/function that references `NEW.target_value`, but the column
+ * does not exist. To fix this, run the following SQL in your Supabase SQL Editor:
+ *
+ *   ALTER TABLE announcements ADD COLUMN target_value TEXT DEFAULT NULL;
+ *
+ * After adding the column, the insert below (which includes `target_value: 'global'`)
+ * will succeed.
+ *
+ * If you cannot add the column, you must either:
+ *   - Drop the trigger that references `target_value`, or
+ *   - Modify the trigger to not use that field.
+ *
+ * This JavaScript already includes the `target_value` field in the INSERT.
+ */
 
-      if (!window.supabase) {
-        document.body.innerHTML = '<p style="color:white;padding:2rem;">Failed to load Supabase. Refresh.</p>';
-        return;
+(function() {
+  // --- Supabase config ---
+  const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kcXF0c2RpYnR2eW1mZ250c3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTI1NjIsImV4cCI6MjA4Nzg4ODU2Mn0.hS-7kmoyFljnhkJEkw7nmgimw9ioQreidyu27_NXYyo';
+
+  if (!window.supabase) {
+    document.body.innerHTML = '<p style="color:white;padding:2rem;">Failed to load Supabase. Refresh.</p>';
+    return;
+  }
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  if (window.TechTitansNotifications) {
+    window.TechTitansNotifications.connect(supabase);
+  }
+
+  let currentUser = null;
+  let currentRole = null;
+  let isCEO = false;
+  let unreadCount = 0;
+  let refreshInterval = null;
+  let messageChart = null;
+  let announcementsChannel = null;
+
+  // --- Helper: update badge ---
+  function updateBadge(count) {
+    const badge = document.getElementById('sidebarUnreadBadge');
+    if (!badge) return;
+    if (count > 0) {
+      badge.style.display = 'inline-block';
+      badge.textContent = count;
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  // --- Fetch unread count ---
+  async function fetchUnreadCount() {
+    if (!currentUser || !currentRole) return 0;
+    try {
+      let query = supabase.from('group_messages').select('id, sender_id');
+      if (!isCEO) query = query.eq('role', currentRole);
+      const { data: messages, error: msgError } = await query;
+      if (msgError) throw msgError;
+      const messageIds = messages.map(m => m.id);
+      let readSet = new Set();
+      if (messageIds.length) {
+        const { data: reads } = await supabase
+          .from('message_reads')
+          .select('message_id')
+          .eq('user_id', currentUser.id)
+          .in('message_id', messageIds);
+        if (reads) readSet = new Set(reads.map(r => r.message_id));
       }
-      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      if (window.TechTitansNotifications) {
-        window.TechTitansNotifications.connect(supabase);
+      return messages.filter(msg => !readSet.has(msg.id) && msg.sender_id !== currentUser.id).length;
+    } catch (err) {
+      console.error('unread error:', err);
+      return 0;
+    }
+  }
+
+  // --- Refresh badge ---
+  async function refreshUnreadBadge() {
+    unreadCount = await fetchUnreadCount();
+    updateBadge(unreadCount);
+  }
+
+  // --- Fetch total messages ---
+  async function fetchTotalMessages() {
+    try {
+      let query = supabase.from('group_messages').select('*', { count: 'exact', head: true });
+      if (!isCEO && currentRole) query = query.eq('role', currentRole);
+      const { count, error } = await query;
+      return error ? 0 : count;
+    } catch { return 0; }
+  }
+
+  // --- Fetch total resources ---
+  async function fetchTotalResources() {
+    try {
+      const { count, error } = await supabase.from('resources').select('*', { count: 'exact', head: true });
+      return error ? 0 : count;
+    } catch { return 0; }
+  }
+
+  // --- Fetch last 3 messages for activity feed ---
+  async function fetchRecentMessages() {
+    try {
+      let query = supabase
+        .from('group_messages')
+        .select('id, content, created_at, sender_id, profiles!inner(full_name)')
+        .order('created_at', { ascending: false })
+        .limit(3);
+      if (!isCEO && currentRole) query = query.eq('role', currentRole);
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    } catch (err) {
+      console.error('recent messages error:', err);
+      return [];
+    }
+  }
+
+  // --- Fetch daily counts for chart ---
+  async function fetchDailyCounts() {
+    try {
+      const now = new Date();
+      const sevenDaysAgo = new Date(now);
+      sevenDaysAgo.setDate(now.getDate() - 7);
+      const start = sevenDaysAgo.toISOString();
+
+      let query = supabase
+        .from('group_messages')
+        .select('created_at')
+        .gte('created_at', start);
+      if (!isCEO && currentRole) query = query.eq('role', currentRole);
+      const { data, error } = await query;
+      if (error) throw error;
+
+      const counts = {};
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(now);
+        d.setDate(now.getDate() - i);
+        const ymd = d.toISOString().split('T')[0];
+        counts[ymd] = 0;
       }
+      data.forEach(msg => {
+        const day = msg.created_at.split('T')[0];
+        if (counts.hasOwnProperty(day)) counts[day]++;
+      });
+      return Object.keys(counts).sort().map(date => ({ date, count: counts[date] }));
+    } catch (err) {
+      console.error('daily counts error:', err);
+      return [];
+    }
+  }
 
-      let currentUser = null;
-      let currentRole = null;
-      let isCEO = false;
-      let unreadCount = 0;
-      let refreshInterval = null;
-      let messageChart = null;
-      let announcementsChannel = null;
-
-      // --- Helper: update badge ---
-      function updateBadge(count) {
-        const badge = document.getElementById('sidebarUnreadBadge');
-        if (!badge) return;
-        if (count > 0) {
-          badge.style.display = 'inline-block';
-          badge.textContent = count;
-        } else {
-          badge.style.display = 'none';
-        }
+  // --- Render chart ---
+  async function renderChart() {
+    const daily = await fetchDailyCounts();
+    const ctx = document.getElementById('messageChart').getContext('2d');
+    if (messageChart) messageChart.destroy();
+    messageChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: daily.map(d => d.date.slice(5)),
+        datasets: [{
+          label: 'messages',
+          data: daily.map(d => d.count),
+          backgroundColor: '#428cff80',
+          borderRadius: 6,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, grid: { color: '#2f3f66' }, ticks: { color: '#a0b0d0' } },
+                 x: { ticks: { color: '#a0b0d0' } } }
       }
+    });
+  }
 
-      // --- Fetch unread count ---
-      async function fetchUnreadCount() {
-        if (!currentUser || !currentRole) return 0;
-        try {
-          let query = supabase.from('group_messages').select('id, sender_id');
-          if (!isCEO) query = query.eq('role', currentRole);
-          const { data: messages, error: msgError } = await query;
-          if (msgError) throw msgError;
-          const messageIds = messages.map(m => m.id);
-          let readSet = new Set();
-          if (messageIds.length) {
-            const { data: reads } = await supabase
-              .from('message_reads')
-              .select('message_id')
-              .eq('user_id', currentUser.id)
-              .in('message_id', messageIds);
-            if (reads) readSet = new Set(reads.map(r => r.message_id));
-          }
-          return messages.filter(msg => !readSet.has(msg.id) && msg.sender_id !== currentUser.id).length;
-        } catch (err) {
-          console.error('unread error:', err);
-          return 0;
-        }
-      }
-
-      // --- Refresh badge ---
-      async function refreshUnreadBadge() {
-        unreadCount = await fetchUnreadCount();
-        updateBadge(unreadCount);
-      }
-
-      // --- Fetch total messages ---
-      async function fetchTotalMessages() {
-        try {
-          let query = supabase.from('group_messages').select('*', { count: 'exact', head: true });
-          if (!isCEO && currentRole) query = query.eq('role', currentRole);
-          const { count, error } = await query;
-          return error ? 0 : count;
-        } catch { return 0; }
-      }
-
-      // --- Fetch total resources ---
-      async function fetchTotalResources() {
-        try {
-          const { count, error } = await supabase.from('resources').select('*', { count: 'exact', head: true });
-          return error ? 0 : count;
-        } catch { return 0; }
-      }
-
-      // --- Fetch last 3 messages for activity feed ---
-      async function fetchRecentMessages() {
-        try {
-          let query = supabase
-            .from('group_messages')
-            .select('id, content, created_at, sender_id, profiles!inner(full_name)')
-            .order('created_at', { ascending: false })
-            .limit(3);
-          if (!isCEO && currentRole) query = query.eq('role', currentRole);
-          const { data, error } = await query;
-          if (error) throw error;
-          return data || [];
-        } catch (err) {
-          console.error('recent messages error:', err);
-          return [];
-        }
-      }
-
-      // --- Fetch daily counts for chart ---
-      async function fetchDailyCounts() {
-        try {
-          const now = new Date();
-          const sevenDaysAgo = new Date(now);
-          sevenDaysAgo.setDate(now.getDate() - 7);
-          const start = sevenDaysAgo.toISOString();
-
-          let query = supabase
-            .from('group_messages')
-            .select('created_at')
-            .gte('created_at', start);
-          if (!isCEO && currentRole) query = query.eq('role', currentRole);
-          const { data, error } = await query;
-          if (error) throw error;
-
-          const counts = {};
-          for (let i = 0; i < 7; i++) {
-            const d = new Date(now);
-            d.setDate(now.getDate() - i);
-            const ymd = d.toISOString().split('T')[0];
-            counts[ymd] = 0;
-          }
-          data.forEach(msg => {
-            const day = msg.created_at.split('T')[0];
-            if (counts.hasOwnProperty(day)) counts[day]++;
-          });
-          return Object.keys(counts).sort().map(date => ({ date, count: counts[date] }));
-        } catch (err) {
-          console.error('daily counts error:', err);
-          return [];
-        }
-      }
-
-      // --- Render chart ---
-      async function renderChart() {
-        const daily = await fetchDailyCounts();
-        const ctx = document.getElementById('messageChart').getContext('2d');
-        if (messageChart) messageChart.destroy();
-        messageChart = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: daily.map(d => d.date.slice(5)),
-            datasets: [{
-              label: 'messages',
-              data: daily.map(d => d.count),
-              backgroundColor: '#428cff80',
-              borderRadius: 6,
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, grid: { color: '#2f3f66' }, ticks: { color: '#a0b0d0' } },
-                     x: { ticks: { color: '#a0b0d0' } } }
-          }
-        });
-      }
-
-      // --- Render activity feed ---
-      async function renderActivity() {
-        const recent = await fetchRecentMessages();
-        const container = document.getElementById('recentActivityList');
-        if (!recent.length) {
-          container.innerHTML = '<div class="activity-item">No recent messages</div>';
-          return;
-        }
-        container.innerHTML = recent.map(msg => {
-          const name = msg.profiles?.full_name || 'User';
-          const initial = name.charAt(0).toUpperCase();
-          const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          return `
-            <div class="activity-item">
-              <div class="activity-avatar">${initial}</div>
-              <div class="activity-details">
-                <span class="activity-name">${name}</span>
-                <div class="activity-msg">${msg.content || '📎 file'}</div>
-                <span class="activity-time">${time}</span>
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
-
-      // --- Update stats cards (total messages, unread, resources) ---
-      async function updateStatsCards() {
-        const [totalMsg, unread, totalRes] = await Promise.all([
-          fetchTotalMessages(),
-          fetchUnreadCount(),
-          fetchTotalResources()
-        ]);
-        const grid = document.getElementById('userInfoGrid');
-        document.querySelectorAll('.stats-card').forEach(el => el.remove());
-        const statsHTML = `
-          <div class="card stats-card">
-            <div class="card-title"><i class="fas fa-envelope"></i> Total messages</div>
-            <div class="card-value">${totalMsg}</div>
-            <div class="card-label">in current scope</div>
+  // --- Render activity feed ---
+  async function renderActivity() {
+    const recent = await fetchRecentMessages();
+    const container = document.getElementById('recentActivityList');
+    if (!recent.length) {
+      container.innerHTML = '<div class="activity-item">No recent messages</div>';
+      return;
+    }
+    container.innerHTML = recent.map(msg => {
+      const name = msg.profiles?.full_name || 'User';
+      const initial = name.charAt(0).toUpperCase();
+      const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return `
+        <div class="activity-item">
+          <div class="activity-avatar">${initial}</div>
+          <div class="activity-details">
+            <span class="activity-name">${name}</span>
+            <div class="activity-msg">${msg.content || '📎 file'}</div>
+            <span class="activity-time">${time}</span>
           </div>
-          <div class="card stats-card">
-            <div class="card-title"><i class="fas fa-bell"></i> Unread</div>
-            <div class="card-value">${unread}</div>
-            <div class="card-label">messages waiting</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // --- Update stats cards (total messages, unread, resources) ---
+  async function updateStatsCards() {
+    const [totalMsg, unread, totalRes] = await Promise.all([
+      fetchTotalMessages(),
+      fetchUnreadCount(),
+      fetchTotalResources()
+    ]);
+    const grid = document.getElementById('userInfoGrid');
+    document.querySelectorAll('.stats-card').forEach(el => el.remove());
+    const statsHTML = `
+      <div class="card stats-card">
+        <div class="card-title"><i class="fas fa-envelope"></i> Total messages</div>
+        <div class="card-value">${totalMsg}</div>
+        <div class="card-label">in current scope</div>
+      </div>
+      <div class="card stats-card">
+        <div class="card-title"><i class="fas fa-bell"></i> Unread</div>
+        <div class="card-value">${unread}</div>
+        <div class="card-label">messages waiting</div>
+      </div>
+      <div class="card stats-card">
+        <div class="card-title"><i class="fas fa-archive"></i> Resources</div>
+        <div class="card-value">${totalRes}</div>
+        <div class="card-label">available files</div>
+      </div>
+    `;
+    grid.insertAdjacentHTML('beforeend', statsHTML);
+  }
+
+  // --- ANNOUNCEMENT FUNCTIONS ---
+
+  // Delete announcements older than 24 hours (only if CEO)
+  async function deleteOldAnnouncements() {
+    if (!isCEO) return;
+    const oneDayAgo = new Date(Date.now() - 24*60*60*1000).toISOString();
+    const { error } = await supabase
+      .from('announcements')
+      .delete()
+      .lt('created_at', oneDayAgo);
+    if (error) console.error('Failed to delete old announcements:', error);
+  }
+
+  // Delete a single announcement (CEO only)
+  async function deleteAnnouncement(id) {
+    if (!isCEO) return;
+    if (!confirm('Delete this announcement?')) return;
+    const { error } = await supabase
+      .from('announcements')
+      .delete()
+      .eq('id', id);
+    if (error) {
+      alert('Failed to delete: ' + error.message);
+    } else {
+      // Remove from DOM
+      document.querySelector(`.announcement-card[data-id="${id}"]`)?.remove();
+    }
+  }
+
+  async function fetchAnnouncements() {
+    try {
+      const oneDayAgo = new Date(Date.now() - 24*60*60*1000).toISOString();
+      const { data, error } = await supabase
+        .from('announcements')
+        .select('*, profiles!created_by(full_name)')
+        .gte('created_at', oneDayAgo)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    } catch (err) {
+      console.error('fetch announcements error:', err);
+      return [];
+    }
+  }
+
+  function escapeHtml(unsafe) {
+    if (!unsafe) return '';
+    return unsafe.replace(/[&<>"']/g, function(m) {
+      if(m === '&') return '&amp;';
+      if(m === '<') return '&lt;';
+      if(m === '>') return '&gt;';
+      if(m === '"') return '&quot;';
+      if(m === "'") return '&#039;';
+      return m;
+    });
+  }
+
+  function renderAnnouncements(announcements) {
+    const container = document.getElementById('announcementsList');
+    if (!announcements.length) {
+      container.innerHTML = '<div style="color:#9aa4bf; text-align:center; padding:1rem;">No announcements yet.</div>';
+      return;
+    }
+    container.innerHTML = announcements.map(a => {
+      const date = new Date(a.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const fileLink = a.file_url ? `<div class="announcement-attachment"><a href="${a.file_url}" target="_blank"><i class="fas fa-paperclip"></i> Attachment</a></div>` : '';
+      const deleteBtn = isCEO ? `<button class="delete-announcement" onclick="deleteAnnouncement('${a.id}')"><i class="fas fa-trash"></i></button>` : '';
+      return `
+        <div class="announcement-card" data-id="${a.id}">
+          ${deleteBtn}
+          <div class="announcement-meta">
+            <span class="announcement-author"><i class="fas fa-user-circle"></i> ${escapeHtml(a.profiles?.full_name || 'CEO')}</span>
+            <span class="announcement-date">${date}</span>
           </div>
-          <div class="card stats-card">
-            <div class="card-title"><i class="fas fa-archive"></i> Resources</div>
-            <div class="card-value">${totalRes}</div>
-            <div class="card-label">available files</div>
-          </div>
-        `;
-        grid.insertAdjacentHTML('beforeend', statsHTML);
-      }
+          <div class="announcement-content">${escapeHtml(a.content)}</div>
+          ${fileLink}
+        </div>
+      `;
+    }).join('');
+  }
 
-      // --- ANNOUNCEMENT FUNCTIONS (updated for 24h expiration and CEO delete) ---
+  async function loadAnnouncements() {
+    const announcements = await fetchAnnouncements();
+    renderAnnouncements(announcements);
+  }
 
-      // Delete announcements older than 24 hours (only if CEO)
-      async function deleteOldAnnouncements() {
-        if (!isCEO) return;
-        const oneDayAgo = new Date(Date.now() - 24*60*60*1000).toISOString();
-        const { error } = await supabase
-          .from('announcements')
-          .delete()
-          .lt('created_at', oneDayAgo);
-        if (error) console.error('Failed to delete old announcements:', error);
-      }
+  // --- POST ANNOUNCEMENT (includes target_value) ---
+  async function postAnnouncement() {
+    const content = document.getElementById('announcementContent').value.trim();
+    const fileInput = document.getElementById('announcementFile');
+    const file = fileInput.files[0];
+    if (!content && !file) return;
 
-      // Delete a single announcement (CEO only)
-      async function deleteAnnouncement(id) {
-        if (!isCEO) return;
-        if (!confirm('Delete this announcement?')) return;
-        const { error } = await supabase
-          .from('announcements')
-          .delete()
-          .eq('id', id);
-        if (error) {
-          alert('Failed to delete: ' + error.message);
-        } else {
-          // Remove from DOM
-          document.querySelector(`.announcement-card[data-id="${id}"]`)?.remove();
-        }
-      }
+    const postBtn = document.getElementById('postAnnouncementBtn');
+    postBtn.disabled = true;
+    postBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Posting...';
 
-      async function fetchAnnouncements() {
-        try {
-          const oneDayAgo = new Date(Date.now() - 24*60*60*1000).toISOString();
-          const { data, error } = await supabase
-            .from('announcements')
-            .select('*, profiles!created_by(full_name)')
-            .gte('created_at', oneDayAgo)
-            .order('created_at', { ascending: false });
-          if (error) throw error;
-          return data || [];
-        } catch (err) {
-          console.error('fetch announcements error:', err);
-          return [];
-        }
-      }
-
-      function escapeHtml(unsafe) {
-        if (!unsafe) return '';
-        return unsafe.replace(/[&<>"']/g, function(m) {
-          if(m === '&') return '&amp;';
-          if(m === '<') return '&lt;';
-          if(m === '>') return '&gt;';
-          if(m === '"') return '&quot;';
-          if(m === "'") return '&#039;';
-          return m;
-        });
-      }
-
-      function renderAnnouncements(announcements) {
-        const container = document.getElementById('announcementsList');
-        if (!announcements.length) {
-          container.innerHTML = '<div style="color:#9aa4bf; text-align:center; padding:1rem;">No announcements yet.</div>';
-          return;
-        }
-        container.innerHTML = announcements.map(a => {
-          const date = new Date(a.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-          const fileLink = a.file_url ? `<div class="announcement-attachment"><a href="${a.file_url}" target="_blank"><i class="fas fa-paperclip"></i> Attachment</a></div>` : '';
-          const deleteBtn = isCEO ? `<button class="delete-announcement" onclick="deleteAnnouncement('${a.id}')"><i class="fas fa-trash"></i></button>` : '';
-          return `
-            <div class="announcement-card" data-id="${a.id}">
-              ${deleteBtn}
-              <div class="announcement-meta">
-                <span class="announcement-author"><i class="fas fa-user-circle"></i> ${escapeHtml(a.profiles?.full_name || 'CEO')}</span>
-                <span class="announcement-date">${date}</span>
-              </div>
-              <div class="announcement-content">${escapeHtml(a.content)}</div>
-              ${fileLink}
-            </div>
-          `;
-        }).join('');
-      }
-
-      async function loadAnnouncements() {
-        const announcements = await fetchAnnouncements();
-        renderAnnouncements(announcements);
-      }
-
-      async function postAnnouncement() {
-        const content = document.getElementById('announcementContent').value.trim();
-        const fileInput = document.getElementById('announcementFile');
-        const file = fileInput.files[0];
-        if (!content && !file) return;
-
-        const postBtn = document.getElementById('postAnnouncementBtn');
-        postBtn.disabled = true;
-        postBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Posting...';
-
-        let fileUrl = null;
-        if (file) {
-          const fileExt = file.name.split('.').pop();
-          const fileName = `${currentUser.id}/${Date.now()}.${fileExt}`;
-          const { error: uploadError } = await supabase.storage
-            .from('announcements')
-            .upload(fileName, file);
-          if (uploadError) {
-            alert('Upload failed: ' + uploadError.message);
-            postBtn.disabled = false;
-            postBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Post';
-            return;
-          }
-          const { data: urlData } = supabase.storage.from('announcements').getPublicUrl(fileName);
-          fileUrl = urlData.publicUrl;
-        }
-
-        const { error } = await supabase
-          .from('announcements')
-          .insert({ content, file_url: fileUrl, created_by: currentUser.id });
-
+    let fileUrl = null;
+    if (file) {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${currentUser.id}/${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from('announcements')
+        .upload(fileName, file);
+      if (uploadError) {
+        alert('Upload failed: ' + uploadError.message);
         postBtn.disabled = false;
         postBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Post';
-
-        if (error) {
-          alert('Failed to post: ' + error.message);
-          return;
-        }
-
-        document.getElementById('announcementContent').value = '';
-        fileInput.value = '';
-
-        // After posting, delete any announcements older than 24 hours (CEO only)
-        await deleteOldAnnouncements();
-
-        // Announcement will appear via realtime (no need to reload)
+        return;
       }
+      const { data: urlData } = supabase.storage.from('announcements').getPublicUrl(fileName);
+      fileUrl = urlData.publicUrl;
+    }
 
-      function subscribeToAnnouncements() {
-        if (announcementsChannel) announcementsChannel.unsubscribe();
-        announcementsChannel = supabase
-          .channel('announcements-channel')
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'announcements' }, async (payload) => {
-            // Fetch full announcement with profile
-            const { data, error } = await supabase
-              .from('announcements')
-              .select('*, profiles!created_by(full_name)')
-              .eq('id', payload.new.id)
-              .single();
-            if (!error && data) {
-              // Insert at top
-              const container = document.getElementById('announcementsList');
-              const date = new Date(data.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-              const fileLink = data.file_url ? `<div class="announcement-attachment"><a href="${data.file_url}" target="_blank"><i class="fas fa-paperclip"></i> Attachment</a></div>` : '';
-              const deleteBtn = isCEO ? `<button class="delete-announcement" onclick="deleteAnnouncement('${data.id}')"><i class="fas fa-trash"></i></button>` : '';
-              const newCard = document.createElement('div');
-              newCard.className = 'announcement-card';
-              newCard.setAttribute('data-id', data.id);
-              newCard.innerHTML = `
-                ${deleteBtn}
-                <div class="announcement-meta">
-                  <span class="announcement-author"><i class="fas fa-user-circle"></i> ${escapeHtml(data.profiles?.full_name || 'CEO')}</span>
-                  <span class="announcement-date">${date}</span>
-                </div>
-                <div class="announcement-content">${escapeHtml(data.content)}</div>
-                ${fileLink}
-              `;
-              container.insertBefore(newCard, container.firstChild);
-
-              // Trigger push notification
-              if (window.TechTitansNotifications && data.created_by !== currentUser.id) {
-                window.TechTitansNotifications.display(`New Announcement`, {
-                  body: data.content.substring(0, 50) + (data.content.length > 50 ? '...' : ''),
-                  url: 'dashboard.html'
-                });
-              }
-            }
-          })
-          .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'announcements' }, (payload) => {
-            // Remove deleted announcement from UI (for CEO deletes)
-            document.querySelector(`.announcement-card[data-id="${payload.old.id}"]`)?.remove();
-          })
-          .subscribe();
-      }
-
-      // --- Load user and populate dashboard ---
-      async function loadDashboard() {
-        try {
-          const { data: { user }, error } = await supabase.auth.getUser();
-          if (error || !user) {
-            window.location.href = 'index.html';
-            return;
-          }
-          currentUser = user;
-          const metadata = user.user_metadata || {};
-          const fullName = metadata.full_name || 'User';
-          const jobRole = metadata.job_role || 'Not specified';
-          const firstName = fullName.split(' ')[0] || 'User';
-          const email = user.email || '—';
-          const createdAt = user.created_at 
-            ? new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) 
-            : '—';
-
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single();
-
-          const metadataRole = user.user_metadata?.role;
-          const effectiveRole = profile?.role || metadataRole || (jobRole === 'CEO' ? 'admin' : null);
-          const isAdmin = effectiveRole === 'admin';
-          currentRole = jobRole;
-          isCEO = (currentRole === 'CEO');
-
-          if (isAdmin) {
-            const sidebarNav = document.getElementById('sidebarNav');
-            if (sidebarNav && !sidebarNav.querySelector('a[href="admin.html"]')) {
-              sidebarNav.insertAdjacentHTML('beforeend',
-                '<a href="admin.html"><i class="fas fa-user-cog"></i> Admin Panel</a>');
-            }
-          }
-
-          document.getElementById('userName').textContent = firstName;
-
-          // Compact user info cards (3 only)
-          const grid = document.getElementById('userInfoGrid');
-          grid.innerHTML = `
-            <div class="card">
-              <div class="card-title"><i class="fas fa-user"></i> User</div>
-              <div class="card-value">${fullName}</div>
-              <div class="card-label">${jobRole}</div>
-            </div>
-            <div class="card">
-              <div class="card-title"><i class="fas fa-envelope"></i> Email</div>
-              <div class="card-value" style="font-size:1.4rem;">${email}</div>
-              <div class="card-label">contact</div>
-            </div>
-            <div class="card">
-              <div class="card-title"><i class="fas fa-calendar"></i> Member since</div>
-              <div class="card-value" style="font-size:1.4rem;">${createdAt}</div>
-              <div class="card-label">join date</div>
-            </div>
-          `;
-
-          // Show/hide CEO announcement form
-          const ceoForm = document.getElementById('ceoAnnouncementForm');
-          if (isCEO) {
-            ceoForm.style.display = 'block';
-            document.getElementById('postAnnouncementBtn').addEventListener('click', postAnnouncement);
-            // Delete any announcements older than 24 hours on load
-            await deleteOldAnnouncements();
-          } else {
-            ceoForm.style.display = 'none';
-          }
-
-          // Load announcements (only last 24h)
-          await loadAnnouncements();
-          subscribeToAnnouncements();
-
-          // Make deleteAnnouncement globally accessible for inline onclick
-          window.deleteAnnouncement = deleteAnnouncement;
-
-          // Start periodic unread sync
-          refreshUnreadBadge();
-          refreshInterval = setInterval(refreshUnreadBadge, 10000);
-          document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) refreshUnreadBadge();
-          });
-
-          // Load extended stats & chart & activity
-          await Promise.all([
-            updateStatsCards(),
-            renderChart(),
-            renderActivity()
-          ]);
-
-        } catch (err) {
-          console.error('Dashboard load error:', err);
-        }
-      }
-
-      // --- Logout ---
-      document.getElementById('logout').addEventListener('click', async () => {
-        if (refreshInterval) clearInterval(refreshInterval);
-        if (announcementsChannel) announcementsChannel.unsubscribe();
-        await supabase.auth.signOut();
-        window.location.href = 'index.html';
+    // ✅ Include target_value – but this column must exist in the table.
+    //    If you get an error about missing column, run:
+    //    ALTER TABLE announcements ADD COLUMN target_value TEXT DEFAULT NULL;
+    const { error } = await supabase
+      .from('announcements')
+      .insert({
+        content,
+        file_url: fileUrl,
+        created_by: currentUser.id,
+        target_value: 'global'   // required by a trigger; adjust value as needed
       });
 
-      // --- Initialise ---
-      loadDashboard();
-    })();
+    postBtn.disabled = false;
+    postBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Post';
+
+    if (error) {
+      alert('Failed to post: ' + error.message);
+      return;
+    }
+
+    document.getElementById('announcementContent').value = '';
+    fileInput.value = '';
+
+    // After posting, delete any announcements older than 24 hours (CEO only)
+    await deleteOldAnnouncements();
+  }
+
+  function subscribeToAnnouncements() {
+    if (announcementsChannel) announcementsChannel.unsubscribe();
+    announcementsChannel = supabase
+      .channel('announcements-channel')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'announcements' }, async (payload) => {
+        // Fetch full announcement with profile
+        const { data, error } = await supabase
+          .from('announcements')
+          .select('*, profiles!created_by(full_name)')
+          .eq('id', payload.new.id)
+          .single();
+        if (!error && data) {
+          // Insert at top
+          const container = document.getElementById('announcementsList');
+          const date = new Date(data.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+          const fileLink = data.file_url ? `<div class="announcement-attachment"><a href="${data.file_url}" target="_blank"><i class="fas fa-paperclip"></i> Attachment</a></div>` : '';
+          const deleteBtn = isCEO ? `<button class="delete-announcement" onclick="deleteAnnouncement('${data.id}')"><i class="fas fa-trash"></i></button>` : '';
+          const newCard = document.createElement('div');
+          newCard.className = 'announcement-card';
+          newCard.setAttribute('data-id', data.id);
+          newCard.innerHTML = `
+            ${deleteBtn}
+            <div class="announcement-meta">
+              <span class="announcement-author"><i class="fas fa-user-circle"></i> ${escapeHtml(data.profiles?.full_name || 'CEO')}</span>
+              <span class="announcement-date">${date}</span>
+            </div>
+            <div class="announcement-content">${escapeHtml(data.content)}</div>
+            ${fileLink}
+          `;
+          container.insertBefore(newCard, container.firstChild);
+
+          // Trigger push notification
+          if (window.TechTitansNotifications && data.created_by !== currentUser.id) {
+            window.TechTitansNotifications.display(`New Announcement`, {
+              body: data.content.substring(0, 50) + (data.content.length > 50 ? '...' : ''),
+              url: 'dashboard.html'
+            });
+          }
+        }
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'announcements' }, (payload) => {
+        // Remove deleted announcement from UI (for CEO deletes)
+        document.querySelector(`.announcement-card[data-id="${payload.old.id}"]`)?.remove();
+      })
+      .subscribe();
+  }
+
+  // --- Load user and populate dashboard ---
+  async function loadDashboard() {
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error || !user) {
+        window.location.href = 'index.html';
+        return;
+      }
+      currentUser = user;
+      const metadata = user.user_metadata || {};
+      const fullName = metadata.full_name || 'User';
+      const jobRole = metadata.job_role || 'Not specified';
+      const firstName = fullName.split(' ')[0] || 'User';
+      const email = user.email || '—';
+      const createdAt = user.created_at 
+        ? new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) 
+        : '—';
+
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      const metadataRole = user.user_metadata?.role;
+      const effectiveRole = profile?.role || metadataRole || (jobRole === 'CEO' ? 'admin' : null);
+      const isAdmin = effectiveRole === 'admin';
+      currentRole = jobRole;
+      isCEO = (currentRole === 'CEO');
+
+      if (isAdmin) {
+        const sidebarNav = document.getElementById('sidebarNav');
+        if (sidebarNav && !sidebarNav.querySelector('a[href="admin.html"]')) {
+          sidebarNav.insertAdjacentHTML('beforeend',
+            '<a href="admin.html"><i class="fas fa-user-cog"></i> Admin Panel</a>');
+        }
+      }
+
+      document.getElementById('userName').textContent = firstName;
+
+      // Compact user info cards (3 only)
+      const grid = document.getElementById('userInfoGrid');
+      grid.innerHTML = `
+        <div class="card">
+          <div class="card-title"><i class="fas fa-user"></i> User</div>
+          <div class="card-value">${fullName}</div>
+          <div class="card-label">${jobRole}</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fas fa-envelope"></i> Email</div>
+          <div class="card-value" style="font-size:1.4rem;">${email}</div>
+          <div class="card-label">contact</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fas fa-calendar"></i> Member since</div>
+          <div class="card-value" style="font-size:1.4rem;">${createdAt}</div>
+          <div class="card-label">join date</div>
+        </div>
+      `;
+
+      // Show/hide CEO announcement form
+      const ceoForm = document.getElementById('ceoAnnouncementForm');
+      if (isCEO) {
+        ceoForm.style.display = 'block';
+        document.getElementById('postAnnouncementBtn').addEventListener('click', postAnnouncement);
+        // Delete any announcements older than 24 hours on load
+        await deleteOldAnnouncements();
+      } else {
+        ceoForm.style.display = 'none';
+      }
+
+      // Load announcements (only last 24h)
+      await loadAnnouncements();
+      subscribeToAnnouncements();
+
+      // Make deleteAnnouncement globally accessible for inline onclick
+      window.deleteAnnouncement = deleteAnnouncement;
+
+      // Start periodic unread sync
+      refreshUnreadBadge();
+      refreshInterval = setInterval(refreshUnreadBadge, 10000);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) refreshUnreadBadge();
+      });
+
+      // Load extended stats & chart & activity
+      await Promise.all([
+        updateStatsCards(),
+        renderChart(),
+        renderActivity()
+      ]);
+
+    } catch (err) {
+      console.error('Dashboard load error:', err);
+    }
+  }
+
+  // --- Logout ---
+  document.getElementById('logout').addEventListener('click', async () => {
+    if (refreshInterval) clearInterval(refreshInterval);
+    if (announcementsChannel) announcementsChannel.unsubscribe();
+    await supabase.auth.signOut();
+    window.location.href = 'index.html';
+  });
+
+  // --- Initialise ---
+  loadDashboard();
+})();
   </script>
   <!-- 
     Note: For automatic 24-hour deletion without relying on CEO actions,

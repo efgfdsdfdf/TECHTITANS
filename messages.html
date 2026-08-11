@@ -10,6 +10,7 @@
   <title>TECH TITANS · Group Chat</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <style>
+    /* ... (same CSS as before, unchanged) ... */
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
     body {
       background: #0b0f17;
@@ -111,111 +112,134 @@
       overflow: hidden;
       height: 100%;
     }
+
     /* === CHAT HEADER (topbar) === */
     .chat-header {
-      padding: 0.6rem 1rem;
+      padding: 0.4rem 0.8rem;
       border-bottom: 1px solid #263154;
       color: white;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.4rem;
       flex-wrap: nowrap;
       flex-shrink: 0;
       background: #131c30;
       z-index: 5;
-      min-height: 4rem;
-      overflow: visible;  /* no scroll on the whole header */
+      min-height: 3.5rem;
+      overflow: visible;
     }
-    
     .chat-header .group-name-wrapper {
       display: flex;
       align-items: center;
-      gap: 0.3rem;
+      gap: 0.2rem;
       flex: 0 0 auto;
     }
     .chat-header .group-name-wrapper .group-icon {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       line-height: 1;
     }
     .chat-header .group-name-wrapper #groupTitle {
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 700;
       color: #fff;
       letter-spacing: -0.01em;
       white-space: nowrap;
     }
-    .chat-header .role-tag {
-      background: #428cff;
-      padding: 0.15rem 0.7rem;
-      border-radius: 2rem;
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: white;
-      flex: 0 0 auto;
-    }
+    .chat-header .role-tag,
     .chat-header .online-count {
+      display: none !important;
+    }
+
+    /* Group switcher button – visible to everyone */
+    .group-switcher-btn {
       background: #1f2a44;
-      padding: 0.15rem 0.7rem;
+      color: #fff;
+      border: 1px solid #2f3a5a;
+      padding: 0.3rem 0.8rem;
       border-radius: 2rem;
-      font-size: 0.7rem;
-      color: #8affb8;
+      font-size: 0.8rem;
       display: flex;
       align-items: center;
-      gap: 0.3rem;
-      flex: 0 0 auto;
-    }
-    .chat-header .online-count::before {
-      content: '';
-      width: 8px;
-      height: 8px;
-      background: #2ecc71;
-      border-radius: 50%;
-      display: inline-block;
-    }
-    /* Scrollable group tabs – ONLY this part scrolls horizontally */
-    .chat-header .group-tabs {
-      display: flex;
       gap: 0.4rem;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      overflow-y: hidden;
-      flex: 1 1 auto;       /* takes remaining space, shrinks if needed */
-      min-width: 0;         /* allows shrinking below content */
-      scrollbar-width: thin;
-      -webkit-overflow-scrolling: touch;
-      padding: 0.2rem 0.1rem;
-    }
-    .chat-header .group-tabs::-webkit-scrollbar { height: 2px; }
-    .chat-header .group-tabs::-webkit-scrollbar-thumb { background: #428cff; border-radius: 10px; }
-    .chat-header .group-tab {
-      flex: 0 0 auto;
-      background: #1f2a44;
-      color: #9aa4bf;
-      padding: 0.2rem 0.8rem;
-      border-radius: 2rem;
-      font-size: 0.75rem;
-      font-weight: 500;
+      flex: 1 1 auto;
+      min-width: 0;
       cursor: pointer;
-      border: 1px solid #2f3a5a;
-      transition: 0.2s;
       white-space: nowrap;
-      position: relative;
+      overflow: hidden;
     }
-    .chat-header .group-tab.active {
-      background: #428cff;
-      color: white;
-      border-color: #428cff;
-    }
-    .chat-header .group-tab .unread-badge-tab {
-      position: absolute;
-      top: -4px;
-      right: -4px;
+    .group-switcher-btn .unread-badge-tab {
+      margin-left: auto;
       background: #ff4d4d;
       color: white;
       border-radius: 2rem;
       padding: 0.05rem 0.4rem;
       font-size: 0.6rem;
       font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* Group switcher sheet – bottom sheet */
+    .group-switcher-sheet {
+      position: fixed;
+      inset: auto 0 0 0;
+      background: #131c30;
+      border-top: 1px solid #263154;
+      border-radius: 1.2rem 1.2rem 0 0;
+      padding: 1rem 1rem 2rem;
+      z-index: 1500;
+      max-height: 60vh;
+      overflow-y: auto;
+      box-shadow: 0 -8px 30px rgba(0,0,0,0.5);
+      transform: translateY(100%);
+      transition: transform 0.25s ease;
+      display: none;
+    }
+    .group-switcher-sheet.open {
+      display: block;
+      transform: translateY(0);
+    }
+    .group-switcher-sheet .sheet-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0.5rem 1rem 0.5rem;
+      color: #9aa4bf;
+      font-weight: 500;
+      border-bottom: 1px solid #263154;
+      margin-bottom: 0.5rem;
+    }
+    .group-switcher-sheet .close-sheet {
+      background: none;
+      border: none;
+      color: #9aa4bf;
+      font-size: 1.4rem;
+      cursor: pointer;
+      padding: 0 0.5rem;
+    }
+    .group-switcher-sheet .option {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 1rem;
+      border-radius: 1rem;
+      color: #e0e7ff;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .group-switcher-sheet .option:hover {
+      background: #1f2a44;
+    }
+    .group-switcher-sheet .option.active {
+      background: #428cff;
+      color: #fff;
+    }
+    .group-switcher-sheet .option .badge {
+      background: #ff4d4d;
+      color: white;
+      border-radius: 2rem;
+      padding: 0.05rem 0.5rem;
+      font-size: 0.65rem;
+      font-weight: 600;
     }
 
     /* Ongoing call banner */
@@ -226,8 +250,8 @@
       padding: 0.15rem 0.7rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      font-size: 0.75rem;
+      gap: 0.4rem;
+      font-size: 0.7rem;
       color: #cfe1ff;
       white-space: nowrap;
       flex: 0 0 auto;
@@ -240,16 +264,16 @@
       padding: 0.1rem 0.6rem;
       border-radius: 2rem;
       cursor: pointer;
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       font-weight: 600;
     }
     .ongoing-call-banner button:hover { background: #27ae60; }
     .ongoing-call-banner .call-status {
       color: #8affb8;
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       display: flex;
       align-items: center;
-      gap: 0.3rem;
+      gap: 0.2rem;
     }
     .ongoing-call-banner .call-status::before {
       content: '●';
@@ -261,7 +285,7 @@
       100% { opacity: 0.3; }
     }
 
-    .chat-header .voice-btn {
+    .chat-header .call-btn {
       background: #2f3a5a;
       border: none;
       color: white;
@@ -276,53 +300,21 @@
       align-items: center;
       justify-content: center;
     }
-    .chat-header .voice-btn:hover { background: #428cff; }
-
-    /* Groups list (CEO view) */
-    .groups-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.8rem;
-      padding: 1rem;
-      align-items: flex-start;
-      justify-content: flex-start;
-    }
-    .group-card {
-      background: #19233a;
-      color: #cfe1ff;
-      padding: 0.8rem 1rem;
-      border-radius: 12px;
-      border: 1px solid #263154;
-      cursor: pointer;
-      min-width: 160px;
-      text-align: center;
-      font-weight: 600;
-      transition: transform 0.12s, box-shadow 0.12s;
-      position: relative;
-    }
-    .group-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
-    .group-card .unread-badge {
-      position: absolute;
-      top: -6px;
-      right: -6px;
-      background: #ff4d4d;
-      color: white;
-      border-radius: 2rem;
-      padding: 0.1rem 0.5rem;
-      font-size: 0.7rem;
-    }
+    .chat-header .call-btn:hover { background: #428cff; }
 
     /* === MESSAGES AREA === */
     .messages-area {
       flex: 1;
-      padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+      padding: 1rem 1.5rem 0.5rem 1.5rem;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
       gap: 0.3rem;
       scroll-behavior: smooth;
+      min-height: 0;
     }
-    /* Sticky Date Separator */
+
+    /* Date separator – sticky at top */
     .date-separator {
       position: sticky;
       top: 0;
@@ -343,22 +335,121 @@
       font-weight: 500;
       color: #b0c8ff;
       border: 1px solid #2a3a60;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
       pointer-events: none;
     }
-    /* Message rows */
+
+    /* === GROUPS LIST VIEW (CEO "All") === */
+    .groups-list-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      padding: 0.5rem 0 1rem 0;
+      width: 100%;
+    }
+    .groups-list-container .section-title {
+      color: #9aa4bf;
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.5rem 0.2rem;
+      border-bottom: 1px solid #1f2a44;
+      margin-bottom: 0.5rem;
+    }
+    .group-card {
+      background: #19233a;
+      color: #cfe1ff;
+      padding: 1rem 1.2rem;
+      border-radius: 14px;
+      border: 1px solid #263154;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .group-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      border-color: #428cff;
+    }
+    .group-card .group-info {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      min-width: 0;
+      flex: 1;
+    }
+    .group-card .group-info .group-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #428cff, #6a4cff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: white;
+      flex-shrink: 0;
+    }
+    .group-card .group-info .group-name {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .group-card .group-info .group-preview {
+      font-size: 0.8rem;
+      color: #9aa4bf;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
+    }
+    .group-card .group-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-shrink: 0;
+    }
+    .group-card .group-meta .unread-count {
+      background: #ff4d4d;
+      color: white;
+      border-radius: 2rem;
+      padding: 0.1rem 0.5rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .group-card .group-meta .last-time {
+      font-size: 0.65rem;
+      color: #6a7a9a;
+      white-space: nowrap;
+    }
+    .group-card .group-meta .arrow {
+      color: #428cff;
+      font-size: 0.9rem;
+      opacity: 0.6;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .group-card:hover .group-meta .arrow {
+      opacity: 1;
+      transform: translateX(3px);
+    }
+
+    /* === MESSAGE ROWS === */
     .message-row {
       display: flex;
       align-items: flex-end;
       gap: 0.5rem;
       cursor: pointer;
     }
-    .message-row.sent {
-      justify-content: flex-end;
-    }
-    .message-row.unread .message {
-      border-left: 4px solid #428cff;
-    }
+    .message-row.sent { justify-content: flex-end; }
+    .message-row.unread .message { border-left: 4px solid #428cff; }
     .message-row.sent.unread .message {
       border-left: 4px solid #428cff;
       border-radius: 1.5rem 1.5rem 0.2rem 1.5rem;
@@ -376,7 +467,7 @@
       color: white;
       text-transform: uppercase;
       flex-shrink: 0;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
       cursor: pointer;
       transition: transform 0.1s;
       object-fit: cover;
@@ -460,13 +551,20 @@
     }
     .seen-indicator .double-tick { font-size: 0.8rem; line-height: 1; }
 
+    /* Message actions – always visible, faded */
     .message-actions {
-      display: none;
+      display: flex !important;
+      opacity: 0.3;
+      transition: opacity 0.15s;
       gap: 0.4rem;
       justify-content: flex-end;
       margin-top: 0.1rem;
     }
-    .message-row.selected .message-actions { display: flex; }
+    .message-actions:hover,
+    .message-row:active .message-actions,
+    .message-row.selected .message-actions {
+      opacity: 1;
+    }
     .message-actions button {
       background: transparent;
       border: none;
@@ -478,6 +576,7 @@
       padding: 0.1rem 0.3rem;
     }
     .message-actions button:hover { opacity: 1; transform: scale(1.1); }
+
     .message-row.sent .message-bubble { align-items: flex-end; }
     .message-row.sent .avatar { display: none; }
 
@@ -508,6 +607,7 @@
     }
     .edit-actions button.save-btn { background: #428cff; }
 
+    /* Read receipts modal */
     .read-receipts-modal {
       position: absolute;
       background: #1f2a44;
@@ -517,7 +617,7 @@
       color: white;
       font-size: 0.9rem;
       z-index: 1000;
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.7);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.7);
       min-width: 260px;
       max-width: 320px;
       backdrop-filter: blur(4px);
@@ -546,6 +646,7 @@
     .reader-name { color: white; font-weight: 500; }
     .reader-time { color: #9aa4bf; font-size: 0.65rem; }
 
+    /* Typing indicator */
     .typing-indicator {
       display: flex;
       align-items: center;
@@ -581,7 +682,7 @@
       margin-left: 0.5rem;
     }
 
-    /* Chat input */
+    /* === CHAT INPUT AREA – FIXED AT BOTTOM === */
     .chat-input-area {
       display: flex;
       padding: 0.8rem 1.2rem;
@@ -593,6 +694,7 @@
       position: relative;
       bottom: 0;
       align-items: center;
+      margin-top: auto;
     }
     .chat-input-area input {
       flex: 1;
@@ -604,8 +706,13 @@
       outline: none;
       transition: border 0.2s;
       font-size: 0.9rem;
+      min-width: 0;
     }
     .chat-input-area input:focus { border-color: #428cff; }
+    .chat-input-area input:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
     .chat-input-area button {
       background: #428cff;
       border: none;
@@ -622,7 +729,10 @@
       justify-content: center;
     }
     .chat-input-area button:hover { background: #5f9eff; }
-    .chat-input-area button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .chat-input-area button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
     .voice-btn {
       background: #2f3a5a;
       border: none;
@@ -663,7 +773,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.92);
+      background: rgba(0,0,0,0.92);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -737,7 +847,7 @@
       position: absolute;
       bottom: 0.3rem;
       left: 0.3rem;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0,0,0,0.6);
       color: white;
       padding: 0.05rem 0.5rem;
       border-radius: 0.4rem;
@@ -782,7 +892,7 @@
       color: #fff;
       padding: 0.6rem 1rem;
       border-radius: 0.8rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
       opacity: 0.9;
       z-index: 3000;
       font-size: 0.8rem;
@@ -791,23 +901,33 @@
     }
     .toast.hide { opacity: 0; }
 
-    /* Mobile */
+    /* === MOBILE === */
     @media (max-width: 768px) {
       .sidebar { display: none; }
       .main { padding: 0.5rem; }
-      .chat-header { padding: 0.4rem 0.6rem; gap: 0.3rem; min-height: 3.2rem; }
-      .chat-header .group-name-wrapper #groupTitle { font-size: 0.9rem; }
-      .chat-header .online-count, .chat-header .role-tag { display: none; }
+      .chat-header { padding: 0.3rem 0.5rem; gap: 0.3rem; min-height: 3rem; }
+      .chat-header .group-name-wrapper #groupTitle { font-size: 0.85rem; }
       .chat-panel { border-radius: 0; }
       .messages-area { padding: 0.4rem 0.6rem 0; }
-      .ongoing-call-banner { font-size: 0.65rem; padding: 0.1rem 0.5rem; gap: 0.3rem; }
       .call-videos { grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 0.4rem; }
       .video-container { min-width: 60px; min-height: 60px; }
       .chat-input-area { padding: 0.4rem 0.6rem; }
-      .chat-input-area input { font-size: 0.8rem; padding: 0.4rem 0.8rem; }
+      .chat-input-area input { font-size: 0.8rem; padding: 0.6rem 0.8rem; }
       .chat-input-area button, .chat-input-area .voice-btn { width: 2.2rem; height: 2.2rem; font-size: 0.9rem; }
-      .chat-header .group-tabs { flex: 1 1 auto; min-width: 30px; }
-      .chat-header .group-tab { font-size: 0.65rem; padding: 0.1rem 0.6rem; }
+      .chat-header .call-btn { width: 2rem; height: 2rem; font-size: 0.9rem; }
+      .ongoing-call-banner { font-size: 0.55rem; padding: 0.1rem 0.4rem; gap: 0.2rem; }
+      .group-switcher-btn { font-size: 0.7rem; padding: 0.2rem 0.6rem; }
+      .group-card {
+        padding: 0.7rem 0.9rem;
+        flex-wrap: wrap;
+      }
+      .group-card .group-info .group-preview {
+        max-width: 120px;
+        font-size: 0.7rem;
+      }
+      .group-card .group-meta .last-time {
+        font-size: 0.55rem;
+      }
     }
 
     /* Mobile nav overlay */
@@ -818,7 +938,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0,0,0,0.6);
       z-index: 1000;
       align-items: stretch;
       justify-content: flex-start;
@@ -827,13 +947,13 @@
       width: 280px;
       max-width: 80vw;
       height: 100%;
-      background: rgba(10, 16, 28, 0.98);
+      background: rgba(10,16,28,0.98);
       backdrop-filter: blur(16px);
       padding: 2rem 1.2rem;
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
-      box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
+      box-shadow: 4px 0 30px rgba(0,0,0,0.5);
       animation: slideInNav 0.25s ease;
     }
     @keyframes slideInNav {
@@ -907,7 +1027,7 @@
         width: 2.2rem;
         height: 2.2rem;
         border: none;
-        background: rgba(255, 255, 255, 0.07);
+        background: rgba(255,255,255,0.07);
         color: white;
         border-radius: 50%;
         cursor: pointer;
@@ -963,22 +1083,35 @@
         <span class="role-tag" id="roleDisplay"></span>
         <div class="online-count" id="onlineCount">0 online</div>
 
-        <!-- CEO Group Tabs (scrollable horizontally) – ONLY this part scrolls -->
-        <div id="groupTabs" class="group-tabs" style="display: none;"></div>
+        <!-- Group switcher – visible to everyone -->
+        <button id="groupSwitcherBtn" class="group-switcher-btn" style="display: none;">
+          <span id="groupSwitcherLabel">All</span>
+          <i class="fas fa-chevron-down"></i>
+          <span class="unread-badge-tab" id="groupSwitcherBadge" style="display: none;">0</span>
+        </button>
 
-        <!-- Ongoing call banner -->
         <div id="ongoingCallBanner" class="ongoing-call-banner" style="display: none;">
           <span class="call-status">Live</span>
           <span><span class="caller-name" id="callerNameDisplay">Someone</span> started a call</span>
           <button id="joinOngoingCallBtn">Join</button>
         </div>
 
-        <button id="groupCallBtn" class="voice-btn" style="background:#2f3a5a;" title="Start group call">📞</button>
+        <button id="groupCallBtn" class="call-btn" title="Start group call">📞</button>
       </div>
 
-      <!-- MESSAGES -->
+      <!-- GROUP SWITCHER SHEET -->
+      <div id="groupSwitcherSheet" class="group-switcher-sheet">
+        <div class="sheet-header">
+          <span>Switch group</span>
+          <button class="close-sheet" id="closeSwitcherSheet">✕</button>
+        </div>
+        <div id="switcherOptions"></div>
+      </div>
+
+      <!-- MESSAGES AREA -->
       <div class="messages-area" id="messagesArea" oncontextmenu="return false;"></div>
 
+      <!-- TYPING INDICATOR -->
       <div id="typingIndicatorContainer" class="typing-container" style="display: none;">
         <div class="typing-indicator">
           <span></span><span></span><span></span>
@@ -986,6 +1119,7 @@
         </div>
       </div>
 
+      <!-- CHAT INPUT – fixed at bottom -->
       <div class="chat-input-area">
         <input type="text" id="messageInput" placeholder="Write a message..." disabled>
         <button class="voice-btn" id="voiceNoteBtn" disabled>🎤</button>
@@ -1075,12 +1209,19 @@
       return;
     }
 
+    // --- Belt‑and‑braces: remove any injected notification button from header ---
+    function removeNotificationButtons() {
+      document.querySelectorAll('.chat-header [id*="notif" i], .chat-header [class*="notif" i]')
+        .forEach(el => el.remove());
+    }
+    removeNotificationButtons();
+
     // --- State ---
     let currentUser = null;
     let currentUserFullName = 'User';
     let currentRole = null;
     let isCEO = false;
-    let selectedGroupRole = null;
+    let selectedGroupRole = null; // null = "All", otherwise group name
     let availableRoles = [];
     let messageSubscription = null;
     let messageReadsSubscription = null;
@@ -1169,6 +1310,13 @@
     const callerNameDisplay = document.getElementById('callerNameDisplay');
     const joinOngoingCallBtn = document.getElementById('joinOngoingCallBtn');
     const groupTitleEl = document.getElementById('groupTitle');
+    const groupCallBtn = document.getElementById('groupCallBtn');
+    const groupSwitcherBtn = document.getElementById('groupSwitcherBtn');
+    const groupSwitcherLabel = document.getElementById('groupSwitcherLabel');
+    const groupSwitcherBadge = document.getElementById('groupSwitcherBadge');
+    const switcherOptions = document.getElementById('switcherOptions');
+    const switcherSheet = document.getElementById('groupSwitcherSheet');
+    const closeSwitcherSheet = document.getElementById('closeSwitcherSheet');
 
     // --- Helpers ---
     function formatDateHeader(date) {
@@ -1210,17 +1358,27 @@
       setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.style.display = 'none', 300); }, 3000);
     }
 
-    // --- Update group title based on role/selection ---
+    // --- Update group title ---
     function updateGroupTitle() {
-      if (isCEO) {
-        if (selectedGroupRole === null) {
-          groupTitleEl.textContent = 'All Groups';
-        } else {
-          groupTitleEl.textContent = selectedGroupRole;
-        }
+      if (selectedGroupRole === null) {
+        groupTitleEl.textContent = 'All';
       } else {
-        groupTitleEl.textContent = currentRole || 'Group';
+        groupTitleEl.textContent = selectedGroupRole;
       }
+    }
+
+    // --- Update switcher button ---
+    function updateSwitcherButton() {
+      const label = selectedGroupRole === null ? 'All' : selectedGroupRole;
+      groupSwitcherLabel.textContent = label;
+      const badge = totalUnreadCount || 0;
+      if (badge > 0) {
+        groupSwitcherBadge.style.display = 'inline-block';
+        groupSwitcherBadge.textContent = badge;
+      } else {
+        groupSwitcherBadge.style.display = 'none';
+      }
+      groupSwitcherBtn.style.display = 'flex';
     }
 
     // --- Presence ---
@@ -1234,15 +1392,12 @@
           Object.values(state).forEach(presences => {
             presences.forEach(p => { if (p.userId !== currentUser.id) onlineUsers.set(p.userId, { name: p.name, role: p.role }); });
           });
-          document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
         })
         .on('presence', { event: 'join' }, ({ key, newPresences }) => {
           newPresences.forEach(p => { if (p.userId !== currentUser.id) onlineUsers.set(p.userId, { name: p.name, role: p.role }); });
-          document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
         })
         .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
           leftPresences.forEach(p => onlineUsers.delete(p.userId));
-          document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
         })
         .subscribe(async (status) => {
           if (status === 'SUBSCRIBED') {
@@ -1251,24 +1406,16 @@
         });
     }
 
-    // --- Badges (only sidebar now) ---
+    // --- Badges ---
     function updateUnreadBadges() {
       const sidebarBadge = document.getElementById('sidebarUnreadBadge');
-      if (isCEO) {
-        if (totalUnreadCount > 0) {
-          sidebarBadge.style.display = 'inline-block';
-          sidebarBadge.textContent = totalUnreadCount;
-        } else {
-          sidebarBadge.style.display = 'none';
-        }
+      if (totalUnreadCount > 0) {
+        sidebarBadge.style.display = 'inline-block';
+        sidebarBadge.textContent = totalUnreadCount;
       } else {
-        if (currentUnreadCount > 0) {
-          sidebarBadge.style.display = 'inline-block';
-          sidebarBadge.textContent = currentUnreadCount;
-        } else {
-          sidebarBadge.style.display = 'none';
-        }
+        sidebarBadge.style.display = 'none';
       }
+      updateSwitcherButton();
     }
 
     function updateDMBadge() {
@@ -1304,7 +1451,7 @@
         const msgRow = document.querySelector(`.message-row[data-message-id="${messageId}"]`);
         if (msgRow) {
           if (currentUnreadCount > 0) currentUnreadCount--;
-          if (isCEO && totalUnreadCount > 0) totalUnreadCount--;
+          await updateGlobalUnreadCount();
           updateUnreadBadges();
           updateSeenIndicator(messageId);
           scheduleUnreadBorderRemoval(messageId);
@@ -1449,20 +1596,27 @@
     // --- Load messages ---
     async function loadMessages() {
       try {
-        if (isCEO && selectedGroupRole === null) {
-          renderGroupsList(availableRoles || []);
+        // If "All" view, show group cards (for both CEO and regular)
+        if (selectedGroupRole === null) {
+          let roles;
+          if (isCEO) {
+            roles = availableRoles.length > 0 ? availableRoles : ['General'];
+          } else {
+            roles = ['General', currentRole];
+          }
+          // Ensure General is present
+          if (!roles.includes('General')) roles.push('General');
+          roles = [...new Set(roles)].sort();
+          await renderGroupsList(roles);
           return;
         }
+
+        // Specific group: load messages
         let query = supabase
           .from('group_messages')
           .select(`*, sender:profiles!sender_id (id, full_name, avatar_url)`)
+          .eq('role', selectedGroupRole)
           .order('created_at', { ascending: true });
-
-        if (!isCEO) {
-          query = query.eq('role', currentRole);
-        } else if (selectedGroupRole) {
-          query = query.eq('role', selectedGroupRole);
-        }
 
         const { data, error } = await query;
         if (error) throw error;
@@ -1515,7 +1669,7 @@
         area.innerHTML = html;
 
         currentUnreadCount = data.filter(msg => !readMessageIds.has(msg.id) && msg.sender_id !== currentUser.id).length;
-        if (isCEO) await updateTotalUnreadCount();
+        await updateGlobalUnreadCount();
         updateUnreadBadges();
 
         attachMessageHandlers();
@@ -1528,13 +1682,15 @@
         } else {
           area.scrollTop = area.scrollHeight;
         }
+        removeNotificationButtons();
       } catch (err) {
         console.error('Load messages error:', err);
         document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Could not load messages.</div>';
       }
     }
 
-    async function updateTotalUnreadCount() {
+    // --- Update Global Unread Count ---
+    async function updateGlobalUnreadCount() {
       if (!currentUser) return;
       try {
         const { data: reads } = await supabase
@@ -1542,177 +1698,270 @@
           .select('message_id')
           .eq('user_id', currentUser.id);
         const readIds = new Set(reads.map(r => r.message_id));
-        const { data: msgs, error } = await supabase
-          .from('group_messages')
-          .select('id, sender_id');
+
+        // Get all messages the user has access to: General + their role (or all for CEO)
+        let query = supabase.from('group_messages').select('id, sender_id, role');
+        if (!isCEO) {
+          query = query.in('role', ['General', currentRole]);
+        }
+
+        const { data: msgs, error } = await query;
         if (error) throw error;
+
         let count = 0;
-        msgs.forEach(m => { if (m.sender_id !== currentUser.id && !readIds.has(m.id)) count++; });
+        msgs.forEach(m => {
+          if (m.sender_id !== currentUser.id && !readIds.has(m.id)) {
+            count++;
+          }
+        });
         totalUnreadCount = count;
         updateUnreadBadges();
-      } catch (err) { console.error('updateTotalUnreadCount error:', err); }
+      } catch (err) { console.error('updateGlobalUnreadCount error:', err); }
     }
 
+    // --- RENDER GROUPS LIST (CEO "All" view) ---
     async function renderGroupsList(roles) {
       const area = document.getElementById('messagesArea');
       if (!area) return;
+
+      // Ensure 'General' is in the list
+      if (!roles.includes('General')) roles.push('General');
+      roles = [...new Set(roles)].sort();
+
       if (!roles || roles.length === 0) {
-        area.innerHTML = '<div style="color:#9aa4bf;text-align:center;padding:2rem;">No groups found</div>';
+        area.innerHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;color:#6a7a9a;text-align:center;">
+            <i class="fas fa-users" style="font-size:2.5rem;margin-bottom:1rem;opacity:0.3;"></i>
+            <p style="font-size:0.95rem;">No groups available yet</p>
+            <p style="font-size:0.75rem;margin-top:0.3rem;">Messages will appear here when groups are created</p>
+          </div>
+        `;
         return;
       }
+
       const { data: reads } = await supabase
         .from('message_reads')
         .select('message_id')
         .eq('user_id', currentUser.id);
       const readIds = new Set(reads.map(r => r.message_id));
+
       const { data: msgs } = await supabase
         .from('group_messages')
-        .select('id, role, sender_id');
-      const unreadCounts = {};
-      msgs.forEach(m => {
-        if (m.sender_id !== currentUser.id && !readIds.has(m.id)) {
-          unreadCounts[m.role] = (unreadCounts[m.role] || 0) + 1;
-        }
+        .select('id, role, sender_id, content, audio_url, created_at')
+        .order('created_at', { ascending: false });
+
+      const roleData = {};
+      roles.forEach(r => {
+        roleData[r] = { unread: 0, lastMsg: null, lastTime: null };
       });
 
-      const items = roles.map(r => {
-        const count = unreadCounts[r] || 0;
-        const badge = count > 0 ? `<span class="unread-badge">${count}</span>` : '';
-        return `<div class="group-card" data-role="${escapeHtml(r)}">${escapeHtml(r)}${badge}</div>`;
-      }).join('');
-      area.innerHTML = `<div class="groups-list">${items}</div>`;
+      if (msgs) {
+        const seenRoles = new Set();
+        msgs.forEach(m => {
+          if (m.role && roleData[m.role]) {
+            if (m.sender_id !== currentUser.id && !readIds.has(m.id)) {
+              roleData[m.role].unread++;
+            }
+            if (!seenRoles.has(m.role)) {
+              roleData[m.role].lastMsg = m.content || (m.audio_url ? '🎤 Voice note' : '');
+              roleData[m.role].lastTime = m.created_at;
+              seenRoles.add(m.role);
+            }
+          }
+        });
+      }
+
+      let html = `<div class="groups-list-container">`;
+      html += `<div class="section-title"><i class="fas fa-layer-group" style="margin-right:0.5rem;"></i>Your Groups (${roles.length})</div>`;
+
+      roles.forEach(role => {
+        const data = roleData[role] || { unread: 0, lastMsg: null, lastTime: null };
+        const unreadBadge = data.unread > 0 ? `<span class="unread-count">${data.unread}</span>` : '';
+        const timeStr = data.lastTime ? formatTimeOnly(data.lastTime) : '';
+        const preview = data.lastMsg ? data.lastMsg.substring(0, 50) : 'No messages yet';
+        const initial = role.charAt(0).toUpperCase();
+
+        html += `
+          <div class="group-card" data-role="${escapeHtml(role)}">
+            <div class="group-info">
+              <div class="group-avatar">${initial}</div>
+              <div>
+                <div class="group-name">${escapeHtml(role)}</div>
+                <div class="group-preview">${escapeHtml(preview)}</div>
+              </div>
+            </div>
+            <div class="group-meta">
+              ${unreadBadge}
+              ${timeStr ? `<span class="last-time">${timeStr}</span>` : ''}
+              <span class="arrow"><i class="fas fa-chevron-right"></i></span>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+      area.innerHTML = html;
+
       document.querySelectorAll('.group-card').forEach(card => {
         card.addEventListener('click', async (e) => {
           const role = e.currentTarget.dataset.role;
-          await switchGroup(role);
+          if (role) await switchGroup(role);
         });
       });
+
+      // Input disabled in "All" view
+      document.getElementById('messageInput').disabled = true;
+      document.getElementById('sendBtn').disabled = true;
+      document.getElementById('voiceNoteBtn').disabled = true;
     }
 
-    async function buildGroupTabs() {
-      if (!isCEO) return;
-      const tabsContainer = document.getElementById('groupTabs');
-      tabsContainer.style.display = 'flex';
-      tabsContainer.innerHTML = '';
-
+    // --- Build group switcher (bottom sheet) – works for everyone ---
+    async function buildGroupSwitcher() {
       let roles = [];
-      try {
-        const { data: profiles, error } = await supabase
-          .from('profiles')
-          .select('job_role')
-          .not('job_role', 'is', null);
-        if (!error && profiles && profiles.length > 0) {
-          roles = [...new Set(profiles.map(p => p.job_role))].sort();
-        }
-      } catch (e) {}
 
-      if (roles.length === 0) {
+      if (isCEO) {
+        // CEO: show all roles + General
         try {
-          const { data: messages, error } = await supabase
-            .from('group_messages')
-            .select('role')
-            .not('role', 'is', null);
-          if (!error && messages) {
-            roles = [...new Set(messages.map(m => m.role))].sort();
+          const { data: profiles, error } = await supabase
+            .from('profiles')
+            .select('job_role')
+            .not('job_role', 'is', null);
+          if (!error && profiles && profiles.length > 0) {
+            roles = [...new Set(profiles.map(p => p.job_role))].sort();
           }
         } catch (e) {}
+
+        if (roles.length === 0) {
+          try {
+            const { data: messages, error } = await supabase
+              .from('group_messages')
+              .select('role')
+              .not('role', 'is', null);
+            if (!error && messages) {
+              roles = [...new Set(messages.map(m => m.role))].sort();
+            }
+          } catch (e) {}
+        }
+
+        if (!roles.includes('General')) roles.push('General');
+        roles.sort();
+        availableRoles = roles;
+
+      } else {
+        // Regular user: "All", General, and their role
+        roles = ['General', currentRole];
+        roles = [...new Set(roles)].sort();
       }
 
       if (roles.length === 0) {
-        tabsContainer.innerHTML = '<span style="color:#9aa4bf;padding:0.4rem 1rem;">No groups</span>';
+        groupSwitcherBtn.style.display = 'none';
         return;
       }
 
-      availableRoles = roles;
-
+      // Fetch unread counts for badges
       const { data: reads } = await supabase
         .from('message_reads')
         .select('message_id')
         .eq('user_id', currentUser.id);
       const readIds = new Set(reads.map(r => r.message_id));
-      const { data: msgs } = await supabase
-        .from('group_messages')
-        .select('id, role, sender_id');
+
+      // For regular users, only count unreads in groups they have access to
+      let query = supabase.from('group_messages').select('id, role, sender_id');
+      if (!isCEO) {
+        query = query.in('role', ['General', currentRole]);
+      }
+      const { data: msgs } = await query;
+
       const unreadCounts = {};
+      let allUnread = 0;
       msgs.forEach(m => {
         if (m.sender_id !== currentUser.id && !readIds.has(m.id)) {
           unreadCounts[m.role] = (unreadCounts[m.role] || 0) + 1;
+          allUnread++;
         }
       });
 
-      const allTab = document.createElement('span');
-      allTab.className = `group-tab ${selectedGroupRole === null ? 'active' : ''}`;
-      allTab.textContent = 'All';
-      if (totalUnreadCount > 0) {
-        const badge = document.createElement('span');
-        badge.className = 'unread-badge-tab';
-        badge.textContent = totalUnreadCount;
-        allTab.appendChild(badge);
-      }
-      allTab.dataset.role = '';
-      allTab.addEventListener('click', () => switchGroup(''));
-      tabsContainer.appendChild(allTab);
+      switcherOptions.innerHTML = '';
 
+      // "All" option (for both CEO and regular)
+      const allOpt = document.createElement('div');
+      const isAllActive = selectedGroupRole === null;
+      allOpt.className = `option ${isAllActive ? 'active' : ''}`;
+      allOpt.innerHTML = `All ${allUnread > 0 ? `<span class="badge">${allUnread}</span>` : ''}`;
+      allOpt.dataset.role = '';
+      allOpt.addEventListener('click', () => switchGroup(''));
+      switcherOptions.appendChild(allOpt);
+
+      // Individual groups
       roles.forEach(role => {
-        const tab = document.createElement('span');
-        tab.className = `group-tab ${selectedGroupRole === role ? 'active' : ''}`;
-        tab.textContent = role;
+        const opt = document.createElement('div');
+        const isActive = selectedGroupRole === role;
+        opt.className = `option ${isActive ? 'active' : ''}`;
         const unread = unreadCounts[role] || 0;
-        if (unread > 0) {
-          const badge = document.createElement('span');
-          badge.className = 'unread-badge-tab';
-          badge.textContent = unread;
-          tab.appendChild(badge);
-        }
-        tab.dataset.role = role;
-        tab.addEventListener('click', () => switchGroup(role));
-        tabsContainer.appendChild(tab);
+        opt.innerHTML = `${role} ${unread > 0 ? `<span class="badge">${unread}</span>` : ''}`;
+        opt.dataset.role = role;
+        opt.addEventListener('click', () => switchGroup(role));
+        switcherOptions.appendChild(opt);
       });
 
-      if (selectedGroupRole === null && roles.length > 0) {
+      updateSwitcherButton();
+      groupSwitcherBtn.style.display = 'flex';
+
+      // If no group selected, default to "All"
+      if (selectedGroupRole === undefined || selectedGroupRole === null) {
+        selectedGroupRole = null;
         document.getElementById('messageInput').disabled = true;
         document.getElementById('sendBtn').disabled = true;
         document.getElementById('voiceNoteBtn').disabled = true;
         await loadMessages();
-      } else if (!selectedGroupRole && roles.length > 0) {
-        selectedGroupRole = roles[0];
-        document.querySelectorAll('.group-tab').forEach(tab => {
-          if (tab.dataset.role === selectedGroupRole) tab.classList.add('active');
-        });
+      } else {
+        // Enable input for specific group
         document.getElementById('messageInput').disabled = false;
         document.getElementById('sendBtn').disabled = false;
         document.getElementById('voiceNoteBtn').disabled = false;
-        await loadMessages();
       }
+
+      updateSwitcherButton();
       updateGroupTitle();
     }
 
+    // --- Switch group ---
     async function switchGroup(role) {
       const normalized = role === '' ? null : role;
       if (selectedGroupRole === normalized) return;
       selectedGroupRole = normalized;
-      document.querySelectorAll('.group-tab').forEach(tab => {
-        const tr = tab.dataset.role === '' ? null : tab.dataset.role;
-        if (tr === selectedGroupRole) tab.classList.add('active');
-        else tab.classList.remove('active');
+
+      // Update active class in sheet
+      document.querySelectorAll('.option').forEach(opt => {
+        const r = opt.dataset.role === '' ? null : opt.dataset.role;
+        opt.classList.toggle('active', r === selectedGroupRole);
       });
-      if (isCEO) {
-        const disabled = selectedGroupRole === null;
-        document.getElementById('messageInput').disabled = disabled;
-        document.getElementById('sendBtn').disabled = disabled;
-        document.getElementById('voiceNoteBtn').disabled = disabled;
-        if (selectedGroupRole === null) {
-          await buildGroupTabs();
-        }
+
+      // Enable/disable input
+      if (selectedGroupRole === null) {
+        document.getElementById('messageInput').disabled = true;
+        document.getElementById('sendBtn').disabled = true;
+        document.getElementById('voiceNoteBtn').disabled = true;
+      } else {
+        document.getElementById('messageInput').disabled = false;
+        document.getElementById('sendBtn').disabled = false;
+        document.getElementById('voiceNoteBtn').disabled = false;
       }
+
       updateGroupTitle();
+      updateSwitcherButton();
+
       if (typingSubscription) typingSubscription.unsubscribe();
       setupTypingSubscription();
       await loadMessages();
       checkOngoingCall();
       setupGroupCallSubscription();
+
+      switcherSheet.classList.remove('open');
+      switcherSheet.style.display = 'none';
     }
 
+    // --- Message handlers ---
     function attachMessageHandlers() {
       document.querySelectorAll('.message-row').forEach(row => {
         row.removeEventListener('click', onMessageRowClick);
@@ -1732,6 +1981,7 @@
         avatar.removeEventListener('click', onAvatarClick);
         avatar.addEventListener('click', onAvatarClick);
       });
+      removeNotificationButtons();
     }
 
     function onMessageRowClick(e) {
@@ -1805,7 +2055,7 @@
         </div>
       `;
       messageDiv.style.display = 'none';
-      btn.closest('.message-actions').style.display = 'none';
+      btn.closest('.message-actions').style.display = 'flex';
 
       const editContainer = document.createElement('div');
       editContainer.innerHTML = editHtml;
@@ -1898,7 +2148,6 @@
       if (messageRow) {
         if (messageRow.classList.contains('unread')) {
           if (currentUnreadCount > 0) currentUnreadCount--;
-          if (isCEO && totalUnreadCount > 0) totalUnreadCount--;
         }
         if (observer) observer.unobserve(messageRow);
         messageRow.remove();
@@ -1911,6 +2160,7 @@
         clearTimeout(unreadBorderTimeouts.get(messageId));
         unreadBorderTimeouts.delete(messageId);
       }
+      updateGlobalUnreadCount();
       updateUnreadBadges();
     }
 
@@ -1946,11 +2196,13 @@
 
     function appendMessageToUI(message, isSent, sender, messageRole, isUnread = false) {
       if (document.querySelector(`.message-row[data-message-id="${message.id}"]`)) return;
-      if (isCEO) {
-        if (selectedGroupRole && messageRole !== selectedGroupRole) return;
-      } else {
-        if (messageRole !== currentRole) return;
-      }
+
+      // In "All" view, we don't append messages (we show group cards)
+      if (selectedGroupRole === null) return;
+
+      // Only append if message matches current group
+      if (messageRole !== selectedGroupRole) return;
+
       const area = document.getElementById('messagesArea');
       if (!area) return;
       const lastMessageRow = area.querySelector('.message-row:last-child');
@@ -1966,12 +2218,20 @@
         const newRow = document.querySelector(`.message-row[data-message-id="${message.id}"]`);
         if (observer && newRow) observer.observe(newRow);
       }
+      removeNotificationButtons();
     }
 
     function displaySentMessage(message) {
       const area = document.getElementById('messagesArea');
       if (!area) return;
       if (document.querySelector(`.message-row[data-message-id="${message.id}"]`)) return;
+
+      // In "All" view, don't append messages
+      if (selectedGroupRole === null) return;
+
+      // Only append if message matches current group
+      if (message.role !== selectedGroupRole) return;
+
       const lastMessageRow = area.querySelector('.message-row:last-child');
       let lastDate = lastMessageRow ? lastMessageRow.dataset.createdAt : null;
       const separatorHtml = maybeAppendDateSeparator(lastDate, message.created_at);
@@ -1983,6 +2243,7 @@
       const isScrolledToBottom = area.scrollHeight - area.scrollTop <= area.clientHeight + 50;
       if (isScrolledToBottom) area.scrollTop = area.scrollHeight;
       attachMessageHandlers();
+      removeNotificationButtons();
     }
 
     // --- Typing ---
@@ -1998,8 +2259,8 @@
     }
 
     async function sendTypingIndicator() {
-      if (!currentUser || (isCEO && !selectedGroupRole) || (!isCEO && !currentRole)) return;
-      const channel = isCEO ? (selectedGroupRole ? `typing-${selectedGroupRole}` : 'typing-all') : `typing-${currentRole}`;
+      if (!currentUser || !selectedGroupRole) return;
+      const channel = `typing-${selectedGroupRole}`;
       await supabase.channel(channel).send({
         type: 'broadcast',
         event: 'typing',
@@ -2009,7 +2270,8 @@
 
     function setupTypingSubscription() {
       if (typingSubscription) typingSubscription.unsubscribe();
-      const channel = isCEO ? (selectedGroupRole ? `typing-${selectedGroupRole}` : 'typing-all') : `typing-${currentRole}`;
+      if (!selectedGroupRole) return;
+      const channel = `typing-${selectedGroupRole}`;
       typingSubscription = supabase
         .channel(channel)
         .on('broadcast', { event: 'typing' }, (payload) => {
@@ -2029,7 +2291,7 @@
 
     // --- Ongoing call ---
     async function checkOngoingCall() {
-      const role = isCEO ? selectedGroupRole : currentRole;
+      const role = selectedGroupRole || 'General';
       if (!role) {
         ongoingCallBanner.style.display = 'none';
         activeGroupCallId = null;
@@ -2059,7 +2321,7 @@
       }
     }
 
-    // --- Agora helpers ---
+    // --- Agora helpers (unchanged) ---
     function isValidAgoraChannelName(channelName) {
       return window.TechTitansAgora.isValidChannelName(channelName);
     }
@@ -2196,8 +2458,8 @@
     // --- Join group call ---
     async function joinGroupCall(existingCallId = null) {
       if (callActive || callStarting) { alert('You are already joining or in a group call.'); return; }
-      if (!selectedGroupRole && !currentRole) { alert('No group selected.'); return; }
-      const role = isCEO ? selectedGroupRole : currentRole;
+      if (!selectedGroupRole) { alert('No group selected.'); return; }
+      const role = selectedGroupRole;
       if (!role) { alert('Cannot determine group role.'); return; }
       if (!window.AgoraRTC) { alert('Calling service did not load. Check your connection and refresh.'); return; }
       callStarting = true;
@@ -2348,7 +2610,7 @@
             .from('group_calls')
             .update({ status: 'ended', ended_at: new Date().toISOString() })
             .eq('id', activeGroupCallId);
-          const role = isCEO ? selectedGroupRole : currentRole;
+          const role = selectedGroupRole || 'General';
           if (role) {
             await supabase.channel(`group-call-${role}`).send({
               type: 'broadcast',
@@ -2372,7 +2634,7 @@
           console.warn('Failed to end group call:', err);
         }
       } else {
-        const role = isCEO ? selectedGroupRole : currentRole;
+        const role = selectedGroupRole || 'General';
         if (role) {
           await supabase.channel(`group-call-${role}`).send({
             type: 'broadcast',
@@ -2386,7 +2648,6 @@
       }
     }
 
-    // --- Mute controls ---
     let audioEnabled = true, videoEnabled = true;
     document.getElementById('muteAudioBtn').addEventListener('click', async () => {
       if (localAudioTrack) {
@@ -2419,13 +2680,9 @@
 
     document.getElementById('sendBtn').addEventListener('click', sendMessage);
     document.getElementById('messageInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
-    document.getElementById('groupCallBtn').addEventListener('click', () => {
-      joinGroupCall(null);
-    });
+    groupCallBtn.addEventListener('click', () => { joinGroupCall(null); });
     joinOngoingCallBtn.addEventListener('click', () => {
-      if (activeGroupCallId) {
-        joinGroupCall(activeGroupCallId);
-      }
+      if (activeGroupCallId) joinGroupCall(activeGroupCallId);
     });
     document.getElementById('closeCallModalBtn').addEventListener('click', hangUpCall);
     document.getElementById('hangupCallBtn').addEventListener('click', hangUpCall);
@@ -2440,19 +2697,35 @@
       window.location.href = `dm.html?user=${userId}`;
     });
 
+    // --- Switcher sheet controls ---
+    groupSwitcherBtn.addEventListener('click', () => {
+      buildGroupSwitcher().then(() => {
+        switcherSheet.classList.add('open');
+        switcherSheet.style.display = 'block';
+      });
+    });
+    closeSwitcherSheet.addEventListener('click', () => {
+      switcherSheet.classList.remove('open');
+      switcherSheet.style.display = 'none';
+    });
+    switcherSheet.addEventListener('click', (e) => {
+      if (e.target === switcherSheet) {
+        switcherSheet.classList.remove('open');
+        switcherSheet.style.display = 'none';
+      }
+    });
+
     // --- Send message ---
     async function sendMessage() {
       const input = document.getElementById('messageInput');
       const content = input.value.trim();
       if (!content || !currentUser) return;
 
-      let messageRole;
-      if (isCEO) {
-        if (!selectedGroupRole) { alert('Please select a group first.'); return; }
-        messageRole = selectedGroupRole;
-      } else {
-        messageRole = currentRole;
+      if (!selectedGroupRole) {
+        alert('Please select a group first.');
+        return;
       }
+      const messageRole = selectedGroupRole;
 
       if (activeTypers.has(currentUserFullName)) { activeTypers.delete(currentUserFullName); updateTypingIndicator(); }
 
@@ -2524,13 +2797,11 @@
     }
 
     async function uploadVoiceNote(audioBlob) {
-      let messageRole;
-      if (isCEO) {
-        if (!selectedGroupRole) { alert('Please select a group first.'); return; }
-        messageRole = selectedGroupRole;
-      } else {
-        messageRole = currentRole;
+      if (!selectedGroupRole) {
+        alert('Please select a group first.');
+        return;
       }
+      const messageRole = selectedGroupRole;
 
       const fileName = `${currentUser.id}/${Date.now()}.webm`;
       const { error: uploadError } = await supabase.storage
@@ -2581,7 +2852,7 @@
     let groupCallDbSubscription = null;
     function setupGroupCallDbSubscription() {
       if (groupCallDbSubscription) groupCallDbSubscription.unsubscribe();
-      const role = isCEO ? selectedGroupRole : currentRole;
+      const role = selectedGroupRole || 'General';
       if (!role) return;
       groupCallDbSubscription = supabase
         .channel(`group-calls-db-${role}`)
@@ -2593,7 +2864,7 @@
 
     function setupGroupCallSubscription() {
       if (groupCallSubscription) groupCallSubscription.unsubscribe();
-      const role = isCEO ? selectedGroupRole : currentRole;
+      const role = selectedGroupRole || 'General';
       if (!role) return;
       groupCallSubscription = supabase
         .channel(`group-call-${role}`)
@@ -2630,7 +2901,11 @@
     function setupGroupSubscription() {
       if (messageSubscription) { messageSubscription.unsubscribe(); messageSubscription = null; }
 
+      // For non-CEO, we need to watch General and their role
+      const rolesToWatch = isCEO ? [] : ['General', currentRole];
+
       if (isCEO) {
+        // CEO watches all messages (since they see all groups)
         messageSubscription = supabase
           .channel('all-messages')
           .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'group_messages' }, async (payload) => {
@@ -2646,12 +2921,13 @@
             if (!senderProfile) return;
             const enrichedMsg = { ...newMsg, sender: senderProfile };
 
-            const shouldShow = selectedGroupRole === null || newMsg.role === selectedGroupRole;
-            if (shouldShow) {
+            // For CEO: if in "All" view, we don't append messages (they see cards)
+            // If in specific group, append if matches
+            if (selectedGroupRole !== null && newMsg.role === selectedGroupRole) {
               appendMessageToUI(enrichedMsg, false, senderProfile, newMsg.role, true);
               currentUnreadCount++;
             }
-            totalUnreadCount++;
+            await updateGlobalUnreadCount();
             updateUnreadBadges();
 
             if (window.TechTitansNotifications) {
@@ -2660,7 +2936,7 @@
                 url: 'messages.html'
               });
             }
-            if (isCEO) buildGroupTabs();
+            if (isCEO) buildGroupSwitcher();
           })
           .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'group_messages' }, (payload) => {
             updateMessageInUI(payload.new.id, payload.new.content);
@@ -2670,9 +2946,10 @@
           })
           .subscribe();
       } else {
+        // Non-CEO: watch messages in General and their role
         messageSubscription = supabase
-          .channel(`group-${currentRole}`)
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, async (payload) => {
+          .channel(`group-${currentUser.id}`)
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'group_messages', filter: `role=in.(${rolesToWatch.map(r => `"${r}"`).join(',')})` }, async (payload) => {
             const newMsg = payload.new;
             if (document.querySelector(`.message-row[data-message-id="${newMsg.id}"]`)) return;
             if (newMsg.sender_id === currentUser.id) return;
@@ -2685,8 +2962,15 @@
             if (!senderProfile) return;
             const enrichedMsg = { ...newMsg, sender: senderProfile };
 
-            appendMessageToUI(enrichedMsg, false, senderProfile, newMsg.role, true);
-            currentUnreadCount++;
+            // In "All" view we don't append messages
+            if (selectedGroupRole === null) {
+              // Do not append, but we could update the card preview? That's more complex.
+              // For simplicity, we'll just update unread counts.
+            } else if (selectedGroupRole === newMsg.role) {
+              appendMessageToUI(enrichedMsg, false, senderProfile, newMsg.role, true);
+              currentUnreadCount++;
+            }
+            await updateGlobalUnreadCount();
             updateUnreadBadges();
 
             if (window.TechTitansNotifications) {
@@ -2696,10 +2980,10 @@
               });
             }
           })
-          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, (payload) => {
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'group_messages', filter: `role=in.(${rolesToWatch.map(r => `"${r}"`).join(',')})` }, (payload) => {
             updateMessageInUI(payload.new.id, payload.new.content);
           })
-          .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, (payload) => {
+          .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'group_messages', filter: `role=in.(${rolesToWatch.map(r => `"${r}"`).join(',')})` }, (payload) => {
             removeMessageFromUI(payload.old.id);
           })
           .subscribe();
@@ -2755,23 +3039,28 @@
           typingTimeout = setTimeout(() => {}, 2000);
         });
 
+        // Default to "All" view for everyone
+        selectedGroupRole = null;
+        document.getElementById('messageInput').disabled = true;
+        document.getElementById('sendBtn').disabled = true;
+        document.getElementById('voiceNoteBtn').disabled = true;
+
         if (isCEO) {
           document.getElementById('roleDisplay').style.display = 'none';
-          await updateTotalUnreadCount();
-          await buildGroupTabs();
         } else {
           document.getElementById('roleDisplay').textContent = currentRole;
-          selectedGroupRole = currentRole;
-          document.getElementById('messageInput').disabled = false;
-          document.getElementById('sendBtn').disabled = false;
-          document.getElementById('voiceNoteBtn').disabled = false;
         }
+
+        await updateGlobalUnreadCount();
+        await buildGroupSwitcher();
         updateGroupTitle();
+        updateSwitcherButton();
         await loadMessages();
         setupGroupSubscription();
         setupGroupCallSubscription();
         setupGroupCallDbSubscription();
         await checkOngoingCall();
+        removeNotificationButtons();
       } catch (err) {
         console.error('Init error:', err);
         document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Failed to load chat. Please refresh.</div>';
