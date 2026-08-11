@@ -19,8 +19,12 @@
     body {
       background: #0b0f17;
       display: flex;
-      height: 100vh;
+      height: 100dvh;
       overflow: hidden;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
     }
     body.sidebar-collapsed .sidebar {
       transform: translateX(-100%);
@@ -1667,11 +1671,22 @@
         const list = document.getElementById('dmConversationsList');
         const chatArea = document.getElementById('dmChatArea');
         const backBtn = document.getElementById('dmBackBtn');
+        const outerHeader = document.querySelector('.chat-panel > .chat-header');
         if (!layout || !list || !chatArea || !backBtn) return;
-        layout.classList.toggle('chat-open', Boolean(isOpen));
-        list.style.display = '';
-        chatArea.style.display = '';
-        backBtn.style.display = '';
+        if (isOpen) {
+          layout.classList.add('mobile-chat-open');
+          list.style.display = 'none';
+          chatArea.style.display = 'flex';
+          backBtn.style.display = 'block';
+          if (outerHeader && window.innerWidth <= 768) outerHeader.style.display = 'none';
+        } else {
+          layout.classList.remove('mobile-chat-open');
+          list.style.display = 'block';
+          chatArea.style.display = 'none';
+          backBtn.style.display = 'none';
+          if (outerHeader) outerHeader.style.display = 'flex';
+          document.querySelectorAll('.dm-conversation-item').forEach(i => i.classList.remove('active'));
+        }
       }
 
       // ─── LOAD DM VIEW ───
