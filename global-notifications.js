@@ -60,6 +60,7 @@ const TechTitansGlobal = {
     this._setupUserChannel();
     this._setupGroupCallListener();
     this._setupAnnouncementListener();
+    this._setupGlobalDmBadge();
     this._setupServiceWorkerRelay();
   },
 
@@ -142,6 +143,57 @@ const TechTitansGlobal = {
             { url: 'dashboard.html' }
           );
         }
+      })
+      .subscribe();
+  },
+
+  // ─── Global DM Badge listener ─────────────────────────────────────
+
+  async _setupGlobalDmBadge() {
+    if (!this._supabase || !this._userId) return;
+
+    const updateGlobalBadge = (count) => {
+      const badge1 = document.getElementById('globalDmUnreadBadge');
+      const badge2 = document.getElementById('dmUnreadBadge'); // If on dm.html
+      [badge1, badge2].forEach(b => {
+        if (b) {
+          if (count > 0) {
+            b.style.display = 'inline-block';
+            b.textContent = count;
+          } else {
+            b.style.display = 'none';
+          }
+        }
+      });
+    };
+
+    const fetchUnread = async () => {
+      try {
+        const { count, error } = await this._supabase
+          .from('private_messages')
+          .select('*', { count: 'exact', head: true })
+          .eq('recipient_id', this._userId)
+          .is('read_at', null);
+        if (!error && count !== null) {
+          updateGlobalBadge(count);
+        }
+      } catch (e) {}
+    };
+
+    // Initial fetch
+    await fetchUnread();
+
+    // Listen for changes (new messages or marked as read)
+    this._supabase.channel('global-dm-badge')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'private_messages',
+        filter: `recipient_id=eq.${this._userId}`
+      }, () => {
+        // Debounce fetch slightly to prevent spam
+        if (this._dmBadgeTimeout) clearTimeout(this._dmBadgeTimeout);
+        this._dmBadgeTimeout = setTimeout(() => fetchUnread(), 500);
       })
       .subscribe();
   },

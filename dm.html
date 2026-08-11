@@ -2263,8 +2263,7 @@ if (mobileNavToggleList && mobileNavOverlay) {
             const updated = payload.new;
             if (updated.read_at && dmUnreadBySender[updated.sender_id]) {
               dmUnreadBySender[updated.sender_id]--;
-              if (dmUnreadBySender[updated.sender_id] <= 0) delete dmUnreadBySender[updated
-              .sender_id];
+              if (dmUnreadBySender[updated.sender_id] <= 0) delete dmUnreadBySender[updated.sender_id];
               updateDMBadge();
               const targetItem = document.querySelector(
                 `.dm-conversation-item[data-user-id="${updated.sender_id}"]`);
@@ -2279,14 +2278,23 @@ if (mobileNavToggleList && mobileNavOverlay) {
                   `.dm-msg-row[data-message-id="${updated.id}"]`);
                 if (msgRow) {
                   msgRow.classList.remove('unread');
-                  const statusEl = msgRow.querySelector('.dm-msg-status');
-                  if (statusEl) statusEl.textContent = 'Seen';
-                  if (!msgRow.querySelector('.dm-seen-indicator')) {
-                    const seenDiv = document.createElement('div');
-                    seenDiv.className = 'dm-seen-indicator';
-                    seenDiv.textContent = `Seen ${formatTimeOnly(updated.read_at)}`;
-                    msgRow.querySelector('.dm-msg').appendChild(seenDiv);
-                  }
+                }
+              }
+            }
+          })
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'private_messages',
+            filter: `sender_id=eq.${currentUser.id}` }, (payload) => {
+            const updated = payload.new;
+            if (updated.read_at && currentRecipientId === updated.recipient_id) {
+              const msgRow = document.querySelector(`.dm-msg-row[data-message-id="${updated.id}"]`);
+              if (msgRow) {
+                const statusEl = msgRow.querySelector('.dm-msg-status');
+                if (statusEl) statusEl.textContent = 'Seen';
+                if (!msgRow.querySelector('.dm-seen-indicator')) {
+                  const seenDiv = document.createElement('div');
+                  seenDiv.className = 'dm-seen-indicator';
+                  seenDiv.textContent = `Seen ${formatTimeOnly(updated.read_at)}`;
+                  msgRow.querySelector('.dm-msg').appendChild(seenDiv);
                 }
               }
             }
