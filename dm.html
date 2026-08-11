@@ -1686,6 +1686,28 @@
             .neq('id', currentUser.id);
           if (profilesError) throw profilesError;
 
+          const { data: allMessages } = await supabase
+            .from('private_messages')
+            .select('sender_id, recipient_id, created_at')
+            .or(`sender_id.eq.${currentUser.id},recipient_id.eq.${currentUser.id}`);
+
+          const lastInteraction = {};
+          if (allMessages) {
+             for (const msg of allMessages) {
+                const otherId = msg.sender_id === currentUser.id ? msg.recipient_id : msg.sender_id;
+                const time = new Date(msg.created_at).getTime();
+                if (!lastInteraction[otherId] || time > lastInteraction[otherId]) {
+                   lastInteraction[otherId] = time;
+                }
+             }
+          }
+
+          allProfiles.sort((a, b) => {
+             const timeA = lastInteraction[a.id] || 0;
+             const timeB = lastInteraction[b.id] || 0;
+             return timeB - timeA;
+          });
+
           const unreadCounts = {};
           const { data: unreadRows, error: unreadError } = await supabase
             .from('private_messages')
@@ -1781,6 +1803,15 @@
                 if (!item.querySelector('.dm-conv-seen')) {
                   item.insertAdjacentHTML('beforeend', '<span class="dm-conv-seen"><i class="fas fa-check-double"></i></span>');
                 }
+                // Mark messages from this user as read in the DB immediately
+                try {
+                  await supabase
+                    .from('private_messages')
+                    .update({ read_at: new Date().toISOString() })
+                    .eq('sender_id', userId)
+                    .eq('recipient_id', currentUser.id)
+                    .is('read_at', null);
+                } catch (err) { console.error('Error marking as read on click', err); }
               }
               if (window.innerWidth <= 768) {
                 setDmMobileChatOpen(true);
