@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
@@ -20,7 +20,6 @@
     </script>
     <script src="global-notifications.js">
     </script>
-    <!-- PDF.js library for custom PDF rendering -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js">
     </script>
     <style>
@@ -478,8 +477,10 @@
             display: flex;
             gap: 0.8rem;
             margin-top: 1rem;
+            flex-wrap: wrap;
         }
         .resource-link,
+        .edit-resource,
         .delete-resource {
             flex: 1;
             text-align: center;
@@ -504,6 +505,13 @@
         .resource-link:hover {
             background: #2a5bbf;
         }
+        .edit-resource {
+            background: #f0b429;
+            color: #1f2a44;
+        }
+        .edit-resource:hover {
+            background: #d49a1f;
+        }
         .delete-resource {
             background: transparent;
             border: 1px solid #ff4d4d;
@@ -527,7 +535,7 @@
             opacity: 0.2;
         }
 
-        /* ─── UPLOAD MODAL ─── */
+        /* ─── UPLOAD / EDIT MODAL ─── */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -599,6 +607,7 @@
             resize: vertical;
             min-height: 100px;
         }
+
         .file-upload-area {
             background: #0f172f;
             border: 2px dashed #2a3650;
@@ -608,6 +617,7 @@
             cursor: pointer;
             transition: 0.2s;
             position: relative;
+            touch-action: manipulation;
         }
         .file-upload-area:hover {
             border-color: #428cff;
@@ -618,17 +628,38 @@
             inset: 0;
             opacity: 0;
             cursor: pointer;
+            width: 100%;
+            height: 100%;
+            touch-action: manipulation;
+        }
+        .file-upload-area input[type="file"]:active {
+            opacity: 0.01;
         }
         .file-upload-area i {
             font-size: 2.5rem;
             color: #428cff;
             display: block;
             margin-bottom: 0.8rem;
+            pointer-events: none;
         }
         .file-upload-area p {
             color: #a5b3d1;
             font-size: 1rem;
+            pointer-events: none;
         }
+        .file-upload-area .file-name-preview {
+            color: #d7def5;
+            font-weight: 500;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+        .file-upload-area .file-replace-hint {
+            color: #7a8bb5;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+        }
+
         .submit-upload {
             background: #428cff;
             border: none;
@@ -663,7 +694,7 @@
             transition: width 0.2s;
         }
 
-        /* ─── RESOURCE PREVIEW MODAL – ENHANCED ─── */
+        /* ─── RESOURCE PREVIEW MODAL (unchanged) ─── */
         .preview-overlay {
             display: none;
             position: fixed;
@@ -853,7 +884,6 @@
             max-width: 90%;
         }
 
-        /* PDF custom viewer inside preview-media */
         .pdf-viewer-container {
             width: 100%;
             height: 100%;
@@ -1091,6 +1121,18 @@
             .resources-grid {
                 gap: 1.2rem;
             }
+            .resource-card {
+                padding: 1.2rem;
+            }
+            .card-actions {
+                flex-direction: column;
+            }
+            .card-actions .resource-link,
+            .card-actions .edit-resource,
+            .card-actions .delete-resource {
+                flex: none;
+                width: 100%;
+            }
 
             .sidebar-overlay {
                 display: none;
@@ -1104,7 +1146,6 @@
                 display: block;
             }
 
-            /* Preview modal responsive */
             .preview-overlay {
                 padding: 0.5rem;
                 align-items: stretch;
@@ -1156,7 +1197,6 @@
                 height: 34px;
                 font-size: 1.1rem;
             }
-            /* PDF viewer on mobile */
             .pdf-viewer-container canvas {
                 max-height: calc(100% - 50px);
             }
@@ -1164,6 +1204,13 @@
                 font-size: 0.8rem;
                 gap: 0.8rem;
                 padding: 0.3rem 0.8rem;
+            }
+            .modal-content {
+                padding: 1.5rem;
+                border-radius: 2rem;
+            }
+            .modal-header h2 {
+                font-size: 1.4rem;
             }
         }
 
@@ -1173,13 +1220,6 @@
             }
             .resources-grid {
                 grid-template-columns: 1fr;
-            }
-            .modal-content {
-                padding: 1.5rem;
-                border-radius: 2rem;
-            }
-            .modal-header h2 {
-                font-size: 1.4rem;
             }
             .preview-media {
                 min-height: 200px;
@@ -1253,7 +1293,7 @@
 
     <!-- ─── MAIN ─── -->
     <div class="main">
-        <!-- Mobile Header with Toggle & Search -->
+        <!-- Mobile Header -->
         <div class="mobile-header">
             <div class="logo" style="font-size: 1.4rem;">TECH<span>TITANS</span></div>
             <div class="mobile-actions">
@@ -1287,15 +1327,15 @@
         <div id="resourcesGrid" class="resources-grid"></div>
     </div>
 
-    <!-- ─── UPLOAD MODAL ─── -->
+    <!-- ─── UPLOAD / EDIT MODAL ─── -->
     <div class="modal-overlay" id="uploadModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-cloud-upload-alt" style="color:#428cff;"></i> Upload Resource</h2>
+                <h2 id="modalTitle"><i class="fas fa-cloud-upload-alt" style="color:#428cff;"></i> <span id="modalTitleText">Upload Resource</span></h2>
                 <button class="modal-close" id="closeModal">&times;</button>
             </div>
             <div class="modal-form">
-                <input type="text" id="modalTitle" placeholder="Title *" required />
+                <input type="text" id="modalResourceTitle" placeholder="Title *" required />
                 <select id="modalCategory">
                     <option value="CEO Reports">CEO Reports</option>
                     <option value="Team Guides">Team Guides</option>
@@ -1307,10 +1347,12 @@
                 <div class="file-upload-area">
                     <i class="fas fa-file-upload"></i>
                     <p id="fileLabel">Click or drag to choose a file</p>
-                    <input type="file" id="modalFile" required />
+                    <div id="filePreviewName" class="file-name-preview" style="display:none;"></div>
+                    <div class="file-replace-hint" id="fileReplaceHint">Leave empty to keep current file</div>
+                    <input type="file" id="modalFile" />
                 </div>
                 <div class="upload-progress" id="modalProgress" style="display:none;"><div class="progress-fill" id="modalProgressFill"></div></div>
-                <button class="submit-upload" id="modalUploadBtn"><i class="fas fa-upload"></i> Upload</button>
+                <button class="submit-upload" id="modalUploadBtn"><i class="fas fa-upload"></i> <span id="modalSubmitText">Upload</span></button>
             </div>
         </div>
     </div>
@@ -1322,9 +1364,7 @@
             <button class="preview-nav preview-prev hidden" id="previewPrev" title="Previous resource"><i class="fas fa-chevron-left"></i></button>
             <button class="preview-nav preview-next hidden" id="previewNext" title="Next resource"><i class="fas fa-chevron-right"></i></button>
             <div class="preview-layout">
-                <div class="preview-media" id="previewMedia">
-                    <!-- Media content will be injected here -->
-                </div>
+                <div class="preview-media" id="previewMedia"></div>
                 <div class="preview-info" id="previewInfo"></div>
             </div>
         </div>
@@ -1364,11 +1404,13 @@
             // Preview state
             let previewList = [];
             let previewIndex = -1;
-            // PDF state
             let pdfDoc = null;
             let currentPage = 1;
             let totalPages = 0;
             let rendering = false;
+
+            // Edit state
+            let editingResourceId = null;
 
             // ─── DOM refs ───
             const grid = document.getElementById('resourcesGrid');
@@ -1378,12 +1420,16 @@
             const uploadModal = document.getElementById('uploadModal');
             const openModalBtn = document.getElementById('openUploadModal');
             const closeModalBtn = document.getElementById('closeModal');
-            const modalTitle = document.getElementById('modalTitle');
+            const modalTitleText = document.getElementById('modalTitleText');
+            const modalResourceTitle = document.getElementById('modalResourceTitle');
             const modalCategory = document.getElementById('modalCategory');
             const modalDesc = document.getElementById('modalDesc');
             const modalFile = document.getElementById('modalFile');
             const fileLabel = document.getElementById('fileLabel');
+            const filePreviewName = document.getElementById('filePreviewName');
+            const fileReplaceHint = document.getElementById('fileReplaceHint');
             const modalUploadBtn = document.getElementById('modalUploadBtn');
+            const modalSubmitText = document.getElementById('modalSubmitText');
             const modalProgress = document.getElementById('modalProgress');
             const modalProgressFill = document.getElementById('modalProgressFill');
 
@@ -1399,7 +1445,6 @@
             const statRecentCard = document.getElementById('statRecentCard');
             const statCategoriesCard = document.getElementById('statCategoriesCard');
 
-            // Preview DOM refs
             const previewOverlay = document.getElementById('previewOverlay');
             const previewClose = document.getElementById('previewClose');
             const previewPrev = document.getElementById('previewPrev');
@@ -1496,8 +1541,16 @@
 
                 // File input label
                 modalFile.addEventListener('change', () => {
-                    fileLabel.textContent = modalFile.files[0]?.name ||
-                        'Click or drag to choose a file';
+                    if (modalFile.files.length > 0) {
+                        fileLabel.textContent = 'File selected:';
+                        filePreviewName.textContent = modalFile.files[0].name;
+                        filePreviewName.style.display = 'block';
+                        fileReplaceHint.textContent = 'Leave empty to keep current file (if editing)';
+                    } else {
+                        fileLabel.textContent = 'Click or drag to choose a file';
+                        filePreviewName.style.display = 'none';
+                        fileReplaceHint.textContent = 'Leave empty to keep current file (if editing)';
+                    }
                 });
 
                 // Category filter clicks
@@ -1527,15 +1580,37 @@
                     });
                 }
 
-                // Modal open/close
-                openModalBtn.addEventListener('click', () => uploadModal.classList.add('open'));
+                // Modal open/close (upload)
+                openModalBtn.addEventListener('click', () => {
+                    // Reset modal for upload
+                    editingResourceId = null;
+                    modalTitleText.textContent = 'Upload Resource';
+                    modalSubmitText.textContent = 'Upload';
+                    modalResourceTitle.value = '';
+                    modalDesc.value = '';
+                    modalCategory.value = 'CEO Reports';
+                    modalFile.value = '';
+                    fileLabel.textContent = 'Click or drag to choose a file';
+                    filePreviewName.style.display = 'none';
+                    fileReplaceHint.textContent = 'Choose a file to upload';
+                    modalProgress.style.display = 'none';
+                    modalUploadBtn.disabled = false;
+                    uploadModal.classList.add('open');
+                });
+
                 closeModalBtn.addEventListener('click', () => uploadModal.classList.remove('open'));
                 uploadModal.addEventListener('click', (e) => {
                     if (e.target === uploadModal) uploadModal.classList.remove('open');
                 });
 
-                // Upload
-                modalUploadBtn.addEventListener('click', uploadResource);
+                // Upload / Edit action
+                modalUploadBtn.addEventListener('click', async () => {
+                    if (editingResourceId) {
+                        await updateResource(editingResourceId);
+                    } else {
+                        await uploadResource();
+                    }
+                });
 
                 // Preview modal events
                 previewClose.addEventListener('click', closePreviewModal);
@@ -1545,7 +1620,6 @@
                 previewPrev.addEventListener('click', () => navigatePreview(-1));
                 previewNext.addEventListener('click', () => navigatePreview(1));
 
-                // Keyboard support for preview modal
                 document.addEventListener('keydown', (e) => {
                     if (!previewOverlay.classList.contains('open')) return;
                     if (e.key === 'Escape') {
@@ -1557,17 +1631,15 @@
                     }
                 });
 
-                // Load resources
                 await loadResources();
 
-                // Handle logout
                 document.getElementById('logout').addEventListener('click', async () => {
                     await supabase.auth.signOut();
                     window.location.href = 'index.html';
                 });
             }
 
-            // ─── Load resources from DB ───
+            // ─── Load resources ───
             async function loadResources() {
                 try {
                     const { data, error } = await supabase
@@ -1606,7 +1678,6 @@
                 statRecentCard.textContent = recent;
                 statCategoriesCard.textContent = categories.size;
 
-                // Update category counts in sidebar
                 const catCounts = {};
                 allResources.forEach(r => {
                     if (r.category) catCounts[r.category] = (catCounts[r.category] || 0) + 1;
@@ -1635,7 +1706,6 @@
                 return filtered;
             }
 
-            // ─── Filter & render ───
             function filterAndRender() {
                 const filtered = getFilteredList();
                 renderResources(filtered);
@@ -1653,10 +1723,25 @@
                     const iconClass = getFileIcon(r.file_url);
                     const isOwner = currentUser && r.uploader_id === currentUser.id;
                     const isAdmin = currentUserRole === 'admin' || currentUserRole === 'CEO';
+                    const canEdit = isOwner || isAdmin;
                     const canDelete = isOwner || isAdmin;
 
                     const uploaderInitial = (r.uploader_name || 'U').charAt(0).toUpperCase();
                     const date = r.created_at ? new Date(r.created_at).toLocaleDateString() : '';
+
+                    let actionsHtml = `
+                        <button class="resource-link open-preview-btn" data-id="${escapeHtml(r.id)}"><i class="fas fa-eye"></i> Preview</button>
+                    `;
+                    if (canEdit) {
+                        actionsHtml += `
+                            <button class="edit-resource" data-id="${escapeHtml(r.id)}"><i class="fas fa-edit"></i> Edit</button>
+                        `;
+                    }
+                    if (canDelete) {
+                        actionsHtml += `
+                            <button class="delete-resource" data-id="${r.id}"><i class="fas fa-trash-alt"></i> Delete</button>
+                        `;
+                    }
 
                     return `
                 <div class="resource-card" data-id="${escapeHtml(r.id)}">
@@ -1677,19 +1762,27 @@
                     <span class="card-date">${date}</span>
                   </div>
                   <div class="card-actions">
-                    <button class="resource-link open-preview-btn" data-id="${escapeHtml(r.id)}"><i class="fas fa-eye"></i> Preview</button>
-                    ${canDelete ? `<button class="delete-resource" data-id="${r.id}"><i class="fas fa-trash-alt"></i> Delete</button>` : ''}
+                    ${actionsHtml}
                   </div>
                 </div>
               `;
                 }).join('');
 
-                // Event delegation for preview buttons
+                // Preview buttons
                 grid.querySelectorAll('.open-preview-btn').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation();
                         const resourceId = btn.dataset.id;
                         openPreviewModal(resourceId);
+                    });
+                });
+
+                // Edit buttons
+                grid.querySelectorAll('.edit-resource').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const resourceId = btn.dataset.id;
+                        openEditModal(resourceId);
                     });
                 });
 
@@ -1725,279 +1818,132 @@
                 });
             }
 
-            // ─── Preview Modal ───
-            function openPreviewModal(resourceId) {
-                // Build the preview list from the current filtered view
-                previewList = getFilteredList();
-                previewIndex = previewList.findIndex(r => r.id === resourceId);
-
-                if (previewIndex === -1) {
-                    // Resource not in filtered list, try full list
-                    previewList = [...allResources];
-                    previewIndex = previewList.findIndex(r => r.id === resourceId);
-                }
-
-                if (previewIndex === -1) return;
-
-                // Reset PDF state
-                pdfDoc = null;
-                currentPage = 1;
-                totalPages = 0;
-                rendering = false;
-
-                updatePreviewContent();
-                previewOverlay.classList.add('open');
-                document.body.style.overflow = 'hidden';
-
-                if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
-                    sidebar.classList.remove('open');
-                    sidebarOverlay.classList.remove('active');
-                }
-            }
-
-            function closePreviewModal() {
-                previewOverlay.classList.remove('open');
-                document.body.style.overflow = '';
-                previewList = [];
-                previewIndex = -1;
-                // Clean up PDF
-                pdfDoc = null;
-                currentPage = 1;
-                totalPages = 0;
-                rendering = false;
-            }
-
-            function navigatePreview(direction) {
-                if (previewList.length <= 1) return;
-                const newIndex = previewIndex + direction;
-                if (newIndex < 0 || newIndex >= previewList.length) return;
-                previewIndex = newIndex;
-                // Reset PDF state before updating
-                pdfDoc = null;
-                currentPage = 1;
-                totalPages = 0;
-                rendering = false;
-                updatePreviewContent();
-
-                const container = document.getElementById('previewContainer');
-                container.style.animation = 'none';
-                container.offsetHeight;
-                container.style.animation = 'slideUpPreview 0.25s cubic-bezier(0.22, 0.61, 0.36, 1)';
-            }
-
-            // ─── PDF rendering with pdf.js ───
-            async function renderPdfPage(url, pageNum) {
-                const container = previewMedia;
-                // Clear previous PDF content
-                container.innerHTML = '';
-
-                // Show loading indicator
-                const loader = document.createElement('div');
-                loader.className = 'pdf-loading';
-                loader.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Loading PDF…';
-                container.appendChild(loader);
-
-                try {
-                    if (!pdfDoc) {
-                        // Load PDF document
-                        const loadingTask = pdfjsLib.getDocument(url);
-                        pdfDoc = await loadingTask.promise;
-                        totalPages = pdfDoc.numPages;
-                    }
-
-                    // Get the page
-                    const page = await pdfDoc.getPage(pageNum);
-                    const viewport = page.getViewport({ scale: 1.5 });
-
-                    // Create canvas with proper size
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    canvas.width = viewport.width;
-                    canvas.height = viewport.height;
-
-                    // Render page
-                    const renderContext = {
-                        canvasContext: context,
-                        viewport: viewport
-                    };
-                    await page.render(renderContext).promise;
-
-                    // Clear container and append canvas
-                    container.innerHTML = '';
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'pdf-viewer-container';
-                    wrapper.appendChild(canvas);
-
-                    // Add controls
-                    const controls = document.createElement('div');
-                    controls.className = 'pdf-controls';
-                    controls.innerHTML = `
-                        <button id="pdfPrevPage" ${pageNum <= 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i> Previous</button>
-                        <span class="page-info">Page ${pageNum} / ${totalPages}</span>
-                        <button id="pdfNextPage" ${pageNum >= totalPages ? 'disabled' : ''}>Next <i class="fas fa-chevron-right"></i></button>
-                    `;
-                    wrapper.appendChild(controls);
-                    container.appendChild(wrapper);
-
-                    // Attach page navigation
-                    const prevBtn = controls.querySelector('#pdfPrevPage');
-                    const nextBtn = controls.querySelector('#pdfNextPage');
-                    prevBtn.addEventListener('click', () => changePdfPage(-1));
-                    nextBtn.addEventListener('click', () => changePdfPage(1));
-
-                    // Also attach to media area keydown? Already handled globally for resource navigation,
-                    // but for PDF we want page navigation with arrow keys only when PDF is focused.
-                    // We'll add a keydown listener on the container.
-                    const pdfKeyHandler = (e) => {
-                        if (!previewOverlay.classList.contains('open')) return;
-                        if (e.key === 'ArrowLeft' && !e.target.closest('input, textarea, button')) {
-                            e.preventDefault();
-                            changePdfPage(-1);
-                        } else if (e.key === 'ArrowRight' && !e.target.closest('input, textarea, button')) {
-                            e.preventDefault();
-                            changePdfPage(1);
-                        }
-                    };
-                    wrapper._pdfKeyHandler = pdfKeyHandler;
-                    document.addEventListener('keydown', pdfKeyHandler);
-
-                } catch (err) {
-                    console.error('PDF rendering error:', err);
-                    container.innerHTML = `
-                        <div class="file-placeholder">
-                            <i class="fas fa-file-pdf"></i>
-                            <p style="color:#ff6b6b;">Failed to render PDF</p>
-                            <p class="file-name-display">${escapeHtml(getFileNameFromUrl(url))}</p>
-                            <a href="${escapeHtml(url)}" target="_blank" class="pi-download-btn" style="background:#428cff;padding:0.5rem 1.5rem;border-radius:2rem;color:#fff;text-decoration:none;">Open in browser</a>
-                        </div>
-                    `;
-                }
-            }
-
-            async function changePdfPage(delta) {
-                if (!pdfDoc) return;
-                const newPage = currentPage + delta;
-                if (newPage < 1 || newPage > totalPages) return;
-                currentPage = newPage;
-                // Re-render the page
-                const fileUrl = previewList[previewIndex]?.file_url;
-                if (fileUrl) {
-                    await renderPdfPage(fileUrl, currentPage);
-                }
-            }
-
-            // ─── Update preview content ───
-            function updatePreviewContent() {
-                const resource = previewList[previewIndex];
+            // ─── Open Edit Modal ───
+            function openEditModal(resourceId) {
+                const resource = allResources.find(r => r.id === resourceId);
                 if (!resource) return;
 
+                editingResourceId = resourceId;
+                modalTitleText.textContent = 'Edit Resource';
+                modalSubmitText.textContent = 'Save Changes';
+                modalResourceTitle.value = resource.title || '';
+                modalDesc.value = resource.description || '';
+                modalCategory.value = resource.category || 'CEO Reports';
+                // Show current file name
                 const fileName = getFileNameFromUrl(resource.file_url);
-                const fileUrl = resource.file_url;
-                const iconClass = getFileIcon(fileName);
-                const isImage = isImageFile(fileName);
-                const isPdf = isPdfFile(fileName);
-                const isVideo = isVideoFile(fileName);
-                const isAudio = isAudioFile(fileName);
-
-                // Update navigation buttons
-                if (previewList.length <= 1) {
-                    previewPrev.classList.add('hidden');
-                    previewNext.classList.add('hidden');
+                if (fileName) {
+                    fileLabel.textContent = 'Current file:';
+                    filePreviewName.textContent = fileName;
+                    filePreviewName.style.display = 'block';
+                    fileReplaceHint.textContent = 'Choose a new file to replace it (optional)';
                 } else {
-                    previewPrev.classList.toggle('hidden', previewIndex === 0);
-                    previewNext.classList.toggle('hidden', previewIndex === previewList.length - 1);
+                    fileLabel.textContent = 'Click or drag to choose a file';
+                    filePreviewName.style.display = 'none';
+                    fileReplaceHint.textContent = 'Choose a file (required)';
                 }
-
-                // Build media content - handle PDF with custom viewer
-                let mediaHTML = '';
-                if (isPdf) {
-                    // We'll render PDF using pdf.js inside renderPdfPage
-                    // So we clear and call renderPdfPage
-                    renderPdfPage(fileUrl, 1);
-                } else if (isImage) {
-                    mediaHTML = `
-                <img src="${escapeHtml(fileUrl)}" alt="${escapeHtml(resource.title)}" 
-                     onerror="this.parentElement.innerHTML='<div class=\\'file-placeholder\\'><i class=\\'fas fa-file-image\\'></i><p>Image failed to load</p><p class=\\'file-name-display\\'>${escapeHtml(fileName)}</p></div>'"
-                     loading="eager" />
-              `;
-                    previewMedia.innerHTML = mediaHTML;
-                } else if (isVideo) {
-                    mediaHTML = `
-                <video controls controlsList="nodownload" preload="metadata"
-                       onerror="this.parentElement.innerHTML='<div class=\\'file-placeholder\\'><i class=\\'fas fa-file-video\\'></i><p>Video failed to load</p><p class=\\'file-name-display\\'>${escapeHtml(fileName)}</p></div>'">
-                  <source src="${escapeHtml(fileUrl)}" type="video/${getFileExtension(fileName)}" />
-                  Your browser does not support the video tag.
-                </video>
-              `;
-                    previewMedia.innerHTML = mediaHTML;
-                } else if (isAudio) {
-                    mediaHTML = `
-                <div class="file-placeholder" style="gap:1.5rem;">
-                  <i class="fas ${iconClass}" style="font-size:4rem;"></i>
-                  <p class="file-name-display">${escapeHtml(fileName)}</p>
-                  <audio controls preload="metadata" style="width:100%;max-width:400px;">
-                    <source src="${escapeHtml(fileUrl)}" type="audio/${getFileExtension(fileName)}" />
-                    Your browser does not support the audio tag.
-                  </audio>
-                </div>
-              `;
-                    previewMedia.innerHTML = mediaHTML;
-                } else {
-                    // Generic file placeholder
-                    const ext = getFileExtension(fileName).toUpperCase() || 'FILE';
-                    mediaHTML = `
-                <div class="file-placeholder">
-                  <i class="fas ${iconClass}"></i>
-                  <span class="file-type-badge">${ext}</span>
-                  <p class="file-name-display">${escapeHtml(fileName)}</p>
-                  <p style="color:#5b6b92;font-size:0.85rem;">Preview not available for this file type</p>
-                </div>
-              `;
-                    previewMedia.innerHTML = mediaHTML;
-                }
-
-                // Build info panel (same for all)
-                const uploaderInitial = (resource.uploader_name || 'U').charAt(0).toUpperCase();
-                const date = resource.created_at ? new Date(resource.created_at).toLocaleDateString(
-                    'en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    }) : 'Unknown date';
-                const time = resource.created_at ? new Date(resource.created_at).toLocaleTimeString(
-                    'en-US', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }) : '';
-
-                previewInfo.innerHTML = `
-              <span class="pi-category">${escapeHtml(resource.category || 'Uncategorized')}</span>
-              <h3>${escapeHtml(resource.title)}</h3>
-              ${resource.description ? `<p class="pi-desc">${escapeHtml(resource.description)}</p>` : '<p class="pi-desc" style="color:#5b6b92;font-style:italic;">No description provided</p>'}
-              <div class="pi-meta">
-                <div class="pi-meta-row">
-                  <div class="pi-avatar">${uploaderInitial}</div>
-                  <span style="color:#d7def5;font-weight:500;">${escapeHtml(resource.uploader_name || 'Unknown')}</span>
-                  <span style="color:#7a8bb5;background:#1f2a44;padding:0.15rem 0.6rem;border-radius:1rem;font-size:0.7rem;">${escapeHtml(resource.uploader_role || 'member')}</span>
-                </div>
-                <div class="pi-meta-row">
-                  <i class="fas fa-calendar-alt"></i>
-                  <span>${date} at ${time}</span>
-                </div>
-                <div class="pi-meta-row">
-                  <i class="fas fa-file"></i>
-                  <span style="word-break:break-all;">${escapeHtml(fileName)}</span>
-                </div>
-              </div>
-              <a href="${escapeHtml(fileUrl)}" download="${escapeHtml(fileName)}" class="pi-download-btn" target="_blank" rel="noopener noreferrer">
-                <i class="fas fa-download"></i> Download File
-              </a>
-            `;
+                modalFile.value = '';
+                modalProgress.style.display = 'none';
+                modalUploadBtn.disabled = false;
+                uploadModal.classList.add('open');
             }
 
-            // ─── Upload resource ───
+            // ─── Update Resource ───
+            async function updateResource(resourceId) {
+                const title = modalResourceTitle.value.trim();
+                const category = modalCategory.value;
+                const description = modalDesc.value.trim();
+                const file = modalFile.files[0];
+
+                if (!title) { alert('Title is required.');
+                    return; }
+                if (!currentUser) { alert('You must be logged in.'); return; }
+
+                modalUploadBtn.disabled = true;
+                modalUploadBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Saving...';
+                modalProgress.style.display = 'block';
+                modalProgressFill.style.width = '0%';
+
+                try {
+                    let fileUrl = null;
+                    const resource = allResources.find(r => r.id === resourceId);
+                    if (!resource) throw new Error('Resource not found');
+
+                    // If a new file is provided, upload it and delete the old one
+                    if (file) {
+                        // Delete old file from storage
+                        if (resource.file_url) {
+                            const oldFileName = getFileNameFromUrl(resource.file_url);
+                            if (oldFileName && oldFileName !== 'unknown-file') {
+                                await supabase.storage.from('resources').remove([
+                                    `resources/${oldFileName}`
+                                ]);
+                            }
+                        }
+                        // Upload new file
+                        const fileExt = file.name.split('.').pop();
+                        const fileName =
+                            `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+                        const filePath = `resources/${fileName}`;
+
+                        const { error: uploadError } = await supabase.storage
+                            .from('resources')
+                            .upload(filePath, file, {
+                                cacheControl: '3600',
+                                upsert: false,
+                                onUploadProgress: (progress) => {
+                                    const percent = (progress.loaded / progress.total) * 100;
+                                    modalProgressFill.style.width = `${percent}%`;
+                                }
+                            });
+
+                        if (uploadError) throw uploadError;
+
+                        const { data: { publicUrl } } = supabase.storage.from('resources')
+                            .getPublicUrl(filePath);
+                        fileUrl = publicUrl;
+                    } else {
+                        // Keep existing file
+                        fileUrl = resource.file_url;
+                    }
+
+                    // Update database
+                    const { error: dbError } = await supabase
+                        .from('resources')
+                        .update({
+                            title,
+                            description,
+                            category,
+                            file_url: fileUrl,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', resourceId);
+
+                    if (dbError) throw dbError;
+
+                    // Reset & close modal
+                    modalTitle.value = '';
+                    modalDesc.value = '';
+                    modalFile.value = '';
+                    fileLabel.textContent = 'Click or drag to choose a file';
+                    filePreviewName.style.display = 'none';
+                    fileReplaceHint.textContent = 'Choose a file to upload';
+                    modalProgress.style.display = 'none';
+                    uploadModal.classList.remove('open');
+                    editingResourceId = null;
+
+                    loadResources();
+                } catch (err) {
+                    console.error(err);
+                    alert('Update failed: ' + err.message);
+                } finally {
+                    modalUploadBtn.disabled = false;
+                    modalUploadBtn.innerHTML = '<i class="fas fa-upload"></i> Save Changes';
+                }
+            }
+
+            // ─── Upload Resource (unchanged) ───
             async function uploadResource() {
-                const title = modalTitle.value.trim();
+                const title = modalResourceTitle.value.trim();
                 const category = modalCategory.value;
                 const description = modalDesc.value.trim();
                 const file = modalFile.files[0];
@@ -2050,11 +1996,12 @@
 
                     if (dbError) throw dbError;
 
-                    // Reset & close modal
-                    modalTitle.value = '';
+                    modalResourceTitle.value = '';
                     modalDesc.value = '';
                     modalFile.value = '';
                     fileLabel.textContent = 'Click or drag to choose a file';
+                    filePreviewName.style.display = 'none';
+                    fileReplaceHint.textContent = 'Choose a file to upload';
                     modalProgress.style.display = 'none';
                     uploadModal.classList.remove('open');
 
@@ -2066,6 +2013,243 @@
                     modalUploadBtn.disabled = false;
                     modalUploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload';
                 }
+            }
+
+            // ─── Preview functions (unchanged) ───
+            function openPreviewModal(resourceId) {
+                previewList = getFilteredList();
+                previewIndex = previewList.findIndex(r => r.id === resourceId);
+                if (previewIndex === -1) {
+                    previewList = [...allResources];
+                    previewIndex = previewList.findIndex(r => r.id === resourceId);
+                }
+                if (previewIndex === -1) return;
+
+                pdfDoc = null;
+                currentPage = 1;
+                totalPages = 0;
+                rendering = false;
+
+                updatePreviewContent();
+                previewOverlay.classList.add('open');
+                document.body.style.overflow = 'hidden';
+
+                if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+                    sidebar.classList.remove('open');
+                    sidebarOverlay.classList.remove('active');
+                }
+            }
+
+            function closePreviewModal() {
+                previewOverlay.classList.remove('open');
+                document.body.style.overflow = '';
+                previewList = [];
+                previewIndex = -1;
+                pdfDoc = null;
+                currentPage = 1;
+                totalPages = 0;
+                rendering = false;
+            }
+
+            function navigatePreview(direction) {
+                if (previewList.length <= 1) return;
+                const newIndex = previewIndex + direction;
+                if (newIndex < 0 || newIndex >= previewList.length) return;
+                previewIndex = newIndex;
+                pdfDoc = null;
+                currentPage = 1;
+                totalPages = 0;
+                rendering = false;
+                updatePreviewContent();
+
+                const container = document.getElementById('previewContainer');
+                container.style.animation = 'none';
+                container.offsetHeight;
+                container.style.animation = 'slideUpPreview 0.25s cubic-bezier(0.22, 0.61, 0.36, 1)';
+            }
+
+            async function renderPdfPage(url, pageNum) {
+                const container = previewMedia;
+                container.innerHTML = '';
+
+                const loader = document.createElement('div');
+                loader.className = 'pdf-loading';
+                loader.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Loading PDF…';
+                container.appendChild(loader);
+
+                try {
+                    if (!pdfDoc) {
+                        const loadingTask = pdfjsLib.getDocument(url);
+                        pdfDoc = await loadingTask.promise;
+                        totalPages = pdfDoc.numPages;
+                    }
+
+                    const page = await pdfDoc.getPage(pageNum);
+                    const viewport = page.getViewport({ scale: 1.5 });
+
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+
+                    const renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+                    await page.render(renderContext).promise;
+
+                    container.innerHTML = '';
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'pdf-viewer-container';
+                    wrapper.appendChild(canvas);
+
+                    const controls = document.createElement('div');
+                    controls.className = 'pdf-controls';
+                    controls.innerHTML = `
+                        <button id="pdfPrevPage" ${pageNum <= 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i> Previous</button>
+                        <span class="page-info">Page ${pageNum} / ${totalPages}</span>
+                        <button id="pdfNextPage" ${pageNum >= totalPages ? 'disabled' : ''}>Next <i class="fas fa-chevron-right"></i></button>
+                    `;
+                    wrapper.appendChild(controls);
+                    container.appendChild(wrapper);
+
+                    const prevBtn = controls.querySelector('#pdfPrevPage');
+                    const nextBtn = controls.querySelector('#pdfNextPage');
+                    prevBtn.addEventListener('click', () => changePdfPage(-1));
+                    nextBtn.addEventListener('click', () => changePdfPage(1));
+
+                    const pdfKeyHandler = (e) => {
+                        if (!previewOverlay.classList.contains('open')) return;
+                        if (e.key === 'ArrowLeft' && !e.target.closest('input, textarea, button')) {
+                            e.preventDefault();
+                            changePdfPage(-1);
+                        } else if (e.key === 'ArrowRight' && !e.target.closest('input, textarea, button')) {
+                            e.preventDefault();
+                            changePdfPage(1);
+                        }
+                    };
+                    wrapper._pdfKeyHandler = pdfKeyHandler;
+                    document.addEventListener('keydown', pdfKeyHandler);
+
+                } catch (err) {
+                    console.error('PDF rendering error:', err);
+                    container.innerHTML = `
+                        <div class="file-placeholder">
+                            <i class="fas fa-file-pdf"></i>
+                            <p style="color:#ff6b6b;">Failed to render PDF</p>
+                            <p class="file-name-display">${escapeHtml(getFileNameFromUrl(url))}</p>
+                            <a href="${escapeHtml(url)}" target="_blank" class="pi-download-btn" style="background:#428cff;padding:0.5rem 1.5rem;border-radius:2rem;color:#fff;text-decoration:none;">Open in browser</a>
+                        </div>
+                    `;
+                }
+            }
+
+            async function changePdfPage(delta) {
+                if (!pdfDoc) return;
+                const newPage = currentPage + delta;
+                if (newPage < 1 || newPage > totalPages) return;
+                currentPage = newPage;
+                const fileUrl = previewList[previewIndex]?.file_url;
+                if (fileUrl) {
+                    await renderPdfPage(fileUrl, currentPage);
+                }
+            }
+
+            function updatePreviewContent() {
+                const resource = previewList[previewIndex];
+                if (!resource) return;
+
+                const fileName = getFileNameFromUrl(resource.file_url);
+                const fileUrl = resource.file_url;
+                const iconClass = getFileIcon(fileName);
+                const isImage = isImageFile(fileName);
+                const isPdf = isPdfFile(fileName);
+                const isVideo = isVideoFile(fileName);
+                const isAudio = isAudioFile(fileName);
+
+                if (previewList.length <= 1) {
+                    previewPrev.classList.add('hidden');
+                    previewNext.classList.add('hidden');
+                } else {
+                    previewPrev.classList.toggle('hidden', previewIndex === 0);
+                    previewNext.classList.toggle('hidden', previewIndex === previewList.length - 1);
+                }
+
+                if (isPdf) {
+                    renderPdfPage(fileUrl, 1);
+                } else if (isImage) {
+                    previewMedia.innerHTML = `
+                        <img src="${escapeHtml(fileUrl)}" alt="${escapeHtml(resource.title)}" 
+                             onerror="this.parentElement.innerHTML='<div class=\\'file-placeholder\\'><i class=\\'fas fa-file-image\\'></i><p>Image failed to load</p><p class=\\'file-name-display\\'>${escapeHtml(fileName)}</p></div>'"
+                             loading="eager" />
+                    `;
+                } else if (isVideo) {
+                    previewMedia.innerHTML = `
+                        <video controls controlsList="nodownload" preload="metadata"
+                               onerror="this.parentElement.innerHTML='<div class=\\'file-placeholder\\'><i class=\\'fas fa-file-video\\'></i><p>Video failed to load</p><p class=\\'file-name-display\\'>${escapeHtml(fileName)}</p></div>'">
+                          <source src="${escapeHtml(fileUrl)}" type="video/${getFileExtension(fileName)}" />
+                          Your browser does not support the video tag.
+                        </video>
+                    `;
+                } else if (isAudio) {
+                    previewMedia.innerHTML = `
+                        <div class="file-placeholder" style="gap:1.5rem;">
+                          <i class="fas ${iconClass}" style="font-size:4rem;"></i>
+                          <p class="file-name-display">${escapeHtml(fileName)}</p>
+                          <audio controls preload="metadata" style="width:100%;max-width:400px;">
+                            <source src="${escapeHtml(fileUrl)}" type="audio/${getFileExtension(fileName)}" />
+                            Your browser does not support the audio tag.
+                          </audio>
+                        </div>
+                    `;
+                } else {
+                    const ext = getFileExtension(fileName).toUpperCase() || 'FILE';
+                    previewMedia.innerHTML = `
+                        <div class="file-placeholder">
+                          <i class="fas ${iconClass}"></i>
+                          <span class="file-type-badge">${ext}</span>
+                          <p class="file-name-display">${escapeHtml(fileName)}</p>
+                          <p style="color:#5b6b92;font-size:0.85rem;">Preview not available for this file type</p>
+                        </div>
+                    `;
+                }
+
+                const uploaderInitial = (resource.uploader_name || 'U').charAt(0).toUpperCase();
+                const date = resource.created_at ? new Date(resource.created_at).toLocaleDateString(
+                    'en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    }) : 'Unknown date';
+                const time = resource.created_at ? new Date(resource.created_at).toLocaleTimeString(
+                    'en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }) : '';
+
+                previewInfo.innerHTML = `
+                    <span class="pi-category">${escapeHtml(resource.category || 'Uncategorized')}</span>
+                    <h3>${escapeHtml(resource.title)}</h3>
+                    ${resource.description ? `<p class="pi-desc">${escapeHtml(resource.description)}</p>` : '<p class="pi-desc" style="color:#5b6b92;font-style:italic;">No description provided</p>'}
+                    <div class="pi-meta">
+                        <div class="pi-meta-row">
+                            <div class="pi-avatar">${uploaderInitial}</div>
+                            <span style="color:#d7def5;font-weight:500;">${escapeHtml(resource.uploader_name || 'Unknown')}</span>
+                            <span style="color:#7a8bb5;background:#1f2a44;padding:0.15rem 0.6rem;border-radius:1rem;font-size:0.7rem;">${escapeHtml(resource.uploader_role || 'member')}</span>
+                        </div>
+                        <div class="pi-meta-row">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>${date} at ${time}</span>
+                        </div>
+                        <div class="pi-meta-row">
+                            <i class="fas fa-file"></i>
+                            <span style="word-break:break-all;">${escapeHtml(fileName)}</span>
+                        </div>
+                    </div>
+                    <a href="${escapeHtml(fileUrl)}" download="${escapeHtml(fileName)}" class="pi-download-btn" target="_blank" rel="noopener noreferrer">
+                        <i class="fas fa-download"></i> Download File
+                    </a>
+                `;
             }
 
             // ─── Start ───
