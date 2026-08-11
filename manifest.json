@@ -6,7 +6,7 @@
   "display": "standalone",
   "background_color": "#050c18",
   "theme_color": "#428cff",
-  "orientation": "any",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "img/titans_logo2.png",
