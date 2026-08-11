@@ -209,6 +209,23 @@
       font-size: 0.9rem;
       background: #0d1426;
     }
+    .dm-list-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.dm-list-hamburger {
+  display: none;
+}
+@media (max-width: 768px) {
+  .dm-list-hamburger {
+    display: inline-flex;
+    width: 2.4rem;
+    height: 2.4rem;
+    font-size: 1.1rem;
+    padding: 0;
+  }
+}
     .dm-conversation-item {
       padding: 0.8rem 1rem;
       border-bottom: 1px solid #1f2a44;
@@ -975,7 +992,7 @@
         height: 100%;
         width: 100%;
         min-height: 0;
-        overflow: hidden;
+        overflow: visible;
         display: flex;
         flex-direction: column;
       }
@@ -1502,9 +1519,11 @@
       }
 
       function maybeAppendDateSeparator(prevDate, currentDate) {
-        if (!prevDate) return '';
-        const prevDay = new Date(prevDate).toDateString();
         const currDay = new Date(currentDate).toDateString();
+        if (!prevDate) {
+          return `<div class="dm-date-separator"><span>${formatDateHeader(currentDate)}</span></div>`;
+        }
+        const prevDay = new Date(prevDate).toDateString();
         if (prevDay !== currDay) {
           return `<div class="dm-date-separator"><span>${formatDateHeader(currentDate)}</span></div>`;
         }
@@ -1581,7 +1600,13 @@
             const badge = targetItem.querySelector('.dm-unread-badge');
             const newCount = dmUnreadBySender[senderId] || 0;
             if (newCount > 0) badge.textContent = newCount;
-            else if (badge) badge.remove();
+            else if (badge) {
+              badge.remove();
+              // Add seen indicator when all messages from this sender are read
+              if (!targetItem.querySelector('.dm-conv-seen')) {
+                targetItem.insertAdjacentHTML('beforeend', '<span class="dm-conv-seen"><i class="fas fa-check-double"></i></span>');
+              }
+            }
           }
         }
         const msgRow = document.querySelector(`.dm-msg-row[data-message-id="${messageId}"]`);
@@ -1658,6 +1683,7 @@
           const conversationsHtml = allProfiles.map(profile => {
             const unread = unreadCounts[profile.id] || 0;
             const unreadBadge = unread > 0 ? `<span class="dm-unread-badge">${unread}</span>` : '';
+            const seenIndicator = unread === 0 ? `<span class="dm-conv-seen"><i class="fas fa-check-double"></i></span>` : '';
             const onlineClass = onlineUsers.has(profile.id) ? 'online' : '';
             return `
               <div class="dm-conversation-item" data-user-id="${profile.id}" data-user-name="${escapeHtml(profile.full_name)}" data-user-role="${escapeHtml(profile.job_role)}">
@@ -1667,6 +1693,7 @@
                   <div class="dm-conv-role">${escapeHtml(profile.job_role)}</div>
                 </div>
                 ${unreadBadge}
+                ${seenIndicator}
               </div>
             `;
           }).join('');
@@ -1674,13 +1701,15 @@
           area.innerHTML = `
             <div class="dm-layout">
               <div class="dm-conversations-list" id="dmConversationsList">
-                <div class="dm-list-header">All Members</div>
+<div class="dm-list-header">
+  <button class="dm-icon-btn dm-list-hamburger" id="mobileNavToggleList" title="Menu">☰</button>
+  <span>All Members</span>
+</div>
                 ${conversationsHtml}
               </div>
               <div class="dm-chat-area" id="dmChatArea" style="display:none;">
                 <div class="dm-chat-header">
                   <div class="dm-chat-peer">
-                    <button class="hamburger-btn dm-icon-btn" id="mobileNavToggle" title="Menu">☰</button>
                     <button class="dm-back-btn dm-icon-btn" id="dmBackBtn" title="Back">&lt;</button>
                     <div id="dmPeerAvatar" class="avatar" style="display:none;"></div>
                     <div class="dm-peer-copy">
@@ -1729,6 +1758,10 @@
                 badge.remove();
                 delete dmUnreadBySender[userId];
                 updateDMBadge();
+                // Add seen indicator when unread badge is removed
+                if (!item.querySelector('.dm-conv-seen')) {
+                  item.insertAdjacentHTML('beforeend', '<span class="dm-conv-seen"><i class="fas fa-check-double"></i></span>');
+                }
               }
               if (window.innerWidth <= 768) {
                 setDmMobileChatOpen(true);
@@ -1752,6 +1785,13 @@
               mobileNavOverlay.setAttribute('aria-hidden', 'false');
             });
           }
+          const mobileNavToggleList = document.getElementById('mobileNavToggleList');
+if (mobileNavToggleList && mobileNavOverlay) {
+  mobileNavToggleList.addEventListener('click', () => {
+    mobileNavOverlay.style.display = 'flex';
+    mobileNavOverlay.setAttribute('aria-hidden', 'false');
+  });
+}
           if (mobileNavClose && mobileNavOverlay) {
             mobileNavClose.addEventListener('click', () => {
               mobileNavOverlay.style.display = 'none';
