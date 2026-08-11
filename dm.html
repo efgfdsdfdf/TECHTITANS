@@ -1686,7 +1686,7 @@
           if (outerHeader && window.innerWidth <= 768) outerHeader.style.display = 'none';
         } else {
           layout.classList.remove('chat-open');
-          list.style.display = 'flex';
+          list.style.display = ''; // Revert to CSS default (block)
           chatArea.style.display = 'none';
           backBtn.style.display = 'none';
           if (outerHeader && window.innerWidth <= 768) outerHeader.style.display = 'flex';
