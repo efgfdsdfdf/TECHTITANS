@@ -4,1044 +4,1160 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
   <title>TECH TITANS - Direct Messages</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Inter', sans-serif;
-}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+    body {
+      background: #0b0f17;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    body.sidebar-collapsed .sidebar {
+      transform: translateX(-100%);
+      width: 0;
+      padding: 0;
+      overflow: hidden;
+      border-right: none;
+    }
+    body.sidebar-collapsed .main {
+      padding-left: 0;
+    }
+    .sidebar {
+      width: 260px;
+      background: rgba(10, 16, 28, 0.95);
+      backdrop-filter: blur(10px);
+      border-right: 1px solid #1f2a44;
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      flex-shrink: 0;
+      transition: transform 0.25s ease, width 0.25s ease, padding 0.25s ease;
+      overflow: hidden;
+    }
+    .logo {
+      color: #fff;
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      padding-left: 1rem;
+      white-space: nowrap;
+    }
+    .logo span { color: #428cff; }
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .nav a {
+      color: #9aa4bf;
+      text-decoration: none;
+      padding: 0.9rem 1rem;
+      border-radius: 1.2rem;
+      transition: 0.2s;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      position: relative;
+      white-space: nowrap;
+    }
+    .nav a:hover, .nav a.active {
+      background: #1f2a44;
+      color: #fff;
+    }
+    .nav a.active {
+      background: #428cff;
+      color: #fff;
+      box-shadow: 0 8px 16px -8px #428cff;
+    }
+    .sidebar-unread {
+      background: #ff4d4d;
+      color: #fff;
+      border-radius: 2rem;
+      padding: 0.15rem 0.5rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-left: auto;
+      line-height: 1.3;
+      box-shadow: 0 0 0 1px #0b0f17;
+    }
+    .logout-btn {
+      margin-top: auto;
+      background: transparent;
+      border: 1px solid #2f3a5a;
+      color: #ff9f9f;
+      padding: 0.9rem;
+      border-radius: 1.2rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .logout-btn:hover {
+      background: #ff4d4d20;
+      border-color: #ff4d4d;
+    }
 
-body {
-  background: #0b0f17;
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-}
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+      min-width: 0;
+      height: 100%;
+      overflow: hidden;
+      transition: padding 0.25s ease;
+    }
+    .chat-panel {
+      flex: 1;
+      background: #131c30;
+      border-radius: 2rem;
+      border: 1px solid #263154;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      height: 100%;
+      min-height: 0;
+    }
+    .chat-header {
+      padding: 1.2rem 1.8rem;
+      border-bottom: 1px solid #263154;
+      color: #fff;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+      background: #131c30;
+      z-index: 5;
+    }
+    .chat-header .hamburger-toggle {
+      background: none;
+      border: none;
+      color: #9aa4bf;
+      font-size: 1.4rem;
+      cursor: pointer;
+      display: none;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.5rem;
+      transition: 0.2s;
+    }
+    .chat-header .hamburger-toggle:hover {
+      background: #1f2a44;
+      color: #fff;
+    }
+    .online-count {
+      background: #1f2a44;
+      padding: 0.2rem 0.8rem;
+      border-radius: 2rem;
+      font-size: 0.8rem;
+      color: #8affb8;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-left: auto;
+    }
+    .online-count::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: #2ecc71;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .messages-area {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      display: flex;
+    }
 
-/* === SIDEBAR (desktop first) === */
-.sidebar {
-  width: 260px;
-  background: rgba(10, 16, 28, 0.95);
-  backdrop-filter: blur(10px);
-  border-right: 1px solid #1f2a44;
-  padding: 2rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  flex-shrink: 0;
-}
+    .dm-layout {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      gap: 0;
+    }
+    .dm-conversations-list {
+      width: min(360px, 34vw);
+      border-right: 1px solid #263154;
+      overflow-y: auto;
+      min-height: 0;
+      background: #0d1426;
+      flex-shrink: 0;
+    }
+    .dm-list-header {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      padding: 1rem;
+      font-weight: 600;
+      color: #d7def5;
+      border-bottom: 1px solid #263154;
+      font-size: 0.9rem;
+      background: #0d1426;
+    }
+    .dm-conversation-item {
+      padding: 0.8rem 1rem;
+      border-bottom: 1px solid #1f2a44;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .dm-conversation-item:hover {
+      background: #18233b;
+    }
+    .dm-conversation-item.active {
+      background: #203257;
+      border-left: 3px solid #428cff;
+    }
+    .dm-conv-content {
+      flex: 1;
+      min-width: 0;
+    }
+    .dm-conv-name {
+      color: #fff;
+      font-weight: 500;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .dm-conv-role {
+      color: #9aa4bf;
+      font-size: 0.75rem;
+      margin-top: 0.2rem;
+    }
+    .status-dot {
+      width: 0.6rem;
+      height: 0.6rem;
+      border-radius: 50%;
+      background: #444;
+      flex-shrink: 0;
+    }
+    .status-dot.online {
+      background: #2ecc71;
+    }
+    .dm-unread-badge {
+      background: #428cff;
+      color: #fff;
+      padding: 0.2rem 0.5rem;
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      min-width: 20px;
+      text-align: center;
+      margin-left: auto;
+    }
 
-.logo {
-  color: white;
-  font-size: 1.5rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  padding-left: 1rem;
-}
-.logo span { color: #428cff; }
+    .dm-chat-area {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      background:
+        radial-gradient(circle at 18px 18px, rgba(255,255,255,0.035) 1px, transparent 1px) 0 0 / 36px 36px,
+        linear-gradient(180deg, #111a2c 0%, #0d1525 100%);
+      min-width: 0;
+      min-height: 0;
+    }
+    .dm-chat-header {
+      min-height: 72px;
+      padding: 0.9rem 1.1rem;
+      border-bottom: 1px solid #263154;
+      color: #fff;
+      font-weight: 500;
+      background: rgba(17, 26, 44, 0.94);
+      backdrop-filter: blur(14px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-shrink: 0;
+    }
+    .dm-chat-header .dm-back-btn {
+      display: none;
+    }
+    .dm-chat-peer {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      min-width: 0;
+    }
+    .dm-peer-copy {
+      min-width: 0;
+    }
+    .dm-chat-title {
+      display: block;
+      color: #f8fbff;
+      font-size: 1rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .dm-chat-subtitle {
+      display: block;
+      color: #91a0c7;
+      font-size: 0.78rem;
+      margin-top: 0.15rem;
+    }
+    .dm-chat-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      flex-shrink: 0;
+    }
+    .dm-icon-btn {
+      min-width: 2.55rem;
+      height: 2.55rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 50%;
+      background: #18233b;
+      color: #eaf0ff;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .dm-chat-actions .dm-icon-btn {
+      width: auto;
+      min-width: 4rem;
+      padding: 0 0.8rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .dm-icon-btn:hover {
+      background: #203257;
+      transform: translateY(-1px);
+    }
+    .dm-icon-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .dm-chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      scroll-behavior: smooth;
+      min-height: 0;
+    }
+    .dm-chat-input {
+      display: flex;
+      padding: 0.85rem 1rem;
+      background: rgba(17, 26, 44, 0.96);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid #263154;
+      gap: 0.5rem;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .dm-composer-tools {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      flex-shrink: 0;
+    }
+    .dm-input-wrap {
+      flex: 1;
+      min-width: 0;
+      position: relative;
+    }
+    #dmChatInput {
+      width: 100%;
+      background: #0b1221;
+      border: 1px solid #263154;
+      border-radius: 999px;
+      padding: 0.8rem 1.2rem;
+      color: #fff;
+      outline: none;
+      min-width: 0;
+    }
+    #dmChatInput:focus {
+      border-color: #428cff;
+    }
+    #dmChatSendBtn {
+      background: #428cff;
+      border: none;
+      color: #fff;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: 0.2s;
+      flex-shrink: 0;
+    }
+    .voice-btn {
+      background: #2f3a5a;
+      border: none;
+      color: #fff;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: 0.2s;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-.nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-.nav a {
-  color: #9aa4bf;
-  text-decoration: none;
-  padding: 0.9rem 1rem;
-  border-radius: 1.2rem;
-  transition: 0.2s;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  position: relative;
-}
-.nav a:hover,
-.nav a.active {
-  background: #1f2a44;
-  color: white;
-}
-.nav a.active {
-  background: #428cff;
-  color: white;
-  box-shadow: 0 8px 16px -8px #428cff;
-}
+    .dm-msg-row {
+      display: flex;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      align-items: flex-end;
+      gap: 0.5rem;
+    }
+    .dm-msg-row.sent {
+      justify-content: flex-end;
+    }
+    .dm-msg-row.unread .dm-msg {
+      border-left: 4px solid #428cff;
+    }
+    .dm-msg {
+      max-width: min(68%, 720px);
+      padding: 0.72rem 0.82rem 0.42rem;
+      border-radius: 1rem;
+      word-wrap: break-word;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      position: relative;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+    }
+    .dm-msg-text {
+      white-space: pre-wrap;
+    }
+    .dm-msg-meta {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.35rem;
+      margin-top: 0.32rem;
+      font-size: 0.68rem;
+      line-height: 1;
+      opacity: 0.76;
+    }
+    .dm-msg-status {
+      color: #bde7ff;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+    .dm-msg.sent {
+      background: linear-gradient(135deg, #2979ff, #1f9f7a);
+      color: #fff;
+      border-bottom-right-radius: 0.25rem;
+    }
+    .dm-msg.received {
+      background: #202b43;
+      color: #e0e7ff;
+      border-bottom-left-radius: 0.25rem;
+    }
+    .dm-seen-indicator {
+      font-size: 0.68rem;
+      color: #8fa0c5;
+      margin-top: 0.25rem;
+      text-align: right;
+    }
 
-.sidebar-unread {
-  background: #ff4d4d;
-  color: white;
-  border-radius: 2rem;
-  padding: 0.15rem 0.5rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  margin-left: auto;
-  line-height: 1.3;
-  box-shadow: 0 0 0 1px #0b0f17;
-}
+    .dm-date-separator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0.8rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 0.3rem 0;
+    }
+    .dm-date-separator span {
+      background: #1f2a44;
+      color: #9aa4bf;
+      padding: 0.3rem 1rem;
+      border-radius: 2rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      border: 1px solid #2f3a5a;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
 
-.logout-btn {
-  margin-top: auto;
-  background: transparent;
-  border: 1px solid #2f3a5a;
-  color: #ff9f9f;
-  padding: 0.9rem;
-  border-radius: 1.2rem;
-  cursor: pointer;
-  font-weight: 500;
-  transition: 0.2s;
-}
-.logout-btn:hover {
-  background: #ff4d4d20;
-  border-color: #ff4d4d;
-}
+    .dm-voice-note {
+      display: grid;
+      grid-template-columns: auto minmax(130px, 1fr) auto;
+      align-items: center;
+      gap: 0.65rem;
+      min-width: min(300px, 62vw);
+    }
+    .dm-audio-btn {
+      min-width: 3.2rem;
+      padding: 0 0.6rem;
+      height: 2.35rem;
+      border: none;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.16);
+      color: #fff;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .dm-wave {
+      height: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .dm-wave span {
+      width: 3px;
+      height: var(--h);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.48);
+    }
+    .dm-audio-duration {
+      font-size: 0.76rem;
+      opacity: 0.82;
+      min-width: 2.6rem;
+      text-align: right;
+    }
+    .dm-audio-progress {
+      grid-column: 2 / 4;
+      height: 3px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.18);
+      overflow: hidden;
+    }
+    .dm-audio-progress span {
+      display: block;
+      width: 0%;
+      height: 100%;
+      background: #fff;
+    }
+    .dm-msg.received .dm-audio-btn {
+      background: rgba(66,140,255,0.22);
+    }
+    .dm-msg.received .dm-wave span {
+      background: rgba(190,210,255,0.58);
+    }
+    .dm-empty-state {
+      margin: auto;
+      max-width: 360px;
+      color: #9aa4bf;
+      text-align: center;
+      padding: 2rem;
+      line-height: 1.5;
+    }
+    .dm-delete-btn {
+      position: absolute;
+      top: 0.35rem;
+      right: 0.4rem;
+      border: 0;
+      background: rgba(0,0,0,0.18);
+      color: inherit;
+      border-radius: 999px;
+      padding: 0.2rem 0.45rem;
+      font-size: 0.66rem;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .dm-msg:hover .dm-delete-btn {
+      opacity: 0.85;
+    }
 
-/* === MAIN DM AREA === */
-.main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 1.5rem;
-  min-width: 0;
-  height: 100%;
-  overflow: hidden;
-}
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #428cff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      color: #fff;
+      text-transform: uppercase;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: transform 0.1s;
+      object-fit: cover;
+    }
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .avatar:hover {
+      transform: scale(1.05);
+    }
 
-.chat-panel {
-  flex: 1;
-  background: #131c30;
-  border-radius: 2rem;
-  border: 1px solid #263154;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  height: 100%;
-  min-height: 0;
-}
+    .typing-container {
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      padding: 0 1.5rem;
+    }
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.5rem 1rem;
+      background: #1f2a44;
+      border-radius: 2rem;
+      width: fit-content;
+      margin-bottom: 0.5rem;
+    }
+    .typing-indicator span {
+      width: 0.5rem;
+      height: 0.5rem;
+      background: #9aa4bf;
+      border-radius: 50%;
+      animation: typingBounce 1.4s infinite ease-in-out;
+    }
+    .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingBounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-0.5rem); }
+    }
+    .typing-text {
+      color: #9aa4bf;
+      font-size: 0.85rem;
+      margin-left: 0.5rem;
+    }
+    .recording-timer {
+      color: #ff4d4d;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+    .voice-btn.recording {
+      background: #ff4d4d;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
 
-.chat-header {
-  padding: 1.2rem 1.8rem;
-  border-bottom: 1px solid #263154;
-  color: white;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  flex-shrink: 0;
-  background: #131c30;
-  z-index: 5;
-}
+    .call-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    .call-modal-content {
+      background: #1f2a44;
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      max-width: 800px;
+      width: 90%;
+      color: #fff;
+    }
+    .call-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .call-modal-header h3 { font-size: 1.2rem; }
+    .call-modal-close {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    .call-videos {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .video-container {
+      background: #0b0f17;
+      border-radius: 1rem;
+      overflow: hidden;
+      width: 300px;
+      height: 200px;
+      position: relative;
+    }
+    .video-container video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .rtc-video-slot {
+      width: 100%;
+      height: 100%;
+      background: #090d15;
+    }
+    .rtc-video-slot > * {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover;
+    }
+    .video-label {
+      position: absolute;
+      bottom: 0.5rem;
+      left: 0.5rem;
+      background: rgba(0,0,0,0.5);
+      color: #fff;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.5rem;
+      font-size: 0.8rem;
+    }
+    .call-controls {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    .call-controls button {
+      background: #428cff;
+      border: none;
+      color: #fff;
+      padding: 0.6rem 1.2rem;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .call-controls button.hangup { background: #ff4d4d; }
+    .call-controls button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.online-count {
-  background: #1f2a44;
-  padding: 0.2rem 0.8rem;
-  border-radius: 2rem;
-  font-size: 0.8rem;
-  color: #8affb8;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  margin-left: auto;
-}
-.online-count::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  background: #2ecc71;
-  border-radius: 50%;
-  display: inline-block;
-}
+    .call-options-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1500;
+    }
+    .call-options-content {
+      background: #1f2a44;
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      width: 300px;
+      color: #fff;
+      text-align: center;
+    }
+    .call-options-content h3 { margin-bottom: 1rem; }
+    .call-option-btn {
+      background: #2f3a5a;
+      border: none;
+      color: #fff;
+      padding: 1rem;
+      margin: 0.5rem 0;
+      width: 100%;
+      border-radius: 2rem;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: background 0.2s;
+    }
+    .call-option-btn:hover { background: #428cff; }
+    .call-option-btn.video { background: #428cff; }
+    .call-option-btn.video:hover { background: #5f9eff; }
 
-.messages-area {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-  display: flex;
-}
+    #incomingCallModal .call-modal-content {
+      max-width: 400px;
+      text-align: center;
+    }
+    #incomingCallModal .call-controls { margin-top: 1.5rem; }
+    #acceptCallBtn { background: #2ecc71; }
+    #declineCallBtn { background: #ff4d4d; }
 
-/* DM layout (full width) */
-.dm-layout {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  gap: 0;
-}
+    .read-receipts-modal {
+      position: absolute;
+      background: #1f2a44;
+      border: 1px solid #428cff;
+      border-radius: 1.2rem;
+      padding: 1rem 1.2rem;
+      color: #fff;
+      font-size: 0.9rem;
+      z-index: 1000;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.7);
+      min-width: 260px;
+      max-width: 320px;
+      backdrop-filter: blur(4px);
+    }
+    .read-receipts-modal h4 {
+      margin-bottom: 0.8rem;
+      color: #b0c8ff;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 0.4rem;
+    }
 
-.dm-conversations-list {
-  width: min(360px, 34vw);
-  border-right: 1px solid #263154;
-  overflow-y: auto;
-  min-height: 0;
-  background: #0d1426;
-  flex-shrink: 0;
-}
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #1f2a44;
+      color: #fff;
+      padding: 0.8rem 1.2rem;
+      border-radius: 0.8rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      opacity: 0.9;
+      z-index: 3000;
+      font-size: 0.9rem;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .toast.hide { opacity: 0; }
 
-.dm-list-header {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  padding: 1rem;
-  font-weight: 600;
-  color: #d7def5;
-  border-bottom: 1px solid #263154;
-  font-size: 0.9rem;
-  background: #0d1426;
-}
+    .mobile-nav-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      align-items: stretch;
+      justify-content: flex-start;
+    }
+    .mobile-nav-panel {
+      width: 280px;
+      max-width: 80vw;
+      height: 100%;
+      background: rgba(10, 16, 28, 0.98);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 2rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      box-shadow: 4px 0 30px rgba(0,0,0,0.5);
+      animation: slideInNav 0.25s ease;
+    }
+    @keyframes slideInNav {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(0); }
+    }
+    .mobile-nav-panel .close-btn {
+      align-self: flex-end;
+      background: none;
+      border: none;
+      color: #9aa4bf;
+      font-size: 2rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0.2rem;
+    }
+    .mobile-nav-panel .close-btn:hover { color: #fff; }
+    .mobile-nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .mobile-nav-links a {
+      color: #9aa4bf;
+      text-decoration: none;
+      padding: 0.9rem 1rem;
+      border-radius: 1.2rem;
+      transition: 0.2s;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-size: 1rem;
+    }
+    .mobile-nav-links a:hover,
+    .mobile-nav-links a.active {
+      background: #1f2a44;
+      color: #fff;
+    }
+    .mobile-nav-links a.active {
+      background: #428cff;
+      color: #fff;
+      box-shadow: 0 8px 16px -8px #428cff;
+    }
+    .mobile-nav-panel .logout-btn {
+      margin-top: auto;
+      background: transparent;
+      border: 1px solid #2f3a5a;
+      color: #ff9f9f;
+      padding: 0.9rem;
+      border-radius: 1.2rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .mobile-nav-panel .logout-btn:hover {
+      background: #ff4d4d20;
+      border-color: #ff4d4d;
+    }
 
-.dm-conversation-item {
-  padding: 0.8rem 1rem;
-  border-bottom: 1px solid #1f2a44;
-  cursor: pointer;
-  transition: background 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-}
-.dm-conversation-item:hover {
-  background: #18233b;
-}
-.dm-conversation-item.active {
-  background: #203257;
-  border-left: 3px solid #428cff;
-}
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+        height: 100vh;
+      }
+      .sidebar {
+        display: none;
+      }
+      body.sidebar-collapsed .sidebar {
+        transform: none;
+        width: auto;
+        padding: 2rem 1rem;
+        overflow: visible;
+      }
+      .main {
+        padding: 0;
+        order: 1;
+        flex: 1 1 0;
+        height: 100%;
+        overflow: hidden;
+      }
+      .chat-panel {
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        border-top: none;
+        height: 100%;
+        padding: 0;
+      }
+      .chat-header {
+        display: none;
+      }
+      .dm-chat-header {
+        display: flex !important;
+      }
+      .messages-area {
+        height: 100%;
+        width: 100%;
+        min-height: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .online-count {
+        margin-left: 0;
+      }
+      .dm-layout {
+        flex-direction: row;
+        width: 200vw;
+        min-width: 200vw;
+        height: 100%;
+        overflow: hidden;
+        transform: translateX(0);
+        transition: transform 0.26s ease;
+        will-change: transform;
+      }
+      .dm-conversations-list,
+      .dm-chat-area {
+        width: 100vw;
+        flex: 0 0 100vw;
+        max-width: 100vw;
+        min-width: 100vw;
+        height: 100%;
+      }
+      .dm-conversations-list {
+        border-right: none;
+        border-bottom: 1px solid #263154;
+        min-height: 0;
+        -webkit-overflow-scrolling: touch;
+      }
+      .dm-chat-area {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        height: 100%;
+      }
+      .dm-layout.chat-open {
+        transform: translateX(-100vw);
+      }
+      .dm-chat-header .dm-back-btn {
+        display: inline-flex;
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 1.8rem;
+        line-height: 1;
+        cursor: pointer;
+        margin-right: 0.5rem;
+        padding: 0 0.2rem;
+      }
+      .dm-chat-messages {
+        -webkit-overflow-scrolling: touch;
+      }
+      .dm-chat-header .hamburger-btn {
+        display: inline-flex;
+        width: 2.7rem;
+        height: 2.7rem;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.2rem;
+        padding: 0;
+      }
+      .dm-chat-actions .dm-icon-btn {
+        min-width: 2.7rem;
+        width: 2.7rem;
+        padding: 0;
+        font-size: 0;
+      }
+      #dmHeaderVoiceCallBtn::before { content: 'Call'; font-size: 0.72rem; }
+      #dmHeaderVideoCallBtn::before { content: 'Video'; font-size: 0.72rem; }
+      .dm-msg {
+        max-width: 80%;
+      }
+      #dmChatSendBtn,
+      .voice-btn {
+        width: 2.8rem;
+        height: 2.8rem;
+        font-size: 1.1rem;
+      }
+      #dmChatInput {
+        padding: 0.7rem 1rem;
+        font-size: 16px;
+      }
+      .chat-header .hamburger-toggle {
+        display: none !important;
+      }
+    }
+    @media (max-width: 480px) {
+      .sidebar {
+        display: none;
+      }
+      .dm-msg {
+        max-width: 90%;
+      }
+    }
 
-.dm-conv-content {
-  flex: 1;
-  min-width: 0;
-}
-.dm-conv-name {
-  color: white;
-  font-weight: 500;
-  font-size: 0.9rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.dm-conv-role {
-  color: #9aa4bf;
-  font-size: 0.75rem;
-  margin-top: 0.2rem;
-}
+    /* Desktop sidebar toggle button */
+    .chat-header .hamburger-toggle {
+      display: inline-flex;
+    }
+    @media (max-width: 768px) {
+      .chat-header .hamburger-toggle {
+        display: none;
+      }
+    }
 
-.status-dot {
-  width: 0.6rem;
-  height: 0.6rem;
-  border-radius: 50%;
-  background: #444;
-  flex-shrink: 0;
-}
-.status-dot.online {
-  background: #2ecc71;
-}
-
-.dm-unread-badge {
-  background: #428cff;
-  color: white;
-  padding: 0.2rem 0.5rem;
-  border-radius: 1rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  min-width: 20px;
-  text-align: center;
-  margin-left: auto;
-}
-
-.dm-chat-area {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  background:
-    radial-gradient(circle at 18px 18px, rgba(255,255,255,0.035) 1px, transparent 1px) 0 0 / 36px 36px,
-    linear-gradient(180deg, #111a2c 0%, #0d1525 100%);
-  min-width: 0;
-  min-height: 0;
-}
-
-.dm-chat-header {
-  min-height: 72px;
-  padding: 0.9rem 1.1rem;
-  border-bottom: 1px solid #263154;
-  color: white;
-  font-weight: 500;
-  background: rgba(17, 26, 44, 0.94);
-  backdrop-filter: blur(14px);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-.dm-chat-header .dm-back-btn {
-  display: none;
-}
-.dm-chat-peer {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  min-width: 0;
-}
-.dm-peer-copy {
-  min-width: 0;
-}
-.dm-chat-title {
-  display: block;
-  color: #f8fbff;
-  font-size: 1rem;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.dm-chat-subtitle {
-  display: block;
-  color: #91a0c7;
-  font-size: 0.78rem;
-  margin-top: 0.15rem;
-}
-.dm-chat-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  flex-shrink: 0;
-}
-.dm-icon-btn {
-  min-width: 2.55rem;
-  height: 2.55rem;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 50%;
-  background: #18233b;
-  color: #eaf0ff;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s ease, transform 0.2s ease;
-}
-.dm-chat-actions .dm-icon-btn {
-  width: auto;
-  min-width: 4rem;
-  padding: 0 0.8rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-.dm-icon-btn:hover {
-  background: #203257;
-  transform: translateY(-1px);
-}
-.dm-icon-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.dm-chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1rem 1.2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  scroll-behavior: smooth;
-}
-
-.dm-chat-input {
-  display: flex;
-  padding: 0.85rem 1rem;
-  background: rgba(17, 26, 44, 0.96);
-  backdrop-filter: blur(14px);
-  border-top: 1px solid #263154;
-  gap: 0.5rem;
-  align-items: center;
-}
-.dm-composer-tools {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  flex-shrink: 0;
-}
-.dm-input-wrap {
-  flex: 1;
-  min-width: 0;
-  position: relative;
-}
-
-#dmChatInput {
-  width: 100%;
-  background: #0b1221;
-  border: 1px solid #263154;
-  border-radius: 999px;
-  padding: 0.8rem 1.2rem;
-  color: white;
-  outline: none;
-  min-width: 0;
-}
-#dmChatInput:focus {
-  border-color: #428cff;
-}
-
-#dmChatSendBtn {
-  background: #428cff;
-  border: none;
-  color: white;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 1.2rem;
-  transition: 0.2s;
-  flex-shrink: 0;
-}
-
-.voice-btn,
-.dm-voice-btn {
-  background: #2f3a5a;
-  border: none;
-  color: white;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 1.2rem;
-  transition: 0.2s;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.dm-msg-row {
-  display: flex;
-  margin-bottom: 0.5rem;
-  cursor: pointer;
-  align-items: flex-end;
-  gap: 0.5rem;
-}
-.dm-msg-row.sent {
-  justify-content: flex-end;
-}
-.dm-msg-row.unread .dm-msg {
-  border-left: 4px solid #428cff;
-}
-
-.dm-msg {
-  max-width: min(68%, 720px);
-  padding: 0.72rem 0.82rem 0.42rem;
-  border-radius: 1rem;
-  word-wrap: break-word;
-  font-size: 0.9rem;
-  line-height: 1.4;
-  position: relative;
-  box-shadow: 0 10px 24px rgba(0,0,0,0.18);
-}
-.dm-msg-text {
-  white-space: pre-wrap;
-}
-.dm-msg-meta {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.35rem;
-  margin-top: 0.32rem;
-  font-size: 0.68rem;
-  line-height: 1;
-  opacity: 0.76;
-}
-.dm-msg-status {
-  color: #bde7ff;
-  font-weight: 800;
-  letter-spacing: 0;
-}
-.dm-msg.sent {
-  background: linear-gradient(135deg, #2979ff, #1f9f7a);
-  color: white;
-  border-bottom-right-radius: 0.25rem;
-}
-.dm-msg.received {
-  background: #202b43;
-  color: #e0e7ff;
-  border-bottom-left-radius: 0.25rem;
-}
-.dm-seen-indicator {
-  font-size: 0.68rem;
-  color: #8fa0c5;
-  margin-top: 0.25rem;
-  text-align: right;
-}
-.dm-voice-note {
-  display: grid;
-  grid-template-columns: auto minmax(130px, 1fr) auto;
-  align-items: center;
-  gap: 0.65rem;
-  min-width: min(300px, 62vw);
-}
-.dm-audio-btn {
-  min-width: 3.2rem;
-  padding: 0 0.6rem;
-  height: 2.35rem;
-  border: none;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.16);
-  color: #fff;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.72rem;
-  font-weight: 700;
-}
-.dm-wave {
-  height: 1.8rem;
-  display: flex;
-  align-items: center;
-  gap: 3px;
-}
-.dm-wave span {
-  width: 3px;
-  height: var(--h);
-  border-radius: 999px;
-  background: rgba(255,255,255,0.48);
-}
-.dm-audio-duration {
-  font-size: 0.76rem;
-  opacity: 0.82;
-  min-width: 2.6rem;
-  text-align: right;
-}
-.dm-audio-progress {
-  grid-column: 2 / 4;
-  height: 3px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.18);
-  overflow: hidden;
-}
-.dm-audio-progress span {
-  display: block;
-  width: 0%;
-  height: 100%;
-  background: #ffffff;
-}
-.dm-msg.received .dm-audio-btn {
-  background: rgba(66,140,255,0.22);
-}
-.dm-msg.received .dm-wave span {
-  background: rgba(190,210,255,0.58);
-}
-.dm-empty-state {
-  margin: auto;
-  max-width: 360px;
-  color: #9aa4bf;
-  text-align: center;
-  padding: 2rem;
-  line-height: 1.5;
-}
-.dm-delete-btn {
-  position: absolute;
-  top: 0.35rem;
-  right: 0.4rem;
-  border: 0;
-  background: rgba(0,0,0,0.18);
-  color: inherit;
-  border-radius: 999px;
-  padding: 0.2rem 0.45rem;
-  font-size: 0.66rem;
-  opacity: 0;
-  cursor: pointer;
-}
-.dm-msg:hover .dm-delete-btn {
-  opacity: 0.85;
-}
-
-.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #428cff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  color: white;
-  text-transform: uppercase;
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  cursor: pointer;
-  transition: transform 0.1s;
-  object-fit: cover;
-}
-.avatar img {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-}
-.avatar:hover {
-  transform: scale(1.05);
-}
-
-.typing-container {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-  padding: 0 1.5rem;
-}
-
-.typing-indicator {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.5rem 1rem;
-  background: #1f2a44;
-  border-radius: 2rem;
-  width: fit-content;
-  margin-bottom: 0.5rem;
-}
-.typing-indicator span {
-  width: 0.5rem;
-  height: 0.5rem;
-  background: #9aa4bf;
-  border-radius: 50%;
-  animation: typingBounce 1.4s infinite ease-in-out;
-}
-.typing-indicator span:nth-child(1) { animation-delay: 0s; }
-.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes typingBounce {
-  0%, 60%, 100% { transform: translateY(0); }
-  30% { transform: translateY(-0.5rem); }
-}
-
-.typing-text {
-  color: #9aa4bf;
-  font-size: 0.85rem;
-  margin-left: 0.5rem;
-}
-
-.recording-timer {
-  color: #ff4d4d;
-  font-size: 1rem;
-  font-weight: 600;
-  margin-left: 0.5rem;
-}
-
-.voice-btn.recording {
-  background: #ff4d4d;
-  animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
-}
-
-/* === Call modal styles (DM calls) === */
-.call-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-}
-.call-modal-content {
-  background: #1f2a44;
-  border-radius: 1.5rem;
-  padding: 1.5rem;
-  max-width: 800px;
-  width: 90%;
-  color: white;
-}
-.call-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-.call-modal-header h3 { font-size: 1.2rem; }
-.call-modal-close {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-.call-videos {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-bottom: 1rem;
-}
-.video-container {
-  background: #0b0f17;
-  border-radius: 1rem;
-  overflow: hidden;
-  width: 300px;
-  height: 200px;
-  position: relative;
-}
-.video-container video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.rtc-video-slot {
-  width: 100%;
-  height: 100%;
-  background: #090d15;
-}
-.rtc-video-slot > * {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover;
-}
-.video-label {
-  position: absolute;
-  bottom: 0.5rem;
-  left: 0.5rem;
-  background: rgba(0,0,0,0.5);
-  color: white;
-  padding: 0.2rem 0.5rem;
-  border-radius: 0.5rem;
-  font-size: 0.8rem;
-}
-.call-controls {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-top: 1rem;
-}
-.call-controls button {
-  background: #428cff;
-  border: none;
-  color: white;
-  padding: 0.6rem 1.2rem;
-  border-radius: 2rem;
-  cursor: pointer;
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.call-controls button.hangup { background: #ff4d4d; }
-.call-controls button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.call-options-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1500;
-}
-.call-options-content {
-  background: #1f2a44;
-  border-radius: 1.5rem;
-  padding: 1.5rem;
-  width: 300px;
-  color: white;
-  text-align: center;
-}
-.call-options-content h3 { margin-bottom: 1rem; }
-.call-option-btn {
-  background: #2f3a5a;
-  border: none;
-  color: white;
-  padding: 1rem;
-  margin: 0.5rem 0;
-  width: 100%;
-  border-radius: 2rem;
-  font-size: 1rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  transition: background 0.2s;
-}
-.call-option-btn:hover { background: #428cff; }
-.call-option-btn.video { background: #428cff; }
-.call-option-btn.video:hover { background: #5f9eff; }
-
-#incomingCallModal .call-modal-content {
-  max-width: 400px;
-  text-align: center;
-}
-#incomingCallModal .call-controls { margin-top: 1.5rem; }
-#acceptCallBtn { background: #2ecc71; }
-#declineCallBtn { background: #ff4d4d; }
-
-.read-receipts-modal {
-  position: absolute;
-  background: #1f2a44;
-  border: 1px solid #428cff;
-  border-radius: 1.2rem;
-  padding: 1rem 1.2rem;
-  color: white;
-  font-size: 0.9rem;
-  z-index: 1000;
-  box-shadow: 0 12px 28px rgba(0,0,0,0.7);
-  min-width: 260px;
-  max-width: 320px;
-  backdrop-filter: blur(4px);
-}
-.read-receipts-modal h4 {
-  margin-bottom: 0.8rem;
-  color: #b0c8ff;
-  border-bottom: 1px solid #334155;
-  padding-bottom: 0.4rem;
-}
-.read-receipts-modal ul {
-  list-style: none;
-  max-height: 200px;
-  overflow-y: auto;
-}
-.read-receipts-modal li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.4rem 0;
-  border-bottom: 1px solid #263154;
-}
-.read-receipts-modal li:last-child { border-bottom: none; }
-.reader-name { color: white; font-weight: 500; }
-.reader-time { color: #9aa4bf; font-size: 0.75rem; }
-
-.toast {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: #1f2a44;
-  color: #fff;
-  padding: 0.8rem 1.2rem;
-  border-radius: 0.8rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-  opacity: 0.9;
-  z-index: 3000;
-  font-size: 0.9rem;
-  pointer-events: none;
-  transition: opacity 0.3s;
-}
-.toast.hide { opacity: 0; }
-
-/* ===== MOBILE & TABLET RESPONSIVE ===== */
-@media (max-width: 768px) {
-  body {
-    flex-direction: column;
-    height: 100vh;
-  }
-
-  .sidebar {
-    display: none;
-  }
-
-  .main {
-    padding: 0;
-    order: 1;
-    flex: 1 1 0;
-    height: 100%;
-    overflow: hidden;
-  }
-
-  .chat-panel {
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-    border-top: none;
-    height: 100%;
-    padding: 0;
-  }
-
-  .chat-header {
-    display: none;
-  }
-
-  .messages-area {
-    height: 100%;
-    width: 100%;
-    min-height: 0;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .online-count {
-    margin-left: 0;
-  }
-
-  /* DM layout adjustments */
-  .dm-layout {
-    flex-direction: row;
-    width: 200vw;
-    min-width: 200vw;
-    height: 100%;
-    overflow: hidden;
-    transform: translateX(0);
-    transition: transform 0.26s ease;
-    will-change: transform;
-  }
-
-  .dm-conversations-list,
-  .dm-chat-area {
-    width: 100vw;
-    flex: 0 0 100vw;
-    max-width: 100vw;
-    min-width: 100vw;
-    height: 100%;
-  }
-
-  .dm-conversations-list {
-    border-right: none;
-    border-bottom: 1px solid #263154;
-    min-height: 0;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .dm-chat-area {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    height: 100%;
-  }
-
-  .dm-layout.chat-open {
-    transform: translateX(-100vw);
-  }
-
-  .dm-chat-header .dm-back-btn {
-    display: inline-flex;
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.8rem; /* larger for touch */
-    line-height: 1;
-    cursor: pointer;
-    margin-right: 0.5rem;
-    padding: 0 0.2rem;
-  }
-
-  .dm-chat-messages {
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .dm-chat-header .hamburger-btn {
-    display: inline-flex;
-    width: 2.7rem;
-    height: 2.7rem;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.2rem;
-    padding: 0;
-  }
-
-  .dm-chat-actions .dm-icon-btn {
-    min-width: 2.7rem;
-    width: 2.7rem;
-    padding: 0;
-    font-size: 0;
-  }
-
-  #dmHeaderVoiceCallBtn::before { content: 'Call'; font-size: 0.72rem; }
-  #dmHeaderVideoCallBtn::before { content: 'Video'; font-size: 0.72rem; }
-
-  /* Make message bubbles take more width on small screens */
-  .dm-msg {
-    max-width: 80%;
-  }
-
-  /* Input area buttons slightly smaller but still tappable */
-  #dmChatSendBtn,
-  .dm-voice-btn {
-    width: 2.8rem;
-    height: 2.8rem;
-    font-size: 1.1rem;
-  }
-
-  #dmChatInput {
-    padding: 0.7rem 1rem;
-    font-size: 16px; /* prevents zoom on iOS */
-  }
-}
-
-/* Extra small screens (max-width: 480px) */
-@media (max-width: 480px) {
-  .sidebar {
-    display: none;
-  }
-
-  .dm-msg {
-    max-width: 90%;
-  }
-}
-.dm-chat-area {
-  min-height: 0;  /* allows children to shrink below content height */
-}
-
-.dm-chat-messages {
-  min-height: 0;  /* ensures overflow works correctly */
-}
+    #profileModal .call-modal-content {
+      max-width: 400px;
+    }
+    #profileModal .call-modal-content .btn {
+      background: #428cff;
+      border: none;
+      color: #fff;
+      padding: 0.6rem 2rem;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    #profileModal .call-modal-content .btn:hover {
+      background: #5f9eff;
+    }
   </style>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="native-bridge.js"></script>
   <script src="notifications.js"></script>
   <script src="agora-utils.js"></script>
 </head>
 <body>
+
+  <!-- ─── SIDEBAR ─── -->
   <div class="sidebar">
     <div class="logo">TECH<span>TITANS</span></div>
-    <div class="nav">
-      <a href="dashboard.html"><span>Dashboard</span></a>
-      <a href="messages.html" id="chatNavLink"><span>Group Chat</span>
-        <span class="sidebar-unread" id="sidebarUnreadBadge" style="display: none;">0</span>
+    <div class="nav" id="sidebarNav">
+      <a href="dashboard.html"><i class="fas fa-chart-pie"></i> <span>Dashboard</span></a>
+      <a href="messages.html" id="chatNavLink"><i class="fas fa-comments"></i> <span>Group Chat</span>
+        <span class="sidebar-unread" id="sidebarUnreadBadge" style="display:none;">0</span>
       </a>
-      <a href="dm.html" class="active" id="dmNavLink"><span>Direct Messages</span>
-        <span class="sidebar-unread" id="dmUnreadBadge" style="display: none;">0</span>
+      <a href="dm.html" class="active" id="dmNavLink"><i class="fas fa-envelope"></i> <span>Direct Messages</span>
+        <span class="sidebar-unread" id="dmUnreadBadge" style="display:none;">0</span>
       </a>
-      <a href="profile.html"><span>Profile</span></a>
+      <a href="resources.html"><i class="fas fa-book-open"></i> <span>Resources</span></a>
+      <a href="profile.html"><i class="fas fa-user-cog"></i> <span>Profile</span></a>
     </div>
-    <button class="logout-btn" id="logout"><span>Logout</span></button>
+    <button class="logout-btn" id="logout"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></button>
   </div>
 
+  <!-- ─── MAIN ─── -->
   <div class="main">
     <div class="chat-panel">
       <div class="chat-header">
+        <button class="hamburger-toggle" id="sidebarToggle" title="Toggle sidebar">
+          <i class="fas fa-bars"></i>
+        </button>
         <span>Direct Messages</span>
         <div class="online-count" id="onlineCount">0 online</div>
       </div>
       <div class="messages-area" id="messagesArea" oncontextmenu="return false;"></div>
-      <!-- DM layout will be injected here by JS -->
     </div>
   </div>
 
+  <!-- ─── MOBILE NAV OVERLAY ─── -->
   <div id="mobileNavOverlay" class="mobile-nav-overlay" aria-hidden="true">
     <div class="mobile-nav-panel">
       <button class="close-btn" id="mobileNavClose" aria-label="Close menu">&times;</button>
       <nav class="mobile-nav-links" aria-label="Mobile navigation">
-        <a href="dashboard.html">Dashboard</a>
-        <a href="messages.html">Group Chat</a>
-        <a href="dm.html">Direct Messages</a>
-        <a href="profile.html">Profile</a>
+        <a href="dashboard.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
+        <a href="messages.html"><i class="fas fa-comments"></i> Group Chat</a>
+        <a href="dm.html" class="active"><i class="fas fa-envelope"></i> Direct Messages</a>
+        <a href="resources.html"><i class="fas fa-book-open"></i> Resources</a>
+        <a href="profile.html"><i class="fas fa-user-cog"></i> Profile</a>
       </nav>
-      <button class="logout-btn" id="mobileLogout">Logout</button>
+      <button class="logout-btn" id="mobileLogout"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </div>
   </div>
 
-  <div id="receiptsModal" class="read-receipts-modal" style="display: none;"></div>
-  <div id="toast" class="toast hide" style="display: none;"></div>
+  <!-- ─── MODALS ─── -->
+  <div id="receiptsModal" class="read-receipts-modal" style="display:none;"></div>
+  <div id="toast" class="toast hide" style="display:none;"></div>
 
-  <!-- Call options modal (for DM) -->
-  <div id="callOptionsModal" class="call-options-modal" style="display: none;">
+  <div id="callOptionsModal" class="call-options-modal" style="display:none;">
     <div class="call-options-content">
       <h3>Start a call with <span id="callWithUserName"></span></h3>
       <button class="call-option-btn video" id="startVideoCallBtn">Video Call</button>
@@ -1050,8 +1166,7 @@ body {
     </div>
   </div>
 
-  <!-- Active call modal (DM) -->
-  <div id="callModal" class="call-modal" style="display: none;">
+  <div id="callModal" class="call-modal" style="display:none;">
     <div class="call-modal-content">
       <div class="call-modal-header">
         <h3 id="callModalTitle">Call with ...</h3>
@@ -1075,8 +1190,7 @@ body {
     </div>
   </div>
 
-  <!-- Incoming call modal -->
-  <div id="incomingCallModal" class="call-modal" style="display: none;">
+  <div id="incomingCallModal" class="call-modal" style="display:none;">
     <div class="call-modal-content">
       <h3>Incoming call from <span id="incomingCallerName"></span></h3>
       <p id="incomingCallType"></p>
@@ -1087,1510 +1201,1601 @@ body {
     </div>
   </div>
 
-  <!-- Profile Modal -->
-  <div id="profileModal" class="call-modal" style="display: none;">
-    <div class="call-modal-content" style="max-width: 400px;">
+  <div id="profileModal" class="call-modal" style="display:none;">
+    <div class="call-modal-content">
       <div class="call-modal-header">
         <h3>User Profile</h3>
         <button class="call-modal-close" id="closeProfileModal">&times;</button>
       </div>
-      <div style="text-align: center; padding: 1rem;">
-        <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
-          <img id="modalAvatar" src="" alt="Avatar" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; background: #1f2a44; display: none;">
-          <div id="modalAvatarPlaceholder" style="width: 100px; height: 100px; border-radius: 50%; background: #428cff; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: white; display: none;">TT</div>
+      <div style="text-align:center;padding:1rem;">
+        <div style="display:flex;justify-content:center;margin-bottom:1rem;">
+          <img id="modalAvatar" src="" alt="Avatar" style="width:100px;height:100px;border-radius:50%;object-fit:cover;background:#1f2a44;display:none;">
+          <div id="modalAvatarPlaceholder" style="width:100px;height:100px;border-radius:50%;background:#428cff;display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:#fff;display:none;">TT</div>
         </div>
-        <h2 id="modalName" style="color: white; margin-bottom: 0.5rem;">-</h2>
-        <p id="modalRole" style="color: #9aa4bf; margin-bottom: 0.5rem;">-</p>
-        <p id="modalJoined" style="color: #9aa4bf; font-size: 0.9rem;">-</p>
-        <button id="modalSendDM" class="btn" style="margin-top: 1rem; width: auto; padding: 0.6rem 2rem;">Send Message</button>
+        <h2 id="modalName" style="color:#fff;margin-bottom:0.5rem;">-</h2>
+        <p id="modalRole" style="color:#9aa4bf;margin-bottom:0.5rem;">-</p>
+        <p id="modalJoined" style="color:#9aa4bf;font-size:0.9rem;">-</p>
+        <button id="modalSendDM" class="btn" style="margin-top:1rem;width:auto;padding:0.6rem 2rem;">Send Message</button>
       </div>
     </div>
   </div>
 
-<script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
-<script>
-  (function() {
-    const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kcXF0c2RpYnR2eW1mZ250c3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTI1NjIsImV4cCI6MjA4Nzg4ODU2Mn0.hS-7kmoyFljnhkJEkw7nmgimw9ioQreidyu27_NXYyo';
-    const AGORA_APP_ID = 'cf82ae26325e48ea87d2a36f17629591';
+  <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+  <script>
+    (function() {
+      const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
+      const SUPABASE_ANON_KEY =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kcXF0c2RpYnR2eW1mZ250c3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTI1NjIsImV4cCI6MjA4Nzg4ODU2Mn0.hS-7kmoyFljnhkJEkw7nmgimw9ioQreidyu27_NXYyo';
+      const AGORA_APP_ID = 'cf82ae26325e48ea87d2a36f17629591';
 
-    let supabase;
-    try {
-      if (!window.supabase) throw new Error('Supabase library failed to load.');
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      if (window.TechTitansNotifications) {
-        window.TechTitansNotifications.connect(supabase);
+      let supabase;
+      try {
+        if (!window.supabase) throw new Error('Supabase library failed to load.');
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        if (window.TechTitansNotifications) {
+          window.TechTitansNotifications.connect(supabase);
+        }
+      } catch (e) {
+        console.error(e);
+        document.body.innerHTML = '<p style="color:white;padding:2rem;">Service unavailable. Please refresh.</p>';
+        return;
       }
-    } catch (e) {
-      console.error(e);
-      document.body.innerHTML = '<p style="color:white;padding:2rem;">Service unavailable. Please refresh.</p>';
-      return;
-    }
 
-    // --- Global state ---
-    let currentUser = null;
-    let currentUserFullName = 'User';
-    let currentRole = null;
-    let isCEO = false;
-    let dmUnreadBySender = {};
-    let globalDmSubscription = null;
-    let dmDeleteSubscription = null;
-    let presenceChannel = null;
-    let onlineUsers = new Map();
-    let currentRecipientId = null;
-    let dmTypingSubscription = null;
-    let dmTypingTimeouts = {};
-    let dmActiveTypers = new Set();
+      // ─── STATE ───
+      let currentUser = null;
+      let currentUserFullName = 'User';
+      let currentRole = null;
+      let isCEO = false;
+      let dmUnreadBySender = {};
+      let globalDmSubscription = null;
+      let dmDeleteSubscription = null;
+      let presenceChannel = null;
+      let onlineUsers = new Map();
+      let currentRecipientId = null;
+      let dmTypingSubscription = null;
+      let dmTypingTimeouts = {};
+      let dmActiveTypers = new Set();
 
-    // Voice recording (DM)
-    let dmMediaRecorder = null;
-    let dmAudioChunks = [];
-    let dmIsRecording = false;
-    let dmRecordingStartTime = null;
-    let dmRecordingTimerInterval = null;
+      let dmMediaRecorder = null;
+      let dmAudioChunks = [];
+      let dmIsRecording = false;
+      let dmRecordingStartTime = null;
+      let dmRecordingTimerInterval = null;
 
-    // Agora DM call variables
-    let agoraClient = null;
-    let localAudioTrack = null;
-    let localVideoTrack = null;
-    let callType = null;
-    let callTarget = null;
-    let currentDMCallId = null;
-    let callActive = false;
-    let callStarting = false;
-    let joinedAgoraChannelName = null;
-    let pendingCall = null;
-    let userChannel = null;
+      let agoraClient = null;
+      let localAudioTrack = null;
+      let localVideoTrack = null;
+      let callType = null;
+      let callTarget = null;
+      let currentDMCallId = null;
+      let callActive = false;
+      let callStarting = false;
+      let joinedAgoraChannelName = null;
+      let pendingCall = null;
+      let userChannel = null;
+      let dmObserver = null;
 
-    // Observer for marking messages as read when scrolled into view
-    let dmObserver = null;
+      // ─── DOM REFS ───
+      const modal = document.getElementById('receiptsModal');
+      const toast = document.getElementById('toast');
+      const callOptionsModal = document.getElementById('callOptionsModal');
+      const callModal = document.getElementById('callModal');
+      const incomingCallModal = document.getElementById('incomingCallModal');
+      const localVideo = document.getElementById('localVideo');
+      const remoteVideo = document.getElementById('remoteVideo');
+      const callWithUserNameSpan = document.getElementById('callWithUserName');
+      const callModalTitle = document.getElementById('callModalTitle');
+      const remoteVideoLabel = document.getElementById('remoteVideoLabel');
+      const incomingCallerName = document.getElementById('incomingCallerName');
+      const incomingCallType = document.getElementById('incomingCallType');
+      const profileModal = document.getElementById('profileModal');
+      const modalAvatar = document.getElementById('modalAvatar');
+      const modalAvatarPlaceholder = document.getElementById('modalAvatarPlaceholder');
+      const modalName = document.getElementById('modalName');
+      const modalRole = document.getElementById('modalRole');
+      const modalJoined = document.getElementById('modalJoined');
+      const modalSendDM = document.getElementById('modalSendDM');
 
-    // DOM elements
-    const modal = document.getElementById('receiptsModal');
-    const toast = document.getElementById('toast');
-    const callOptionsModal = document.getElementById('callOptionsModal');
-    const callModal = document.getElementById('callModal');
-    const incomingCallModal = document.getElementById('incomingCallModal');
-    const localVideo = document.getElementById('localVideo');
-    const remoteVideo = document.getElementById('remoteVideo');
-    const callWithUserNameSpan = document.getElementById('callWithUserName');
-    const callModalTitle = document.getElementById('callModalTitle');
-    const remoteVideoLabel = document.getElementById('remoteVideoLabel');
-    const incomingCallerName = document.getElementById('incomingCallerName');
-    const incomingCallType = document.getElementById('incomingCallType');
-    const profileModal = document.getElementById('profileModal');
-    const modalAvatar = document.getElementById('modalAvatar');
-    const modalAvatarPlaceholder = document.getElementById('modalAvatarPlaceholder');
-    const modalName = document.getElementById('modalName');
-    const modalRole = document.getElementById('modalRole');
-    const modalJoined = document.getElementById('modalJoined');
-    const modalSendDM = document.getElementById('modalSendDM');
-
-    // ==================== HELPER FUNCTIONS ====================
-    function formatDateHeader(date) {
-      const now = new Date();
-      const msgDate = new Date(date);
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-      const msgDay = new Date(msgDate.getFullYear(), msgDate.getMonth(), msgDate.getDate());
-      if (msgDay.getTime() === today.getTime()) return 'Today';
-      else if (msgDay.getTime() === yesterday.getTime()) return 'Yesterday';
-      else return msgDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    }
-
-    function formatTimeOnly(date) {
-      return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-
-    function formatAudioTime(seconds) {
-      if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
-      const rounded = Math.floor(seconds);
-      const minutes = Math.floor(rounded / 60);
-      const secs = rounded % 60;
-      return `${minutes}:${secs.toString().padStart(2, '0')}`;
-    }
-
-    function stringToColor(str) {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-      const hue = Math.abs(hash % 360);
-      return `hsl(${hue}, 70%, 50%)`;
-    }
-
-    function getInitials(name) {
-      if (!name) return '?';
-      const parts = name.trim().split(/\s+/);
-      if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-      return (parts[0].charAt(0) + parts[parts.length-1].charAt(0)).toUpperCase();
-    }
-
-    function escapeHtml(unsafe) {
-      if (unsafe === null || unsafe === undefined) return '';
-      return String(unsafe).replace(/[&<>"']/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        if (m === '"') return '&quot;';
-        if (m === "'") return '&#039;';
-        return m;
-      });
-    }
-
-    function renderVoiceNote(audioUrl, messageId) {
-      const bars = [12, 20, 15, 26, 18, 30, 14, 24, 17, 28, 13, 22, 16, 25]
-        .map(height => `<span style="--h:${height}px"></span>`)
-        .join('');
-      return `
-        <div class="dm-voice-note" data-audio-url="${escapeHtml(audioUrl)}" data-message-id="${escapeHtml(messageId)}">
-          <button type="button" class="dm-audio-btn" aria-label="Play voice note">Play</button>
-          <div class="dm-wave">${bars}</div>
-          <span class="dm-audio-duration">0:00</span>
-          <div class="dm-audio-progress"><span></span></div>
-        </div>
-      `;
-    }
-
-    function renderMessageBubble(msg, options = {}) {
-      const isSent = options.isSent ?? msg.sender_id === currentUser.id;
-      const sender = msg.sender || options.sender || {};
-      const senderName = sender.full_name || options.senderName || 'Unknown';
-      const senderRole = sender.job_role || options.senderRole || '';
-      const isUnread = !isSent && !msg.read_at;
-      const timeStr = formatTimeOnly(msg.created_at || new Date());
-      const contentHtml = msg.audio_url
-        ? renderVoiceNote(msg.audio_url, msg.id)
-        : `<div class="dm-msg-text">${escapeHtml(msg.content)}</div>`;
-      const deleteBtn = (isSent || isCEO) ? `<button class="dm-delete-btn" title="Delete message" data-id="${msg.id}">Delete</button>` : '';
-      const seenHtml = isSent && msg.read_at
-        ? `<div class="dm-seen-indicator">Seen ${formatTimeOnly(msg.read_at)}</div>`
-        : '';
-      const statusHtml = isSent ? `<span class="dm-msg-status">${msg.read_at ? 'Seen' : 'Sent'}</span>` : '';
-
-      let avatarHtml = '';
-      if (!isSent) {
-        if (sender.avatar_url) {
-          avatarHtml = `<img src="${escapeHtml(sender.avatar_url)}" class="avatar" alt="${escapeHtml(senderName)}" data-user-id="${sender.id || msg.sender_id}" data-user-name="${escapeHtml(senderName)}" data-user-role="${escapeHtml(senderRole)}">`;
-        } else {
-          avatarHtml = `<div class="avatar" style="background-color: ${stringToColor(senderName)};" data-user-id="${sender.id || msg.sender_id}" data-user-name="${escapeHtml(senderName)}" data-user-role="${escapeHtml(senderRole)}">${getInitials(senderName)}</div>`;
+      // ─── SIDEBAR TOGGLE ───
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', () => {
+          document.body.classList.toggle('sidebar-collapsed');
+          // Store preference in localStorage
+          const collapsed = document.body.classList.contains('sidebar-collapsed');
+          localStorage.setItem('techTitansSidebarCollapsed', collapsed);
+        });
+        // Restore preference
+        const stored = localStorage.getItem('techTitansSidebarCollapsed');
+        if (stored === 'true') {
+          document.body.classList.add('sidebar-collapsed');
         }
       }
 
-      return `
-        <div class="dm-msg-row ${isSent ? 'sent' : 'received'} ${isUnread ? 'unread' : ''}" data-message-id="${msg.id}" data-created-at="${msg.created_at}" data-sender-id="${msg.sender_id}">
-          ${avatarHtml}
-          <div class="dm-msg ${isSent ? 'sent' : 'received'}">
-            ${contentHtml}
-            <div class="dm-msg-meta">
-              <span>${timeStr}</span>
-              ${statusHtml}
-            </div>
-            ${seenHtml}
-            ${deleteBtn}
+      // ─── HELPERS ───
+      function formatDateHeader(date) {
+        const now = new Date();
+        const msgDate = new Date(date);
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const msgDay = new Date(msgDate.getFullYear(), msgDate.getMonth(), msgDate.getDate());
+        if (msgDay.getTime() === today.getTime()) return 'Today';
+        else if (msgDay.getTime() === yesterday.getTime()) return 'Yesterday';
+        else return msgDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long',
+            day: 'numeric' });
+      }
+
+      function formatTimeOnly(date) {
+        return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+
+      function formatAudioTime(seconds) {
+        if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+        const rounded = Math.floor(seconds);
+        const minutes = Math.floor(rounded / 60);
+        const secs = rounded % 60;
+        return `${minutes}:${secs.toString().padStart(2, '0')}`;
+      }
+
+      function stringToColor(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        const hue = Math.abs(hash % 360);
+        return `hsl(${hue}, 70%, 50%)`;
+      }
+
+      function getInitials(name) {
+        if (!name) return '?';
+        const parts = name.trim().split(/\s+/);
+        if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+        return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+      }
+
+      function escapeHtml(unsafe) {
+        if (unsafe === null || unsafe === undefined) return '';
+        return String(unsafe).replace(/[&<>"']/g, function(m) {
+          if (m === '&') return '&amp;';
+          if (m === '<') return '&lt;';
+          if (m === '>') return '&gt;';
+          if (m === '"') return '&quot;';
+          if (m === "'") return '&#039;';
+          return m;
+        });
+      }
+
+      function renderVoiceNote(audioUrl, messageId) {
+        const bars = [12, 20, 15, 26, 18, 30, 14, 24, 17, 28, 13, 22, 16, 25]
+          .map(h => `<span style="--h:${h}px"></span>`)
+          .join('');
+        return `
+          <div class="dm-voice-note" data-audio-url="${escapeHtml(audioUrl)}" data-message-id="${escapeHtml(messageId)}">
+            <button type="button" class="dm-audio-btn" aria-label="Play voice note">Play</button>
+            <div class="dm-wave">${bars}</div>
+            <span class="dm-audio-duration">0:00</span>
+            <div class="dm-audio-progress"><span></span></div>
           </div>
-        </div>
-      `;
-    }
-
-    function attachMessageInteractions(root = document) {
-      root.querySelectorAll('.dm-msg-row').forEach(row => row.addEventListener('contextmenu', onRightClick));
-      root.querySelectorAll('.dm-delete-btn').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          e.stopPropagation();
-          const messageId = btn.dataset.id;
-          if (confirm('Delete this message?')) await deletePrivateMessage(messageId);
-        });
-      });
-      root.querySelectorAll('.dm-msg-row .avatar, .dm-msg-row .avatar img').forEach(el => el.addEventListener('click', onAvatarClick));
-      root.querySelectorAll('.dm-voice-note').forEach(setupVoiceNoteControl);
-    }
-
-    function appendRenderedMessage(messagesDiv, msg, options = {}) {
-      const emptyState = messagesDiv.querySelector('.dm-empty-state');
-      if (emptyState) emptyState.remove();
-      messagesDiv.insertAdjacentHTML('beforeend', renderMessageBubble(msg, options));
-      const newRow = messagesDiv.lastElementChild;
-      attachMessageInteractions(newRow);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-      return newRow;
-    }
-
-    function setupVoiceNoteControl(note) {
-      if (note.dataset.ready === 'true') return;
-      note.dataset.ready = 'true';
-      const audio = new Audio(note.dataset.audioUrl);
-      const button = note.querySelector('.dm-audio-btn');
-      const duration = note.querySelector('.dm-audio-duration');
-      const progress = note.querySelector('.dm-audio-progress span');
-
-      audio.addEventListener('loadedmetadata', () => {
-        duration.textContent = formatAudioTime(audio.duration);
-      });
-      audio.addEventListener('timeupdate', () => {
-        const percent = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
-        progress.style.width = `${percent}%`;
-        duration.textContent = formatAudioTime(audio.duration ? audio.duration - audio.currentTime : audio.currentTime);
-      });
-      audio.addEventListener('ended', () => {
-        button.textContent = 'Play';
-        progress.style.width = '0%';
-        duration.textContent = formatAudioTime(audio.duration);
-      });
-      button.addEventListener('click', (event) => {
-        event.stopPropagation();
-        document.querySelectorAll('.dm-voice-note').forEach(other => {
-          if (other !== note && other._audio) {
-            other._audio.pause();
-            other.querySelector('.dm-audio-btn').textContent = 'Play';
-          }
-        });
-        if (audio.paused) {
-          audio.play();
-          button.textContent = 'Pause';
-        } else {
-          audio.pause();
-          button.textContent = 'Play';
-        }
-      });
-      note._audio = audio;
-    }
-
-    function showToast(text) {
-      toast.textContent = text;
-      toast.style.display = 'block';
-      toast.classList.remove('hide');
-      setTimeout(() => {
-        toast.classList.add('hide');
-        setTimeout(() => toast.style.display = 'none', 300);
-      }, 3000);
-    }
-
-    function maybeAppendDateSeparator(prevDate, currentDate) {
-      if (!prevDate) return '';
-      const prevDay = new Date(prevDate).toDateString();
-      const currDay = new Date(currentDate).toDateString();
-      if (prevDay !== currDay) {
-        return `<div class="date-separator"><span>${formatDateHeader(currentDate)}</span></div>`;
-      }
-      return '';
-    }
-
-    // ==================== PRESENCE ====================
-    async function setupPresence() {
-      if (!currentUser) return;
-      presenceChannel = supabase.channel('online-users', { config: { presence: { key: currentUser.id } } });
-      presenceChannel
-        .on('presence', { event: 'sync' }, () => {
-          const state = presenceChannel.presenceState();
-          onlineUsers.clear();
-          Object.values(state).forEach(presences => {
-            presences.forEach(p => { if (p.userId !== currentUser.id) onlineUsers.set(p.userId, { name: p.name, role: p.role }); });
-          });
-          document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
-          // Update status dots in conversation list
-          document.querySelectorAll('.dm-conversation-item').forEach(item => {
-            const uid = item.dataset.userId;
-            const dot = item.querySelector('.status-dot');
-            if (dot) {
-              if (onlineUsers.has(uid)) dot.classList.add('online');
-              else dot.classList.remove('online');
-            }
-          });
-        })
-        .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-          newPresences.forEach(p => { if (p.userId !== currentUser.id) onlineUsers.set(p.userId, { name: p.name, role: p.role }); });
-          document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
-        })
-        .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-          leftPresences.forEach(p => onlineUsers.delete(p.userId));
-          document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
-        })
-        .subscribe(async (status) => {
-          if (status === 'SUBSCRIBED') {
-            await presenceChannel.track({ userId: currentUser.id, name: currentUserFullName, role: currentRole, online_at: new Date().toISOString() });
-          }
-        });
-    }
-
-    // ==================== UNREAD BADGE ====================
-    function updateDMBadge() {
-      const total = Object.values(dmUnreadBySender).reduce((a,b)=>a+b,0);
-      const dmBadge = document.getElementById('dmUnreadBadge');
-      if (total > 0) { dmBadge.style.display = 'inline-block'; dmBadge.textContent = total; }
-      else { dmBadge.style.display = 'none'; }
-    }
-
-    // ==================== MARK DM AS READ (with observer support) ====================
-    async function markDirectMessageAsRead(messageId, senderId) {
-      try {
-        await supabase
-          .from('private_messages')
-          .update({ read_at: new Date().toISOString() })
-          .eq('id', messageId)
-          .eq('recipient_id', currentUser.id);
-      } catch (err) { console.error('Mark DM read error:', err); }
-
-      // Remove from unread counter and update UI
-      if (senderId && dmUnreadBySender[senderId]) {
-        dmUnreadBySender[senderId] = Math.max(0, dmUnreadBySender[senderId] - 1);
-        if (dmUnreadBySender[senderId] === 0) delete dmUnreadBySender[senderId];
-        updateDMBadge();
-
-        // Update the conversation list badge
-        const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${senderId}"]`);
-        if (targetItem) {
-          const badge = targetItem.querySelector('.dm-unread-badge');
-          const newCount = dmUnreadBySender[senderId] || 0;
-          if (newCount > 0) badge.textContent = newCount;
-          else if (badge) badge.remove();
-        }
+        `;
       }
 
-      // Remove the 'unread' class from the message row
-      const msgRow = document.querySelector(`.dm-msg-row[data-message-id="${messageId}"]`);
-      if (msgRow) msgRow.classList.remove('unread');
-    }
+      function renderMessageBubble(msg, options = {}) {
+        const isSent = options.isSent ?? msg.sender_id === currentUser.id;
+        const sender = msg.sender || options.sender || {};
+        const senderName = sender.full_name || options.senderName || 'Unknown';
+        const senderRole = sender.job_role || options.senderRole || '';
+        const isUnread = !isSent && !msg.read_at;
+        const timeStr = formatTimeOnly(msg.created_at || new Date());
+        const contentHtml = msg.audio_url ?
+          renderVoiceNote(msg.audio_url, msg.id) :
+          `<div class="dm-msg-text">${escapeHtml(msg.content)}</div>`;
+        const deleteBtn = (isSent || isCEO) ?
+          `<button class="dm-delete-btn" title="Delete message" data-id="${msg.id}">Delete</button>` :
+          '';
+        const seenHtml = isSent && msg.read_at ?
+          `<div class="dm-seen-indicator">Seen ${formatTimeOnly(msg.read_at)}</div>` :
+          '';
+        const statusHtml = isSent ?
+          `<span class="dm-msg-status">${msg.read_at ? 'Seen' : 'Sent'}</span>` :
+          '';
 
-    // ==================== OBSERVER FOR AUTO-MARK READ ====================
-    function setupDmObserver() {
-      if (dmObserver) dmObserver.disconnect();
-      dmObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const row = entry.target;
-            const messageId = row.dataset.messageId;
-            const senderId = row.dataset.senderId;
-            // Only mark received messages that are still unread
-            if (messageId && senderId && row.classList.contains('received') && row.classList.contains('unread')) {
-              markDirectMessageAsRead(messageId, senderId);
-            }
+        let avatarHtml = '';
+        if (!isSent) {
+          if (sender.avatar_url) {
+            avatarHtml =
+              `<img src="${escapeHtml(sender.avatar_url)}" class="avatar" alt="${escapeHtml(senderName)}" data-user-id="${sender.id || msg.sender_id}" data-user-name="${escapeHtml(senderName)}" data-user-role="${escapeHtml(senderRole)}">`;
+          } else {
+            avatarHtml =
+              `<div class="avatar" style="background-color:${stringToColor(senderName)};" data-user-id="${sender.id || msg.sender_id}" data-user-name="${escapeHtml(senderName)}" data-user-role="${escapeHtml(senderRole)}">${getInitials(senderName)}</div>`;
           }
-        });
-      }, { threshold: 0.5 });
-
-      // Observe all current unread received messages
-      document.querySelectorAll('.dm-msg-row.received.unread').forEach(row => dmObserver.observe(row));
-    }
-
-    // ==================== LOAD DM VIEW ====================
-    function setDmMobileChatOpen(isOpen) {
-      const layout = document.querySelector('.dm-layout');
-      const list = document.getElementById('dmConversationsList');
-      const chatArea = document.getElementById('dmChatArea');
-      const backBtn = document.getElementById('dmBackBtn');
-      if (!layout || !list || !chatArea || !backBtn) return;
-
-      layout.classList.toggle('chat-open', Boolean(isOpen));
-      list.style.display = '';
-      chatArea.style.display = '';
-      backBtn.style.display = '';
-    }
-
-    async function loadPrivateMessagesView() {
-      try {
-        const area = document.getElementById('messagesArea');
-        area.innerHTML = ''; // Clear
-
-        const { data: allProfiles, error: profilesError } = await supabase
-          .from('profiles')
-          .select('id, full_name, job_role')
-          .neq('id', currentUser.id);
-
-        if (profilesError) throw profilesError;
-
-        const unreadCounts = {};
-        const { data: unreadRows, error: unreadError } = await supabase
-          .from('private_messages')
-          .select('sender_id')
-          .eq('recipient_id', currentUser.id)
-          .is('read_at', null);
-        if (unreadError) console.warn('Unable to load unread counts:', unreadError);
-        for (const row of unreadRows || []) {
-          unreadCounts[row.sender_id] = (unreadCounts[row.sender_id] || 0) + 1;
         }
-        dmUnreadBySender = unreadCounts;
-        updateDMBadge();
 
-        const conversationsHtml = allProfiles.map(profile => {
-          const unread = unreadCounts[profile.id] || 0;
-          const unreadBadge = unread > 0 ? `<span class="dm-unread-badge">${unread}</span>` : '';
-          const onlineClass = onlineUsers.has(profile.id) ? 'online' : '';
-          return `
-            <div class="dm-conversation-item" data-user-id="${profile.id}" data-user-name="${escapeHtml(profile.full_name)}" data-user-role="${escapeHtml(profile.job_role)}">
-              <span class="status-dot ${onlineClass}"></span>
-              <div class="dm-conv-content">
-                <div class="dm-conv-name">${escapeHtml(profile.full_name)}</div>
-                <div class="dm-conv-role">${escapeHtml(profile.job_role)}</div>
+        return `
+          <div class="dm-msg-row ${isSent ? 'sent' : 'received'} ${isUnread ? 'unread' : ''}" data-message-id="${msg.id}" data-created-at="${msg.created_at}" data-sender-id="${msg.sender_id}">
+            ${avatarHtml}
+            <div class="dm-msg ${isSent ? 'sent' : 'received'}">
+              ${contentHtml}
+              <div class="dm-msg-meta">
+                <span>${timeStr}</span>
+                ${statusHtml}
               </div>
-              ${unreadBadge}
-            </div>
-          `;
-        }).join('');
-
-        area.innerHTML = `
-          <div class="dm-layout">
-            <div class="dm-conversations-list" id="dmConversationsList">
-              <div class="dm-list-header">All Members</div>
-              ${conversationsHtml}
-            </div>
-            <div class="dm-chat-area" id="dmChatArea">
-              <div class="dm-chat-header">
-                <div class="dm-chat-peer">
-                  <button class="hamburger-btn dm-icon-btn" id="mobileNavToggle" title="Menu">☰</button>
-                  <button class="dm-back-btn dm-icon-btn" id="dmBackBtn" title="Back">&lt;</button>
-                  <div id="dmPeerAvatar" class="avatar" style="display:none;"></div>
-                  <div class="dm-peer-copy">
-                    <span class="dm-chat-title">Select a conversation</span>
-                    <span class="dm-chat-subtitle">Messages and calls stay private here</span>
-                  </div>
-                </div>
-                <div class="dm-chat-actions">
-                  <button class="dm-icon-btn" id="dmHeaderVoiceCallBtn" title="Voice call" disabled>Call</button>
-                  <button class="dm-icon-btn" id="dmHeaderVideoCallBtn" title="Video call" disabled>Video</button>
-                </div>
-              </div>
-              <div id="dmChatMessages" class="dm-chat-messages"><div class="dm-empty-state">Pick a member to start a direct conversation.</div></div>
-              <div id="dmTypingContainer" class="typing-container" style="display: none;">
-                <div class="typing-indicator">
-                  <span></span><span></span><span></span>
-                  <span class="typing-text" id="dmTypingText">Someone is typing...</span>
-                </div>
-              </div>
-              <div class="dm-chat-input">
-                <div class="dm-composer-tools">
-                  <button class="voice-btn" id="dmVoiceNoteBtn" title="Record voice note">Mic</button>
-                </div>
-                <div class="dm-input-wrap">
-                  <input type="text" id="dmChatInput" placeholder="Message">
-                </div>
-                <button id="dmChatSendBtn">Send</button>
-                <span id="dmRecordingTimer" class="recording-timer" style="display: none;">0:00</span>
-              </div>
+              ${seenHtml}
+              ${deleteBtn}
             </div>
           </div>
         `;
-        // Attach conversation click handlers
-        document.querySelectorAll('.dm-conversation-item').forEach(item => {
-          item.addEventListener('click', async () => {
-            const userId = item.dataset.userId;
-            const userName = item.dataset.userName;
-            const userRole = item.dataset.userRole;
-            await openPrivateChat(userId, { full_name: userName, job_role: userRole });
-            document.querySelectorAll('.dm-conversation-item').forEach(i => i.classList.remove('active'));
-            item.classList.add('active');
-            const badge = item.querySelector('.dm-unread-badge');
-            if (badge) {
-              badge.remove();
-              delete dmUnreadBySender[userId];
-              updateDMBadge();
-            }
-            if (window.innerWidth <= 768) {
-              setDmMobileChatOpen(true);
-            }
+      }
+
+      function attachMessageInteractions(root) {
+        if (!root) root = document;
+        root.querySelectorAll('.dm-msg-row').forEach(row => row.addEventListener('contextmenu', onRightClick));
+        root.querySelectorAll('.dm-delete-btn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const messageId = btn.dataset.id;
+            if (confirm('Delete this message?')) await deletePrivateMessage(messageId);
           });
         });
+        root.querySelectorAll('.dm-msg-row .avatar, .dm-msg-row .avatar img').forEach(el => el.addEventListener(
+          'click', onAvatarClick));
+        root.querySelectorAll('.dm-voice-note').forEach(setupVoiceNoteControl);
+      }
 
-        document.getElementById('dmBackBtn').addEventListener('click', () => {
-          setDmMobileChatOpen(false);
-          currentRecipientId = null;
+      function appendRenderedMessage(messagesDiv, msg, options = {}) {
+        const emptyState = messagesDiv.querySelector('.dm-empty-state');
+        if (emptyState) emptyState.remove();
+        messagesDiv.insertAdjacentHTML('beforeend', renderMessageBubble(msg, options));
+        const newRow = messagesDiv.lastElementChild;
+        attachMessageInteractions(newRow);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        return newRow;
+      }
+
+      function setupVoiceNoteControl(note) {
+        if (note.dataset.ready === 'true') return;
+        note.dataset.ready = 'true';
+        const audio = new Audio(note.dataset.audioUrl);
+        const button = note.querySelector('.dm-audio-btn');
+        const duration = note.querySelector('.dm-audio-duration');
+        const progress = note.querySelector('.dm-audio-progress span');
+
+        audio.addEventListener('loadedmetadata', () => {
+          duration.textContent = formatAudioTime(audio.duration);
         });
+        audio.addEventListener('timeupdate', () => {
+          const percent = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+          progress.style.width = `${percent}%`;
+          duration.textContent = formatAudioTime(audio.duration ? audio.duration - audio.currentTime :
+            audio.currentTime);
+        });
+        audio.addEventListener('ended', () => {
+          button.textContent = 'Play';
+          progress.style.width = '0%';
+          duration.textContent = formatAudioTime(audio.duration);
+        });
+        button.addEventListener('click', (event) => {
+          event.stopPropagation();
+          document.querySelectorAll('.dm-voice-note').forEach(other => {
+            if (other !== note && other._audio) {
+              other._audio.pause();
+              other.querySelector('.dm-audio-btn').textContent = 'Play';
+            }
+          });
+          if (audio.paused) {
+            audio.play();
+            button.textContent = 'Pause';
+          } else {
+            audio.pause();
+            button.textContent = 'Play';
+          }
+        });
+        note._audio = audio;
+      }
 
-        const mobileNavToggle = document.getElementById('mobileNavToggle');
-        const mobileNavOverlay = document.getElementById('mobileNavOverlay');
-        const mobileNavClose = document.getElementById('mobileNavClose');
-        const mobileLogout = document.getElementById('mobileLogout');
-        if (mobileNavToggle && mobileNavOverlay) {
-          mobileNavToggle.addEventListener('click', () => {
-            mobileNavOverlay.style.display = 'flex';
-            mobileNavOverlay.setAttribute('aria-hidden', 'false');
-          });
+      function showToast(text) {
+        toast.textContent = text;
+        toast.style.display = 'block';
+        toast.classList.remove('hide');
+        setTimeout(() => {
+          toast.classList.add('hide');
+          setTimeout(() => toast.style.display = 'none', 300);
+        }, 3000);
+      }
+
+      function maybeAppendDateSeparator(prevDate, currentDate) {
+        if (!prevDate) return '';
+        const prevDay = new Date(prevDate).toDateString();
+        const currDay = new Date(currentDate).toDateString();
+        if (prevDay !== currDay) {
+          return `<div class="dm-date-separator"><span>${formatDateHeader(currentDate)}</span></div>`;
         }
-        if (mobileNavClose && mobileNavOverlay) {
-          mobileNavClose.addEventListener('click', () => {
-            mobileNavOverlay.style.display = 'none';
-            mobileNavOverlay.setAttribute('aria-hidden', 'true');
+        return '';
+      }
+
+      // ─── PRESENCE ───
+      async function setupPresence() {
+        if (!currentUser) return;
+        presenceChannel = supabase.channel('online-users', { config: { presence: { key: currentUser.id } } });
+        presenceChannel
+          .on('presence', { event: 'sync' }, () => {
+            const state = presenceChannel.presenceState();
+            onlineUsers.clear();
+            Object.values(state).forEach(presences => {
+              presences.forEach(p => {
+                if (p.userId !== currentUser.id) onlineUsers.set(p.userId, { name: p.name,
+                  role: p.role });
+              });
+            });
+            document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
+            document.querySelectorAll('.dm-conversation-item').forEach(item => {
+              const uid = item.dataset.userId;
+              const dot = item.querySelector('.status-dot');
+              if (dot) {
+                if (onlineUsers.has(uid)) dot.classList.add('online');
+                else dot.classList.remove('online');
+              }
+            });
+          })
+          .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+            newPresences.forEach(p => {
+              if (p.userId !== currentUser.id) onlineUsers.set(p.userId, { name: p.name,
+                role: p.role });
+            });
+            document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
+          })
+          .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+            leftPresences.forEach(p => onlineUsers.delete(p.userId));
+            document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
+          })
+          .subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+              await presenceChannel.track({ userId: currentUser.id, name: currentUserFullName,
+                role: currentRole, online_at: new Date().toISOString() });
+            }
           });
+      }
+
+      // ─── UNREAD BADGE ───
+      function updateDMBadge() {
+        const total = Object.values(dmUnreadBySender).reduce((a, b) => a + b, 0);
+        const dmBadge = document.getElementById('dmUnreadBadge');
+        if (total > 0) { dmBadge.style.display = 'inline-block';
+          dmBadge.textContent = total; } else { dmBadge.style.display = 'none'; }
+      }
+
+      // ─── MARK DM AS READ ───
+      async function markDirectMessageAsRead(messageId, senderId) {
+        try {
+          await supabase
+            .from('private_messages')
+            .update({ read_at: new Date().toISOString() })
+            .eq('id', messageId)
+            .eq('recipient_id', currentUser.id);
+        } catch (err) { console.error('Mark DM read error:', err); }
+
+        if (senderId && dmUnreadBySender[senderId]) {
+          dmUnreadBySender[senderId] = Math.max(0, dmUnreadBySender[senderId] - 1);
+          if (dmUnreadBySender[senderId] === 0) delete dmUnreadBySender[senderId];
+          updateDMBadge();
+          const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${senderId}"]`);
+          if (targetItem) {
+            const badge = targetItem.querySelector('.dm-unread-badge');
+            const newCount = dmUnreadBySender[senderId] || 0;
+            if (newCount > 0) badge.textContent = newCount;
+            else if (badge) badge.remove();
+          }
         }
-        if (mobileNavOverlay) {
-          mobileNavOverlay.addEventListener('click', event => {
-            if (event.target === mobileNavOverlay) {
+        const msgRow = document.querySelector(`.dm-msg-row[data-message-id="${messageId}"]`);
+        if (msgRow) {
+          msgRow.classList.remove('unread');
+          const statusEl = msgRow.querySelector('.dm-msg-status');
+          if (statusEl) statusEl.textContent = 'Seen';
+          if (!msgRow.querySelector('.dm-seen-indicator')) {
+            const seenDiv = document.createElement('div');
+            seenDiv.className = 'dm-seen-indicator';
+            seenDiv.textContent = `Seen ${formatTimeOnly(new Date())}`;
+            msgRow.querySelector('.dm-msg').appendChild(seenDiv);
+          }
+        }
+      }
+
+      // ─── OBSERVER FOR AUTO-MARK READ ───
+      function setupDmObserver() {
+        if (dmObserver) dmObserver.disconnect();
+        dmObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const row = entry.target;
+              const messageId = row.dataset.messageId;
+              const senderId = row.dataset.senderId;
+              if (messageId && senderId && row.classList.contains('received') && row.classList
+                .contains('unread')) {
+                markDirectMessageAsRead(messageId, senderId);
+              }
+            }
+          });
+        }, { threshold: 0.5 });
+        document.querySelectorAll('.dm-msg-row.received.unread').forEach(row => dmObserver.observe(row));
+      }
+
+      // ─── MOBILE CHAT TOGGLE ───
+      function setDmMobileChatOpen(isOpen) {
+        const layout = document.querySelector('.dm-layout');
+        const list = document.getElementById('dmConversationsList');
+        const chatArea = document.getElementById('dmChatArea');
+        const backBtn = document.getElementById('dmBackBtn');
+        if (!layout || !list || !chatArea || !backBtn) return;
+        layout.classList.toggle('chat-open', Boolean(isOpen));
+        list.style.display = '';
+        chatArea.style.display = '';
+        backBtn.style.display = '';
+      }
+
+      // ─── LOAD DM VIEW ───
+      async function loadPrivateMessagesView() {
+        try {
+          const area = document.getElementById('messagesArea');
+          area.innerHTML = '';
+
+          const { data: allProfiles, error: profilesError } = await supabase
+            .from('profiles')
+            .select('id, full_name, job_role')
+            .neq('id', currentUser.id);
+          if (profilesError) throw profilesError;
+
+          const unreadCounts = {};
+          const { data: unreadRows, error: unreadError } = await supabase
+            .from('private_messages')
+            .select('sender_id')
+            .eq('recipient_id', currentUser.id)
+            .is('read_at', null);
+          if (unreadError) console.warn('Unable to load unread counts:', unreadError);
+          for (const row of unreadRows || []) {
+            unreadCounts[row.sender_id] = (unreadCounts[row.sender_id] || 0) + 1;
+          }
+          dmUnreadBySender = unreadCounts;
+          updateDMBadge();
+
+          const conversationsHtml = allProfiles.map(profile => {
+            const unread = unreadCounts[profile.id] || 0;
+            const unreadBadge = unread > 0 ? `<span class="dm-unread-badge">${unread}</span>` : '';
+            const onlineClass = onlineUsers.has(profile.id) ? 'online' : '';
+            return `
+              <div class="dm-conversation-item" data-user-id="${profile.id}" data-user-name="${escapeHtml(profile.full_name)}" data-user-role="${escapeHtml(profile.job_role)}">
+                <span class="status-dot ${onlineClass}"></span>
+                <div class="dm-conv-content">
+                  <div class="dm-conv-name">${escapeHtml(profile.full_name)}</div>
+                  <div class="dm-conv-role">${escapeHtml(profile.job_role)}</div>
+                </div>
+                ${unreadBadge}
+              </div>
+            `;
+          }).join('');
+
+          area.innerHTML = `
+            <div class="dm-layout">
+              <div class="dm-conversations-list" id="dmConversationsList">
+                <div class="dm-list-header">All Members</div>
+                ${conversationsHtml}
+              </div>
+              <div class="dm-chat-area" id="dmChatArea" style="display:none;">
+                <div class="dm-chat-header">
+                  <div class="dm-chat-peer">
+                    <button class="hamburger-btn dm-icon-btn" id="mobileNavToggle" title="Menu">☰</button>
+                    <button class="dm-back-btn dm-icon-btn" id="dmBackBtn" title="Back">&lt;</button>
+                    <div id="dmPeerAvatar" class="avatar" style="display:none;"></div>
+                    <div class="dm-peer-copy">
+                      <span class="dm-chat-title">Select a conversation</span>
+                      <span class="dm-chat-subtitle">Messages and calls stay private here</span>
+                    </div>
+                  </div>
+                  <div class="dm-chat-actions">
+                    <button class="dm-icon-btn" id="dmHeaderVoiceCallBtn" title="Voice call" disabled>Call</button>
+                    <button class="dm-icon-btn" id="dmHeaderVideoCallBtn" title="Video call" disabled>Video</button>
+                  </div>
+                </div>
+                <div id="dmChatMessages" class="dm-chat-messages"><div class="dm-empty-state">Pick a member to start a direct conversation.</div></div>
+                <div id="dmTypingContainer" class="typing-container" style="display:none;">
+                  <div class="typing-indicator">
+                    <span></span><span></span><span></span>
+                    <span class="typing-text" id="dmTypingText">Someone is typing...</span>
+                  </div>
+                </div>
+                <div class="dm-chat-input">
+                  <div class="dm-composer-tools">
+                    <button class="voice-btn" id="dmVoiceNoteBtn" title="Record voice note">Mic</button>
+                  </div>
+                  <div class="dm-input-wrap">
+                    <input type="text" id="dmChatInput" placeholder="Message">
+                  </div>
+                  <button id="dmChatSendBtn">Send</button>
+                  <span id="dmRecordingTimer" class="recording-timer" style="display:none;">0:00</span>
+                </div>
+              </div>
+            </div>
+          `;
+
+          // ── conversation clicks ──
+          document.querySelectorAll('.dm-conversation-item').forEach(item => {
+            item.addEventListener('click', async () => {
+              const userId = item.dataset.userId;
+              const userName = item.dataset.userName;
+              const userRole = item.dataset.userRole;
+              await openPrivateChat(userId, { full_name: userName, job_role: userRole });
+              document.querySelectorAll('.dm-conversation-item').forEach(i => i.classList.remove(
+                'active'));
+              item.classList.add('active');
+              const badge = item.querySelector('.dm-unread-badge');
+              if (badge) {
+                badge.remove();
+                delete dmUnreadBySender[userId];
+                updateDMBadge();
+              }
+              if (window.innerWidth <= 768) {
+                setDmMobileChatOpen(true);
+              }
+            });
+          });
+
+          document.getElementById('dmBackBtn').addEventListener('click', () => {
+            setDmMobileChatOpen(false);
+            currentRecipientId = null;
+          });
+
+          // ── mobile nav ──
+          const mobileNavToggle = document.getElementById('mobileNavToggle');
+          const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+          const mobileNavClose = document.getElementById('mobileNavClose');
+          const mobileLogout = document.getElementById('mobileLogout');
+          if (mobileNavToggle && mobileNavOverlay) {
+            mobileNavToggle.addEventListener('click', () => {
+              mobileNavOverlay.style.display = 'flex';
+              mobileNavOverlay.setAttribute('aria-hidden', 'false');
+            });
+          }
+          if (mobileNavClose && mobileNavOverlay) {
+            mobileNavClose.addEventListener('click', () => {
               mobileNavOverlay.style.display = 'none';
               mobileNavOverlay.setAttribute('aria-hidden', 'true');
-            }
-          });
-        }
-        if (mobileLogout) {
-          mobileLogout.addEventListener('click', () => {
-            document.getElementById('logout').click();
-          });
-        }
-
-        document.getElementById('dmHeaderVoiceCallBtn').addEventListener('click', () => {
-          if (!currentRecipientId) return;
-          const activeItem = document.querySelector('.dm-conversation-item.active');
-          const userName = activeItem ? activeItem.dataset.userName : 'User';
-          startDMCall(currentRecipientId, userName, 'voice');
-        });
-        document.getElementById('dmHeaderVideoCallBtn').addEventListener('click', () => {
-          if (!currentRecipientId) return;
-          const activeItem = document.querySelector('.dm-conversation-item.active');
-          const userName = activeItem ? activeItem.dataset.userName : 'User';
-          startDMCall(currentRecipientId, userName, 'video');
-        });
-        // DM voice recording
-        const dmVoiceBtn = document.getElementById('dmVoiceNoteBtn');
-        const dmRecordingTimer = document.getElementById('dmRecordingTimer');
-        dmVoiceBtn.addEventListener('click', async () => {
-          if (dmIsRecording) {
-            if (dmMediaRecorder) {
-              dmMediaRecorder.stop();
-              dmIsRecording = false;
-              dmVoiceBtn.textContent = 'Mic';
-              dmVoiceBtn.classList.remove('recording');
-              dmRecordingTimer.style.display = 'none';
-              if (dmRecordingTimerInterval) { clearInterval(dmRecordingTimerInterval); dmRecordingTimerInterval = null; }
-            }
-          } else {
-            try {
-              const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-              dmMediaRecorder = new MediaRecorder(stream);
-              dmAudioChunks = [];
-              dmMediaRecorder.ondataavailable = event => { dmAudioChunks.push(event.data); };
-              dmMediaRecorder.onstop = async () => {
-                const audioBlob = new Blob(dmAudioChunks, { type: 'audio/webm' });
-                if (!currentRecipientId) { alert('No chat selected. Please open a conversation first.'); return; }
-                await sendPrivateVoiceNote(audioBlob, currentRecipientId);
-                stream.getTracks().forEach(track => track.stop());
-              };
-              dmMediaRecorder.start();
-              dmIsRecording = true;
-              dmVoiceBtn.classList.add('recording');
-              dmVoiceBtn.textContent = 'Stop';
-              dmRecordingStartTime = Date.now();
-              dmRecordingTimer.style.display = 'inline';
-              dmRecordingTimerInterval = setInterval(() => {
-                if (!dmIsRecording) return;
-                const elapsed = Math.floor((Date.now() - dmRecordingStartTime) / 1000);
-                const minutes = Math.floor(elapsed / 60);
-                const seconds = elapsed % 60;
-                dmRecordingTimer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-              }, 1000);
-            } catch (err) { console.error('DM mic error:', err); alert('Could not access microphone.'); }
+            });
           }
-        });
+          if (mobileNavOverlay) {
+            mobileNavOverlay.addEventListener('click', event => {
+              if (event.target === mobileNavOverlay) {
+                mobileNavOverlay.style.display = 'none';
+                mobileNavOverlay.setAttribute('aria-hidden', 'true');
+              }
+            });
+          }
+          if (mobileLogout) {
+            mobileLogout.addEventListener('click', () => {
+              document.getElementById('logout').click();
+            });
+          }
 
-        // If URL has ?user=id, auto-open that conversation
-        const urlParams = new URLSearchParams(window.location.search);
-        const targetUserId = urlParams.get('user');
-        if (targetUserId) {
-          const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${targetUserId}"]`);
-          if (targetItem) targetItem.click();
+          // ── call buttons ──
+          document.getElementById('dmHeaderVoiceCallBtn').addEventListener('click', () => {
+            if (!currentRecipientId) return;
+            const activeItem = document.querySelector('.dm-conversation-item.active');
+            const userName = activeItem ? activeItem.dataset.userName : 'User';
+            startDMCall(currentRecipientId, userName, 'voice');
+          });
+          document.getElementById('dmHeaderVideoCallBtn').addEventListener('click', () => {
+            if (!currentRecipientId) return;
+            const activeItem = document.querySelector('.dm-conversation-item.active');
+            const userName = activeItem ? activeItem.dataset.userName : 'User';
+            startDMCall(currentRecipientId, userName, 'video');
+          });
+
+          // ── voice recording ──
+          const dmVoiceBtn = document.getElementById('dmVoiceNoteBtn');
+          const dmRecordingTimer = document.getElementById('dmRecordingTimer');
+          dmVoiceBtn.addEventListener('click', async () => {
+            if (dmIsRecording) {
+              if (dmMediaRecorder) {
+                dmMediaRecorder.stop();
+                dmIsRecording = false;
+                dmVoiceBtn.textContent = 'Mic';
+                dmVoiceBtn.classList.remove('recording');
+                dmRecordingTimer.style.display = 'none';
+                if (dmRecordingTimerInterval) { clearInterval(dmRecordingTimerInterval);
+                  dmRecordingTimerInterval = null; }
+              }
+            } else {
+              try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                dmMediaRecorder = new MediaRecorder(stream);
+                dmAudioChunks = [];
+                dmMediaRecorder.ondataavailable = event => { dmAudioChunks.push(event.data); };
+                dmMediaRecorder.onstop = async () => {
+                  const audioBlob = new Blob(dmAudioChunks, { type: 'audio/webm' });
+                  if (!currentRecipientId) { alert(
+                      'No chat selected. Please open a conversation first.');
+                    return; }
+                  await sendPrivateVoiceNote(audioBlob, currentRecipientId);
+                  stream.getTracks().forEach(track => track.stop());
+                };
+                dmMediaRecorder.start();
+                dmIsRecording = true;
+                dmVoiceBtn.classList.add('recording');
+                dmVoiceBtn.textContent = 'Stop';
+                dmRecordingStartTime = Date.now();
+                dmRecordingTimer.style.display = 'inline';
+                dmRecordingTimerInterval = setInterval(() => {
+                  if (!dmIsRecording) return;
+                  const elapsed = Math.floor((Date.now() -
+                    dmRecordingStartTime) / 1000);
+                  const minutes = Math.floor(elapsed / 60);
+                  const seconds = elapsed % 60;
+                  dmRecordingTimer.textContent =
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }, 1000);
+              } catch (err) { console.error('DM mic error:', err);
+                alert('Could not access microphone.'); }
+            }
+          });
+
+          // ── auto-open from URL ──
+          const urlParams = new URLSearchParams(window.location.search);
+          const targetUserId = urlParams.get('user');
+          if (targetUserId) {
+            const targetItem = document.querySelector(
+              `.dm-conversation-item[data-user-id="${targetUserId}"]`);
+            if (targetItem) targetItem.click();
+          }
+        } catch (err) {
+          console.error('Load DM view error:', err);
+          document.getElementById('messagesArea').innerHTML =
+            '<div style="color:#ff628c;text-align:center;padding:2rem;">Failed to load direct messages.</div>';
         }
-      } catch (err) {
-        console.error('Load DM view error:', err);
-        document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Failed to load direct messages.</div>';
       }
-    }
 
-    // ==================== DM TYPING INDICATOR ====================
-    function updateDmTypingIndicator() {
-      const container = document.getElementById('dmTypingContainer');
-      const textEl = document.getElementById('dmTypingText');
-      if (!container || !textEl) return;
-      if (dmActiveTypers.size === 0) { container.style.display = 'none'; return; }
-      const names = Array.from(dmActiveTypers);
-      let text = '';
-      if (names.length === 1) text = `${names[0]} is typing...`;
-      else if (names.length === 2) text = `${names[0]} and ${names[1]} are typing...`;
-      else text = `${names.length} people are typing...`;
-      textEl.textContent = text;
-      container.style.display = 'block';
-    }
+      // ─── TYPING INDICATOR ───
+      function updateDmTypingIndicator() {
+        const container = document.getElementById('dmTypingContainer');
+        const textEl = document.getElementById('dmTypingText');
+        if (!container || !textEl) return;
+        if (dmActiveTypers.size === 0) { container.style.display = 'none'; return; }
+        const names = Array.from(dmActiveTypers);
+        let text = '';
+        if (names.length === 1) text = `${names[0]} is typing...`;
+        else if (names.length === 2) text = `${names[0]} and ${names[1]} are typing...`;
+        else text = `${names.length} people are typing...`;
+        textEl.textContent = text;
+        container.style.display = 'block';
+      }
 
-    // ==================== OPEN PRIVATE CHAT ====================
-    async function openPrivateChat(otherUserId, otherProfile) {
-      currentRecipientId = otherUserId;
-      if (dmTypingSubscription) dmTypingSubscription.unsubscribe();
-      dmActiveTypers.clear();
+      // ─── OPEN PRIVATE CHAT ───
+      async function openPrivateChat(otherUserId, otherProfile) {
+        currentRecipientId = otherUserId;
+        if (dmTypingSubscription) dmTypingSubscription.unsubscribe();
+        dmActiveTypers.clear();
 
-      const chatArea = document.getElementById('dmChatArea');
-      const headerTitle = document.querySelector('.dm-chat-title');
-      const headerSubtitle = document.querySelector('.dm-chat-subtitle');
-      const peerAvatar = document.getElementById('dmPeerAvatar');
-      const messagesDiv = document.getElementById('dmChatMessages');
-      const input = document.getElementById('dmChatInput');
-      const sendBtn = document.getElementById('dmChatSendBtn');
-      const voiceCallBtn = document.getElementById('dmHeaderVoiceCallBtn');
-      const videoCallBtn = document.getElementById('dmHeaderVideoCallBtn');
+        const chatArea = document.getElementById('dmChatArea');
+        const headerTitle = document.querySelector('.dm-chat-title');
+        const headerSubtitle = document.querySelector('.dm-chat-subtitle');
+        const peerAvatar = document.getElementById('dmPeerAvatar');
+        const messagesDiv = document.getElementById('dmChatMessages');
+        const input = document.getElementById('dmChatInput');
+        const sendBtn = document.getElementById('dmChatSendBtn');
+        const voiceCallBtn = document.getElementById('dmHeaderVoiceCallBtn');
+        const videoCallBtn = document.getElementById('dmHeaderVideoCallBtn');
 
-      const safeName = otherProfile.full_name || 'Unknown';
-      const safeRole = otherProfile.job_role || 'Member';
-      headerTitle.textContent = safeName;
-      headerSubtitle.textContent = `${safeRole} • ${onlineUsers.has(otherUserId) ? 'online' : 'offline'}`;
-      peerAvatar.style.display = 'flex';
-      peerAvatar.style.backgroundColor = stringToColor(safeName);
-      peerAvatar.textContent = getInitials(safeName);
-      voiceCallBtn.disabled = false;
-      videoCallBtn.disabled = false;
-      chatArea.style.display = 'flex';
-      input.focus();
-      messagesDiv.innerHTML = '<div class="dm-empty-state">Loading conversation...</div>';
-
-      try {
-        let { data, error } = await supabase
-          .from('private_messages')
-          .select(`*, sender:profiles!sender_id (id, full_name, job_role, avatar_url)`)
-          .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`)
-          .order('created_at', { ascending: true });
-
-        if (error && error.message && error.message.includes('Could not find a relationship')) {
-          console.warn('Join failed, falling back to selected profile data:', error.message);
-          const { data: msgs, error: msgsError } = await supabase
-            .from('private_messages')
-            .select('*')
-            .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`)
-            .order('created_at', { ascending: true });
-          if (msgsError) throw msgsError;
-          data = (msgs || []).map((msg) => ({
-            ...msg,
-            sender: msg.sender_id === currentUser.id
-              ? { id: currentUser.id, full_name: currentUserFullName, job_role: currentRole }
-              : { id: otherUserId, full_name: safeName, job_role: safeRole }
-          }));
-        } else if (error) { throw error; }
-
-        let html = '';
-        let lastDate = null;
-        for (const msg of data || []) {
-          const dateHeader = maybeAppendDateSeparator(lastDate, msg.created_at);
-          if (dateHeader) html += dateHeader.replace('date-separator', 'dm-date-separator');
-          lastDate = msg.created_at;
-          html += renderMessageBubble(msg, {
-            isSent: msg.sender_id === currentUser.id,
-            sender: msg.sender || { id: otherUserId, full_name: safeName, job_role: safeRole }
-          });
+        if (!chatArea || !headerTitle || !headerSubtitle || !peerAvatar || !messagesDiv || !input || !sendBtn) {
+          console.error('DM chat DOM elements missing');
+          return;
         }
-        messagesDiv.innerHTML = html || '<div class="dm-empty-state">No messages yet. Send the first one.</div>';
-        attachMessageInteractions(messagesDiv);
 
-        setupDmObserver();
+        const safeName = otherProfile.full_name || 'Unknown';
+        const safeRole = otherProfile.job_role || 'Member';
+        headerTitle.textContent = safeName;
+        headerSubtitle.textContent = `${safeRole} • ${onlineUsers.has(otherUserId) ? 'online' : 'offline'}`;
+        peerAvatar.style.display = 'flex';
+        peerAvatar.style.backgroundColor = stringToColor(safeName);
+        peerAvatar.textContent = getInitials(safeName);
+        voiceCallBtn.disabled = false;
+        videoCallBtn.disabled = false;
+        chatArea.style.display = 'flex'; // ensure visible
+        input.focus();
+        messagesDiv.innerHTML = '<div class="dm-empty-state">Loading conversation...</div>';
 
-        sendBtn.onclick = () => sendPrivateMessage(otherUserId);
-        input.onkeydown = (e) => {
-          if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendPrivateMessage(otherUserId);
+        try {
+          let { data, error } = await supabase
+            .from('private_messages')
+            .select(`*, sender:profiles!sender_id (id, full_name, job_role, avatar_url)`)
+            .or(
+              `and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`
+              )
+            .order('created_at', { ascending: true });
+
+          if (error && error.message && error.message.includes('Could not find a relationship')) {
+            console.warn('Join failed, falling back to selected profile data:', error.message);
+            const { data: msgs, error: msgsError } = await supabase
+              .from('private_messages')
+              .select('*')
+              .or(
+                `and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`
+                )
+              .order('created_at', { ascending: true });
+            if (msgsError) throw msgsError;
+            data = (msgs || []).map((msg) => ({
+              ...msg,
+              sender: msg.sender_id === currentUser.id ?
+                { id: currentUser.id, full_name: currentUserFullName, job_role: currentRole } :
+                { id: otherUserId, full_name: safeName, job_role: safeRole }
+            }));
+          } else if (error) { throw error; }
+
+          let html = '';
+          let lastDate = null;
+          for (const msg of data || []) {
+            const dateHeader = maybeAppendDateSeparator(lastDate, msg.created_at);
+            if (dateHeader) html += dateHeader;
+            lastDate = msg.created_at;
+            html += renderMessageBubble(msg, {
+              isSent: msg.sender_id === currentUser.id,
+              sender: msg.sender || { id: otherUserId, full_name: safeName, job_role: safeRole }
+            });
           }
-        };
+          messagesDiv.innerHTML = html ||
+            '<div class="dm-empty-state">No messages yet. Send the first one.</div>';
+          attachMessageInteractions(messagesDiv);
+          setupDmObserver();
 
-        const typingChannel = `typing-dm-${Math.min(currentUser.id, otherUserId)}-${Math.max(currentUser.id, otherUserId)}`;
-        dmTypingSubscription = supabase
-          .channel(typingChannel)
-          .on('broadcast', { event: 'typing' }, (payload) => {
-            const { userId, userName } = payload.payload;
-            if (userId === currentUser.id) return;
-            if (dmTypingTimeouts[userId]) clearTimeout(dmTypingTimeouts[userId]);
-            dmActiveTypers.add(userName);
-            updateDmTypingIndicator();
-            dmTypingTimeouts[userId] = setTimeout(() => {
-              dmActiveTypers.delete(userName);
+          sendBtn.onclick = () => sendPrivateMessage(otherUserId);
+          input.onkeydown = (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              sendPrivateMessage(otherUserId);
+            }
+          };
+
+          const typingChannel =
+            `typing-dm-${Math.min(currentUser.id, otherUserId)}-${Math.max(currentUser.id, otherUserId)}`;
+          dmTypingSubscription = supabase
+            .channel(typingChannel)
+            .on('broadcast', { event: 'typing' }, (payload) => {
+              const { userId, userName } = payload.payload;
+              if (userId === currentUser.id) return;
+              if (dmTypingTimeouts[userId]) clearTimeout(dmTypingTimeouts[userId]);
+              dmActiveTypers.add(userName);
               updateDmTypingIndicator();
-              delete dmTypingTimeouts[userId];
-            }, 3000);
+              dmTypingTimeouts[userId] = setTimeout(() => {
+                dmActiveTypers.delete(userName);
+                updateDmTypingIndicator();
+                delete dmTypingTimeouts[userId];
+              }, 3000);
+            })
+            .subscribe();
+
+          let dmTypingTimeout;
+          input.oninput = () => {
+            if (dmTypingTimeout) clearTimeout(dmTypingTimeout);
+            supabase.channel(typingChannel).send({
+              type: 'broadcast',
+              event: 'typing',
+              payload: { userId: currentUser.id, userName: currentUserFullName,
+                timestamp: Date.now() }
+            });
+            dmTypingTimeout = setTimeout(() => {}, 2000);
+          };
+
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+          input.value = '';
+        } catch (err) {
+          console.error('Load private chat error:', err);
+          messagesDiv.innerHTML = '<div style="color:#ff628c;padding:1rem;">Failed to load messages.</div>';
+        }
+      }
+
+      // ─── SEND PRIVATE MESSAGE ───
+      async function sendPrivateMessage(otherUserId) {
+        const input = document.getElementById('dmChatInput');
+        const content = input.value.trim();
+        if (!content) return;
+        input.value = '';
+
+        try {
+          const { data, error } = await supabase
+            .from('private_messages')
+            .insert({ sender_id: currentUser.id, recipient_id: otherUserId, content: content })
+            .select()
+            .single();
+          if (error) throw error;
+          const messagesDiv = document.getElementById('dmChatMessages');
+          appendRenderedMessage(messagesDiv, data, { isSent: true });
+        } catch (err) { console.error('Send private message error:', err);
+          alert('Failed to send: ' + err.message); }
+      }
+
+      // ─── SEND PRIVATE VOICE NOTE ───
+      async function sendPrivateVoiceNote(audioBlob, otherUserId) {
+        if (!otherUserId) { alert('Recipient not specified.'); return; }
+        const fileName = `${currentUser.id}/${Date.now()}.webm`;
+        const { error: uploadError } = await supabase.storage
+          .from('voice_notes')
+          .upload(fileName, audioBlob, { contentType: 'audio/webm' });
+        if (uploadError) { console.error('Upload error:', uploadError);
+          alert('Failed to upload voice note: ' + uploadError.message); return; }
+
+        const { data: urlData } = supabase.storage.from('voice_notes').getPublicUrl(fileName);
+        const audioUrl = urlData.publicUrl;
+
+        try {
+          const { data, error } = await supabase
+            .from('private_messages')
+            .insert({ sender_id: currentUser.id, recipient_id: otherUserId, content: '',
+              audio_url: audioUrl })
+            .select()
+            .single();
+          if (error) throw error;
+          const messagesDiv = document.getElementById('dmChatMessages');
+          appendRenderedMessage(messagesDiv, data, { isSent: true });
+        } catch (err) { console.error('Insert private voice note error:', err);
+          alert('Failed to send voice note: ' + err.message); }
+      }
+
+      // ─── DELETE PRIVATE MESSAGE ───
+      async function deletePrivateMessage(messageId) {
+        try {
+          let query = supabase.from('private_messages').delete().eq('id', messageId);
+          if (!isCEO) query = query.eq('sender_id', currentUser.id);
+          const { error } = await query;
+          if (error) throw error;
+          removePrivateMessageFromUI(messageId);
+        } catch (err) { console.error('Delete DM error:', err);
+          alert('Failed to delete message: ' + err.message); }
+      }
+
+      function removePrivateMessageFromUI(messageId) {
+        const msgRow = document.querySelector(`.dm-msg-row[data-message-id="${messageId}"]`);
+        if (!msgRow) return;
+        if (msgRow.classList.contains('received') && msgRow.classList.contains('unread')) {
+          const senderId = msgRow.dataset.senderId;
+          if (senderId && dmUnreadBySender[senderId] > 0) {
+            dmUnreadBySender[senderId]--;
+            if (dmUnreadBySender[senderId] === 0) delete dmUnreadBySender[senderId];
+          }
+          updateDMBadge();
+          const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${senderId}"]`);
+          if (targetItem) {
+            const badge = targetItem.querySelector('.dm-unread-badge');
+            const newCount = dmUnreadBySender[senderId] || 0;
+            if (newCount > 0) badge.textContent = newCount;
+            else if (badge) badge.remove();
+          }
+        }
+        if (dmObserver) dmObserver.unobserve(msgRow);
+        msgRow.remove();
+        const messagesDiv = document.getElementById('dmChatMessages');
+        if (messagesDiv && messagesDiv.children.length === 0) {
+          messagesDiv.innerHTML =
+            '<div style="color:#9aa4bf;text-align:center;padding:2rem;">No messages yet. Say hello!</div>';
+        }
+      }
+
+      // ─── RIGHT-CLICK READ RECEIPTS ───
+      async function onRightClick(e) {
+        e.preventDefault();
+        const row = e.currentTarget;
+        const messageId = row.dataset.messageId;
+        modal.style.display = 'none';
+
+        const { data: msg, error } = await supabase
+          .from('private_messages')
+          .select('sender_id, recipient_id, read_at, profiles!sender_id(full_name), profiles!recipient_id(full_name)')
+          .eq('id', messageId)
+          .single();
+        if (error || !msg) { console.error('fetch DM readers error:', error); return; }
+
+        const readerName = (msg.sender_id === currentUser.id) ? msg.profiles_recipient_id?.full_name : msg
+          .profiles_sender_id?.full_name;
+        const readTime = msg.read_at ? new Date(msg.read_at).toLocaleString('en-US', { month: 'short',
+          day: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
+        if (msg.read_at) {
+          modal.innerHTML =
+            `<h4>Read receipt</h4><p style="padding:0.5rem 0;">Seen by ${escapeHtml(readerName)} at ${readTime}</p>`;
+        } else {
+          modal.innerHTML = '<h4>Read receipt</h4><p style="padding:0.5rem 0;">Not seen yet.</p>';
+        }
+        modal.style.left = e.pageX + 10 + 'px';
+        modal.style.top = e.pageY + 10 + 'px';
+        modal.style.display = 'block';
+        const hideModal = (ev) => { if (!modal.contains(ev.target)) { modal.style.display = 'none';
+            document.removeEventListener('click', hideModal); } };
+        setTimeout(() => document.addEventListener('click', hideModal), 0);
+      }
+
+      // ─── AVATAR CLICK (PROFILE MODAL) ───
+      async function onAvatarClick(e) {
+        e.stopPropagation();
+        const avatar = e.currentTarget;
+        const userId = avatar.dataset.userId;
+        const userName = avatar.dataset.userName;
+        const userRole = avatar.dataset.userRole;
+
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('full_name, job_role, avatar_url, created_at')
+          .eq('id', userId)
+          .single();
+
+        if (error || !profile) { console.error('Failed to load profile', error); return; }
+
+        modalName.textContent = profile.full_name || userName;
+        modalRole.textContent = profile.job_role || userRole || '-';
+        modalJoined.textContent = profile.created_at ? `Joined ${new Date(profile.created_at).toLocaleDateString()}` :
+          '-';
+
+        if (profile.avatar_url) {
+          modalAvatar.src = profile.avatar_url;
+          modalAvatar.style.display = 'block';
+          modalAvatarPlaceholder.style.display = 'none';
+        } else {
+          modalAvatar.style.display = 'none';
+          modalAvatarPlaceholder.style.display = 'flex';
+          modalAvatarPlaceholder.textContent = getInitials(profile.full_name || userName);
+        }
+
+        modalSendDM.dataset.userId = userId;
+        modalSendDM.dataset.userName = profile.full_name || userName;
+        profileModal.style.display = 'flex';
+      }
+
+      // ─── DM SUBSCRIPTIONS ───
+      function subscribeToAllDirectMessages() {
+        if (globalDmSubscription) globalDmSubscription.unsubscribe();
+        if (!currentUser) return;
+        globalDmSubscription = supabase
+          .channel(`dm-global-${currentUser.id}`)
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'private_messages',
+            filter: `recipient_id=eq.${currentUser.id}` }, async (payload) => {
+            const newMsg = payload.new;
+            if (newMsg.sender_id === currentUser.id) return;
+
+            if (currentRecipientId === newMsg.sender_id) {
+              const messagesDiv = document.getElementById('dmChatMessages');
+              const { data: senderProfile } = await supabase
+                .from('profiles')
+                .select('id, full_name, job_role, avatar_url')
+                .eq('id', newMsg.sender_id)
+                .single();
+              const sender = senderProfile || { full_name: 'Unknown', avatar_url: null };
+              const newRow = appendRenderedMessage(messagesDiv, { ...newMsg, sender }, { isSent: false,
+                sender });
+              if (dmObserver) dmObserver.observe(newRow);
+              return;
+            }
+
+            dmUnreadBySender[newMsg.sender_id] = (dmUnreadBySender[newMsg.sender_id] || 0) + 1;
+            updateDMBadge();
+
+            const targetItem = document.querySelector(
+              `.dm-conversation-item[data-user-id="${newMsg.sender_id}"]`);
+            if (targetItem) {
+              let badge = targetItem.querySelector('.dm-unread-badge');
+              const currentCount = dmUnreadBySender[newMsg.sender_id];
+              if (badge) badge.textContent = currentCount;
+              else {
+                badge = document.createElement('span');
+                badge.className = 'dm-unread-badge';
+                badge.textContent = currentCount;
+                targetItem.appendChild(badge);
+              }
+            }
+
+            let senderName = 'Someone';
+            try {
+              const { data: prof } = await supabase.from('profiles').select('full_name').eq('id',
+                newMsg.sender_id).single();
+              if (prof) senderName = prof.full_name;
+            } catch (e) {}
+            showToast(`New DM from ${senderName}`);
+
+            if (window.TechTitansNotifications) {
+              window.TechTitansNotifications.display(`New DM from ${senderName}`, {
+                body: newMsg.content ? newMsg.content.substring(0, 50) + (newMsg.content
+                  .length > 50 ? '...' : '') : 'Sent a voice note',
+                url: 'dm.html'
+              });
+            }
+          })
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'private_messages',
+            filter: `recipient_id=eq.${currentUser.id}` }, (payload) => {
+            const updated = payload.new;
+            if (updated.read_at && dmUnreadBySender[updated.sender_id]) {
+              dmUnreadBySender[updated.sender_id]--;
+              if (dmUnreadBySender[updated.sender_id] <= 0) delete dmUnreadBySender[updated
+              .sender_id];
+              updateDMBadge();
+              const targetItem = document.querySelector(
+                `.dm-conversation-item[data-user-id="${updated.sender_id}"]`);
+              if (targetItem) {
+                const badge = targetItem.querySelector('.dm-unread-badge');
+                const newCount = dmUnreadBySender[updated.sender_id] || 0;
+                if (newCount > 0) badge.textContent = newCount;
+                else if (badge) badge.remove();
+              }
+              if (currentRecipientId === updated.sender_id) {
+                const msgRow = document.querySelector(
+                  `.dm-msg-row[data-message-id="${updated.id}"]`);
+                if (msgRow) {
+                  msgRow.classList.remove('unread');
+                  const statusEl = msgRow.querySelector('.dm-msg-status');
+                  if (statusEl) statusEl.textContent = 'Seen';
+                  if (!msgRow.querySelector('.dm-seen-indicator')) {
+                    const seenDiv = document.createElement('div');
+                    seenDiv.className = 'dm-seen-indicator';
+                    seenDiv.textContent = `Seen ${formatTimeOnly(updated.read_at)}`;
+                    msgRow.querySelector('.dm-msg').appendChild(seenDiv);
+                  }
+                }
+              }
+            }
           })
           .subscribe();
 
-        let dmTypingTimeout;
-        input.oninput = () => {
-          if (dmTypingTimeout) clearTimeout(dmTypingTimeout);
-          supabase.channel(typingChannel).send({
-            type: 'broadcast',
-            event: 'typing',
-            payload: { userId: currentUser.id, userName: currentUserFullName, timestamp: Date.now() }
+        if (dmDeleteSubscription) dmDeleteSubscription.unsubscribe();
+        dmDeleteSubscription = supabase
+          .channel('dm-deletes')
+          .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'private_messages' },
+          (payload) => {
+            const deletedMsg = payload.old;
+            if (deletedMsg.sender_id === currentUser.id || deletedMsg.recipient_id === currentUser
+              .id) {
+              removePrivateMessageFromUI(deletedMsg.id);
+            }
+          })
+          .subscribe();
+      }
+
+      // ─── AGORA DM CALL FUNCTIONS ───
+      async function getDmChannelName(userA, userB) {
+        const sorted = [userA, userB].sort();
+        return window.TechTitansAgora.compactChannelName('dm', sorted.join('_'));
+      }
+
+      function isValidAgoraChannelName(channelName) {
+        return window.TechTitansAgora.isValidChannelName(channelName);
+      }
+
+      function normalizeCallType(mode) {
+        return mode === 'video' ? 'video' : 'voice';
+      }
+
+      function getCallUserMessage(error) {
+        const message = String(error?.message || error?.name || '').toLowerCase();
+        if (message.includes('notallowed') || message.includes('permission') || message.includes('denied')) {
+          return 'Microphone or camera permission is blocked. Please allow access for TechTitans and try again.';
+        }
+        if (message.includes('notreadable') || message.includes('could not start audio source')) {
+          return 'Microphone is unavailable. Close other apps using it, check Android app permissions, and try again.';
+        }
+        if (message.includes('notfound') || message.includes('device not found')) {
+          return 'No microphone or camera was found on this device.';
+        }
+        if (message.includes('overconstrained')) {
+          return 'This device cannot start the requested microphone or camera settings.';
+        }
+        if (message.includes('token') || message.includes('fetch') || message.includes('network')) {
+          return 'Unable to connect to the calling service. Please check your connection and try again.';
+        }
+        return 'Unable to connect to the call. Please try again.';
+      }
+
+      function showCallError(error) {
+        const userMessage = getCallUserMessage(error);
+        if (typeof showToast === 'function') showToast(userMessage);
+        else alert(userMessage);
+      }
+
+      async function getAgoraToken(channelName) {
+        if (!currentUser?.id) {
+          throw new Error('You must be signed in to start a call.');
+        }
+        if (!isValidAgoraChannelName(channelName)) {
+          throw new Error('Invalid call channel name.');
+        }
+
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !sessionData?.session?.access_token) {
+          throw new Error('Authentication expired. Please log in again.');
+        }
+
+        let response;
+        try {
+          console.info('Agora token request started');
+          response = await fetch(`${SUPABASE_URL}/functions/v1/agora-token`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${sessionData.session.access_token}`
+            },
+            body: JSON.stringify({
+              channelName,
+              uid: currentUser.id
+            })
           });
-          dmTypingTimeout = setTimeout(() => {}, 2000);
+        } catch (error) {
+          console.error('Agora token request failed:', error);
+          throw new Error(
+            'Unable to connect to the calling service. Please check your connection and try again.');
+        }
+
+        let data = {};
+        try {
+          data = await response.json();
+        } catch (error) {
+          throw new Error('Token server returned an invalid response.');
+        }
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Unable to get Agora token.');
+        }
+        if (!data.token) {
+          throw new Error('Token server did not return an Agora token.');
+        }
+
+        console.info('Agora token received');
+        return data.token;
+      }
+
+      function setupAgoraTokenRefresh(client, getChannelName) {
+        if (!client?.on) return;
+        const renewToken = async () => {
+          try {
+            const freshToken = await getAgoraToken(getChannelName());
+            if (typeof client.renewToken === 'function') {
+              await client.renewToken(freshToken);
+            }
+          } catch (error) {
+            console.error('Unable to renew Agora token:', error);
+          }
         };
-
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        input.value = '';
-      } catch (err) {
-        console.error('Load private chat error:', err);
-        messagesDiv.innerHTML = '<div style="color:#ff628c; padding: 1rem;">Failed to load messages.</div>';
+        client.on('token-privilege-will-expire', renewToken);
+        client.on('token-privilege-did-expire', renewToken);
       }
-    }
-    // ==================== SEND PRIVATE MESSAGE ====================
-    async function sendPrivateMessage(otherUserId) {
-      const input = document.getElementById('dmChatInput');
-      const content = input.value.trim();
-      if (!content) return;
-      input.value = '';
 
-      try {
-        const { data, error } = await supabase
-          .from('private_messages')
-          .insert({ sender_id: currentUser.id, recipient_id: otherUserId, content: content })
-          .select()
-          .single();
-        if (error) throw error;
-
-        const messagesDiv = document.getElementById('dmChatMessages');
-        appendRenderedMessage(messagesDiv, data, { isSent: true });
-      } catch (err) { console.error('Send private message error:', err); alert('Failed to send: ' + err.message); }
-    }
-
-    // ==================== SEND PRIVATE VOICE NOTE ====================
-    async function sendPrivateVoiceNote(audioBlob, otherUserId) {
-      if (!otherUserId) { alert('Recipient not specified.'); return; }
-      const fileName = `${currentUser.id}/${Date.now()}.webm`;
-      const { error: uploadError } = await supabase.storage
-        .from('voice_notes')
-        .upload(fileName, audioBlob, { contentType: 'audio/webm' });
-      if (uploadError) { console.error('Upload error:', uploadError); alert('Failed to upload voice note: ' + uploadError.message); return; }
-
-      const { data: urlData } = supabase.storage.from('voice_notes').getPublicUrl(fileName);
-      const audioUrl = urlData.publicUrl;
-
-      try {
-        const { data, error } = await supabase
-          .from('private_messages')
-          .insert({ sender_id: currentUser.id, recipient_id: otherUserId, content: '', audio_url: audioUrl })
-          .select()
-          .single();
-        if (error) throw error;
-
-        const messagesDiv = document.getElementById('dmChatMessages');
-        appendRenderedMessage(messagesDiv, data, { isSent: true });
-      } catch (err) { console.error('Insert private voice note error:', err); alert('Failed to send voice note: ' + err.message); }
-    }
-
-    // ==================== DELETE PRIVATE MESSAGE ====================
-    async function deletePrivateMessage(messageId) {
-      try {
-        let query = supabase.from('private_messages').delete().eq('id', messageId);
-        if (!isCEO) query = query.eq('sender_id', currentUser.id);
-        const { error } = await query;
-        if (error) throw error;
-        removePrivateMessageFromUI(messageId);
-      } catch (err) { console.error('Delete DM error:', err); alert('Failed to delete message: ' + err.message); }
-    }
-
-    function removePrivateMessageFromUI(messageId) {
-      const msgRow = document.querySelector(`.dm-msg-row[data-message-id="${messageId}"]`);
-      if (!msgRow) return;
-      if (msgRow.classList.contains('received') && msgRow.classList.contains('unread')) {
-        const senderId = msgRow.dataset.senderId;
-        if (senderId && dmUnreadBySender[senderId] > 0) {
-          dmUnreadBySender[senderId]--;
-          if (dmUnreadBySender[senderId] === 0) delete dmUnreadBySender[senderId];
-        }
-        updateDMBadge();
-        const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${senderId}"]`);
-        if (targetItem) {
-          const badge = targetItem.querySelector('.dm-unread-badge');
-          const newCount = dmUnreadBySender[senderId] || 0;
-          if (newCount > 0) badge.textContent = newCount;
-          else if (badge) badge.remove();
+      async function sendUserBroadcast(userId, event, payload) {
+        const channel = supabase.channel(`user-${userId}`);
+        await new Promise((resolve) => {
+          channel.subscribe((status) => {
+            if (status === 'SUBSCRIBED' || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT')
+              resolve();
+          });
+        });
+        try {
+          await channel.send({ type: 'broadcast', event, payload });
+        } finally {
+          try { channel.unsubscribe(); } catch (err) {}
         }
       }
-      if (dmObserver) dmObserver.unobserve(msgRow);
-      msgRow.remove();
-      const messagesDiv = document.getElementById('dmChatMessages');
-      if (messagesDiv && messagesDiv.children.length === 0) {
-        messagesDiv.innerHTML = '<div style="color:#9aa4bf; text-align:center; padding:2rem;">No messages yet. Say hello!</div>';
-      }
-    }
 
-    // ==================== RIGHT-CLICK READ RECEIPTS ====================
-    async function onRightClick(e) {
-      e.preventDefault();
-      const row = e.currentTarget;
-      const messageId = row.dataset.messageId;
-      modal.style.display = 'none';
+      async function sendCallPushNotification(callId, recipientId, action = 'incoming') {
+        if (!callId || !recipientId) return;
+        try {
+          const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+          if (sessionError || !sessionData?.session?.access_token) return;
 
-      const { data: msg, error } = await supabase
-        .from('private_messages')
-        .select('sender_id, recipient_id, read_at, profiles!sender_id(full_name), profiles!recipient_id(full_name)')
-        .eq('id', messageId)
-        .single();
-      if (error || !msg) { console.error('fetch DM readers error:', error); return; }
+          const response = await fetch(`${SUPABASE_URL}/functions/v1/send-call-notification`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${sessionData.session.access_token}`
+            },
+            body: JSON.stringify({ callId, recipientId, action })
+          });
 
-      const readerName = (msg.sender_id === currentUser.id) ? msg.profiles_recipient_id?.full_name : msg.profiles_sender_id?.full_name;
-      const readTime = msg.read_at ? new Date(msg.read_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
-      if (msg.read_at) {
-        modal.innerHTML = `<h4>Read receipt</h4><p style="padding:0.5rem 0;">Seen by ${escapeHtml(readerName)} at ${readTime}</p>`;
-      } else {
-        modal.innerHTML = '<h4>Read receipt</h4><p style="padding:0.5rem 0;">Not seen yet.</p>';
-      }
-      modal.style.left = e.pageX + 10 + 'px';
-      modal.style.top = e.pageY + 10 + 'px';
-      modal.style.display = 'block';
-      const hideModal = (ev) => { if (!modal.contains(ev.target)) { modal.style.display = 'none'; document.removeEventListener('click', hideModal); } };
-      setTimeout(() => document.addEventListener('click', hideModal), 0);
-    }
-
-    // ==================== AVATAR CLICK (PROFILE MODAL) ====================
-    async function onAvatarClick(e) {
-      e.stopPropagation();
-      const avatar = e.currentTarget;
-      const userId = avatar.dataset.userId;
-      const userName = avatar.dataset.userName;
-      const userRole = avatar.dataset.userRole;
-
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('full_name, job_role, avatar_url, created_at')
-        .eq('id', userId)
-        .single();
-
-      if (error || !profile) { console.error('Failed to load profile', error); return; }
-
-      modalName.textContent = profile.full_name || userName;
-      modalRole.textContent = profile.job_role || userRole || '-';
-      modalJoined.textContent = profile.created_at ? `Joined ${new Date(profile.created_at).toLocaleDateString()}` : '-';
-
-      if (profile.avatar_url) {
-        modalAvatar.src = profile.avatar_url;
-        modalAvatar.style.display = 'block';
-        modalAvatarPlaceholder.style.display = 'none';
-      } else {
-        modalAvatar.style.display = 'none';
-        modalAvatarPlaceholder.style.display = 'flex';
-        modalAvatarPlaceholder.textContent = getInitials(profile.full_name || userName);
-      }
-
-      modalSendDM.dataset.userId = userId;
-      modalSendDM.dataset.userName = profile.full_name || userName;
-
-      profileModal.style.display = 'flex';
-    }
-
-    // ==================== DM SUBSCRIPTIONS ====================
-    function subscribeToAllDirectMessages() {
-      if (globalDmSubscription) globalDmSubscription.unsubscribe();
-      if (!currentUser) return;
-      globalDmSubscription = supabase
-        .channel(`dm-global-${currentUser.id}`)
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'private_messages', filter: `recipient_id=eq.${currentUser.id}` }, async (payload) => {
-          const newMsg = payload.new;
-          if (newMsg.sender_id === currentUser.id) return;
-
-          // If we are currently in that conversation, append to UI
-          if (currentRecipientId === newMsg.sender_id) {
-            const messagesDiv = document.getElementById('dmChatMessages');
-
-            const { data: senderProfile } = await supabase
-              .from('profiles')
-              .select('id, full_name, job_role, avatar_url')
-              .eq('id', newMsg.sender_id)
-              .single();
-            const sender = senderProfile || { full_name: 'Unknown', avatar_url: null };
-
-            const newRow = appendRenderedMessage(messagesDiv, { ...newMsg, sender }, { isSent: false, sender });
-
-            if (dmObserver) dmObserver.observe(newRow);
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            console.warn('Call push notification failed:', result.error || response.status);
             return;
           }
-
-          // Otherwise just update unread count and badge
-          dmUnreadBySender[newMsg.sender_id] = (dmUnreadBySender[newMsg.sender_id] || 0) + 1;
-          updateDMBadge();
-
-          // Update conversation list badge
-          const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${newMsg.sender_id}"]`);
-          if (targetItem) {
-            let badge = targetItem.querySelector('.dm-unread-badge');
-            const currentCount = dmUnreadBySender[newMsg.sender_id];
-            if (badge) badge.textContent = currentCount;
-            else {
-              badge = document.createElement('span');
-              badge.className = 'dm-unread-badge';
-              badge.textContent = currentCount;
-              targetItem.appendChild(badge);
-            }
-          }
-
-          let senderName = 'Someone';
-          try { const { data: prof } = await supabase.from('profiles').select('full_name').eq('id', newMsg.sender_id).single(); if (prof) senderName = prof.full_name; } catch (e) {}
-          showToast(`New DM from ${senderName}`);
-
-          // Trigger push notification
-          if (window.TechTitansNotifications) {
-            window.TechTitansNotifications.display(`New DM from ${senderName}`, {
-              body: newMsg.content ? newMsg.content.substring(0, 50) + (newMsg.content.length > 50 ? '...' : '') : 'Sent a voice note',
-              url: 'dm.html'
-            });
-          }
-        })
-        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'private_messages', filter: `recipient_id=eq.${currentUser.id}` }, (payload) => {
-          const updated = payload.new;
-          if (updated.read_at && dmUnreadBySender[updated.sender_id]) {
-            dmUnreadBySender[updated.sender_id]--;
-            if (dmUnreadBySender[updated.sender_id] <= 0) delete dmUnreadBySender[updated.sender_id];
-            updateDMBadge();
-            const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${updated.sender_id}"]`);
-            if (targetItem) {
-              const badge = targetItem.querySelector('.dm-unread-badge');
-              const newCount = dmUnreadBySender[updated.sender_id] || 0;
-              if (newCount > 0) badge.textContent = newCount;
-              else if (badge) badge.remove();
-            }
-
-            // Also update the message row in the current chat if open
-            if (currentRecipientId === updated.sender_id) {
-              const msgRow = document.querySelector(`.dm-msg-row[data-message-id="${updated.id}"]`);
-              if (msgRow) msgRow.classList.remove('unread');
-            }
-          }
-        })
-        .subscribe();
-
-      if (dmDeleteSubscription) dmDeleteSubscription.unsubscribe();
-      dmDeleteSubscription = supabase
-        .channel('dm-deletes')
-        .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'private_messages' }, (payload) => {
-          const deletedMsg = payload.old;
-          if (deletedMsg.sender_id === currentUser.id || deletedMsg.recipient_id === currentUser.id) {
-            removePrivateMessageFromUI(deletedMsg.id);
-          }
-        })
-        .subscribe();
-    }
-
-    // ==================== AGORA DM CALL FUNCTIONS ====================
-    async function getDmChannelName(userA, userB) {
-      const sorted = [userA, userB].sort();
-      return window.TechTitansAgora.compactChannelName('dm', sorted.join('_'));
-    }
-
-    function isValidAgoraChannelName(channelName) {
-      return window.TechTitansAgora.isValidChannelName(channelName);
-    }
-
-    function normalizeCallType(mode) {
-      return mode === 'video' ? 'video' : 'voice';
-    }
-
-    function getCallUserMessage(error) {
-      const message = String(error?.message || error?.name || '').toLowerCase();
-      if (message.includes('notallowed') || message.includes('permission') || message.includes('denied')) {
-        return 'Microphone or camera permission is blocked. Please allow access for TechTitans and try again.';
-      }
-      if (message.includes('notreadable') || message.includes('could not start audio source')) {
-        return 'Microphone is unavailable. Close other apps using it, check Android app permissions, and try again.';
-      }
-      if (message.includes('notfound') || message.includes('device not found')) {
-        return 'No microphone or camera was found on this device.';
-      }
-      if (message.includes('overconstrained')) {
-        return 'This device cannot start the requested microphone or camera settings.';
-      }
-      if (message.includes('token') || message.includes('fetch') || message.includes('network')) {
-        return 'Unable to connect to the calling service. Please check your connection and try again.';
-      }
-      return 'Unable to connect to the call. Please try again.';
-    }
-
-    function showCallError(error) {
-      const userMessage = getCallUserMessage(error);
-      if (typeof showToast === 'function') showToast(userMessage);
-      else alert(userMessage);
-    }
-
-    async function getAgoraToken(channelName) {
-      if (!currentUser?.id) {
-        throw new Error('You must be signed in to start a call.');
-      }
-      if (!isValidAgoraChannelName(channelName)) {
-        throw new Error('Invalid call channel name.');
-      }
-
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !sessionData?.session?.access_token) {
-        throw new Error('Authentication expired. Please log in again.');
-      }
-
-      let response;
-      try {
-        console.info('Agora token request started');
-        response = await fetch(`${SUPABASE_URL}/functions/v1/agora-token`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${sessionData.session.access_token}`
-          },
-          body: JSON.stringify({
-            channelName,
-            uid: currentUser.id
-          })
-        });
-      } catch (error) {
-        console.error('Agora token request failed:', error);
-        throw new Error('Unable to connect to the calling service. Please check your connection and try again.');
-      }
-
-      let data = {};
-      try {
-        data = await response.json();
-      } catch (error) {
-        throw new Error('Token server returned an invalid response.');
-      }
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Unable to get Agora token.');
-      }
-      if (!data.token) {
-        throw new Error('Token server did not return an Agora token.');
-      }
-
-      console.info('Agora token received');
-      return data.token;
-    }
-
-    function setupAgoraTokenRefresh(client, getChannelName) {
-      if (!client?.on) return;
-      const renewToken = async () => {
-        try {
-          const freshToken = await getAgoraToken(getChannelName());
-          if (typeof client.renewToken === 'function') {
-            await client.renewToken(freshToken);
-          }
+          console.info('Call push notification processed', {
+            action,
+            sent: result.sent || 0,
+            failed: result.failed || 0
+          });
         } catch (error) {
-          console.error('Unable to renew Agora token:', error);
+          console.warn('Unable to send call push notification:', error);
         }
-      };
-      client.on('token-privilege-will-expire', renewToken);
-      client.on('token-privilege-did-expire', renewToken);
-    }
-
-    async function sendUserBroadcast(userId, event, payload) {
-      const channel = supabase.channel(`user-${userId}`);
-      await new Promise((resolve) => {
-        channel.subscribe((status) => {
-          if (status === 'SUBSCRIBED' || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') resolve();
-        });
-      });
-      try {
-        await channel.send({ type: 'broadcast', event, payload });
-      } finally {
-        try { channel.unsubscribe(); } catch (err) {}
       }
-    }
 
-    async function sendCallPushNotification(callId, recipientId, action = 'incoming') {
-      if (!callId || !recipientId) return;
-      try {
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError || !sessionData?.session?.access_token) return;
+      async function cleanupLocalCallMedia() {
+        if (localAudioTrack) {
+          localAudioTrack.stop();
+          localAudioTrack.close();
+          localAudioTrack = null;
+        }
+        if (localVideoTrack) {
+          localVideoTrack.stop();
+          localVideoTrack.close();
+          localVideoTrack = null;
+        }
+        localVideo.innerHTML = '';
+        remoteVideo.innerHTML = '';
+      }
 
-        const response = await fetch(`${SUPABASE_URL}/functions/v1/send-call-notification`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${sessionData.session.access_token}`
-          },
-          body: JSON.stringify({ callId, recipientId, action })
+      async function publishLocalTracks(client, mode) {
+        if (!window.AgoraRTC) {
+          throw new Error('Calling service did not load. Check your internet connection and refresh.');
+        }
+        if (!client) {
+          throw new Error('Call client is not available.');
+        }
+
+        console.info('Agora media initialization started', { mode });
+        localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+        const tracks = [localAudioTrack];
+
+        if (mode === 'video') {
+          localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+          tracks.push(localVideoTrack);
+          localVideoTrack.play('localVideo');
+        }
+
+        console.info('Agora publish started');
+        await client.publish(tracks);
+        console.info('Agora publish succeeded');
+      }
+
+      async function startDMCall(targetUserId, targetUserName, mode) {
+        if (callActive || callStarting) { alert('You are already joining or in a call.'); return; }
+        callStarting = true;
+        callType = normalizeCallType(mode);
+        callTarget = targetUserId;
+        audioEnabled = true;
+        videoEnabled = true;
+
+        const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+        agoraClient = client;
+
+        client.on('user-published', async (user, mediaType) => {
+          await client.subscribe(user, mediaType);
+          if (mediaType === 'video') { const remoteVideoTrack = user.videoTrack;
+            remoteVideoTrack.play('remoteVideo'); }
+          if (mediaType === 'audio') user.audioTrack.play();
+          remoteVideoLabel.textContent = targetUserName;
         });
 
-        const result = await response.json().catch(() => ({}));
-        if (!response.ok) {
-          console.warn('Call push notification failed:', result.error || response.status);
+        let channelName = null;
+        try {
+          channelName = await getDmChannelName(currentUser.id, targetUserId);
+          setupAgoraTokenRefresh(client, () => channelName);
+          const token = await getAgoraToken(channelName);
+          console.info('Agora DM join started');
+          await client.join(AGORA_APP_ID, channelName, token, currentUser.id);
+          console.info('Agora DM join succeeded');
+          joinedAgoraChannelName = channelName;
+          await publishLocalTracks(client, callType);
+          callActive = true;
+          callStarting = false;
+        } catch (err) {
+          console.error('Failed to start call:', err);
+          await hangUpCall(false);
+          showCallError(err);
           return;
         }
-        console.info('Call push notification processed', {
-          action,
-          sent: result.sent || 0,
-          failed: result.failed || 0
+
+        const { data: callData, error: callError } = await supabase.from('calls')
+          .insert({ initiated_by: currentUser.id, type: callType, status: 'ringing',
+            room_id: channelName })
+          .select()
+          .single();
+        if (callError || !callData) {
+          console.error('Unable to create call record:', callError);
+        } else {
+          currentDMCallId = callData.id;
+          try {
+            await supabase.from('call_participants').insert([
+              { call_id: callData.id, user_id: currentUser.id, status: 'joined' },
+              { call_id: callData.id, user_id: targetUserId, status: 'invited' }
+            ]);
+          } catch (participantError) {
+            console.warn('Unable to insert call participants:', participantError);
+          }
+          await sendCallPushNotification(callData.id, targetUserId, 'incoming');
+        }
+
+        await sendUserBroadcast(targetUserId, 'call-offer', {
+          callerId: currentUser.id,
+          callerName: currentUserFullName,
+          callChannelName: channelName,
+          callType,
+          callId: currentDMCallId
         });
-      } catch (error) {
-        console.warn('Unable to send call push notification:', error);
-      }
-    }
 
-    async function cleanupLocalCallMedia() {
-      if (localAudioTrack) {
-        localAudioTrack.stop();
-        localAudioTrack.close();
-        localAudioTrack = null;
-      }
-      if (localVideoTrack) {
-        localVideoTrack.stop();
-        localVideoTrack.close();
-        localVideoTrack = null;
-      }
-      localVideo.innerHTML = '';
-      remoteVideo.innerHTML = '';
-    }
-
-    async function publishLocalTracks(client, mode) {
-      if (!window.AgoraRTC) {
-        throw new Error('Calling service did not load. Check your internet connection and refresh.');
-      }
-      if (!client) {
-        throw new Error('Call client is not available.');
-      }
-
-      console.info('Agora media initialization started', { mode });
-      localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-      const tracks = [localAudioTrack];
-
-      if (mode === 'video') {
-        localVideoTrack = await AgoraRTC.createCameraVideoTrack();
-        tracks.push(localVideoTrack);
-        localVideoTrack.play('localVideo');
-      }
-
-      console.info('Agora publish started');
-      await client.publish(tracks);
-      console.info('Agora publish succeeded');
-    }
-
-    async function startDMCall(targetUserId, targetUserName, mode) {
-      if (callActive || callStarting) { alert('You are already joining or in a call.'); return; }
-      callStarting = true;
-      callType = normalizeCallType(mode);
-      callTarget = targetUserId;
-      audioEnabled = true;
-      videoEnabled = true;
-
-      const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-      agoraClient = client;
-
-      client.on('user-published', async (user, mediaType) => {
-        await client.subscribe(user, mediaType);
-        if (mediaType === 'video') { const remoteVideoTrack = user.videoTrack; remoteVideoTrack.play('remoteVideo'); }
-        if (mediaType === 'audio') user.audioTrack.play();
-        remoteVideoLabel.textContent = targetUserName;
-      });
-
-      let channelName = null;
-      try {
-        channelName = await getDmChannelName(currentUser.id, targetUserId);
-        setupAgoraTokenRefresh(client, () => channelName);
-        const token = await getAgoraToken(channelName);
-        console.info('Agora DM join started');
-        await client.join(AGORA_APP_ID, channelName, token, currentUser.id);
-        console.info('Agora DM join succeeded');
-        joinedAgoraChannelName = channelName;
-        await publishLocalTracks(client, callType);
+        callOptionsModal.style.display = 'none';
+        callModalTitle.textContent = `Calling ${targetUserName}...`;
+        callModal.style.display = 'flex';
         callActive = true;
         callStarting = false;
-      } catch (err) {
-        console.error('Failed to start call:', err);
-        await hangUpCall(false);
-        showCallError(err);
-        return;
       }
 
-      const { data: callData, error: callError } = await supabase.from('calls')
-        .insert({ initiated_by: currentUser.id, type: callType, status: 'ringing', room_id: channelName })
-        .select()
-        .single();
-      if (callError || !callData) {
-        console.error('Unable to create call record:', callError);
-      } else {
-        currentDMCallId = callData.id;
-        try {
-          await supabase.from('call_participants').insert([
-            { call_id: callData.id, user_id: currentUser.id, status: 'joined' },
-            { call_id: callData.id, user_id: targetUserId, status: 'invited' }
-          ]);
-        } catch (participantError) {
-          console.warn('Unable to insert call participants:', participantError);
+      async function acceptDMCall() {
+        if (!pendingCall) return;
+        if (callActive || callStarting) { alert('You are already joining or in a call.'); return; }
+        callStarting = true;
+        incomingCallModal.style.display = 'none';
+
+        const { callerId, callerName, callChannelName, callType: incomingType, callId } = pendingCall;
+        callType = normalizeCallType(incomingType);
+        callTarget = callerId;
+        currentDMCallId = callId || null;
+        audioEnabled = true;
+        videoEnabled = true;
+
+        if (callId) {
+          try {
+            await supabase.from('call_participants')
+              .update({ status: 'accepted' })
+              .eq('call_id', callId)
+              .eq('user_id', currentUser.id);
+            await supabase.from('call_events').insert({
+              call_id: callId,
+              event_type: 'call_accepted',
+              user_id: currentUser.id,
+              metadata: { callType, room_id: callChannelName }
+            });
+            await supabase.from('calls').update({ status: 'active', started_at: new Date().toISOString() })
+              .eq('id', callId);
+          } catch (eventError) {
+            console.warn('Unable to record call accept event:', eventError);
+          }
         }
-        await sendCallPushNotification(callData.id, targetUserId, 'incoming');
-      }
 
-      await sendUserBroadcast(targetUserId, 'call-offer', {
-        callerId: currentUser.id,
-        callerName: currentUserFullName,
-        callChannelName: channelName,
-        callType,
-        callId: currentDMCallId
-      });
+        const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+        agoraClient = client;
 
-      callOptionsModal.style.display = 'none';
-      callModalTitle.textContent = `Calling ${targetUserName}...`;
-      callModal.style.display = 'flex';
-      callActive = true;
-      callStarting = false;
-    }
+        client.on('user-published', async (user, mediaType) => {
+          await client.subscribe(user, mediaType);
+          if (mediaType === 'video') { const remoteVideoTrack = user.videoTrack;
+            remoteVideoTrack.play('remoteVideo'); }
+          if (mediaType === 'audio') user.audioTrack.play();
+          remoteVideoLabel.textContent = callerName;
+        });
 
-    async function acceptDMCall() {
-      if (!pendingCall) return;
-      if (callActive || callStarting) { alert('You are already joining or in a call.'); return; }
-      callStarting = true;
-      incomingCallModal.style.display = 'none';
-
-      const { callerId, callerName, callChannelName, callType: incomingType, callId } = pendingCall;
-      callType = normalizeCallType(incomingType);
-      callTarget = callerId;
-      currentDMCallId = callId || null;
-      audioEnabled = true;
-      videoEnabled = true;
-
-      if (callId) {
         try {
-          await supabase.from('call_participants')
-            .update({ status: 'accepted' })
-            .eq('call_id', callId)
-            .eq('user_id', currentUser.id);
-          await supabase.from('call_events').insert({
-            call_id: callId,
-            event_type: 'call_accepted',
-            user_id: currentUser.id,
-            metadata: { callType, room_id: callChannelName }
-          });
-          await supabase.from('calls').update({ status: 'active', started_at: new Date().toISOString() }).eq('id', callId);
-        } catch (eventError) {
-          console.warn('Unable to record call accept event:', eventError);
-        }
-      }
-
-      const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-      agoraClient = client;
-
-      client.on('user-published', async (user, mediaType) => {
-        await client.subscribe(user, mediaType);
-        if (mediaType === 'video') { const remoteVideoTrack = user.videoTrack; remoteVideoTrack.play('remoteVideo'); }
-        if (mediaType === 'audio') user.audioTrack.play();
-        remoteVideoLabel.textContent = callerName;
-      });
-
-      try {
-        setupAgoraTokenRefresh(client, () => callChannelName);
-        const token = await getAgoraToken(callChannelName);
-        console.info('Agora DM accept join started');
-        await client.join(AGORA_APP_ID, callChannelName, token, currentUser.id);
-        console.info('Agora DM accept join succeeded');
-        joinedAgoraChannelName = callChannelName;
-        await publishLocalTracks(client, callType);
-        if (callTarget) {
-          await sendUserBroadcast(callTarget, 'call-accepted', {
-            callId: currentDMCallId,
-            acceptedBy: currentUser.id,
-            calleeName: currentUserFullName,
-            callType
-          });
-        }
-      } catch (err) {
-        console.error('Failed to accept call:', err);
-        await hangUpCall(false);
-        showCallError(err);
-        return;
-      }
-
-      callModalTitle.textContent = `Call with ${callerName}`;
-      callModal.style.display = 'flex';
-      callActive = true;
-      callStarting = false;
-    }
-
-    async function hangUpCall(shouldNotifyPeer = true) {
-      if (currentDMCallId) {
-        try {
-          await supabase.from('call_events').insert({
-            call_id: currentDMCallId,
-            event_type: 'call_ended',
-            user_id: currentUser.id,
-            metadata: { ended_by: currentUser.id, callType, callerName: currentUserFullName }
-          });
-          await supabase.from('calls').update({ status: 'ended', ended_at: new Date().toISOString() }).eq('id', currentDMCallId);
-          if (callTarget && shouldNotifyPeer) {
-            await sendCallPushNotification(currentDMCallId, callTarget, 'cancelled');
-            await sendUserBroadcast(callTarget, 'call-ended', {
+          setupAgoraTokenRefresh(client, () => callChannelName);
+          const token = await getAgoraToken(callChannelName);
+          console.info('Agora DM accept join started');
+          await client.join(AGORA_APP_ID, callChannelName, token, currentUser.id);
+          console.info('Agora DM accept join succeeded');
+          joinedAgoraChannelName = callChannelName;
+          await publishLocalTracks(client, callType);
+          if (callTarget) {
+            await sendUserBroadcast(callTarget, 'call-accepted', {
               callId: currentDMCallId,
-              endedBy: currentUser.id,
-              callType,
-              callerName: currentUserFullName
-            });
-          }
-        } catch (endError) {
-          console.warn('Unable to record DM call end event:', endError);
-        }
-      }
-
-      const client = agoraClient;
-      agoraClient = null;
-      if (client) {
-        try { await client.leave(); } catch (leaveError) { console.warn('Agora DM leave skipped:', leaveError); }
-      }
-      await cleanupLocalCallMedia();
-      callModal.style.display = 'none';
-      incomingCallModal.style.display = 'none';
-      callActive = false;
-      callStarting = false;
-      joinedAgoraChannelName = null;
-      currentDMCallId = null;
-      callTarget = null;
-      pendingCall = null;
-      if (window.TechTitansNotifications) {
-        window.TechTitansNotifications.display('Call ended', {
-          body: 'Your direct call has ended.',
-          url: 'dm.html'
-        });
-      }
-    }
-
-    function setupUserChannel() {
-      const channel = supabase.channel(`user-${currentUser.id}`);
-      channel
-        .on('broadcast', { event: 'call-offer' }, ({ payload }) => {
-          const { callerId, callerName, callChannelName, callType, callId } = payload;
-          if (callActive) {
-            sendUserBroadcast(callerId, 'call-missed', {
-              callId,
-              missedBy: currentUser.id,
-              callType,
+              acceptedBy: currentUser.id,
               calleeName: currentUserFullName,
-              reason: 'busy'
-            });
-            return;
-          }
-
-          pendingCall = { callerId, callerName, callChannelName, callType, callId };
-          incomingCallerName.textContent = callerName;
-          incomingCallType.textContent = callType === 'video' ? 'Video call' : 'Voice call';
-          incomingCallModal.style.display = 'flex';
-
-          if (window.TechTitansNotifications) {
-            window.TechTitansNotifications.display(`Incoming ${callType} call from ${callerName}`, {
-              body: `${callerName} is calling you. Answer in DM to join.`,
-              url: 'dm.html'
+              callType
             });
           }
-        })
-        .on('broadcast', { event: 'call-accepted' }, ({ payload }) => {
-          if (!currentDMCallId || payload.callId !== currentDMCallId) return;
-          callModalTitle.textContent = `Call with ${payload.calleeName || 'teammate'}`;
-          showToast(`${payload.calleeName || 'Your teammate'} joined the call`);
-        })
-        .on('broadcast', { event: 'call-ended' }, async ({ payload }) => {
-          if (currentDMCallId && payload.callId && payload.callId !== currentDMCallId) return;
-          showToast('Call ended');
+        } catch (err) {
+          console.error('Failed to accept call:', err);
           await hangUpCall(false);
-        })
-        .on('broadcast', { event: 'call-missed' }, async ({ payload }) => {
-          if (currentDMCallId && payload.callId && payload.callId !== currentDMCallId) return;
-          showToast(payload.reason === 'busy' ? 'User is busy on another call' : 'Call declined or missed');
-          await hangUpCall(false);
-        })
-        .subscribe();
-      return channel;
-    }
+          showCallError(err);
+          return;
+        }
 
-    // ==================== MUTE CONTROLS ====================
-    let audioEnabled = true, videoEnabled = true;
-    document.getElementById('muteAudioBtn').addEventListener('click', async () => {
-      if (localAudioTrack) {
-        audioEnabled = !audioEnabled;
-        await localAudioTrack.setEnabled(audioEnabled);
-        document.getElementById('muteAudioBtn').textContent = audioEnabled ? 'Mic' : 'Muted';
+        callModalTitle.textContent = `Call with ${callerName}`;
+        callModal.style.display = 'flex';
+        callActive = true;
+        callStarting = false;
       }
-    });
-    document.getElementById('muteVideoBtn').addEventListener('click', async () => {
-      if (localVideoTrack) {
-        videoEnabled = !videoEnabled;
-        await localVideoTrack.setEnabled(videoEnabled);
-        document.getElementById('muteVideoBtn').textContent = videoEnabled ? 'Video' : 'Video off';
-      }
-    });
-    // ==================== NAVIGATION & EVENT LISTENERS ====================
-    document.getElementById('logout').addEventListener('click', async () => {
-      if (globalDmSubscription) globalDmSubscription.unsubscribe();
-      if (dmDeleteSubscription) dmDeleteSubscription.unsubscribe();
-      if (userChannel) userChannel.unsubscribe();
-      if (presenceChannel) await presenceChannel.untrack();
-      if (callActive) hangUpCall();
-      await supabase.auth.signOut();
-      window.location.href = 'index.html';
-    });
 
-    document.getElementById('closeProfileModal').addEventListener('click', () => { profileModal.style.display = 'none'; });
-    modalSendDM.addEventListener('click', () => {
-      const userId = modalSendDM.dataset.userId;
-      profileModal.style.display = 'none';
-      const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${userId}"]`);
-      if (targetItem) targetItem.click();
-    });
+      async function hangUpCall(shouldNotifyPeer = true) {
+        if (currentDMCallId) {
+          try {
+            await supabase.from('call_events').insert({
+              call_id: currentDMCallId,
+              event_type: 'call_ended',
+              user_id: currentUser.id,
+              metadata: { ended_by: currentUser.id, callType, callerName: currentUserFullName }
+            });
+            await supabase.from('calls').update({ status: 'ended', ended_at: new Date().toISOString() })
+              .eq('id', currentDMCallId);
+            if (callTarget && shouldNotifyPeer) {
+              await sendCallPushNotification(currentDMCallId, callTarget, 'cancelled');
+              await sendUserBroadcast(callTarget, 'call-ended', {
+                callId: currentDMCallId,
+                endedBy: currentUser.id,
+                callType,
+                callerName: currentUserFullName
+              });
+            }
+          } catch (endError) {
+            console.warn('Unable to record DM call end event:', endError);
+          }
+        }
 
-    // Call modal listeners
-    document.getElementById('startVideoCallBtn').addEventListener('click', () => {
-      if (!currentRecipientId) return;
-      const activeItem = document.querySelector('.dm-conversation-item.active');
-      const userName = activeItem ? activeItem.dataset.userName : 'User';
-      startDMCall(currentRecipientId, userName, 'video');
-    });
-    document.getElementById('startVoiceCallBtn').addEventListener('click', () => {
-      if (!currentRecipientId) return;
-      const activeItem = document.querySelector('.dm-conversation-item.active');
-      const userName = activeItem ? activeItem.dataset.userName : 'User';
-      startDMCall(currentRecipientId, userName, 'voice');
-    });
-    document.getElementById('cancelCallOptionsBtn').addEventListener('click', () => { callOptionsModal.style.display = 'none'; });
-    document.getElementById('acceptCallBtn').addEventListener('click', acceptDMCall);
-    document.getElementById('declineCallBtn').addEventListener('click', async () => {
-      if (pendingCall && pendingCall.callId) {
-        try {
-          await supabase.from('call_participants')
-            .update({ status: 'declined' })
-            .eq('call_id', pendingCall.callId)
-            .eq('user_id', currentUser.id);
-          await supabase.from('call_events').insert({
-            call_id: pendingCall.callId,
-            event_type: 'call_declined',
-            user_id: currentUser.id,
-            metadata: { callerId: pendingCall.callerId, missed: true, callType: pendingCall.callType, callerName: currentUserFullName }
+        const client = agoraClient;
+        agoraClient = null;
+        if (client) {
+          try { await client.leave(); } catch (leaveError) { console.warn('Agora DM leave skipped:',
+              leaveError); }
+        }
+        await cleanupLocalCallMedia();
+        callModal.style.display = 'none';
+        incomingCallModal.style.display = 'none';
+        callActive = false;
+        callStarting = false;
+        joinedAgoraChannelName = null;
+        currentDMCallId = null;
+        callTarget = null;
+        pendingCall = null;
+        if (window.TechTitansNotifications) {
+          window.TechTitansNotifications.display('Call ended', {
+            body: 'Your direct call has ended.',
+            url: 'dm.html'
           });
-          await sendUserBroadcast(pendingCall.callerId, 'call-missed', {
-            callId: pendingCall.callId,
-            missedBy: currentUser.id,
-            callType: pendingCall.callType,
-            calleeName: currentUserFullName
-          });
-        } catch (declineError) {
-          console.warn('Unable to record call decline event:', declineError);
         }
       }
-      incomingCallModal.style.display = 'none';
-      pendingCall = null;
-      if (window.TechTitansNotifications) {
-        window.TechTitansNotifications.display('Missed call', {
-          body: 'You missed an incoming call.',
-          url: 'dm.html'
-        });
+
+      function setupUserChannel() {
+        const channel = supabase.channel(`user-${currentUser.id}`);
+        channel
+          .on('broadcast', { event: 'call-offer' }, ({ payload }) => {
+            const { callerId, callerName, callChannelName, callType, callId } = payload;
+            if (callActive) {
+              sendUserBroadcast(callerId, 'call-missed', {
+                callId,
+                missedBy: currentUser.id,
+                callType,
+                calleeName: currentUserFullName,
+                reason: 'busy'
+              });
+              return;
+            }
+
+            pendingCall = { callerId, callerName, callChannelName, callType, callId };
+            incomingCallerName.textContent = callerName;
+            incomingCallType.textContent = callType === 'video' ? 'Video call' : 'Voice call';
+            incomingCallModal.style.display = 'flex';
+
+            if (window.TechTitansNotifications) {
+              window.TechTitansNotifications.display(`Incoming ${callType} call from ${callerName}`, {
+                body: `${callerName} is calling you. Answer in DM to join.`,
+                url: 'dm.html'
+              });
+            }
+          })
+          .on('broadcast', { event: 'call-accepted' }, ({ payload }) => {
+            if (!currentDMCallId || payload.callId !== currentDMCallId) return;
+            callModalTitle.textContent = `Call with ${payload.calleeName || 'teammate'}`;
+            showToast(`${payload.calleeName || 'Your teammate'} joined the call`);
+          })
+          .on('broadcast', { event: 'call-ended' }, async ({ payload }) => {
+            if (currentDMCallId && payload.callId && payload.callId !== currentDMCallId) return;
+            showToast('Call ended');
+            await hangUpCall(false);
+          })
+          .on('broadcast', { event: 'call-missed' }, async ({ payload }) => {
+            if (currentDMCallId && payload.callId && payload.callId !== currentDMCallId) return;
+            showToast(payload.reason === 'busy' ? 'User is busy on another call' :
+              'Call declined or missed');
+            await hangUpCall(false);
+          })
+          .subscribe();
+        return channel;
       }
-    });
-    document.getElementById('closeCallModalBtn').addEventListener('click', hangUpCall);
-    document.getElementById('hangupCallBtn').addEventListener('click', hangUpCall);
 
-    window.addEventListener('scroll', () => modal.style.display = 'none', true);
-    document.addEventListener('click', (e) => { if (!modal.contains(e.target)) modal.style.display = 'none'; });
+      // ─── MUTE CONTROLS ───
+      let audioEnabled = true,
+        videoEnabled = true;
+      document.getElementById('muteAudioBtn').addEventListener('click', async () => {
+        if (localAudioTrack) {
+          audioEnabled = !audioEnabled;
+          await localAudioTrack.setEnabled(audioEnabled);
+          document.getElementById('muteAudioBtn').textContent = audioEnabled ? 'Mic' : 'Muted';
+        }
+      });
+      document.getElementById('muteVideoBtn').addEventListener('click', async () => {
+        if (localVideoTrack) {
+          videoEnabled = !videoEnabled;
+          await localVideoTrack.setEnabled(videoEnabled);
+          document.getElementById('muteVideoBtn').textContent = videoEnabled ? 'Video' : 'Video off';
+        }
+      });
 
-    // ==================== INITIALIZATION ====================
-    async function init() {
-      try {
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (userError || !user) { window.location.href = 'index.html'; return; }
-        currentUser = user;
-        const metadata = user.user_metadata || {};
-        currentUserFullName = metadata.full_name || 'User';
-        currentRole = metadata.job_role;
-        isCEO = (currentRole === 'CEO');
+      // ─── NAVIGATION & EVENT LISTENERS ───
+      document.getElementById('logout').addEventListener('click', async () => {
+        if (globalDmSubscription) globalDmSubscription.unsubscribe();
+        if (dmDeleteSubscription) dmDeleteSubscription.unsubscribe();
+        if (userChannel) userChannel.unsubscribe();
+        if (presenceChannel) await presenceChannel.untrack();
+        if (callActive) hangUpCall();
+        await supabase.auth.signOut();
+        window.location.href = 'index.html';
+      });
 
-        await setupPresence();
-        subscribeToAllDirectMessages();
-        userChannel = setupUserChannel();
+      document.getElementById('closeProfileModal').addEventListener('click', () => { profileModal.style.display =
+          'none'; });
+      modalSendDM.addEventListener('click', () => {
+        const userId = modalSendDM.dataset.userId;
+        profileModal.style.display = 'none';
+        const targetItem = document.querySelector(`.dm-conversation-item[data-user-id="${userId}"]`);
+        if (targetItem) targetItem.click();
+      });
 
-        await loadPrivateMessagesView();
-      } catch (err) {
-        console.error('Init error:', err);
-        document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Failed to load DMs. Please refresh.</div>';
+      document.getElementById('startVideoCallBtn').addEventListener('click', () => {
+        if (!currentRecipientId) return;
+        const activeItem = document.querySelector('.dm-conversation-item.active');
+        const userName = activeItem ? activeItem.dataset.userName : 'User';
+        startDMCall(currentRecipientId, userName, 'video');
+      });
+      document.getElementById('startVoiceCallBtn').addEventListener('click', () => {
+        if (!currentRecipientId) return;
+        const activeItem = document.querySelector('.dm-conversation-item.active');
+        const userName = activeItem ? activeItem.dataset.userName : 'User';
+        startDMCall(currentRecipientId, userName, 'voice');
+      });
+      document.getElementById('cancelCallOptionsBtn').addEventListener('click', () => { callOptionsModal.style
+          .display = 'none'; });
+      document.getElementById('acceptCallBtn').addEventListener('click', acceptDMCall);
+      document.getElementById('declineCallBtn').addEventListener('click', async () => {
+        if (pendingCall && pendingCall.callId) {
+          try {
+            await supabase.from('call_participants')
+              .update({ status: 'declined' })
+              .eq('call_id', pendingCall.callId)
+              .eq('user_id', currentUser.id);
+            await supabase.from('call_events').insert({
+              call_id: pendingCall.callId,
+              event_type: 'call_declined',
+              user_id: currentUser.id,
+              metadata: { callerId: pendingCall.callerId, missed: true,
+                callType: pendingCall.callType, callerName: currentUserFullName }
+            });
+            await sendUserBroadcast(pendingCall.callerId, 'call-missed', {
+              callId: pendingCall.callId,
+              missedBy: currentUser.id,
+              callType: pendingCall.callType,
+              calleeName: currentUserFullName
+            });
+          } catch (declineError) {
+            console.warn('Unable to record call decline event:', declineError);
+          }
+        }
+        incomingCallModal.style.display = 'none';
+        pendingCall = null;
+        if (window.TechTitansNotifications) {
+          window.TechTitansNotifications.display('Missed call', {
+            body: 'You missed an incoming call.',
+            url: 'dm.html'
+          });
+        }
+      });
+      document.getElementById('closeCallModalBtn').addEventListener('click', hangUpCall);
+      document.getElementById('hangupCallBtn').addEventListener('click', hangUpCall);
+
+      window.addEventListener('scroll', () => modal.style.display = 'none', true);
+      document.addEventListener('click', (e) => { if (!modal.contains(e.target)) modal.style.display = 'none'; });
+
+      // ─── INIT ───
+      async function init() {
+        try {
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
+          if (userError || !user) { window.location.href = 'index.html'; return; }
+          currentUser = user;
+          const metadata = user.user_metadata || {};
+          currentUserFullName = metadata.full_name || 'User';
+          currentRole = metadata.job_role;
+          isCEO = (currentRole === 'CEO');
+
+          await setupPresence();
+          subscribeToAllDirectMessages();
+          userChannel = setupUserChannel();
+
+          await loadPrivateMessagesView();
+        } catch (err) {
+          console.error('Init error:', err);
+          document.getElementById('messagesArea').innerHTML =
+            '<div style="color:#ff628c;text-align:center;padding:2rem;">Failed to load DMs. Please refresh.</div>';
+        }
       }
-    }
 
-    init();
-  })();
-</script>
+      init();
+    })();
+  </script>
 </body>
 </html>
-

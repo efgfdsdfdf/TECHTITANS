@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
   <title>TECH TITANS · Group Chat</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
     body {
@@ -792,6 +793,97 @@
         display: none;
       }
     }
+
+    /* === MOBILE NAV OVERLAY === */
+    .mobile-nav-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      align-items: stretch;
+      justify-content: flex-start;
+    }
+    .mobile-nav-panel {
+      width: 280px;
+      max-width: 80vw;
+      height: 100%;
+      background: rgba(10, 16, 28, 0.98);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 2rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
+      animation: slideInNav 0.25s ease;
+    }
+    @keyframes slideInNav {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(0); }
+    }
+    .mobile-nav-panel .close-btn {
+      align-self: flex-end;
+      background: none;
+      border: none;
+      color: #9aa4bf;
+      font-size: 2rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0.2rem;
+    }
+    .mobile-nav-panel .close-btn:hover {
+      color: white;
+    }
+    .mobile-nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .mobile-nav-links a {
+      color: #9aa4bf;
+      text-decoration: none;
+      padding: 0.9rem 1rem;
+      border-radius: 1.2rem;
+      transition: 0.2s;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-size: 1rem;
+    }
+    .mobile-nav-links a:hover,
+    .mobile-nav-links a.active {
+      background: #1f2a44;
+      color: white;
+    }
+    .mobile-nav-links a.active {
+      background: #428cff;
+      color: white;
+      box-shadow: 0 8px 16px -8px #428cff;
+    }
+    .mobile-nav-panel .logout-btn {
+      margin-top: auto;
+      background: transparent;
+      border: 1px solid #2f3a5a;
+      color: #ff9f9f;
+      padding: 0.9rem;
+      border-radius: 1.2rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .mobile-nav-panel .logout-btn:hover {
+      background: #ff4d4d20;
+      border-color: #ff4d4d;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="native-bridge.js"></script>
@@ -801,17 +893,18 @@
 <body>
   <div class="sidebar">
     <div class="logo">TECH<span>TITANS</span></div>
-    <div class="nav">
-      <a href="dashboard.html">📊 <span>Dashboard</span></a>
-      <a href="group-chat.html" class="active" id="chatNavLink">💬 <span>Group Chat</span>
+    <div class="nav" id="sidebarNav">
+      <a href="dashboard.html"><i class="fas fa-chart-pie"></i> <span>Dashboard</span></a>
+      <a href="messages.html" class="active" id="chatNavLink"><i class="fas fa-comments"></i> <span>Group Chat</span>
         <span class="sidebar-unread" id="sidebarUnreadBadge" style="display: none;">0</span>
       </a>
-      <a href="dm.html" id="dmNavLink">📩 <span>Direct Messages</span>
+      <a href="dm.html" id="dmNavLink"><i class="fas fa-envelope"></i> <span>Direct Messages</span>
         <span class="sidebar-unread" id="dmUnreadBadge" style="display: none;">0</span>
       </a>
-      <a href="profile.html">⚙️ <span>Profile</span></a>
+      <a href="resources.html"><i class="fas fa-book-open"></i> <span>Resources</span></a>
+      <a href="profile.html"><i class="fas fa-user-cog"></i> <span>Profile</span></a>
     </div>
-    <button class="logout-btn" id="logout">✕ <span>Logout</span></button>
+    <button class="logout-btn" id="logout"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></button>
   </div>
 
   <div class="main">
@@ -846,12 +939,13 @@
     <div class="mobile-nav-panel">
       <button class="close-btn" id="mobileNavClose" aria-label="Close menu">&times;</button>
       <nav class="mobile-nav-links" aria-label="Mobile navigation">
-        <a href="dashboard.html">📊 Dashboard</a>
-        <a href="messages.html">💬 Group Chat</a>
-        <a href="dm.html">📩 Direct Messages</a>
-        <a href="profile.html">⚙️ Profile</a>
+        <a href="dashboard.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
+        <a href="messages.html" class="active"><i class="fas fa-comments"></i> Group Chat</a>
+        <a href="dm.html"><i class="fas fa-envelope"></i> Direct Messages</a>
+        <a href="resources.html"><i class="fas fa-book-open"></i> Resources</a>
+        <a href="profile.html"><i class="fas fa-user-cog"></i> Profile</a>
       </nav>
-      <button class="logout-btn" id="mobileLogout">✕ Logout</button>
+      <button class="logout-btn" id="mobileLogout"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </div>
   </div>
 
