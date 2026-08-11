@@ -188,6 +188,56 @@
       font-size: 0.7rem;
       font-weight: 600;
     }
+
+    /* Ongoing call banner */
+    .ongoing-call-banner {
+      background: #1f2a44;
+      border: 1px solid #428cff;
+      border-radius: 2rem;
+      padding: 0.3rem 1rem;
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-size: 0.85rem;
+      color: #cfe1ff;
+      white-space: nowrap;
+    }
+    .ongoing-call-banner .caller-name {
+      font-weight: 600;
+      color: white;
+    }
+    .ongoing-call-banner button {
+      background: #2ecc71;
+      border: none;
+      color: white;
+      padding: 0.2rem 0.8rem;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .ongoing-call-banner button:hover {
+      background: #27ae60;
+    }
+    .ongoing-call-banner .call-status {
+      color: #8affb8;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .ongoing-call-banner .call-status::before {
+      content: '●';
+      animation: pulse-dot 1.5s infinite;
+    }
+    @keyframes pulse-dot {
+      0% { opacity: 0.3; }
+      50% { opacity: 1; }
+      100% { opacity: 0.3; }
+    }
+
+    /* Groups list */
     .groups-list {
       display: flex;
       flex-wrap: wrap;
@@ -666,6 +716,8 @@
       max-width: 800px;
       width: 90%;
       color: white;
+      max-height: 90vh;
+      overflow-y: auto;
     }
     .call-modal-header {
       display: flex;
@@ -683,18 +735,25 @@
     }
     .call-videos {
       display: flex;
-      gap: 1rem;
       flex-wrap: wrap;
+      gap: 0.5rem;
       justify-content: center;
       margin-bottom: 1rem;
+      background: #0b0f17;
+      border-radius: 1rem;
+      padding: 0.5rem;
+      min-height: 120px;
     }
     .video-container {
       background: #0b0f17;
-      border-radius: 1rem;
+      border-radius: 0.8rem;
       overflow: hidden;
-      width: 300px;
-      height: 200px;
+      width: 180px;
+      height: 140px;
       position: relative;
+      flex: 1 1 160px;
+      min-width: 120px;
+      border: 1px solid #2f3a5a;
     }
     .video-container video {
       width: 100%;
@@ -713,19 +772,24 @@
     }
     .video-label {
       position: absolute;
-      bottom: 0.5rem;
-      left: 0.5rem;
-      background: rgba(0,0,0,0.5);
+      bottom: 0.3rem;
+      left: 0.3rem;
+      background: rgba(0,0,0,0.6);
       color: white;
-      padding: 0.2rem 0.5rem;
-      border-radius: 0.5rem;
-      font-size: 0.8rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 0.4rem;
+      font-size: 0.7rem;
+      max-width: 90%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .call-controls {
       display: flex;
       gap: 1rem;
       justify-content: center;
       margin-top: 1rem;
+      flex-wrap: wrap;
     }
     .call-controls button {
       background: #428cff;
@@ -788,6 +852,16 @@
       }
       .messages-area {
         padding: 0.8rem 0.9rem 0;
+      }
+      .ongoing-call-banner {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.6rem;
+      }
+      .video-container {
+        width: 120px;
+        height: 90px;
+        flex: 1 1 100px;
+        min-width: 80px;
       }
     }
 
@@ -912,7 +986,13 @@
         <span class="role-tag" id="roleDisplay"></span>
         <div class="online-count" id="onlineCount">0 online</div>
         <div id="groupTabs" class="group-tabs" style="display: none;"></div>
-        <button id="groupCallBtn" class="voice-btn" style="background:#2f3a5a;" title="Join group call">📞</button>
+        <!-- Ongoing call banner -->
+        <div id="ongoingCallBanner" class="ongoing-call-banner" style="display: none;">
+          <span class="call-status">Live</span>
+          <span><span class="caller-name" id="callerNameDisplay">Someone</span> started a call</span>
+          <button id="joinOngoingCallBtn">Join</button>
+        </div>
+        <button id="groupCallBtn" class="voice-btn" style="background:#2f3a5a;" title="Start group call">📞</button>
       </div>
       <div class="messages-area" id="messagesArea" oncontextmenu="return false;"></div>
       
@@ -954,17 +1034,16 @@
     <div class="call-modal-content">
       <div class="call-modal-header">
         <h3 id="callModalTitle">Group call</h3>
+        <span id="callParticipantCount" style="font-size:0.9rem;color:#9aa4bf;">0 participants</span>
         <button class="call-modal-close" id="closeCallModalBtn">&times;</button>
       </div>
-      <div class="call-videos">
-        <div class="video-container">
+      <div id="callVideosContainer" class="call-videos">
+        <!-- Local video will be appended here -->
+        <div id="localVideoContainer" class="video-container">
           <div id="localVideo" class="rtc-video-slot"></div>
-          <div class="video-label">You</div>
+          <div class="video-label" id="localVideoLabel">You</div>
         </div>
-        <div class="video-container">
-          <div id="remoteVideo" class="rtc-video-slot"></div>
-          <div class="video-label" id="remoteVideoLabel">Remote</div>
-        </div>
+        <!-- Remote videos will be dynamically added here -->
       </div>
       <div class="call-controls">
         <button id="muteAudioBtn" title="Mute">🎤</button>
@@ -1029,9 +1108,9 @@
     let totalUnreadCount = 0;
     let editTimeouts = new Map();
     let observer = null;
-    let dmUnreadCount = 0;               // for sidebar badge (but DM is separate page now)
+    let dmUnreadCount = 0;
     let dmUnreadBySender = {};
-    let globalDmSubscription = null;      // still needed to update sidebar DM badge
+    let globalDmSubscription = null;
     let presenceChannel = null;
     let onlineUsers = new Map();
     let typingTimeouts = {};
@@ -1056,6 +1135,8 @@
     let callStarting = false;
     let joinedAgoraChannelName = null;
     let groupCallChannelName = null;
+    let remoteUsers = new Map(); // uid -> { name, videoTrack, audioTrack, container }
+    let activeGroupCallId = null; // database id of active call
 
     // DOM elements
     const modal = document.getElementById('receiptsModal');
@@ -1094,8 +1175,9 @@
     const typingText = document.getElementById('typingText');
     const callModal = document.getElementById('callModal');
     const localVideo = document.getElementById('localVideo');
-    const remoteVideo = document.getElementById('remoteVideo');
+    const remoteVideoContainer = document.getElementById('callVideosContainer');
     const callModalTitle = document.getElementById('callModalTitle');
+    const callParticipantCount = document.getElementById('callParticipantCount');
     const remoteVideoLabel = document.getElementById('remoteVideoLabel');
     const profileModal = document.getElementById('profileModal');
     const modalAvatar = document.getElementById('modalAvatar');
@@ -1104,8 +1186,11 @@
     const modalRole = document.getElementById('modalRole');
     const modalJoined = document.getElementById('modalJoined');
     const modalSendDM = document.getElementById('modalSendDM');
+    const ongoingCallBanner = document.getElementById('ongoingCallBanner');
+    const callerNameDisplay = document.getElementById('callerNameDisplay');
+    const joinOngoingCallBtn = document.getElementById('joinOngoingCallBtn');
 
-    // Helper functions (same as before)
+    // Helper functions
     function formatDateHeader(date) {
       const now = new Date();
       const msgDate = new Date(date);
@@ -1194,7 +1279,6 @@
       }
     }
 
-    // Keep DM badge updated from global subscription (even though we are on group page)
     function updateDMBadge() {
       const dmBadge = document.getElementById('dmUnreadBadge');
       const total = Object.values(dmUnreadBySender).reduce((a,b)=>a+b,0);
@@ -1206,7 +1290,6 @@
       }
     }
 
-    // --- 30-second unread border removal ---
     function scheduleUnreadBorderRemoval(messageId) {
       if (unreadBorderTimeouts.has(messageId)) clearTimeout(unreadBorderTimeouts.get(messageId));
       const timeoutId = setTimeout(() => {
@@ -1217,7 +1300,6 @@
       unreadBorderTimeouts.set(messageId, timeoutId);
     }
 
-    // --- Mark group message as read ---
     async function markMessageAsRead(messageId) {
       if (readMessageIds.has(messageId)) return;
       try {
@@ -1238,7 +1320,6 @@
       } catch (err) { console.error('markMessageAsRead error:', err); }
     }
 
-    // --- Update seen indicator on a sent message ---
     async function updateSeenIndicator(messageId) {
       const msgRow = document.querySelector(`.message-row.sent[data-message-id="${messageId}"]`);
       if (!msgRow) return;
@@ -1276,7 +1357,6 @@
       document.querySelectorAll('.message-row.unread').forEach(row => observer.observe(row));
     }
 
-    // --- Render message actions ---
     function renderMessageActions(messageId, currentContent, createdAt, senderId, hasAudio) {
       if (hasAudio) return '';
       const msgTime = new Date(createdAt).getTime();
@@ -1302,7 +1382,6 @@
       `;
     }
 
-    // --- Render a single message with avatar support ---
     function renderMessage(message, isSent, sender, messageRole, isUnread = false, seenCount = 0) {
       const senderName = sender?.full_name || 'Unknown';
       const avatarUrl = sender?.avatar_url;
@@ -1375,7 +1454,7 @@
       return '';
     }
 
-    // --- Load messages for selected group ---
+    // --- Load messages ---
     async function loadMessages() {
       try {
         if (isCEO && selectedGroupRole === null) {
@@ -1636,6 +1715,8 @@
       if (typingSubscription) typingSubscription.unsubscribe();
       setupTypingSubscription();
       await loadMessages();
+      // Check ongoing call for this group
+      checkOngoingCall();
     }
 
     function attachMessageHandlers() {
@@ -1952,136 +2033,450 @@
         .subscribe();
     }
 
-    function setupGroupSubscription() {
-      if (messageSubscription) { messageSubscription.unsubscribe(); messageSubscription = null; }
-      if (groupCallSubscription) { groupCallSubscription.unsubscribe(); groupCallSubscription = null; }
-
-      const groupCallRole = isCEO ? selectedGroupRole : currentRole;
-      if (groupCallRole) {
-        groupCallSubscription = supabase
-          .channel(`group-call-${groupCallRole}`)
-          .on('broadcast', { event: 'group-call-started' }, ({ payload }) => {
-            if (!payload || payload.callerId === currentUser.id) return;
-            showToast(`Group call started for ${groupCallRole} by ${payload.callerName}`);
-            if (window.TechTitansNotifications) {
-              window.TechTitansNotifications.display(`Group call started for ${groupCallRole}`, {
-                body: `${payload.callerName} has started a call for ${groupCallRole}.`,
-                url: 'messages.html'
-              });
-            }
-          })
-          .on('broadcast', { event: 'group-call-ended' }, ({ payload }) => {
-            if (!payload || payload.endedBy === currentUser.id) return;
-            showToast(`Group call ended for ${groupCallRole}`);
-            if (window.TechTitansNotifications) {
-              window.TechTitansNotifications.display(`Group call ended for ${groupCallRole}`, {
-                body: `${payload.callerName || 'Someone'} ended the call.`,
-                url: 'messages.html'
-              });
-            }
-          })
-          .subscribe();
+    // --- Group call database and broadcast ---
+    async function checkOngoingCall() {
+      const role = isCEO ? selectedGroupRole : currentRole;
+      if (!role) {
+        ongoingCallBanner.style.display = 'none';
+        return;
       }
-
-      if (isCEO) {
-        messageSubscription = supabase
-          .channel('all-messages')
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'group_messages' }, async (payload) => {
-            const newMsg = payload.new;
-            if (document.querySelector(`.message-row[data-message-id="${newMsg.id}"]`)) return;
-            if (newMsg.sender_id === currentUser.id) return;
-
-            const { data: senderProfile } = await supabase
-              .from('profiles')
-              .select('id, full_name, avatar_url')
-              .eq('id', newMsg.sender_id)
-              .single();
-            if (!senderProfile) return;
-            const enrichedMsg = { ...newMsg, sender: senderProfile };
-
-            const shouldShow = selectedGroupRole === null || newMsg.role === selectedGroupRole;
-            if (shouldShow) {
-              appendMessageToUI(enrichedMsg, false, senderProfile, newMsg.role, true);
-              currentUnreadCount++;
-            }
-            totalUnreadCount++;
-            updateUnreadBadges();
-
-            // Trigger push notification
-            if (window.TechTitansNotifications) {
-              window.TechTitansNotifications.display(`New message in ${newMsg.role}`, {
-                body: `${senderProfile.full_name}: ${newMsg.content || 'Sent a voice note'}`,
-                url: 'messages.html'
-              });
-            }
-            if (isCEO) buildGroupTabs();
-          })
-          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'group_messages' }, (payload) => {
-            updateMessageInUI(payload.new.id, payload.new.content);
-          })
-          .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'group_messages' }, (payload) => {
-            removeMessageFromUI(payload.old.id);
-          })
-          .subscribe();
-      } else {
-        messageSubscription = supabase
-          .channel(`group-${currentRole}`)
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, async (payload) => {
-            const newMsg = payload.new;
-            if (document.querySelector(`.message-row[data-message-id="${newMsg.id}"]`)) return;
-            if (newMsg.sender_id === currentUser.id) return;
-
-            const { data: senderProfile } = await supabase
-              .from('profiles')
-              .select('id, full_name, avatar_url')
-              .eq('id', newMsg.sender_id)
-              .single();
-            if (!senderProfile) return;
-            const enrichedMsg = { ...newMsg, sender: senderProfile };
-
-            appendMessageToUI(enrichedMsg, false, senderProfile, newMsg.role, true);
-            currentUnreadCount++;
-            updateUnreadBadges();
-
-            // Trigger push notification
-            if (window.TechTitansNotifications) {
-              window.TechTitansNotifications.display(`New message in ${newMsg.role}`, {
-                body: `${senderProfile.full_name}: ${newMsg.content || 'Sent a voice note'}`,
-                url: 'messages.html'
-              });
-            }
-          })
-          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, (payload) => {
-            updateMessageInUI(payload.new.id, payload.new.content);
-          })
-          .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, (payload) => {
-            removeMessageFromUI(payload.old.id);
-          })
-          .subscribe();
+      try {
+        const { data, error } = await supabase
+          .from('group_calls')
+          .select('id, started_by, started_at, profiles!started_by(full_name)')
+          .eq('role', role)
+          .eq('status', 'active')
+          .order('started_at', { ascending: false })
+          .limit(1)
+          .single();
+        if (error || !data) {
+          ongoingCallBanner.style.display = 'none';
+          activeGroupCallId = null;
+          return;
+        }
+        const callerName = data.profiles?.full_name || 'Someone';
+        callerNameDisplay.textContent = callerName;
+        activeGroupCallId = data.id;
+        ongoingCallBanner.style.display = 'flex';
+        // If user is already in the call, hide the banner? Actually keep it but disable join button? 
+        // We'll allow re-join if they left but call still active.
+      } catch (e) {
+        ongoingCallBanner.style.display = 'none';
+        activeGroupCallId = null;
       }
     }
 
-    function setupMessageReadsSubscription() {
-      if (messageReadsSubscription) messageReadsSubscription.unsubscribe();
-      if (!currentUser) return;
-      messageReadsSubscription = supabase
-        .channel('message-reads')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'message_reads' }, async (payload) => {
-          const { message_id, user_id } = payload.new;
-          if (user_id === currentUser.id) return;
-          const { data: msg } = await supabase
-            .from('group_messages')
-            .select('sender_id')
-            .eq('id', message_id)
-            .single();
-          if (msg && msg.sender_id === currentUser.id) {
-            await updateSeenIndicator(message_id);
+    // --- Agora group call functions ---
+    function isValidAgoraChannelName(channelName) {
+      return window.TechTitansAgora.isValidChannelName(channelName);
+    }
+
+    function getCallUserMessage(error) {
+      const message = String(error?.message || error?.name || '').toLowerCase();
+      if (message.includes('notallowed') || message.includes('permission') || message.includes('denied')) {
+        return 'Microphone or camera permission is blocked. Please allow access for TechTitans and try again.';
+      }
+      if (message.includes('notreadable') || message.includes('could not start audio source')) {
+        return 'Microphone or camera is unavailable. Close other apps using it, check app permissions, and try again.';
+      }
+      if (message.includes('notfound') || message.includes('device not found')) {
+        return 'No microphone or camera was found on this device.';
+      }
+      if (message.includes('overconstrained')) {
+        return 'This device cannot start the requested microphone or camera settings.';
+      }
+      if (message.includes('token') || message.includes('fetch') || message.includes('network')) {
+        return 'Unable to connect to the calling service. Please check your connection and try again.';
+      }
+      return 'Unable to connect to the call. Please try again.';
+    }
+
+    function showCallError(error) {
+      const userMessage = getCallUserMessage(error);
+      if (typeof showToast === 'function') showToast(userMessage);
+      else alert(userMessage);
+    }
+
+    async function getAgoraToken(channelName) {
+      if (!currentUser?.id) {
+        throw new Error('You must be signed in to start a call.');
+      }
+      if (!isValidAgoraChannelName(channelName)) {
+        throw new Error('Invalid call channel name.');
+      }
+
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !sessionData?.session?.access_token) {
+        throw new Error('Authentication expired. Please log in again.');
+      }
+
+      let response;
+      try {
+        console.info('Agora token request started');
+        response = await fetch(`${SUPABASE_URL}/functions/v1/agora-token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionData.session.access_token}`
+          },
+          body: JSON.stringify({
+            channelName,
+            uid: currentUser.id
+          })
+        });
+      } catch (error) {
+        console.error('Agora token request failed:', error);
+        throw new Error('Unable to connect to the calling service. Please check your connection and try again.');
+      }
+
+      let data = {};
+      try {
+        data = await response.json();
+      } catch (error) {
+        throw new Error('Token server returned an invalid response.');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Unable to get Agora token.');
+      }
+      if (!data.token) {
+        throw new Error('Token server did not return an Agora token.');
+      }
+
+      console.info('Agora token received');
+      return data.token;
+    }
+
+    function setupAgoraTokenRefresh(client, getChannelName) {
+      if (!client?.on) return;
+      const renewToken = async () => {
+        try {
+          const freshToken = await getAgoraToken(getChannelName());
+          if (typeof client.renewToken === 'function') {
+            await client.renewToken(freshToken);
           }
-        })
-        .subscribe();
+        } catch (error) {
+          console.error('Unable to renew Agora token:', error);
+        }
+      };
+      client.on('token-privilege-will-expire', renewToken);
+      client.on('token-privilege-did-expire', renewToken);
     }
 
-    // --- Send group message (text) ---
+    async function cleanupGroupCallMedia() {
+      if (localAudioTrack) {
+        localAudioTrack.stop();
+        localAudioTrack.close();
+        localAudioTrack = null;
+      }
+      if (localVideoTrack) {
+        localVideoTrack.stop();
+        localVideoTrack.close();
+        localVideoTrack = null;
+      }
+      // Remove remote video containers
+      remoteUsers.forEach((user, uid) => {
+        if (user.container) user.container.remove();
+      });
+      remoteUsers.clear();
+    }
+
+    // Add remote user video container
+    function addRemoteVideoContainer(uid, name) {
+      const container = document.createElement('div');
+      container.className = 'video-container';
+      container.id = `remote-${uid}`;
+      const slot = document.createElement('div');
+      slot.className = 'rtc-video-slot';
+      const label = document.createElement('div');
+      label.className = 'video-label';
+      label.textContent = name || `User ${uid}`;
+      container.appendChild(slot);
+      container.appendChild(label);
+      remoteVideoContainer.appendChild(container);
+      return container;
+    }
+
+    function updateParticipantCount() {
+      const count = remoteUsers.size + 1; // +1 for local
+      callParticipantCount.textContent = `${count} participants`;
+    }
+
+    // Join a group call (start new or join existing)
+    async function joinGroupCall(existingCallId = null) {
+      if (callActive || callStarting) { alert('You are already joining or in a group call.'); return; }
+      if (!selectedGroupRole && !currentRole) { alert('No group selected.'); return; }
+      const role = isCEO ? selectedGroupRole : currentRole;
+      if (!role) { alert('Cannot determine group role.'); return; }
+      if (!window.AgoraRTC) { alert('Calling service did not load. Check your connection and refresh.'); return; }
+      callStarting = true;
+
+      const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+      groupAgoraClient = client;
+
+      // Event: remote user published
+      client.on('user-published', async (user, mediaType) => {
+        await client.subscribe(user, mediaType);
+        // Fetch user name from remoteUsers map or fallback
+        let userName = remoteUsers.get(user.uid)?.name || `User ${user.uid}`;
+        if (!remoteUsers.has(user.uid)) {
+          // Try to fetch from profiles
+          try {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('full_name')
+              .eq('id', user.uid)
+              .single();
+            if (profile) userName = profile.full_name;
+          } catch (e) {}
+        }
+        let container = remoteUsers.get(user.uid)?.container;
+        if (!container) {
+          container = addRemoteVideoContainer(user.uid, userName);
+          remoteUsers.set(user.uid, { name: userName, videoTrack: null, audioTrack: null, container });
+        }
+        if (mediaType === 'video') {
+          user.videoTrack.play(container.querySelector('.rtc-video-slot'));
+          remoteUsers.get(user.uid).videoTrack = user.videoTrack;
+        }
+        if (mediaType === 'audio') {
+          user.audioTrack.play();
+          remoteUsers.get(user.uid).audioTrack = user.audioTrack;
+        }
+        updateParticipantCount();
+      });
+
+      client.on('user-unpublished', (user, mediaType) => {
+        if (mediaType === 'video') {
+          const userData = remoteUsers.get(user.uid);
+          if (userData && userData.videoTrack) {
+            userData.videoTrack.stop();
+            userData.videoTrack = null;
+          }
+        }
+        if (mediaType === 'audio') {
+          const userData = remoteUsers.get(user.uid);
+          if (userData && userData.audioTrack) {
+            userData.audioTrack.stop();
+            userData.audioTrack = null;
+          }
+        }
+        // If both audio and video are gone, remove container
+        const userData = remoteUsers.get(user.uid);
+        if (userData && !userData.videoTrack && !userData.audioTrack) {
+          if (userData.container) userData.container.remove();
+          remoteUsers.delete(user.uid);
+          updateParticipantCount();
+        }
+      });
+
+      // When remote user leaves the channel, Agora triggers user-unpublished for all tracks,
+      // but we also handle user-left event? Actually Agora RTC SDK v4 has 'user-left' event.
+      client.on('user-left', (user) => {
+        const userData = remoteUsers.get(user.uid);
+        if (userData && userData.container) {
+          userData.container.remove();
+          remoteUsers.delete(user.uid);
+          updateParticipantCount();
+        }
+      });
+
+      try {
+        const channelName = await window.TechTitansAgora.compactChannelName('group', role);
+        groupCallChannelName = channelName;
+        setupAgoraTokenRefresh(client, () => groupCallChannelName);
+        const token = await getAgoraToken(groupCallChannelName);
+        console.info('Agora group join started');
+        await client.join(AGORA_APP_ID, groupCallChannelName, token, currentUser.id);
+        console.info('Agora group join succeeded');
+        joinedAgoraChannelName = groupCallChannelName;
+        console.info('Agora group media initialization started');
+        localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+        localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+        console.info('Agora group publish started');
+        await client.publish([localAudioTrack, localVideoTrack]);
+        console.info('Agora group publish succeeded');
+        localVideoTrack.play('localVideo');
+        callActive = true;
+        callStarting = false;
+      } catch (err) {
+        console.error('Failed to join group call:', err);
+        await hangUpCall();
+        showCallError(err);
+        return;
+      }
+
+      // If we are starting a new call (no existingCallId), create DB record and broadcast
+      if (!existingCallId) {
+        try {
+          const { data: callData, error: callError } = await supabase
+            .from('group_calls')
+            .insert({ role: role, started_by: currentUser.id, status: 'active', started_at: new Date().toISOString() })
+            .select()
+            .single();
+          if (callError) throw callError;
+          activeGroupCallId = callData.id;
+          // Broadcast to group channel
+          await supabase.channel(`group-call-${role}`).send({
+            type: 'broadcast',
+            event: 'group-call-started',
+            payload: {
+              callerId: currentUser.id,
+              callerName: currentUserFullName,
+              role,
+              callId: callData.id,
+              callChannelName: groupCallChannelName
+            }
+          });
+          // Update banner
+          callerNameDisplay.textContent = currentUserFullName;
+          ongoingCallBanner.style.display = 'flex';
+          // Push notification
+          if (window.TechTitansNotifications) {
+            window.TechTitansNotifications.display(`Group call started for ${role}`, {
+              body: `${currentUserFullName} has started a call for ${role}.`,
+              url: 'messages.html'
+            });
+          }
+        } catch (err) {
+          console.warn('Failed to create group call record:', err);
+        }
+      } else {
+        // Joining existing call: just update the banner? It's already showing.
+        // Add participant count
+        showToast('You joined the group call');
+      }
+
+      callModalTitle.textContent = `Group call: ${role}`;
+      callModal.style.display = 'flex';
+      callActive = true;
+      callStarting = false;
+      audioEnabled = true;
+      videoEnabled = true;
+      updateParticipantCount();
+    }
+
+    async function hangUpCall() {
+      const client = groupAgoraClient;
+      groupAgoraClient = null;
+      if (client) {
+        try { await client.leave(); } catch (leaveError) { console.warn('Agora group leave skipped:', leaveError); }
+      }
+      await cleanupGroupCallMedia();
+      callModal.style.display = 'none';
+      callActive = false;
+      callStarting = false;
+      joinedAgoraChannelName = null;
+
+      // If this user was the one who started the call (or we want to end the call when last person leaves)
+      // We'll end the call if we are the only participant (i.e., after leaving, no remote users)
+      // But we should check if others are still in the call. Since we don't have participant list from DB,
+      // we can use the remoteUsers map: if there are remote users, we don't end the call.
+      // However, if we are the last one, we should end the call and update DB.
+      if (remoteUsers.size === 0 && activeGroupCallId) {
+        // End the call
+        try {
+          await supabase
+            .from('group_calls')
+            .update({ status: 'ended', ended_at: new Date().toISOString() })
+            .eq('id', activeGroupCallId);
+          const role = isCEO ? selectedGroupRole : currentRole;
+          if (role) {
+            await supabase.channel(`group-call-${role}`).send({
+              type: 'broadcast',
+              event: 'group-call-ended',
+              payload: {
+                endedBy: currentUser.id,
+                callerName: currentUserFullName,
+                role
+              }
+            });
+          }
+          activeGroupCallId = null;
+          ongoingCallBanner.style.display = 'none';
+          if (window.TechTitansNotifications) {
+            window.TechTitansNotifications.display(`Group call ended`, {
+              body: `The call for ${role} has ended.`,
+              url: 'messages.html'
+            });
+          }
+        } catch (err) {
+          console.warn('Failed to end group call:', err);
+        }
+      } else {
+        // Notify others that this user left? We already left channel, that's enough.
+        // Optionally broadcast a message.
+        const role = isCEO ? selectedGroupRole : currentRole;
+        if (role) {
+          await supabase.channel(`group-call-${role}`).send({
+            type: 'broadcast',
+            event: 'group-call-participant-left',
+            payload: {
+              userId: currentUser.id,
+              userName: currentUserFullName
+            }
+          });
+        }
+      }
+    }
+
+    // --- Mute controls ---
+    let audioEnabled = true, videoEnabled = true;
+    document.getElementById('muteAudioBtn').addEventListener('click', async () => {
+      if (localAudioTrack) {
+        audioEnabled = !audioEnabled;
+        await localAudioTrack.setEnabled(audioEnabled);
+        document.getElementById('muteAudioBtn').textContent = audioEnabled ? '🎤' : '🔇';
+      }
+    });
+    document.getElementById('muteVideoBtn').addEventListener('click', async () => {
+      if (localVideoTrack) {
+        videoEnabled = !videoEnabled;
+        await localVideoTrack.setEnabled(videoEnabled);
+        document.getElementById('muteVideoBtn').textContent = videoEnabled ? '📹' : '🚫';
+      }
+    });
+
+    // --- Navigation ---
+    document.getElementById('logout').addEventListener('click', async () => {
+      if (messageSubscription) messageSubscription.unsubscribe();
+      if (messageReadsSubscription) messageReadsSubscription.unsubscribe();
+      if (typingSubscription) typingSubscription.unsubscribe();
+      if (presenceChannel) await presenceChannel.untrack();
+      if (globalDmSubscription) globalDmSubscription.unsubscribe();
+      if (callActive) hangUpCall();
+      editTimeouts.forEach(t => clearTimeout(t));
+      unreadBorderTimeouts.forEach(t => clearTimeout(t));
+      await supabase.auth.signOut();
+      window.location.href = 'index.html';
+    });
+
+    document.getElementById('sendBtn').addEventListener('click', sendMessage);
+    document.getElementById('messageInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+    document.getElementById('groupCallBtn').addEventListener('click', () => {
+      // Start a new call
+      joinGroupCall(null);
+    });
+    joinOngoingCallBtn.addEventListener('click', () => {
+      // Join existing call
+      if (activeGroupCallId) {
+        joinGroupCall(activeGroupCallId);
+      }
+    });
+    document.getElementById('closeCallModalBtn').addEventListener('click', hangUpCall);
+    document.getElementById('hangupCallBtn').addEventListener('click', hangUpCall);
+
+    window.addEventListener('scroll', () => modal.style.display = 'none', true);
+    document.addEventListener('click', (e) => { if (!modal.contains(e.target)) modal.style.display = 'none'; });
+
+    document.getElementById('closeProfileModal').addEventListener('click', () => { profileModal.style.display = 'none'; });
+    modalSendDM.addEventListener('click', () => {
+      const userId = modalSendDM.dataset.userId;
+      profileModal.style.display = 'none';
+      window.location.href = `dm.html?user=${userId}`;
+    });
+
+    // --- Send group message ---
     async function sendMessage() {
       const input = document.getElementById('messageInput');
       const content = input.value.trim();
@@ -2195,7 +2590,7 @@
       try { await supabase.from('message_reads').insert({ message_id: data.id, user_id: currentUser.id }); } catch (readErr) {}
     }
 
-    // --- DM badge subscription (to update sidebar badge) ---
+    // --- DM badge subscription ---
     function subscribeToAllDirectMessages() {
       if (globalDmSubscription) globalDmSubscription.unsubscribe();
       if (!currentUser) return;
@@ -2218,252 +2613,144 @@
         .subscribe();
     }
 
-    // --- Agora group call functions ---
-    function isValidAgoraChannelName(channelName) {
-      return window.TechTitansAgora.isValidChannelName(channelName);
-    }
-
-    function getCallUserMessage(error) {
-      const message = String(error?.message || error?.name || '').toLowerCase();
-      if (message.includes('notallowed') || message.includes('permission') || message.includes('denied')) {
-        return 'Microphone or camera permission is blocked. Please allow access for TechTitans and try again.';
-      }
-      if (message.includes('notreadable') || message.includes('could not start audio source')) {
-        return 'Microphone or camera is unavailable. Close other apps using it, check app permissions, and try again.';
-      }
-      if (message.includes('notfound') || message.includes('device not found')) {
-        return 'No microphone or camera was found on this device.';
-      }
-      if (message.includes('overconstrained')) {
-        return 'This device cannot start the requested microphone or camera settings.';
-      }
-      if (message.includes('token') || message.includes('fetch') || message.includes('network')) {
-        return 'Unable to connect to the calling service. Please check your connection and try again.';
-      }
-      return 'Unable to connect to the call. Please try again.';
-    }
-
-    function showCallError(error) {
-      const userMessage = getCallUserMessage(error);
-      if (typeof showToast === 'function') showToast(userMessage);
-      else alert(userMessage);
-    }
-
-    async function getAgoraToken(channelName) {
-      if (!currentUser?.id) {
-        throw new Error('You must be signed in to start a call.');
-      }
-      if (!isValidAgoraChannelName(channelName)) {
-        throw new Error('Invalid call channel name.');
-      }
-
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !sessionData?.session?.access_token) {
-        throw new Error('Authentication expired. Please log in again.');
-      }
-
-      let response;
-      try {
-        console.info('Agora token request started');
-        response = await fetch(`${SUPABASE_URL}/functions/v1/agora-token`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${sessionData.session.access_token}`
-          },
-          body: JSON.stringify({
-            channelName,
-            uid: currentUser.id
-          })
-        });
-      } catch (error) {
-        console.error('Agora token request failed:', error);
-        throw new Error('Unable to connect to the calling service. Please check your connection and try again.');
-      }
-
-      let data = {};
-      try {
-        data = await response.json();
-      } catch (error) {
-        throw new Error('Token server returned an invalid response.');
-      }
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Unable to get Agora token.');
-      }
-      if (!data.token) {
-        throw new Error('Token server did not return an Agora token.');
-      }
-
-      console.info('Agora token received');
-      return data.token;
-    }
-
-    function setupAgoraTokenRefresh(client, getChannelName) {
-      if (!client?.on) return;
-      const renewToken = async () => {
-        try {
-          const freshToken = await getAgoraToken(getChannelName());
-          if (typeof client.renewToken === 'function') {
-            await client.renewToken(freshToken);
-          }
-        } catch (error) {
-          console.error('Unable to renew Agora token:', error);
-        }
-      };
-      client.on('token-privilege-will-expire', renewToken);
-      client.on('token-privilege-did-expire', renewToken);
-    }
-
-    async function cleanupGroupCallMedia() {
-      if (localAudioTrack) {
-        localAudioTrack.stop();
-        localAudioTrack.close();
-        localAudioTrack = null;
-      }
-      if (localVideoTrack) {
-        localVideoTrack.stop();
-        localVideoTrack.close();
-        localVideoTrack = null;
-      }
-      localVideo.innerHTML = '';
-      remoteVideo.innerHTML = '';
-    }
-
-    async function joinGroupCall() {
-      if (callActive || callStarting) { alert('You are already joining or in a group call.'); return; }
-      if (!selectedGroupRole && !currentRole) { alert('No group selected.'); return; }
+    // --- Group call subscription (broadcast) ---
+    function setupGroupCallSubscription() {
+      if (groupCallSubscription) groupCallSubscription.unsubscribe();
       const role = isCEO ? selectedGroupRole : currentRole;
-      if (!role) { alert('Cannot determine group role.'); return; }
-      if (!window.AgoraRTC) { alert('Calling service did not load. Check your connection and refresh.'); return; }
-      callStarting = true;
-
-      const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-      groupAgoraClient = client;
-
-      client.on('user-published', async (user, mediaType) => {
-        await client.subscribe(user, mediaType);
-        if (mediaType === 'video') {
-          user.videoTrack.play('remoteVideo');
-        }
-        if (mediaType === 'audio') {
-          user.audioTrack.play();
-        }
-        remoteVideoLabel.textContent = `Group member ${user.uid}`;
-      });
-
-      try {
-        groupCallChannelName = await window.TechTitansAgora.compactChannelName('group', role);
-        setupAgoraTokenRefresh(client, () => groupCallChannelName);
-        const token = await getAgoraToken(groupCallChannelName);
-        console.info('Agora group join started');
-        await client.join(AGORA_APP_ID, groupCallChannelName, token, currentUser.id);
-        console.info('Agora group join succeeded');
-        joinedAgoraChannelName = groupCallChannelName;
-        console.info('Agora group media initialization started');
-        localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-        localVideoTrack = await AgoraRTC.createCameraVideoTrack();
-        console.info('Agora group publish started');
-        await client.publish([localAudioTrack, localVideoTrack]);
-        console.info('Agora group publish succeeded');
-        localVideoTrack.play('localVideo');
-        callActive = true;
-        callStarting = false;
-      } catch (err) {
-        console.error('Failed to join group call:', err);
-        await hangUpCall();
-        showCallError(err);
-        return;
-      }
-
-      try {
-        await supabase.channel(`group-call-${role}`).send({
-          type: 'broadcast',
-          event: 'group-call-started',
-          payload: {
-            callerId: currentUser.id,
-            callerName: currentUserFullName,
-            role,
-            callChannelName: groupCallChannelName
+      if (!role) return;
+      groupCallSubscription = supabase
+        .channel(`group-call-${role}`)
+        .on('broadcast', { event: 'group-call-started' }, async ({ payload }) => {
+          if (!payload || payload.callerId === currentUser.id) return;
+          // Update banner
+          callerNameDisplay.textContent = payload.callerName || 'Someone';
+          activeGroupCallId = payload.callId || null;
+          ongoingCallBanner.style.display = 'flex';
+          showToast(`Group call started by ${payload.callerName}`);
+          if (window.TechTitansNotifications) {
+            window.TechTitansNotifications.display(`Group call started for ${role}`, {
+              body: `${payload.callerName} has started a call.`,
+              url: 'messages.html'
+            });
           }
-        });
-      } catch (broadcastError) {
-        console.warn('Unable to broadcast group call start:', broadcastError);
-      }
-
-      if (window.TechTitansNotifications) {
-        window.TechTitansNotifications.display(`Group call started for ${role}`, {
-          body: `${currentUserFullName} has started a call for ${role}.`,
-          url: 'messages.html'
-        });
-      }
-
-      callModalTitle.textContent = `Group call: ${role}`;
-      callModal.style.display = 'flex';
-      callActive = true;
-      callStarting = false;
-      audioEnabled = true;
-      videoEnabled = true;
+        })
+        .on('broadcast', { event: 'group-call-ended' }, async ({ payload }) => {
+          if (!payload || payload.endedBy === currentUser.id) return;
+          ongoingCallBanner.style.display = 'none';
+          activeGroupCallId = null;
+          showToast(`Group call ended`);
+          if (window.TechTitansNotifications) {
+            window.TechTitansNotifications.display(`Group call ended`, {
+              body: `The call for ${role} has ended.`,
+              url: 'messages.html'
+            });
+          }
+        })
+        .on('broadcast', { event: 'group-call-participant-left' }, ({ payload }) => {
+          // optional: show toast
+        })
+        .subscribe();
     }
 
-    async function hangUpCall() {
-      const client = groupAgoraClient;
-      groupAgoraClient = null;
-      if (client) {
-        try { await client.leave(); } catch (leaveError) { console.warn('Agora group leave skipped:', leaveError); }
+    // --- Group messages subscription ---
+    function setupGroupSubscription() {
+      if (messageSubscription) { messageSubscription.unsubscribe(); messageSubscription = null; }
+
+      if (isCEO) {
+        messageSubscription = supabase
+          .channel('all-messages')
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'group_messages' }, async (payload) => {
+            const newMsg = payload.new;
+            if (document.querySelector(`.message-row[data-message-id="${newMsg.id}"]`)) return;
+            if (newMsg.sender_id === currentUser.id) return;
+
+            const { data: senderProfile } = await supabase
+              .from('profiles')
+              .select('id, full_name, avatar_url')
+              .eq('id', newMsg.sender_id)
+              .single();
+            if (!senderProfile) return;
+            const enrichedMsg = { ...newMsg, sender: senderProfile };
+
+            const shouldShow = selectedGroupRole === null || newMsg.role === selectedGroupRole;
+            if (shouldShow) {
+              appendMessageToUI(enrichedMsg, false, senderProfile, newMsg.role, true);
+              currentUnreadCount++;
+            }
+            totalUnreadCount++;
+            updateUnreadBadges();
+
+            if (window.TechTitansNotifications) {
+              window.TechTitansNotifications.display(`New message in ${newMsg.role}`, {
+                body: `${senderProfile.full_name}: ${newMsg.content || 'Sent a voice note'}`,
+                url: 'messages.html'
+              });
+            }
+            if (isCEO) buildGroupTabs();
+          })
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'group_messages' }, (payload) => {
+            updateMessageInUI(payload.new.id, payload.new.content);
+          })
+          .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'group_messages' }, (payload) => {
+            removeMessageFromUI(payload.old.id);
+          })
+          .subscribe();
+      } else {
+        messageSubscription = supabase
+          .channel(`group-${currentRole}`)
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, async (payload) => {
+            const newMsg = payload.new;
+            if (document.querySelector(`.message-row[data-message-id="${newMsg.id}"]`)) return;
+            if (newMsg.sender_id === currentUser.id) return;
+
+            const { data: senderProfile } = await supabase
+              .from('profiles')
+              .select('id, full_name, avatar_url')
+              .eq('id', newMsg.sender_id)
+              .single();
+            if (!senderProfile) return;
+            const enrichedMsg = { ...newMsg, sender: senderProfile };
+
+            appendMessageToUI(enrichedMsg, false, senderProfile, newMsg.role, true);
+            currentUnreadCount++;
+            updateUnreadBadges();
+
+            if (window.TechTitansNotifications) {
+              window.TechTitansNotifications.display(`New message in ${newMsg.role}`, {
+                body: `${senderProfile.full_name}: ${newMsg.content || 'Sent a voice note'}`,
+                url: 'messages.html'
+              });
+            }
+          })
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, (payload) => {
+            updateMessageInUI(payload.new.id, payload.new.content);
+          })
+          .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'group_messages', filter: `role=eq.${currentRole}` }, (payload) => {
+            removeMessageFromUI(payload.old.id);
+          })
+          .subscribe();
       }
-      await cleanupGroupCallMedia();
-      callModal.style.display = 'none';
-      callActive = false;
-      callStarting = false;
-      joinedAgoraChannelName = null;
     }
 
-    // --- Mute controls ---
-    let audioEnabled = true, videoEnabled = true;
-    document.getElementById('muteAudioBtn').addEventListener('click', async () => {
-      if (localAudioTrack) {
-        audioEnabled = !audioEnabled;
-        await localAudioTrack.setEnabled(audioEnabled);
-        document.getElementById('muteAudioBtn').textContent = audioEnabled ? 'Mic' : 'Muted';
-      }
-    });
-    document.getElementById('muteVideoBtn').addEventListener('click', async () => {
-      if (localVideoTrack) {
-        videoEnabled = !videoEnabled;
-        await localVideoTrack.setEnabled(videoEnabled);
-        document.getElementById('muteVideoBtn').textContent = videoEnabled ? 'Video' : 'Video off';
-      }
-    });
-    // --- Navigation (only logout and profile modal) ---
-    document.getElementById('logout').addEventListener('click', async () => {
-      if (messageSubscription) messageSubscription.unsubscribe();
+    function setupMessageReadsSubscription() {
       if (messageReadsSubscription) messageReadsSubscription.unsubscribe();
-      if (typingSubscription) typingSubscription.unsubscribe();
-      if (presenceChannel) await presenceChannel.untrack();
-      if (globalDmSubscription) globalDmSubscription.unsubscribe();
-      if (callActive) hangUpCall();
-      editTimeouts.forEach(t => clearTimeout(t));
-      unreadBorderTimeouts.forEach(t => clearTimeout(t));
-      await supabase.auth.signOut();
-      window.location.href = 'index.html';
-    });
-
-    document.getElementById('sendBtn').addEventListener('click', sendMessage);
-    document.getElementById('messageInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
-    document.getElementById('groupCallBtn').addEventListener('click', joinGroupCall);
-    document.getElementById('closeCallModalBtn').addEventListener('click', hangUpCall);
-    document.getElementById('hangupCallBtn').addEventListener('click', hangUpCall);
-
-    window.addEventListener('scroll', () => modal.style.display = 'none', true);
-    document.addEventListener('click', (e) => { if (!modal.contains(e.target)) modal.style.display = 'none'; });
-
-    document.getElementById('closeProfileModal').addEventListener('click', () => { profileModal.style.display = 'none'; });
-    modalSendDM.addEventListener('click', () => {
-      const userId = modalSendDM.dataset.userId;
-      profileModal.style.display = 'none';
-      window.location.href = `dm.html?user=${userId}`;
-    });
+      if (!currentUser) return;
+      messageReadsSubscription = supabase
+        .channel('message-reads')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'message_reads' }, async (payload) => {
+          const { message_id, user_id } = payload.new;
+          if (user_id === currentUser.id) return;
+          const { data: msg } = await supabase
+            .from('group_messages')
+            .select('sender_id')
+            .eq('id', message_id)
+            .single();
+          if (msg && msg.sender_id === currentUser.id) {
+            await updateSeenIndicator(message_id);
+          }
+        })
+        .subscribe();
+    }
 
     // --- Initialization ---
     async function init() {
@@ -2483,7 +2770,7 @@
         isCEO = (currentRole === 'CEO');
 
         await setupPresence();
-        subscribeToAllDirectMessages();   // keeps DM badge updated
+        subscribeToAllDirectMessages();
         setupMessageReadsSubscription();
 
         const messageInput = document.getElementById('messageInput');
@@ -2510,6 +2797,9 @@
 
         await loadMessages();
         setupGroupSubscription();
+        setupGroupCallSubscription();
+        // Check for ongoing call
+        await checkOngoingCall();
       } catch (err) {
         console.error('Init error:', err);
         document.getElementById('messagesArea').innerHTML = '<div style="color:#ff628c;text-align:center;padding:2rem;">Failed to load chat. Please refresh.</div>';
@@ -2521,4 +2811,3 @@
 </script>
 </body>
 </html>
-
