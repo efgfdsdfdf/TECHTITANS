@@ -11,19 +11,10 @@ const defaultAllowedOrigins = [
 ];
 
 function getCorsHeaders(request: Request) {
-  const origin = request.headers.get("origin") || "";
-  const configuredOrigins = (Deno.env.get("ALLOWED_ORIGINS") || "")
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-  const allowedOrigins = configuredOrigins.length > 0 ? configuredOrigins : defaultAllowedOrigins;
-  const allowOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
-
   return {
-    "Access-Control-Allow-Origin": allowOrigin,
+    "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": allowedHeaders,
     "Access-Control-Allow-Methods": allowedMethods,
-    "Vary": "Origin",
   };
 }
 

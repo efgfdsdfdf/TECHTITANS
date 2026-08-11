@@ -24,31 +24,13 @@ const defaultAllowedOrigins = [
   "https://efgfdsdfdf.github.io",
   "capacitor://localhost",
   "http://localhost",
-  "http://127.0.0.1:8080",
-  "http://localhost:8080",
-  "http://127.0.0.1:5500",
-  "http://localhost:5500",
-];
 
-function getAllowedOrigins() {
-  const configuredOrigins = (Deno.env.get("ALLOWED_ORIGINS") || "")
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-  return configuredOrigins.length > 0 ? configuredOrigins : defaultAllowedOrigins;
-}
-
-function getCorsHeaders(request: Request) {
-  const origin = request.headers.get("origin") || "";
-  const headers: Record<string, string> = {
+function getCorsHeaders(_request: Request) {
+  return {
+    "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": allowedHeaders,
     "Access-Control-Allow-Methods": allowedMethods,
-    "Vary": "Origin",
   };
-  if (origin && getAllowedOrigins().includes(origin)) {
-    headers["Access-Control-Allow-Origin"] = origin;
-  }
-  return headers;
 }
 
 function jsonResponse(request: Request, status: number, body: Record<string, unknown>) {
