@@ -17,6 +17,7 @@
       overflow: hidden;
       color: #eef2fb;
     }
+    body.menu-open { overflow: hidden; }
     .sidebar {
       width: 260px;
       min-width: 260px;
@@ -67,6 +68,27 @@
     }
     .logout-btn:hover { background: #1e2c56; }
     .main { flex: 1; padding: 2rem; overflow-y: auto; min-height: 100vh; }
+    .mobile-menu-btn {
+      display: none;
+      width: 2.75rem;
+      height: 2.75rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 50%;
+      background: rgba(66, 140, 255, 0.12);
+      color: #eef2fb;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(2px);
+      z-index: 800;
+    }
     .admin-header {
       display: flex;
       justify-content: space-between;
@@ -202,7 +224,7 @@
     .toolbar .controls { display: flex; gap: 1rem; flex-wrap: wrap; width: 100%; }
     .toolbar .page-info { color: #9aa4bf; font-size: 0.95rem; min-width: 200px; text-align: right; }
     .table-card { background: rgba(14, 22, 41, 0.96); border: 1px solid rgba(66, 140, 255, 0.18); border-radius: 1.5rem; padding: 1rem; }
-    .table-container { overflow-x: auto; }
+    .table-container { overflow-x: auto; border-radius: 1rem; -webkit-overflow-scrolling: touch; }
     table { width: 100%; border-collapse: collapse; min-width: 900px; }
     thead th {
       text-align: left;
@@ -238,11 +260,53 @@
       background: #1a2335; border: 1px solid #428cff; border-radius: 2rem; padding: 2rem;
       width: 400px; max-width: 90%;
     }
+    .modal-content label {
+      display: block;
+      margin: 0.85rem 0 0.35rem;
+      color: #9aa4bf;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+    .modal-content input,
+    .modal-content select,
+    .modal-content textarea,
+    .admin-field {
+      width: 100%;
+      background: #0f172f;
+      border: 1px solid #2f3a5a;
+      border-radius: 0.9rem;
+      color: white;
+      min-height: 2.65rem;
+      padding: 0.75rem 0.9rem;
+      outline: none;
+    }
+    .modal-content input:focus,
+    .modal-content select:focus,
+    .modal-content textarea:focus,
+    .admin-field:focus {
+      border-color: #428cff;
+      box-shadow: 0 0 0 3px rgba(66, 140, 255, 0.16);
+    }
+    .modal-content input:disabled {
+      opacity: 0.64;
+      cursor: not-allowed;
+    }
+    .modal-note {
+      color: #9aa4bf;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      margin-top: 0.8rem;
+    }
+    .extra-fields {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
     .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; }
     .save-btn { background: #428cff; color: white; padding: 0.7rem 1.5rem; border-radius: 2rem; border: none; cursor: pointer; }
     .cancel-btn { background: transparent; border: 1px solid #5b6b92; color: #a5b3d1; padding: 0.7rem 1.5rem; border-radius: 2rem; cursor: pointer; }
     .pagination {
-      display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;
+      display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap;
     }
     .page-btn {
       background: #1f2a44; color: white; border: none; width: 2.5rem; height: 2.5rem;
@@ -265,14 +329,166 @@
     }
     @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
     @media (max-width: 768px) {
-      body { flex-direction: column; }
-      .sidebar { width: 100%; flex-direction: row; padding: 1rem; }
-      .main { padding: 1rem; }
+      body {
+        display: block;
+        height: auto;
+        min-height: 100dvh;
+        overflow: auto;
+      }
+      .mobile-menu-btn { display: inline-flex; }
+      .sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: min(82vw, 320px);
+        min-width: 0;
+        height: 100dvh;
+        padding: 1.25rem;
+        z-index: 900;
+        transform: translateX(-105%);
+        transition: transform 0.24s ease;
+        border-right: 1px solid rgba(66, 140, 255, 0.24);
+        box-shadow: 16px 0 40px rgba(0,0,0,0.3);
+      }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-backdrop.show { display: block; }
+      .logo {
+        font-size: 1.25rem;
+        letter-spacing: 0.08em;
+      }
+      .nav a,
+      .logout-btn {
+        min-height: 44px;
+        border-radius: 1rem;
+      }
+      .main {
+        padding: 1rem;
+        min-height: 100dvh;
+        overflow: visible;
+      }
+      .admin-header {
+        align-items: flex-start;
+        margin-bottom: 1rem;
+      }
+      .admin-header > div:first-child {
+        min-width: 0;
+      }
+      .admin-header h1 {
+        font-size: 1.45rem;
+        line-height: 1.2;
+      }
+      .admin-subtitle {
+        font-size: 0.88rem;
+        line-height: 1.45;
+      }
+      .admin-user {
+        display: none;
+      }
+      .admin-status {
+        margin: 0.85rem 0 1rem;
+        padding: 0.85rem 1rem;
+        border-radius: 1rem;
+        font-size: 0.86rem;
+      }
+      .overview-grid,
+      .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
+      }
+      .stat-card,
+      .section-card {
+        border-radius: 1rem;
+        padding: 1rem;
+      }
+      .stat-value {
+        font-size: 1.6rem;
+      }
+      .stat-label {
+        font-size: 0.78rem;
+      }
+      .tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 0.5rem;
+        padding-bottom: 0.65rem;
+        margin-bottom: 1rem;
+        -webkit-overflow-scrolling: touch;
+      }
+      .tab {
+        white-space: nowrap;
+        padding: 0.58rem 0.95rem;
+        font-size: 0.84rem;
+      }
+      .toolbar {
+        gap: 0.75rem;
+      }
+      .toolbar .controls {
+        gap: 0.65rem;
+      }
+      .toolbar .controls > *,
+      .toolbar .controls .search-box {
+        width: 100% !important;
+        min-width: 0 !important;
+      }
+      .toolbar .page-info {
+        width: 100%;
+        min-width: 0;
+        text-align: left;
+        font-size: 0.82rem;
+      }
+      .table-card {
+        padding: 0.65rem;
+        border-radius: 1rem;
+      }
+      table {
+        min-width: 760px;
+      }
+      th,
+      td {
+        padding: 0.75rem 0.6rem;
+        font-size: 0.85rem;
+      }
+      .edit-btn,
+      .delete-btn {
+        padding: 0.45rem 0.75rem;
+        margin: 0.2rem 0.2rem 0.2rem 0;
+      }
+      .pagination {
+        justify-content: flex-start;
+      }
+      .page-btn {
+        width: 2.25rem;
+        height: 2.25rem;
+      }
+      .modal {
+        align-items: flex-end;
+      }
+      .modal-content {
+        width: 100%;
+        max-width: 100%;
+        max-height: 88dvh;
+        overflow-y: auto;
+        border-radius: 1.3rem 1.3rem 0 0;
+        padding: 1.25rem;
+      }
+      .modal-actions {
+        gap: 0.65rem;
+        margin-top: 1.25rem;
+      }
+      .modal-actions button {
+        flex: 1;
+      }
+    }
+    @media (max-width: 430px) {
+      .overview-grid,
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="sidebar">
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <div class="sidebar" id="adminSidebar">
     <div class="logo">TECH<span>TITANS</span></div>
     <div class="nav" id="sidebarNav">
       <a href="dashboard.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
@@ -286,6 +502,9 @@
 
   <div class="main">
     <div class="admin-header">
+      <button class="mobile-menu-btn" id="mobileMenuBtn" type="button" aria-label="Open admin menu" aria-controls="adminSidebar" aria-expanded="false">
+        <i class="fas fa-bars"></i>
+      </button>
       <div>
         <h1>Admin Control Center</h1>
         <p class="admin-subtitle">Review users, manage announcements, and oversee role assignments. All pages use static navigation so this panel loads cleanly from any path.</p>
@@ -343,7 +562,6 @@
         </div>
             <div class="page-info" id="usersPageInfo">Showing 0 of 0 users</div>
         </div>
-      </div>
 
       <div class="table-card">
         <div class="table-container">
@@ -363,6 +581,7 @@
         </div>
         <div class="pagination" id="usersPagination"></div>
       </div>
+    </div>
     <div class="tab-content" id="tab-announcements">
       <div style="margin-bottom: 1rem;">
         <button class="save-btn" id="newAnnouncementBtn"><i class="fas fa-plus"></i> New Announcement</button>
@@ -404,11 +623,13 @@
   <div class="modal" id="editUserModal">
     <div class="modal-content">
       <h3><i class="fas fa-user-edit"></i> Edit User</h3>
-      <label>Full Name</label><input type="text" id="editName" readonly disabled>
-      <label>Email</label><input type="email" id="editEmail" readonly disabled>
+      <label>Full Name</label><input type="text" id="editName" placeholder="Full name">
+      <label>Email</label><input type="email" id="editEmail" placeholder="Profile email">
       <label>Job Role</label><input type="text" id="editJobRole" placeholder="e.g. CEO, Developer">
       <label>System Role</label>
       <select id="editSysRole"><option value="member">Member</option><option value="admin">Admin</option></select>
+      <div class="extra-fields" id="editExtraFields"></div>
+      <p class="modal-note">This edits the user's profile row. Authentication-only fields can only change if your database exposes a matching editable profile column.</p>
       <div class="modal-actions">
         <button class="cancel-btn" id="cancelEditUser">Cancel</button>
         <button class="save-btn" id="saveEditUser">Save</button>
@@ -462,6 +683,8 @@
       let currentTab = 'users';
       let usersPage = 1;
       let pageSize = 25;
+      let editingUserProfile = null;
+      let profileColumns = new Set();
 
       // DOM elements
       const tabs = document.querySelectorAll('.tab');
@@ -475,12 +698,35 @@
       const usersPageInfo = document.getElementById('usersPageInfo');
       const adminStatus = document.getElementById('adminStatus');
       const logoutBtn = document.getElementById('logout');
+      const adminSidebar = document.getElementById('adminSidebar');
+      const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+      const editExtraFields = document.getElementById('editExtraFields');
 
       // Modals
       const editUserModal = document.getElementById('editUserModal');
       const confirmModal = document.getElementById('confirmModal');
       const annModal = document.getElementById('announcementModal');
       let currentAction = null; // for confirm modal
+
+      function setSidebarOpen(isOpen) {
+        adminSidebar?.classList.toggle('open', isOpen);
+        sidebarBackdrop?.classList.toggle('show', isOpen);
+        document.body.classList.toggle('menu-open', isOpen);
+        mobileMenuBtn?.setAttribute('aria-expanded', String(isOpen));
+      }
+
+      mobileMenuBtn?.addEventListener('click', () => setSidebarOpen(!adminSidebar.classList.contains('open')));
+      sidebarBackdrop?.addEventListener('click', () => setSidebarOpen(false));
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') setSidebarOpen(false);
+      });
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) setSidebarOpen(false);
+      });
+      document.getElementById('sidebarNav')?.addEventListener('click', (event) => {
+        if (event.target.closest('a')) setSidebarOpen(false);
+      });
 
       // ---------- Check admin and load data ----------
       async function init() {
@@ -582,6 +828,7 @@
 
         if (!profiles || profiles.length === 0) {
           allProfiles = [];
+          profileColumns = new Set();
           usersPage = 1;
           filterAndRenderUsers();
           setAdminStatus('No profiles were found in the database. Add users to the profiles table or check your auth setup.');
@@ -593,10 +840,18 @@
           if (!p.email && p.id) {
             try {
               const { data: email, error: eErr } = await supabase.rpc('get_auth_user_email', { user_id: p.id });
-              if (!eErr && email) p.email = email;
+              if (!eErr && email) p._display_email = email;
             } catch (rpcErr) {
               console.warn('RPC get_auth_user_email failed for profile', p.id, rpcErr);
             }
+          }
+        }
+
+        profileColumns = new Set(Object.keys(profiles[0] || {}));
+
+        for (let p of profiles) {
+          if (p._display_email && !profileColumns.has('email')) {
+            p.email = p._display_email;
           }
         }
 
@@ -632,6 +887,9 @@
         updatePageInfo(filtered.length, paginated.length);
       }
 
+      const protectedProfileFields = new Set(['id', 'created_at', 'updated_at', 'last_seen_at', '_display_email']);
+      const primaryProfileFields = new Set(['full_name', 'email', 'job_role', 'role']);
+
       function renderUsers(users) {
         if (!users.length) { usersTbody.innerHTML = '<tr><td colspan="6" class="empty-state">No users</td></tr>'; return; }
         usersTbody.innerHTML = users.map(u => {
@@ -639,15 +897,15 @@
           return `
             <tr>
               <td>
-                <strong>${escapeHtml(u.full_name || '—')}</strong><br>
-                <small>${escapeHtml(u.email || '—')}</small>
+                <strong>${escapeHtml(u.full_name || '-')}</strong><br>
+                <small>${escapeHtml(u.email || '-')}</small>
               </td>
-              <td>${escapeHtml(u.email || '—')}</td>
-              <td><span class="badge-light">${escapeHtml(u.job_role || '—')}</span></td>
+              <td>${escapeHtml(u.email || '-')}</td>
+              <td><span class="badge-light">${escapeHtml(u.job_role || '-')}</span></td>
               <td><span class="role-badge ${u.role === 'admin' ? 'admin' : ''}">${escapeHtml(u.role || 'member')}</span></td>
-              <td>${u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}</td>
+              <td>${u.created_at ? new Date(u.created_at).toLocaleDateString() : '-'}</td>
               <td>
-                <button class="edit-btn" data-id="${u.id}" data-name="${escapeHtml(u.full_name)}" data-email="${escapeHtml(u.email)}" data-job="${escapeHtml(u.job_role)}" data-role="${u.role}"><i class="fas fa-pen"></i> Edit</button>
+                <button class="edit-btn" data-id="${u.id}"><i class="fas fa-pen"></i> Edit</button>
                 <button class="delete-btn" data-id="${u.id}" data-name="${escapeHtml(u.full_name)}"><i class="fas fa-trash"></i> Del</button>
               </td>
             </tr>
@@ -657,23 +915,78 @@
       }
 
       function attachUserActions() {
-        document.querySelectorAll('.edit-btn').forEach(btn => {
+        document.querySelectorAll('#usersTableBody .edit-btn').forEach(btn => {
           btn.addEventListener('click', () => {
-            document.getElementById('editName').value = btn.dataset.name;
-            document.getElementById('editEmail').value = btn.dataset.email;
-            document.getElementById('editJobRole').value = btn.dataset.job;
-            document.getElementById('editSysRole').value = btn.dataset.role;
+            editingUserProfile = allProfiles.find(profile => profile.id === btn.dataset.id) || null;
+            if (!editingUserProfile) {
+              alert('User profile could not be found. Please reload the admin panel.');
+              return;
+            }
+            document.getElementById('editName').value = editingUserProfile.full_name || '';
+            const emailInput = document.getElementById('editEmail');
+            emailInput.value = editingUserProfile.email || '';
+            emailInput.disabled = !profileColumns.has('email');
+            emailInput.title = profileColumns.has('email') ? '' : 'This email is shown from Auth and is not stored in the editable profiles table.';
+            document.getElementById('editJobRole').value = editingUserProfile.job_role || '';
+            document.getElementById('editSysRole').value = editingUserProfile.role || 'member';
             editUserModal.dataset.userId = btn.dataset.id;
+            renderEditableProfileFields(editingUserProfile);
             editUserModal.classList.add('active');
           });
         });
-        document.querySelectorAll('.delete-btn').forEach(btn => {
+        document.querySelectorAll('#usersTableBody .delete-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             currentAction = { type: 'deleteUser', userId: btn.dataset.id, name: btn.dataset.name };
             document.getElementById('confirmMessage').innerText = `Delete user ${btn.dataset.name}? This action cannot be undone.`;
             confirmModal.classList.add('active');
           });
         });
+      }
+
+      function isEditableExtraField(key, value) {
+        if (protectedProfileFields.has(key) || primaryProfileFields.has(key)) return false;
+        return value === null || ['string', 'number', 'boolean', 'object'].includes(typeof value);
+      }
+
+      function humanizeFieldName(key) {
+        return key.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+      }
+
+      function renderEditableProfileFields(profile) {
+        const fields = Object.entries(profile).filter(([key, value]) => isEditableExtraField(key, value));
+        if (!fields.length) {
+          editExtraFields.innerHTML = '<p class="modal-note">No additional editable profile fields were found.</p>';
+          return;
+        }
+        editExtraFields.innerHTML = `
+          <p class="modal-note">Additional profile fields</p>
+          ${fields.map(([key, value]) => renderEditableProfileField(key, value)).join('')}
+        `;
+      }
+
+      function renderEditableProfileField(key, value) {
+        const label = `<label>${escapeHtml(humanizeFieldName(key))}</label>`;
+        if (Array.isArray(value) || (value && typeof value === 'object')) {
+          return `${label}<textarea class="admin-field extra-profile-field" data-field="${escapeHtml(key)}" data-kind="json" rows="4">${escapeHtml(JSON.stringify(value, null, 2))}</textarea>`;
+        }
+        return `${label}<input class="admin-field extra-profile-field" data-field="${escapeHtml(key)}" value="${escapeHtml(value === null ? '' : String(value))}">`;
+      }
+
+      function parseProfileFieldValue(originalValue, newValue) {
+        const trimmed = newValue.trim();
+        if (Array.isArray(originalValue) || (originalValue && typeof originalValue === 'object')) {
+          if (!trimmed) return null;
+          return JSON.parse(trimmed);
+        }
+        if (originalValue === null) return trimmed || null;
+        if (typeof originalValue === 'number') {
+          const parsed = Number(trimmed);
+          return Number.isFinite(parsed) ? parsed : originalValue;
+        }
+        if (typeof originalValue === 'boolean') {
+          return ['true', '1', 'yes', 'on'].includes(trimmed.toLowerCase());
+        }
+        return newValue;
       }
 
       // ---------- ANNOUNCEMENTS ----------
@@ -698,7 +1011,7 @@
             <td>${new Date(a.created_at).toLocaleString()}</td>
             <td>${escapeHtml(a.profiles?.full_name || 'CEO')}</td>
             <td>${escapeHtml(a.content || '')}</td>
-            <td>${a.file_url ? `<a href="${a.file_url}" target="_blank">📎</a>` : '—'}</td>
+            <td>${a.file_url ? `<a href="${a.file_url}" target="_blank" aria-label="Open attachment"><i class="fas fa-paperclip"></i></a>` : '-'}</td>
             <td>
               <button class="edit-btn" data-id="${a.id}" data-content="${escapeHtml(a.content)}"><i class="fas fa-pen"></i> Edit</button>
               <button class="delete-btn" data-id="${a.id}"><i class="fas fa-trash"></i> Del</button>
@@ -774,19 +1087,48 @@
       }
 
       // ---------- Handlers for modals ----------
-      document.getElementById('cancelEditUser').addEventListener('click', () => editUserModal.classList.remove('active'));
+      document.getElementById('cancelEditUser').addEventListener('click', () => {
+        editUserModal.classList.remove('active');
+        editingUserProfile = null;
+        editExtraFields.innerHTML = '';
+      });
       document.getElementById('saveEditUser').addEventListener('click', async () => {
         const id = editUserModal.dataset.userId;
-        const job = document.getElementById('editJobRole').value.trim();
-        const role = document.getElementById('editSysRole').value;
+        const original = editingUserProfile || allProfiles.find(profile => profile.id === id) || {};
+        const updates = {};
+
+        if ('full_name' in original) updates.full_name = document.getElementById('editName').value.trim() || null;
+        if (profileColumns.has('email')) updates.email = document.getElementById('editEmail').value.trim() || null;
+        if ('job_role' in original) updates.job_role = document.getElementById('editJobRole').value.trim() || null;
+        if ('role' in original) updates.role = document.getElementById('editSysRole').value;
+
+        try {
+          document.querySelectorAll('.extra-profile-field').forEach(input => {
+            const field = input.dataset.field;
+            if (!field || protectedProfileFields.has(field)) return;
+            updates[field] = parseProfileFieldValue(original[field], input.value);
+          });
+        } catch (parseError) {
+          alert('One of the JSON profile fields is not valid JSON. Please fix it before saving.');
+          return;
+        }
+
+        if (!Object.keys(updates).length) {
+          alert('No editable profile fields were found for this user.');
+          return;
+        }
+
         const { error } = await supabase
           .from('profiles')
-          .update({ job_role: job || null, role })
+          .update(updates)
           .eq('id', id);
         if (error) alert('Error: ' + error.message);
         else {
           editUserModal.classList.remove('active');
+          editingUserProfile = null;
+          editExtraFields.innerHTML = '';
           loadUsers();
+          loadRoles();
         }
       });
 

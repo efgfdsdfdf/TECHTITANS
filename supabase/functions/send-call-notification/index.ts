@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2.45.4";
+import webpush from "npm:web-push@3.6.7";
 
 type CallRecord = {
   id: string;
@@ -12,7 +13,7 @@ type CallRecord = {
 type DeviceRecord = {
   id: string;
   push_token: string;
-  push_provider: "fcm" | "apns_voip";
+  push_provider: "web_push" | "fcm" | "apns_voip";
 };
 
 type ProfileRecord = {
@@ -248,6 +249,43 @@ function buildApplePayload(action: string, call: CallRecord, caller: ProfileReco
   };
 }
 
+function configureWebPush() {
+  const publicKey = Deno.env.get("VAPID_PUBLIC_KEY");
+  const privateKey = Deno.env.get("VAPID_PRIVATE_KEY");
+  const subject = Deno.env.get("VAPID_SUBJECT") || "mailto:admin@techtitans.app";
+
+  if (!publicKey || !privateKey) return false;
+  webpush.setVapidDetails(subject, publicKey, privateKey);
+  return true;
+}
+
+function buildWebPushPayload(action: string, call: CallRecord, caller: ProfileRecord | null) {
+  const callerName = caller?.full_name || "TechTitans";
+  const isCancel = action === "cancelled";
+  const callLabel = call.type === "video" ? "video call" : "voice call";
+
+  return {
+    title: isCancel ? "Call ended" : callerName,
+    body: isCancel ? "The incoming call has ended." : `Incoming ${callLabel}`,
+    icon: caller?.avatar_url || "img/titans_logo2.png",
+    badge: "img/titans_logo2.png",
+    tag: `call-${call.id}`,
+    requireInteraction: !isCancel,
+    url: `dm.html?callId=${encodeURIComponent(call.id)}`,
+    data: {
+      type: isCancel ? "call_cancelled" : "incoming_call",
+      callId: call.id,
+      callType: call.type,
+      roomId: call.room_id,
+      callerId: call.initiated_by,
+      callerName,
+      action,
+      url: `dm.html?callId=${encodeURIComponent(call.id)}`,
+    },
+    vibrate: isCancel ? [80] : [180, 90, 180, 90, 240],
+  };
+}
+
 serve(async (request) => {
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: getCorsHeaders(request) });
@@ -358,7 +396,7 @@ serve(async (request) => {
     .select("id, push_token, push_provider")
     .eq("user_id", payload.recipientId)
     .eq("is_active", true)
-    .in("push_provider", ["fcm", "apns_voip"])
+    .in("push_provider", ["web_push", "fcm", "apns_voip"])
     .returns<DeviceRecord[]>();
 
   if (devicesError) {
@@ -379,6 +417,7 @@ serve(async (request) => {
   let apnsAccessToken: string | null = null;
   const fcmProjectId = getFcmProjectId();
   const apnsBundleId = Deno.env.get("APNS_BUNDLE_ID");
+  const webPushConfigured = configureWebPush();
 
   let sent = 0;
   let failed = 0;
@@ -387,6 +426,19 @@ serve(async (request) => {
 
   await Promise.all(devices.map(async (device) => {
     try {
+      if (device.push_provider === "web_push") {
+        if (!webPushConfigured) {
+          skipped += 1;
+          return;
+        }
+        await webpush.sendNotification(
+          JSON.parse(device.push_token),
+          JSON.stringify(buildWebPushPayload(action, call, caller || null)),
+        );
+        sent += 1;
+        return;
+      }
+
       if (device.push_provider === "apns_voip") {
         if (!apnsBundleId) {
           skipped += 1;

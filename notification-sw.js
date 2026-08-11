@@ -12,7 +12,10 @@ self.addEventListener('push', (event) => {
     body: payload.body || 'New activity',
     icon: payload.icon || 'img/titans_logo2.png',
     badge: payload.badge || 'img/titans_logo2.png',
+    tag: payload.tag || payload.data?.tag,
+    requireInteraction: Boolean(payload.requireInteraction),
     data: {
+      ...(payload.data || {}),
       url: payload.url || payload.data?.url || '/'
     },
     vibrate: payload.vibrate || [100, 50, 100]
