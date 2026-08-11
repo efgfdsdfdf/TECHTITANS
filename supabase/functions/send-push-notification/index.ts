@@ -24,6 +24,7 @@ const defaultAllowedOrigins = [
   "https://efgfdsdfdf.github.io",
   "capacitor://localhost",
   "http://localhost",
+];
 
 function getCorsHeaders(_request: Request) {
   return {
