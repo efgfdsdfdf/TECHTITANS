@@ -49,9 +49,7 @@
       padding-left: 1rem;
       white-space: nowrap;
     }
-    .logo span {
-      color: #428cff;
-    }
+    .logo span { color: #428cff; }
     .nav {
       display: flex;
       flex-direction: column;
@@ -70,8 +68,7 @@
       position: relative;
       white-space: nowrap;
     }
-    .nav a:hover,
-    .nav a.active {
+    .nav a:hover, .nav a.active {
       background: #1f2a44;
       color: #fff;
     }
@@ -211,22 +208,24 @@
       border-bottom: 1px solid #263154;
       font-size: 0.9rem;
       background: #0d1426;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
     }
-    .dm-list-hamburger {
-      display: none;
-    }
-    @media (max-width: 768px) {
-      .dm-list-hamburger {
-        display: inline-flex;
-        width: 2.4rem;
-        height: 2.4rem;
-        font-size: 1.1rem;
-        padding: 0;
-      }
-    }
+    .dm-list-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.dm-list-hamburger {
+  display: none;
+}
+@media (max-width: 768px) {
+  .dm-list-hamburger {
+    display: inline-flex;
+    width: 2.4rem;
+    height: 2.4rem;
+    font-size: 1.1rem;
+    padding: 0;
+  }
+}
     .dm-conversation-item {
       padding: 0.8rem 1rem;
       border-bottom: 1px solid #1f2a44;
@@ -281,18 +280,13 @@
       text-align: center;
       margin-left: auto;
     }
-    .dm-conv-seen {
-      color: #428cff;
-      font-size: 0.75rem;
-      margin-left: 0.4rem;
-    }
 
     .dm-chat-area {
       flex: 1;
       display: none;
       flex-direction: column;
       background:
-        radial-gradient(circle at 18px 18px, rgba(255, 255, 255, 0.035) 1px, transparent 1px) 0 0 / 36px 36px,
+        radial-gradient(circle at 18px 18px, rgba(255,255,255,0.035) 1px, transparent 1px) 0 0 / 36px 36px,
         linear-gradient(180deg, #111a2c 0%, #0d1525 100%);
       min-width: 0;
       min-height: 0;
@@ -347,7 +341,7 @@
     .dm-icon-btn {
       min-width: 2.55rem;
       height: 2.55rem;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255,255,255,0.1);
       border-radius: 50%;
       background: #18233b;
       color: #eaf0ff;
@@ -445,21 +439,6 @@
       align-items: center;
       justify-content: center;
     }
-    .voice-btn.recording {
-      background: #ff4d4d;
-      animation: pulse 1s infinite;
-    }
-    @keyframes pulse {
-      0% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.1);
-      }
-      100% {
-        transform: scale(1);
-      }
-    }
 
     .dm-msg-row {
       display: flex;
@@ -482,7 +461,7 @@
       font-size: 0.9rem;
       line-height: 1.4;
       position: relative;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
     }
     .dm-msg-text {
       white-space: pre-wrap;
@@ -539,7 +518,7 @@
       text-transform: uppercase;
       letter-spacing: 0.3px;
       border: 1px solid #2f3a5a;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     }
 
     .dm-voice-note {
@@ -555,7 +534,7 @@
       height: 2.35rem;
       border: none;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.16);
+      background: rgba(255,255,255,0.16);
       color: #fff;
       cursor: pointer;
       display: inline-flex;
@@ -574,7 +553,7 @@
       width: 3px;
       height: var(--h);
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.48);
+      background: rgba(255,255,255,0.48);
     }
     .dm-audio-duration {
       font-size: 0.76rem;
@@ -586,7 +565,7 @@
       grid-column: 2 / 4;
       height: 3px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.18);
+      background: rgba(255,255,255,0.18);
       overflow: hidden;
     }
     .dm-audio-progress span {
@@ -596,10 +575,10 @@
       background: #fff;
     }
     .dm-msg.received .dm-audio-btn {
-      background: rgba(66, 140, 255, 0.22);
+      background: rgba(66,140,255,0.22);
     }
     .dm-msg.received .dm-wave span {
-      background: rgba(190, 210, 255, 0.58);
+      background: rgba(190,210,255,0.58);
     }
     .dm-empty-state {
       margin: auto;
@@ -614,7 +593,7 @@
       top: 0.35rem;
       right: 0.4rem;
       border: 0;
-      background: rgba(0, 0, 0, 0.18);
+      background: rgba(0,0,0,0.18);
       color: inherit;
       border-radius: 999px;
       padding: 0.2rem 0.45rem;
@@ -638,7 +617,7 @@
       color: #fff;
       text-transform: uppercase;
       flex-shrink: 0;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
       cursor: pointer;
       transition: transform 0.1s;
       object-fit: cover;
@@ -675,24 +654,12 @@
       border-radius: 50%;
       animation: typingBounce 1.4s infinite ease-in-out;
     }
-    .typing-indicator span:nth-child(1) {
-      animation-delay: 0s;
-    }
-    .typing-indicator span:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-    .typing-indicator span:nth-child(3) {
-      animation-delay: 0.4s;
-    }
+    .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
     @keyframes typingBounce {
-      0%,
-      60%,
-      100% {
-        transform: translateY(0);
-      }
-      30% {
-        transform: translateY(-0.5rem);
-      }
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-0.5rem); }
     }
     .typing-text {
       color: #9aa4bf;
@@ -705,6 +672,15 @@
       font-weight: 600;
       margin-left: 0.5rem;
     }
+    .voice-btn.recording {
+      background: #ff4d4d;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
 
     .call-modal {
       position: fixed;
@@ -712,7 +688,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0,0,0,0.8);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -732,9 +708,7 @@
       align-items: center;
       margin-bottom: 1rem;
     }
-    .call-modal-header h3 {
-      font-size: 1.2rem;
-    }
+    .call-modal-header h3 { font-size: 1.2rem; }
     .call-timer {
       color: #9aa4bf;
       font-size: 0.92rem;
@@ -774,7 +748,7 @@
       height: 100%;
       background: #090d15;
     }
-    .rtc-video-slot>* {
+    .rtc-video-slot > * {
       width: 100% !important;
       height: 100% !important;
       object-fit: cover;
@@ -783,7 +757,7 @@
       position: absolute;
       bottom: 0.5rem;
       left: 0.5rem;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0,0,0,0.5);
       color: #fff;
       padding: 0.2rem 0.5rem;
       border-radius: 0.5rem;
@@ -794,7 +768,6 @@
       gap: 1rem;
       justify-content: center;
       margin-top: 1rem;
-      flex-wrap: wrap;
     }
     .call-controls button {
       background: #428cff;
@@ -808,13 +781,8 @@
       align-items: center;
       gap: 0.5rem;
     }
-    .call-controls button.hangup {
-      background: #ff4d4d;
-    }
-    .call-controls button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+    .call-controls button.hangup { background: #ff4d4d; }
+    .call-controls button:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .call-options-modal {
       position: fixed;
@@ -822,7 +790,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0,0,0,0.5);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -836,9 +804,7 @@
       color: #fff;
       text-align: center;
     }
-    .call-options-content h3 {
-      margin-bottom: 1rem;
-    }
+    .call-options-content h3 { margin-bottom: 1rem; }
     .call-option-btn {
       background: #2f3a5a;
       border: none;
@@ -855,29 +821,17 @@
       gap: 0.5rem;
       transition: background 0.2s;
     }
-    .call-option-btn:hover {
-      background: #428cff;
-    }
-    .call-option-btn.video {
-      background: #428cff;
-    }
-    .call-option-btn.video:hover {
-      background: #5f9eff;
-    }
+    .call-option-btn:hover { background: #428cff; }
+    .call-option-btn.video { background: #428cff; }
+    .call-option-btn.video:hover { background: #5f9eff; }
 
     #incomingCallModal .call-modal-content {
       max-width: 400px;
       text-align: center;
     }
-    #incomingCallModal .call-controls {
-      margin-top: 1.5rem;
-    }
-    #acceptCallBtn {
-      background: #2ecc71;
-    }
-    #declineCallBtn {
-      background: #ff4d4d;
-    }
+    #incomingCallModal .call-controls { margin-top: 1.5rem; }
+    #acceptCallBtn { background: #2ecc71; }
+    #declineCallBtn { background: #ff4d4d; }
 
     .read-receipts-modal {
       position: absolute;
@@ -888,7 +842,7 @@
       color: #fff;
       font-size: 0.9rem;
       z-index: 1000;
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.7);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.7);
       min-width: 260px;
       max-width: 320px;
       backdrop-filter: blur(4px);
@@ -908,16 +862,14 @@
       color: #fff;
       padding: 0.8rem 1.2rem;
       border-radius: 0.8rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
       opacity: 0.9;
       z-index: 3000;
       font-size: 0.9rem;
       pointer-events: none;
       transition: opacity 0.3s;
     }
-    .toast.hide {
-      opacity: 0;
-    }
+    .toast.hide { opacity: 0; }
 
     .mobile-nav-overlay {
       display: none;
@@ -926,7 +878,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0,0,0,0.6);
       z-index: 1000;
       align-items: stretch;
       justify-content: flex-start;
@@ -942,16 +894,12 @@
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
-      box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
+      box-shadow: 4px 0 30px rgba(0,0,0,0.5);
       animation: slideInNav 0.25s ease;
     }
     @keyframes slideInNav {
-      from {
-        transform: translateX(-100%);
-      }
-      to {
-        transform: translateX(0);
-      }
+      from { transform: translateX(-100%); }
+      to { transform: translateX(0); }
     }
     .mobile-nav-panel .close-btn {
       align-self: flex-end;
@@ -963,9 +911,7 @@
       line-height: 1;
       padding: 0.2rem;
     }
-    .mobile-nav-panel .close-btn:hover {
-      color: #fff;
-    }
+    .mobile-nav-panel .close-btn:hover { color: #fff; }
     .mobile-nav-links {
       display: flex;
       flex-direction: column;
@@ -1122,14 +1068,8 @@
         padding: 0;
         font-size: 0;
       }
-      #dmHeaderVoiceCallBtn::before {
-        content: 'Call';
-        font-size: 0.72rem;
-      }
-      #dmHeaderVideoCallBtn::before {
-        content: 'Video';
-        font-size: 0.72rem;
-      }
+      #dmHeaderVoiceCallBtn::before { content: 'Call'; font-size: 0.72rem; }
+      #dmHeaderVideoCallBtn::before { content: 'Video'; font-size: 0.72rem; }
       .dm-msg {
         max-width: 80%;
       }
@@ -1182,51 +1122,12 @@
     #profileModal .call-modal-content .btn:hover {
       background: #5f9eff;
     }
-
-    .call-log-entry {
-      background: #0d1426;
-      padding: 0.6rem 1rem;
-      border-radius: 0.8rem;
-      margin-bottom: 0.4rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.85rem;
-      color: #d7def5;
-      border-left: 3px solid #428cff;
-    }
-    .call-log-entry.missed {
-      border-left-color: #ff4d4d;
-    }
-    .call-log-entry .call-log-icon {
-      width: 2rem;
-      text-align: center;
-    }
-    .call-log-entry .call-log-details {
-      flex: 1;
-      padding: 0 0.8rem;
-    }
-    .call-log-entry .call-log-details .name {
-      font-weight: 600;
-    }
-    .call-log-entry .call-log-details .time {
-      font-size: 0.7rem;
-      color: #9aa4bf;
-    }
-    .call-log-entry .call-log-duration {
-      font-size: 0.75rem;
-      color: #8affb8;
-    }
   </style>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
-  </script>
-  <script src="native-bridge.js">
-  </script>
-  <script src="notifications.js">
-  </script>
-  <script src="agora-utils.js">
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="native-bridge.js"></script>
+  <script src="notifications.js"></script>
+  <script src="agora-utils.js"></script>
 </head>
 <body>
 
@@ -1344,8 +1245,7 @@
     </div>
   </div>
 
-  <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js">
-  </script>
+  <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
   <script>
     (function() {
       const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
@@ -1403,7 +1303,6 @@
       let endingCall = false;
       let userChannel = null;
       let dmObserver = null;
-      let callRingingTimeout = null;
 
       // ─── DOM REFS ───
       const modal = document.getElementById('receiptsModal');
@@ -1432,9 +1331,11 @@
       if (sidebarToggle) {
         sidebarToggle.addEventListener('click', () => {
           document.body.classList.toggle('sidebar-collapsed');
+          // Store preference in localStorage
           const collapsed = document.body.classList.contains('sidebar-collapsed');
           localStorage.setItem('techTitansSidebarCollapsed', collapsed);
         });
+        // Restore preference
         const stored = localStorage.getItem('techTitansSidebarCollapsed');
         if (stored === 'true') {
           document.body.classList.add('sidebar-collapsed');
@@ -1465,13 +1366,6 @@
         const minutes = Math.floor(rounded / 60);
         const secs = rounded % 60;
         return `${minutes}:${secs.toString().padStart(2, '0')}`;
-      }
-
-      function formatCallDuration(totalSeconds) {
-        const seconds = Math.max(0, Math.floor(totalSeconds || 0));
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${String(secs).padStart(2, '0')}`;
       }
 
       function stringToColor(str) {
@@ -1721,9 +1615,9 @@
             if (newCount > 0) badge.textContent = newCount;
             else if (badge) {
               badge.remove();
+              // Add seen indicator when all messages from this sender are read
               if (!targetItem.querySelector('.dm-conv-seen')) {
-                targetItem.insertAdjacentHTML('beforeend',
-                  '<span class="dm-conv-seen"><i class="fas fa-check-double"></i></span>');
+                targetItem.insertAdjacentHTML('beforeend', '<span class="dm-conv-seen"><i class="fas fa-check-double"></i></span>');
               }
             }
           }
@@ -1774,62 +1668,6 @@
         backBtn.style.display = '';
       }
 
-      // ─── LOAD CALL LOG ───
-      async function loadCallLog(userId) {
-        try {
-          const { data, error } = await supabase
-            .from('calls')
-            .select(`
-              id, type, status, started_at, ended_at, duration_seconds,
-              initiated_by,
-              caller:profiles!initiated_by(full_name, avatar_url)
-            `)
-            .or(`initiated_by.eq.${userId},id.in.(
-              select call_id from call_participants where user_id.eq.${userId}
-            )`)
-            .order('started_at', { ascending: false })
-            .limit(20);
-
-          if (error) {
-            console.warn('Call log load error:', error);
-            return [];
-          }
-          return data || [];
-        } catch (e) {
-          console.warn('Call log error:', e);
-          return [];
-        }
-      }
-
-      function renderCallLogEntry(call) {
-        const isOutgoing = call.initiated_by === currentUser.id;
-        const statusMap = {
-          'active': 'Ongoing',
-          'ended': 'Ended',
-          'missed': 'Missed',
-          'declined': 'Declined',
-          'cancelled': 'Cancelled',
-          'ringing': 'Ringing'
-        };
-        const statusText = statusMap[call.status] || call.status;
-        const icon = call.type === 'video' ? 'fa-video' : 'fa-phone';
-        const isMissed = call.status === 'missed' || call.status === 'declined';
-        const duration = call.duration_seconds ? formatCallDuration(call.duration_seconds) : '—';
-        const callerName = call.caller?.full_name || 'Unknown';
-        const timeStr = call.started_at ? formatTimeOnly(call.started_at) : '';
-
-        return `
-          <div class="call-log-entry ${isMissed ? 'missed' : ''}">
-            <span class="call-log-icon"><i class="fas ${icon}"></i></span>
-            <div class="call-log-details">
-              <span class="name">${escapeHtml(callerName)}</span>
-              <span class="time">${isOutgoing ? 'Outgoing' : 'Incoming'} · ${timeStr}</span>
-            </div>
-            <span class="call-log-duration">${duration}</span>
-          </div>
-        `;
-      }
-
       // ─── LOAD DM VIEW ───
       async function loadPrivateMessagesView() {
         try {
@@ -1858,8 +1696,7 @@
           const conversationsHtml = allProfiles.map(profile => {
             const unread = unreadCounts[profile.id] || 0;
             const unreadBadge = unread > 0 ? `<span class="dm-unread-badge">${unread}</span>` : '';
-            const seenIndicator = unread === 0 ?
-              `<span class="dm-conv-seen"><i class="fas fa-check-double"></i></span>` : '';
+            const seenIndicator = unread === 0 ? `<span class="dm-conv-seen"><i class="fas fa-check-double"></i></span>` : '';
             const onlineClass = onlineUsers.has(profile.id) ? 'online' : '';
             return `
               <div class="dm-conversation-item" data-user-id="${profile.id}" data-user-name="${escapeHtml(profile.full_name)}" data-user-role="${escapeHtml(profile.job_role)}">
@@ -1874,24 +1711,14 @@
             `;
           }).join('');
 
-          // Load call log for the current user
-          const callLogs = await loadCallLog(currentUser.id);
-          const callLogHtml = callLogs.length > 0 ?
-            callLogs.map(c => renderCallLogEntry(c)).join('') :
-            '<div style="color:#9aa4bf;padding:1rem;text-align:center;font-size:0.85rem;">No recent calls</div>';
-
           area.innerHTML = `
             <div class="dm-layout">
               <div class="dm-conversations-list" id="dmConversationsList">
-                <div class="dm-list-header">
-                  <button class="dm-icon-btn dm-list-hamburger" id="mobileNavToggleList" title="Menu">☰</button>
-                  <span>All Members</span>
-                </div>
+<div class="dm-list-header">
+  <button class="dm-icon-btn dm-list-hamburger" id="mobileNavToggleList" title="Menu">☰</button>
+  <span>All Members</span>
+</div>
                 ${conversationsHtml}
-                <div style="padding:1rem;border-top:1px solid #1f2a44;margin-top:0.5rem;">
-                  <div style="color:#9aa4bf;font-size:0.75rem;font-weight:600;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.5px;">Recent Calls</div>
-                  <div id="callLogContainer">${callLogHtml}</div>
-                </div>
               </div>
               <div class="dm-chat-area" id="dmChatArea" style="display:none;">
                 <div class="dm-chat-header">
@@ -1944,9 +1771,9 @@
                 badge.remove();
                 delete dmUnreadBySender[userId];
                 updateDMBadge();
+                // Add seen indicator when unread badge is removed
                 if (!item.querySelector('.dm-conv-seen')) {
-                  item.insertAdjacentHTML('beforeend',
-                    '<span class="dm-conv-seen"><i class="fas fa-check-double"></i></span>');
+                  item.insertAdjacentHTML('beforeend', '<span class="dm-conv-seen"><i class="fas fa-check-double"></i></span>');
                 }
               }
               if (window.innerWidth <= 768) {
@@ -1961,16 +1788,23 @@
           });
 
           // ── mobile nav ──
+          const mobileNavToggle = document.getElementById('mobileNavToggle');
           const mobileNavOverlay = document.getElementById('mobileNavOverlay');
           const mobileNavClose = document.getElementById('mobileNavClose');
           const mobileLogout = document.getElementById('mobileLogout');
-          const mobileNavToggleList = document.getElementById('mobileNavToggleList');
-          if (mobileNavToggleList && mobileNavOverlay) {
-            mobileNavToggleList.addEventListener('click', () => {
+          if (mobileNavToggle && mobileNavOverlay) {
+            mobileNavToggle.addEventListener('click', () => {
               mobileNavOverlay.style.display = 'flex';
               mobileNavOverlay.setAttribute('aria-hidden', 'false');
             });
           }
+          const mobileNavToggleList = document.getElementById('mobileNavToggleList');
+if (mobileNavToggleList && mobileNavOverlay) {
+  mobileNavToggleList.addEventListener('click', () => {
+    mobileNavOverlay.style.display = 'flex';
+    mobileNavOverlay.setAttribute('aria-hidden', 'false');
+  });
+}
           if (mobileNavClose && mobileNavOverlay) {
             mobileNavClose.addEventListener('click', () => {
               mobileNavOverlay.style.display = 'none';
@@ -2113,7 +1947,7 @@
         peerAvatar.textContent = getInitials(safeName);
         voiceCallBtn.disabled = false;
         videoCallBtn.disabled = false;
-        chatArea.style.display = 'flex';
+        chatArea.style.display = 'flex'; // ensure visible
         input.focus();
         messagesDiv.innerHTML = '<div class="dm-empty-state">Loading conversation...</div>';
 
@@ -2589,7 +2423,7 @@
         }
       }
 
-      async function sendCallPushNotification(callId, recipientId, action = 'incoming', extra = {}) {
+      async function sendCallPushNotification(callId, recipientId, action = 'incoming') {
         if (!callId || !recipientId) return;
         try {
           const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -2601,7 +2435,7 @@
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${sessionData.session.access_token}`
             },
-            body: JSON.stringify({ callId, recipientId, action, ...extra })
+            body: JSON.stringify({ callId, recipientId, action })
           });
 
           const result = await response.json().catch(() => ({}));
@@ -2657,6 +2491,13 @@
         console.info('Agora publish succeeded');
       }
 
+      function formatCallDuration(totalSeconds) {
+        const seconds = Math.max(0, Math.floor(totalSeconds || 0));
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${String(secs).padStart(2, '0')}`;
+      }
+
       function stopCallTimer(label = 'Waiting for answer') {
         if (callTimerInterval) clearInterval(callTimerInterval);
         callTimerInterval = null;
@@ -2664,11 +2505,9 @@
         if (callTimer) callTimer.textContent = label;
       }
 
-      function startCallTimer(startedAt) {
-        if (!startedAt) startedAt = new Date();
-        const startDate = startedAt instanceof Date ? startedAt : new Date(startedAt);
-        if (Number.isNaN(startDate.getTime())) return;
-        callStartedAt = startDate;
+      function startCallTimer(startedAt = new Date()) {
+        callStartedAt = startedAt instanceof Date ? startedAt : new Date(startedAt);
+        if (Number.isNaN(callStartedAt.getTime())) callStartedAt = new Date();
         if (callTimerInterval) clearInterval(callTimerInterval);
         const render = () => {
           if (!callTimer || !callStartedAt) return;
@@ -2678,33 +2517,12 @@
         callTimerInterval = setInterval(render, 1000);
       }
 
-      // ─── SUBSCRIBE TO CALL STATUS (BOTH SIDES) ───
-      async function subscribeToCurrentCall(callId, onActive) {
+      async function subscribeToCurrentCall(callId) {
         if (!callId) return;
         if (callStatusChannel) {
           try { await callStatusChannel.unsubscribe(); } catch (err) {}
           callStatusChannel = null;
         }
-
-        // First check current status
-        try {
-          const { data: currentCall } = await supabase
-            .from('calls')
-            .select('status, started_at')
-            .eq('id', callId)
-            .single();
-          if (currentCall) {
-            if (currentCall.status === 'active' && currentCall.started_at) {
-              startCallTimer(new Date(currentCall.started_at));
-              if (onActive) onActive();
-            }
-            if (['ended', 'declined', 'missed', 'cancelled', 'failed'].includes(currentCall.status)) {
-              showToast(currentCall.status === 'ended' ? 'Call ended' : 'Call closed');
-              await hangUpCall(false);
-              return;
-            }
-          }
-        } catch (e) { /* ignore */ }
 
         callStatusChannel = supabase
           .channel(`dm-call-status-${callId}`)
@@ -2714,16 +2532,13 @@
             table: 'calls',
             filter: `id=eq.${callId}`
           }, async ({ new: callRow }) => {
-            if (!callRow || callRow.id !== currentDMCallId) return;
+            const trackedCallId = currentDMCallId || pendingCall?.callId;
+            if (!callRow || callRow.id !== trackedCallId) return;
             if (callRow.status === 'active' && callRow.started_at && !callStartedAt) {
               startCallTimer(new Date(callRow.started_at));
-              if (onActive) onActive();
             }
             if (['ended', 'declined', 'missed', 'cancelled', 'failed'].includes(callRow.status)) {
-              const msg = callRow.status === 'ended' ? 'Call ended' :
-                callRow.status === 'declined' ? 'Call declined' :
-                callRow.status === 'missed' ? 'Call missed' : 'Call closed';
-              showToast(msg);
+              showToast(callRow.status === 'ended' ? 'Call ended' : 'Call closed');
               await hangUpCall(false);
             }
           })
@@ -2745,9 +2560,9 @@
       async function markParticipantLeft(callId, userId, endedAt = new Date()) {
         if (!callId || !userId) return;
         try {
-          const durationSeconds = callStartedAt ?
-            Math.max(0, Math.floor((endedAt.getTime() - callStartedAt.getTime()) / 1000)) :
-            0;
+          const durationSeconds = callStartedAt
+            ? Math.max(0, Math.floor((endedAt.getTime() - callStartedAt.getTime()) / 1000))
+            : 0;
           await supabase.from('call_participants')
             .update({
               status: 'left',
@@ -2785,15 +2600,13 @@
         return startedAt;
       }
 
-      // ─── START DM CALL ───
       async function startDMCall(targetUserId, targetUserName, mode) {
-        if (callActive || callStarting) { showToast('You are already joining or in a call.');
-          return; }
+        if (callActive || callStarting) { alert('You are already joining or in a call.'); return; }
         callStarting = true;
         callType = normalizeCallType(mode);
         callTarget = targetUserId;
-        let audioEnabled = true,
-          videoEnabled = true;
+        audioEnabled = true;
+        videoEnabled = true;
 
         const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
         agoraClient = client;
@@ -2826,7 +2639,6 @@
           return;
         }
 
-        // Create call record
         const { data: callData, error: callError } = await supabase.from('calls')
           .insert({ initiated_by: currentUser.id, type: callType, status: 'ringing',
             room_id: channelName })
@@ -2834,32 +2646,20 @@
           .single();
         if (callError || !callData) {
           console.error('Unable to create call record:', callError);
-          await hangUpCall(false);
-          return;
-        }
-        currentDMCallId = callData.id;
-
-        // Subscribe to call status (caller side)
-        await subscribeToCurrentCall(currentDMCallId, () => {
-          // onActive: timer already started by subscription
-        });
-
-        try {
-          await supabase.from('call_participants').insert([
-            { call_id: callData.id, user_id: currentUser.id, status: 'joined' },
-            { call_id: callData.id, user_id: targetUserId, status: 'invited' }
-          ]);
-        } catch (participantError) {
-          console.warn('Unable to insert call participants:', participantError);
+        } else {
+          currentDMCallId = callData.id;
+          await subscribeToCurrentCall(currentDMCallId);
+          try {
+            await supabase.from('call_participants').insert([
+              { call_id: callData.id, user_id: currentUser.id, status: 'joined' },
+              { call_id: callData.id, user_id: targetUserId, status: 'invited' }
+            ]);
+          } catch (participantError) {
+            console.warn('Unable to insert call participants:', participantError);
+          }
+          await sendCallPushNotification(callData.id, targetUserId, 'incoming');
         }
 
-        // Send push notification
-        await sendCallPushNotification(callData.id, targetUserId, 'incoming', {
-          callerName: currentUserFullName,
-          callType: callType
-        });
-
-        // Send broadcast to callee
         await sendUserBroadcast(targetUserId, 'call-offer', {
           callerId: currentUser.id,
           callerName: currentUserFullName,
@@ -2871,25 +2671,13 @@
         callOptionsModal.style.display = 'none';
         callModalTitle.textContent = `Calling ${targetUserName}...`;
         callModal.style.display = 'flex';
-
-        // Ringing timeout: if no answer in 45 seconds, cancel
-        if (callRingingTimeout) clearTimeout(callRingingTimeout);
-        callRingingTimeout = setTimeout(async () => {
-          if (callActive && currentDMCallId) {
-            showToast('Call unanswered');
-            await hangUpCall(true);
-          }
-        }, 45000);
-
         callActive = true;
         callStarting = false;
       }
 
-      // ─── ACCEPT DM CALL ───
       async function acceptDMCall() {
         if (!pendingCall) return;
-        if (callActive || callStarting) { showToast('You are already joining or in a call.');
-          return; }
+        if (callActive || callStarting) { alert('You are already joining or in a call.'); return; }
         callStarting = true;
         incomingCallModal.style.display = 'none';
 
@@ -2897,26 +2685,10 @@
         callType = normalizeCallType(incomingType);
         callTarget = callerId;
         currentDMCallId = callId || null;
-        let audioEnabled = true,
-          videoEnabled = true;
+        audioEnabled = true;
+        videoEnabled = true;
 
-        // Activate the call in DB
-        let startedAt = new Date();
-        if (callId) {
-          try {
-            startedAt = await activateAcceptedCall(callId, currentUser.id, { callType, room_id: callChannelName });
-          } catch (eventError) {
-            console.warn('Unable to activate accepted call:', eventError);
-            startedAt = new Date();
-          }
-        }
-
-        // Subscribe to call status (callee side)
-        if (callId) {
-          await subscribeToCurrentCall(callId, () => {
-            // onActive: timer already started by subscription
-          });
-        }
+        if (callId) await subscribeToCurrentCall(callId);
 
         const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
         agoraClient = client;
@@ -2937,11 +2709,13 @@
           console.info('Agora DM accept join succeeded');
           joinedAgoraChannelName = callChannelName;
           await publishLocalTracks(client, callType);
-
-          // Start timer immediately for callee
+          const startedAt = await activateAcceptedCall(callId, currentUser.id, {
+            callType,
+            room_id: callChannelName,
+            accepted_via: 'web'
+          });
+          if (callId) await sendCallPushNotification(callId, currentUser.id, 'cancelled');
           startCallTimer(startedAt);
-
-          // Notify caller that call was accepted
           if (callTarget) {
             await sendUserBroadcast(callTarget, 'call-accepted', {
               callId: currentDMCallId,
@@ -2962,49 +2736,102 @@
         callModal.style.display = 'flex';
         callActive = true;
         callStarting = false;
-        pendingCall = null;
-        if (callRingingTimeout) clearTimeout(callRingingTimeout);
       }
 
-      // ─── HANG UP CALL ───
+      async function acceptNativeCallFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const callId = params.get('callId');
+        const nativeAccepted = params.get('nativeAccepted') === '1';
+        if (!callId || callActive || callStarting) return;
+
+        try {
+          const { data: call, error: callError } = await supabase
+            .from('calls')
+            .select('id, initiated_by, type, status, room_id')
+            .eq('id', callId)
+            .single();
+          if (callError || !call || ['ended', 'declined', 'missed', 'cancelled', 'failed'].includes(call.status)) {
+            showToast('This call is no longer available');
+            return;
+          }
+
+          const { data: callerProfile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', call.initiated_by)
+            .maybeSingle();
+
+          pendingCall = {
+            callerId: call.initiated_by,
+            callerName: callerProfile?.full_name || 'TechTitans',
+            callChannelName: call.room_id,
+            callType: call.type,
+            callId: call.id
+          };
+          if (nativeAccepted) {
+            await acceptDMCall();
+          } else {
+            await subscribeToCurrentCall(call.id);
+            incomingCallerName.textContent = pendingCall.callerName;
+            incomingCallType.textContent = call.type === 'video' ? 'Video call' : 'Voice call';
+            incomingCallModal.style.display = 'flex';
+          }
+        } catch (error) {
+          console.warn('Unable to accept native call from URL:', error);
+          showToast('Unable to open this call');
+        } finally {
+          if (window.history?.replaceState) {
+            window.history.replaceState({}, document.title, 'dm.html');
+          }
+        }
+      }
+
       async function hangUpCall(shouldNotifyPeer = true) {
         if (endingCall) return;
         endingCall = true;
+        const endedCallId = currentDMCallId;
+        const endedCallTarget = callTarget;
+        const endedCallType = callType;
+        const endedAt = new Date();
 
-        if (callRingingTimeout) { clearTimeout(callRingingTimeout);
-          callRingingTimeout = null; }
-
-        const callIdToEnd = currentDMCallId;
-        const targetId = callTarget;
-
-        if (callIdToEnd) {
+        if (endedCallId) {
           try {
-            // Mark participant as left
-            await markParticipantLeft(callIdToEnd, currentUser.id, new Date());
-
-            // Update call status to ended
-            await supabase.from('calls')
-              .update({ status: 'ended', ended_at: new Date().toISOString() })
-              .eq('id', callIdToEnd)
-              .in('status', ['ringing', 'active']);
-
-            // Log event
+            await markParticipantLeft(endedCallId, currentUser.id, endedAt);
             await supabase.from('call_events').insert({
-              call_id: callIdToEnd,
+              call_id: endedCallId,
               event_type: 'call_ended',
               user_id: currentUser.id,
-              metadata: { ended_by: currentUser.id, callType, callerName: currentUserFullName }
-            });
-
-            if (targetId && shouldNotifyPeer) {
-              await sendCallPushNotification(callIdToEnd, targetId, 'cancelled', {
+              metadata: {
+                ended_by: currentUser.id,
+                callType: endedCallType,
                 callerName: currentUserFullName,
-                callType
-              });
-              await sendUserBroadcast(targetId, 'call-ended', {
-                callId: callIdToEnd,
+                duration_seconds: callStartedAt
+                  ? Math.max(0, Math.floor((endedAt.getTime() - callStartedAt.getTime()) / 1000))
+                  : 0
+              }
+            });
+            const durationSeconds = callStartedAt
+              ? Math.max(0, Math.floor((endedAt.getTime() - callStartedAt.getTime()) / 1000))
+              : 0;
+            const endUpdate = await supabase.from('calls')
+              .update({
+                status: 'ended',
+                ended_at: endedAt.toISOString(),
+                ended_by: currentUser.id,
+                duration_seconds: durationSeconds
+              })
+              .eq('id', endedCallId);
+            if (endUpdate.error) {
+              await supabase.from('calls')
+                .update({ status: 'ended', ended_at: endedAt.toISOString() })
+                .eq('id', endedCallId);
+            }
+            if (endedCallTarget && shouldNotifyPeer) {
+              await sendCallPushNotification(endedCallId, endedCallTarget, 'cancelled');
+              await sendUserBroadcast(endedCallTarget, 'call-ended', {
+                callId: endedCallId,
                 endedBy: currentUser.id,
-                callType,
+                callType: endedCallType,
                 callerName: currentUserFullName
               });
             }
@@ -3013,7 +2840,6 @@
           }
         }
 
-        // Clean up Agora
         const client = agoraClient;
         agoraClient = null;
         if (client) {
@@ -3021,14 +2847,11 @@
               leaveError); }
         }
         await cleanupLocalCallMedia();
-
-        // Close status channel
         if (callStatusChannel) {
           try { await callStatusChannel.unsubscribe(); } catch (err) {}
           callStatusChannel = null;
         }
-
-        // Reset state
+        stopCallTimer('Call ended');
         callModal.style.display = 'none';
         incomingCallModal.style.display = 'none';
         callActive = false;
@@ -3037,9 +2860,7 @@
         currentDMCallId = null;
         callTarget = null;
         pendingCall = null;
-        stopCallTimer('Call ended');
         endingCall = false;
-
         if (window.TechTitansNotifications) {
           window.TechTitansNotifications.display('Call ended', {
             body: 'Your direct call has ended.',
@@ -3048,7 +2869,6 @@
         }
       }
 
-      // ─── SETUP USER CHANNEL (BROADCAST LISTENER) ───
       function setupUserChannel() {
         const channel = supabase.channel(`user-${currentUser.id}`);
         channel
@@ -3066,6 +2886,7 @@
             }
 
             pendingCall = { callerId, callerName, callChannelName, callType, callId };
+            if (callId) subscribeToCurrentCall(callId);
             incomingCallerName.textContent = callerName;
             incomingCallType.textContent = callType === 'video' ? 'Video call' : 'Voice call';
             incomingCallModal.style.display = 'flex';
@@ -3079,26 +2900,21 @@
           })
           .on('broadcast', { event: 'call-accepted' }, ({ payload }) => {
             if (!currentDMCallId || payload.callId !== currentDMCallId) return;
-            // Caller side: start timer with the startedAt from callee
-            if (payload.startedAt) {
-              startCallTimer(new Date(payload.startedAt));
-            } else {
-              // Fallback: start timer now
-              startCallTimer(new Date());
-            }
             callModalTitle.textContent = `Call with ${payload.calleeName || 'teammate'}`;
+            const startedAt = payload.startedAt ? new Date(payload.startedAt) : new Date();
+            startCallTimer(startedAt);
+            markParticipantJoined(currentDMCallId, currentUser.id, startedAt);
             showToast(`${payload.calleeName || 'Your teammate'} joined the call`);
           })
           .on('broadcast', { event: 'call-ended' }, async ({ payload }) => {
             if (currentDMCallId && payload.callId && payload.callId !== currentDMCallId) return;
-            showToast('Call ended by other participant');
+            showToast('Call ended');
             await hangUpCall(false);
           })
           .on('broadcast', { event: 'call-missed' }, async ({ payload }) => {
             if (currentDMCallId && payload.callId && payload.callId !== currentDMCallId) return;
-            const reason = payload.reason === 'busy' ? 'User is busy on another call' :
-              'Call declined or missed';
-            showToast(reason);
+            showToast(payload.reason === 'busy' ? 'User is busy on another call' :
+              'Call declined or missed');
             await hangUpCall(false);
           })
           .subscribe();
@@ -3129,7 +2945,7 @@
         if (dmDeleteSubscription) dmDeleteSubscription.unsubscribe();
         if (userChannel) userChannel.unsubscribe();
         if (presenceChannel) await presenceChannel.untrack();
-        if (callActive) await hangUpCall(false);
+        if (callActive) hangUpCall();
         await supabase.auth.signOut();
         window.location.href = 'index.html';
       });
@@ -3191,8 +3007,8 @@
           });
         }
       });
-      document.getElementById('closeCallModalBtn').addEventListener('click', () => hangUpCall(true));
-      document.getElementById('hangupCallBtn').addEventListener('click', () => hangUpCall(true));
+      document.getElementById('closeCallModalBtn').addEventListener('click', hangUpCall);
+      document.getElementById('hangupCallBtn').addEventListener('click', hangUpCall);
 
       window.addEventListener('scroll', () => modal.style.display = 'none', true);
       document.addEventListener('click', (e) => { if (!modal.contains(e.target)) modal.style.display = 'none'; });
@@ -3213,6 +3029,7 @@
           userChannel = setupUserChannel();
 
           await loadPrivateMessagesView();
+          await acceptNativeCallFromUrl();
         } catch (err) {
           console.error('Init error:', err);
           document.getElementById('messagesArea').innerHTML =
