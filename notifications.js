@@ -32,10 +32,6 @@ const TechTitansNotifications = {
   },
 
   async display(title, options = {}) {
-    if (document.hasFocus()) {
-      return null;
-    }
-
     if (Notification.permission === 'granted') {
       const defaultOptions = {
         icon: 'img/titans_logo2.png',
@@ -432,6 +428,51 @@ const TechTitansNotifications = {
     document.head.appendChild(style);
   },
 
+  async displayCall(callerName, callType, options = {}) {
+    if (Notification.permission !== 'granted') return null;
+    const title = `Incoming ${callType || 'voice'} call`;
+    const defaultOptions = {
+      icon: 'img/titans_logo2.png',
+      badge: 'img/titans_logo2.png',
+      body: `${callerName || 'Someone'} is calling you`,
+      requireInteraction: true,
+      silent: false,
+      vibrate: [300, 100, 300, 100, 300, 100, 300],
+      tag: options.callId ? `call-${options.callId}` : 'incoming-call',
+      url: options.url || 'dm.html'
+    };
+    const finalOptions = { ...defaultOptions, ...options };
+    return this.display(title, finalOptions);
+  },
+
+  async displayAnnouncement(title, body, options = {}) {
+    if (Notification.permission !== 'granted') return null;
+    const defaultOptions = {
+      icon: 'img/titans_logo2.png',
+      badge: 'img/titans_logo2.png',
+      body: body || 'View the latest announcement',
+      requireInteraction: true,
+      silent: false,
+      vibrate: [200, 100, 200],
+      tag: 'announcement',
+      url: options.url || 'dashboard.html'
+    };
+    const finalOptions = { ...defaultOptions, ...options };
+    return this.display(title || 'New Announcement', finalOptions);
+  },
+
+  async cancelCallNotification(callId) {
+    if (!callId) return;
+    try {
+      const registration = await navigator.serviceWorker?.ready;
+      if (!registration) return;
+      const notifications = await registration.getNotifications({ tag: `call-${callId}` });
+      notifications.forEach((n) => n.close());
+    } catch (error) {
+      console.warn('Unable to cancel call notification:', error);
+    }
+  },
+
   _escapeHtml(value) {
     if (!value) return '';
     return String(value)
@@ -461,7 +502,9 @@ const TechTitansNotifications = {
 
 if (window.location.pathname.includes('dashboard.html') ||
     window.location.pathname.includes('dm.html') ||
-    window.location.pathname.includes('messages.html')) {
+    window.location.pathname.includes('messages.html') ||
+    window.location.pathname.includes('resources.html') ||
+    window.location.pathname.includes('profile.html')) {
   document.addEventListener('click', () => {
     if (Notification.permission === 'default') {
       TechTitansNotifications.requestPermission();

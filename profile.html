@@ -3,8 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="img/titans_logo2.png">
   <title>TECH TITANS · Profile</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="native-bridge.js"></script>
+  <script src="notifications.js"></script>
+  <script src="ringtone.js"></script>
+  <script src="global-notifications.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
@@ -474,6 +482,9 @@
         return;
       }
       const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      if (window.TechTitansNotifications) {
+        window.TechTitansNotifications.connect(supabase);
+      }
 
       // DOM elements
       const profileNameEl = document.getElementById('profileName');
