@@ -260,11 +260,60 @@
             top: 0;
             z-index: 100;
         }
+        .mobile-header .logo-mobile {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #a0c0ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .mobile-header .logo-mobile span {
+            background: none;
+            -webkit-text-fill-color: #428cff;
+        }
+        .mobile-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .mobile-search {
+            display: flex;
+            align-items: center;
+            background: rgba(18, 26, 40, 0.9);
+            border: 1px solid #2a3650;
+            border-radius: 1.2rem;
+            overflow: hidden;
+            height: 2.2rem;
+            width: 160px;
+            transition: width 0.3s;
+        }
+        .mobile-search i {
+            font-size: 0.8rem;
+            color: #5b6b92;
+            padding: 0 0 0 0.7rem;
+            flex-shrink: 0;
+        }
+        .mobile-search input {
+            height: 100%;
+            width: 100%;
+            padding: 0 0.7rem;
+            font-size: 0.8rem;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            border-radius: 0;
+            line-height: 1;
+        }
+        .mobile-search input::placeholder {
+            color: #5b6b92;
+        }
+
         .sidebar-toggle {
             background: rgba(66, 140, 255, 0.1);
             border: 1px solid rgba(66, 140, 255, 0.3);
             color: #fff;
-            padding: 0.6rem 1rem;
+            padding: 1rem 1rem;
             border-radius: 1.2rem;
             cursor: pointer;
             display: flex;
@@ -555,17 +604,20 @@
             border: 1px solid rgba(66, 140, 255, 0.3);
             border-radius: 2.5rem;
             padding: 2.5rem;
-            max-width: 600px;
+            max-width: 700px;
             width: 100%;
-            max-height: 90vh;
+            max-height: 92vh;
             overflow-y: auto;
             box-shadow: 0 40px 80px rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
         }
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
+            flex-shrink: 0;
         }
         .modal-header h2 {
             font-size: 1.8rem;
@@ -581,21 +633,27 @@
         .modal-close:hover {
             color: #fff;
         }
+
         .modal-form {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            gap: 1rem;
+            flex: 1;
+            min-height: 0;
         }
+
         .modal-form input,
         .modal-form select,
         .modal-form textarea {
             background: #0f172f;
             border: 1px solid #2a3650;
             border-radius: 1.5rem;
-            padding: 1rem 1.5rem;
+            padding: 0.9rem 1.2rem;
             color: #fff;
             outline: none;
             font-size: 1rem;
+            transition: border-color 0.2s;
+            flex-shrink: 0;
         }
         .modal-form input:focus,
         .modal-form select:focus,
@@ -603,21 +661,33 @@
             border-color: #428cff;
             box-shadow: 0 0 0 4px rgba(66, 140, 255, 0.1);
         }
+
+        /* Description – above file area */
         .modal-form textarea {
             resize: vertical;
-            min-height: 100px;
+            min-height: 60px;
+            max-height: 120px;
+            flex-shrink: 0;
         }
 
+        /* ─── FILE UPLOAD AREA – takes remaining space ─── */
         .file-upload-area {
             background: #0f172f;
             border: 2px dashed #2a3650;
             border-radius: 1.5rem;
-            padding: 2.5rem 1.5rem;
+            padding: 1.5rem;
             text-align: center;
             cursor: pointer;
-            transition: 0.2s;
+            transition: 0.25s ease;
             position: relative;
             touch-action: manipulation;
+            flex: 1;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
         .file-upload-area:hover {
             border-color: #428cff;
@@ -632,44 +702,58 @@
             height: 100%;
             touch-action: manipulation;
         }
-        .file-upload-area input[type="file"]:active {
-            opacity: 0.01;
-        }
         .file-upload-area i {
-            font-size: 2.5rem;
+            font-size: 3rem;
             color: #428cff;
-            display: block;
-            margin-bottom: 0.8rem;
             pointer-events: none;
+            opacity: 0.8;
         }
         .file-upload-area p {
             color: #a5b3d1;
             font-size: 1rem;
             pointer-events: none;
+            margin: 0;
         }
         .file-upload-area .file-name-preview {
             color: #d7def5;
             font-weight: 500;
-            margin-top: 0.5rem;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             word-break: break-all;
+            pointer-events: none;
         }
         .file-upload-area .file-replace-hint {
             color: #7a8bb5;
             font-size: 0.8rem;
-            margin-top: 0.3rem;
+            pointer-events: none;
+        }
+
+        .upload-progress {
+            height: 6px;
+            background: #1f2a44;
+            border-radius: 1rem;
+            margin-top: 0.5rem;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #428cff;
+            width: 0%;
+            transition: width 0.2s;
         }
 
         .submit-upload {
             background: #428cff;
             border: none;
             color: #fff;
-            padding: 1.2rem;
+            padding: 1rem;
             border-radius: 1.8rem;
             font-weight: 700;
             font-size: 1.1rem;
             cursor: pointer;
             transition: 0.25s;
+            flex-shrink: 0;
+            margin-top: 0.5rem;
         }
         .submit-upload:hover {
             background: #2a5bbf;
@@ -680,21 +764,8 @@
             cursor: not-allowed;
             transform: none;
         }
-        .upload-progress {
-            height: 6px;
-            background: #1f2a44;
-            border-radius: 1rem;
-            margin-top: 0.5rem;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: #428cff;
-            width: 0%;
-            transition: width 0.2s;
-        }
 
-        /* ─── RESOURCE PREVIEW MODAL (unchanged) ─── */
+        /* ─── RESOURCE PREVIEW MODAL ─── */
         .preview-overlay {
             display: none;
             position: fixed;
@@ -1079,25 +1150,25 @@
                 display: flex;
             }
 
+            /* Hide desktop search box on mobile */
+            .top-bar .search-box {
+                display: none;
+            }
+
             .main {
                 padding: 1rem 1.2rem;
             }
 
             .top-bar {
-                flex-direction: column;
-                align-items: stretch;
+                flex-direction: row;
+                justify-content: flex-end;
                 gap: 0.8rem;
                 margin-bottom: 1.5rem;
             }
 
-            .search-box {
-                max-width: 100%;
-                padding: 0.7rem 1.2rem;
-            }
-
             .upload-btn-main {
                 justify-content: center;
-                padding: 0.7rem;
+                padding: 1rem 4rem;
                 font-size: 0.9rem;
                 border-radius: 1.5rem;
             }
@@ -1122,7 +1193,7 @@
                 gap: 1.2rem;
             }
             .resource-card {
-                padding: 1.2rem;
+                padding: 0.7rem;
             }
             .card-actions {
                 flex-direction: column;
@@ -1205,12 +1276,25 @@
                 gap: 0.8rem;
                 padding: 0.3rem 0.8rem;
             }
+
             .modal-content {
                 padding: 1.5rem;
                 border-radius: 2rem;
+                max-height: 95vh;
             }
             .modal-header h2 {
                 font-size: 1.4rem;
+            }
+            .file-upload-area {
+                min-height: 140px;
+                padding: 1rem;
+            }
+            .file-upload-area i {
+                font-size: 2.2rem;
+            }
+            .modal-form textarea {
+                min-height: 50px;
+                max-height: 80px;
             }
         }
 
@@ -1244,6 +1328,20 @@
                 flex-wrap: wrap;
                 justify-content: center;
                 gap: 0.5rem;
+            }
+            .file-upload-area {
+                min-height: 100px;
+                padding: 0.8rem;
+            }
+            .file-upload-area i {
+                font-size: 1.8rem;
+            }
+            .mobile-search {
+                width: 170px;
+                height: 2rem;
+            }
+            .mobile-search input {
+                font-size: 0.75rem;
             }
         }
     </style>
@@ -1293,13 +1391,13 @@
 
     <!-- ─── MAIN ─── -->
     <div class="main">
-        <!-- Mobile Header -->
+        <!-- Mobile Header (with search) -->
         <div class="mobile-header">
-            <div class="logo" style="font-size: 1.4rem;">TECH<span>TITANS</span></div>
+            <div class="logo-mobile">TECH<span>TITANS</span></div>
             <div class="mobile-actions">
-                <div class="mobile-search" style="display:flex; align-items:center; background:rgba(18,26,40,0.9); border:1px solid #2a3650; border-radius:1.2rem; overflow:hidden; height:2.2rem; width:160px;">
-                    <i class="fas fa-search" style="font-size:0.8rem; color:#5b6b92; padding:0 0 0 0.7rem;"></i>
-                    <input type="text" id="mobileSearchInput" placeholder="Search..." style="height:100%; width:100%; padding:0 0.7rem; font-size:0.8rem; background:transparent; border:none; outline:none; color:#fff; border-radius:0; line-height:1;" />
+                <div class="mobile-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="mobileSearchInput" placeholder="Search..." />
                 </div>
                 <button class="sidebar-toggle" id="sidebarToggle">
                     <i class="fas fa-bars"></i>
@@ -1307,7 +1405,7 @@
             </div>
         </div>
 
-        <!-- Top bar -->
+        <!-- Top bar with desktop search box (hidden on mobile) -->
         <div class="top-bar">
             <div class="search-box">
                 <i class="fas fa-search"></i>
@@ -1343,7 +1441,11 @@
                     <option value="Tech Specs">Tech Specs</option>
                     <option value="Presentations">Presentations</option>
                 </select>
-                <textarea id="modalDesc" placeholder="Description (optional)" rows="3"></textarea>
+
+                <!-- Description – above file area -->
+                <textarea id="modalDesc" placeholder="Description (optional)" rows="2"></textarea>
+
+                <!-- File Upload Area – takes remaining space -->
                 <div class="file-upload-area">
                     <i class="fas fa-file-upload"></i>
                     <p id="fileLabel">Click or drag to choose a file</p>
@@ -1351,6 +1453,7 @@
                     <div class="file-replace-hint" id="fileReplaceHint">Leave empty to keep current file</div>
                     <input type="file" id="modalFile" />
                 </div>
+
                 <div class="upload-progress" id="modalProgress" style="display:none;"><div class="progress-fill" id="modalProgressFill"></div></div>
                 <button class="submit-upload" id="modalUploadBtn"><i class="fas fa-upload"></i> <span id="modalSubmitText">Upload</span></button>
             </div>
@@ -1510,6 +1613,21 @@
                 }
             }
 
+            function showToast(msg) {
+                const t = document.getElementById('toast');
+                if (!t) {
+                    alert(msg);
+                    return;
+                }
+                t.textContent = msg;
+                t.style.display = 'block';
+                t.classList.remove('hide');
+                setTimeout(() => {
+                    t.classList.add('hide');
+                    setTimeout(() => t.style.display = 'none', 300);
+                }, 3000);
+            }
+
             // ─── Auth & init ───
             async function init() {
                 const { data: { user } } = await supabase.auth.getUser();
@@ -1568,21 +1686,27 @@
                     });
                 });
 
-                // Sync mobile search with desktop search
+                // ─── SEARCH SYNC ───
+                // Desktop search
+                searchInput.addEventListener('input', (e) => {
+                    const val = e.target.value;
+                    searchTerm = val.toLowerCase();
+                    if (mobileSearchInput) mobileSearchInput.value = val;
+                    filterAndRender();
+                });
+
+                // Mobile search
                 if (mobileSearchInput) {
                     mobileSearchInput.addEventListener('input', (e) => {
-                        document.getElementById('searchInput').value = e.target.value;
-                        searchTerm = e.target.value.toLowerCase();
+                        const val = e.target.value;
+                        searchTerm = val.toLowerCase();
+                        searchInput.value = val;
                         filterAndRender();
-                    });
-                    document.getElementById('searchInput').addEventListener('input', (e) => {
-                        mobileSearchInput.value = e.target.value;
                     });
                 }
 
                 // Modal open/close (upload)
                 openModalBtn.addEventListener('click', () => {
-                    // Reset modal for upload
                     editingResourceId = null;
                     modalTitleText.textContent = 'Upload Resource';
                     modalSubmitText.textContent = 'Upload';
@@ -1598,9 +1722,13 @@
                     uploadModal.classList.add('open');
                 });
 
-                closeModalBtn.addEventListener('click', () => uploadModal.classList.remove('open'));
+                closeModalBtn.addEventListener('click', () => {
+                    uploadModal.classList.remove('open');
+                });
                 uploadModal.addEventListener('click', (e) => {
-                    if (e.target === uploadModal) uploadModal.classList.remove('open');
+                    if (e.target === uploadModal) {
+                        uploadModal.classList.remove('open');
+                    }
                 });
 
                 // Upload / Edit action
@@ -1794,7 +1922,7 @@
                         if (!confirm('Delete this resource permanently?')) return;
 
                         if (previewOverlay.classList.contains('open') && previewList[
-                            previewIndex]?.id === id) {
+                                previewIndex]?.id === id) {
                             closePreviewModal();
                         }
 
@@ -1821,17 +1949,21 @@
             // ─── Open Edit Modal ───
             function openEditModal(resourceId) {
                 const resource = allResources.find(r => r.id === resourceId);
-                if (!resource) return;
+                if (!resource) {
+                    alert('Resource not found.');
+                    return;
+                }
 
                 editingResourceId = resourceId;
                 modalTitleText.textContent = 'Edit Resource';
                 modalSubmitText.textContent = 'Save Changes';
+
                 modalResourceTitle.value = resource.title || '';
                 modalDesc.value = resource.description || '';
                 modalCategory.value = resource.category || 'CEO Reports';
-                // Show current file name
+
                 const fileName = getFileNameFromUrl(resource.file_url);
-                if (fileName) {
+                if (fileName && fileName !== 'unknown-file') {
                     fileLabel.textContent = 'Current file:';
                     filePreviewName.textContent = fileName;
                     filePreviewName.style.display = 'block';
@@ -1841,6 +1973,7 @@
                     filePreviewName.style.display = 'none';
                     fileReplaceHint.textContent = 'Choose a file (required)';
                 }
+
                 modalFile.value = '';
                 modalProgress.style.display = 'none';
                 modalUploadBtn.disabled = false;
@@ -1854,9 +1987,27 @@
                 const description = modalDesc.value.trim();
                 const file = modalFile.files[0];
 
-                if (!title) { alert('Title is required.');
-                    return; }
-                if (!currentUser) { alert('You must be logged in.'); return; }
+                if (!title) {
+                    alert('Title is required.');
+                    return;
+                }
+                if (!currentUser) {
+                    alert('You must be logged in.');
+                    return;
+                }
+
+                const existingResource = allResources.find(r => r.id === resourceId);
+                if (!existingResource) {
+                    alert('Resource not found. Please refresh and try again.');
+                    return;
+                }
+
+                const isOwner = existingResource.uploader_id === currentUser.id;
+                const isAdmin = currentUserRole === 'admin' || currentUserRole === 'CEO';
+                if (!isOwner && !isAdmin) {
+                    alert('You do not have permission to edit this resource.');
+                    return;
+                }
 
                 modalUploadBtn.disabled = true;
                 modalUploadBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Saving...';
@@ -1864,21 +2015,20 @@
                 modalProgressFill.style.width = '0%';
 
                 try {
-                    let fileUrl = null;
-                    const resource = allResources.find(r => r.id === resourceId);
-                    if (!resource) throw new Error('Resource not found');
+                    let fileUrl = existingResource.file_url;
 
                     // If a new file is provided, upload it and delete the old one
                     if (file) {
                         // Delete old file from storage
-                        if (resource.file_url) {
-                            const oldFileName = getFileNameFromUrl(resource.file_url);
+                        if (existingResource.file_url) {
+                            const oldFileName = getFileNameFromUrl(existingResource.file_url);
                             if (oldFileName && oldFileName !== 'unknown-file') {
                                 await supabase.storage.from('resources').remove([
                                     `resources/${oldFileName}`
                                 ]);
                             }
                         }
+
                         // Upload new file
                         const fileExt = file.name.split('.').pop();
                         const fileName =
@@ -1896,14 +2046,11 @@
                                 }
                             });
 
-                        if (uploadError) throw uploadError;
+                        if (uploadError) throw new Error('Upload failed: ' + uploadError.message);
 
                         const { data: { publicUrl } } = supabase.storage.from('resources')
                             .getPublicUrl(filePath);
                         fileUrl = publicUrl;
-                    } else {
-                        // Keep existing file
-                        fileUrl = resource.file_url;
                     }
 
                     // Update database
@@ -1913,15 +2060,14 @@
                             title,
                             description,
                             category,
-                            file_url: fileUrl,
-                            updated_at: new Date().toISOString()
+                            file_url: fileUrl
                         })
                         .eq('id', resourceId);
 
-                    if (dbError) throw dbError;
+                    if (dbError) throw new Error(dbError.message);
 
                     // Reset & close modal
-                    modalTitle.value = '';
+                    modalResourceTitle.value = '';
                     modalDesc.value = '';
                     modalFile.value = '';
                     fileLabel.textContent = 'Click or drag to choose a file';
@@ -1931,7 +2077,9 @@
                     uploadModal.classList.remove('open');
                     editingResourceId = null;
 
-                    loadResources();
+                    await loadResources();
+                    showToast('✅ Resource updated successfully!');
+
                 } catch (err) {
                     console.error(err);
                     alert('Update failed: ' + err.message);
@@ -1941,7 +2089,7 @@
                 }
             }
 
-            // ─── Upload Resource (unchanged) ───
+            // ─── Upload Resource ───
             async function uploadResource() {
                 const title = modalResourceTitle.value.trim();
                 const category = modalCategory.value;
@@ -2005,7 +2153,9 @@
                     modalProgress.style.display = 'none';
                     uploadModal.classList.remove('open');
 
-                    loadResources();
+                    await loadResources();
+                    showToast('✅ Resource uploaded successfully!');
+
                 } catch (err) {
                     console.error(err);
                     alert('Upload failed: ' + err.message);
@@ -2015,7 +2165,7 @@
                 }
             }
 
-            // ─── Preview functions (unchanged) ───
+            // ─── Preview functions ───
             function openPreviewModal(resourceId) {
                 previewList = getFilteredList();
                 previewIndex = previewList.findIndex(r => r.id === resourceId);
@@ -2254,7 +2404,19 @@
 
             // ─── Start ───
             init();
+
+            // Toast element if missing
+            if (!document.getElementById('toast')) {
+                const toastEl = document.createElement('div');
+                toastEl.id = 'toast';
+                toastEl.className = 'toast hide';
+                toastEl.style.display = 'none';
+                document.body.appendChild(toastEl);
+            }
         })();
     </script>
+
+    <!-- Toast element -->
+    <div id="toast" class="toast hide" style="display:none; position:fixed; bottom:20px; right:20px; background:#1f2a44; color:#fff; padding:0.8rem 1.2rem; border-radius:0.8rem; box-shadow:0 4px 12px rgba(0,0,0,0.5); opacity:0.9; z-index:3000; font-size:0.9rem; pointer-events:none; transition:opacity 0.3s;"></div>
 </body>
 </html>
