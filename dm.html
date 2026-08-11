@@ -1675,19 +1675,19 @@
         const chatArea = document.querySelector('.dm-chat-area');
         const backBtn = document.querySelector('.dm-back-btn');
         const outerHeader = document.querySelector('.chat-panel > .chat-header');
+        
+        // Remove any inline styles that might conflict with the sliding CSS layout
+        list.style.display = '';
+        chatArea.style.display = '';
+        layout.style.transform = '';
+        chatArea.style.visibility = '';
 
         if (isOpen) {
           layout.classList.add('chat-open');
-          list.style.display = 'none'; // Force layout to only show chatArea
-          layout.style.transform = 'translateX(0)'; // Don't slide if list is hidden
-          chatArea.style.display = 'flex';
-          chatArea.style.visibility = 'visible';
-          backBtn.style.display = 'block';
+          backBtn.style.display = 'inline-flex';
           if (outerHeader && window.innerWidth <= 768) outerHeader.style.display = 'none';
         } else {
           layout.classList.remove('chat-open');
-          list.style.display = ''; // Revert to CSS default (block)
-          chatArea.style.display = 'none';
           backBtn.style.display = 'none';
           if (outerHeader && window.innerWidth <= 768) outerHeader.style.display = 'flex';
         }
