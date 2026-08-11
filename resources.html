@@ -329,8 +329,8 @@
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
-            gap: 1.5rem;
-            margin-bottom: 2.5rem;
+            gap: 1rem;
+            margin-bottom: 2rem;
         }
         .search-box {
             background: rgba(18, 26, 40, 0.7);
@@ -340,8 +340,8 @@
             display: flex;
             align-items: center;
             gap: 1rem;
-            flex: 1 1 300px;
-            max-width: 500px;
+            flex: 1 1 280px;
+            max-width: 450px;
         }
         .search-box i {
             color: #5b6b92;
@@ -358,20 +358,30 @@
             color: #5b6b92;
         }
 
+        /* Buttons group: Upload only (notification removed) */
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-shrink: 0;
+        }
+
         .upload-btn-main {
             background: #428cff;
             border: none;
             color: #fff;
-            padding: 0.8rem 2rem;
+            padding: 0.7rem 1.8rem;
             border-radius: 3rem;
             font-weight: 600;
             cursor: pointer;
             transition: 0.25s;
             display: flex;
             align-items: center;
-            gap: 0.8rem;
+            gap: 0.6rem;
             border: 1px solid #428cff;
-            box-shadow: 0 10px 20px -5px rgba(66, 140, 255, 0.4);
+            box-shadow: 0 8px 18px -4px rgba(66, 140, 255, 0.4);
+            white-space: nowrap;
+            font-size: 0.95rem;
         }
         .upload-btn-main:hover {
             background: #2a5bbf;
@@ -381,67 +391,73 @@
         /* ─── STATS ROW ─── */
         .stats-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 2rem;
         }
         .stat-card {
             background: rgba(18, 26, 40, 0.6);
             backdrop-filter: blur(8px);
             border: 1px solid rgba(66, 140, 255, 0.12);
-            border-radius: 2rem;
-            padding: 1.5rem;
+            border-radius: 1.8rem;
+            padding: 1.2rem;
             text-align: center;
         }
         .stat-card .number {
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: 700;
             color: #fff;
-            margin-bottom: 0.3rem;
+            margin-bottom: 0.2rem;
         }
         .stat-card .label {
             color: #7a8bb5;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.4px;
         }
 
-        /* ─── RESOURCES GRID ─── */
+        /* ─── RESOURCES GRID – even cards with ellipsis ─── */
         .resources-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.5rem;
+            align-items: stretch;
         }
         .resource-card {
             background: rgba(18, 26, 40, 0.7);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(66, 140, 255, 0.15);
-            border-radius: 2rem;
-            padding: 1.8rem;
+            border-radius: 1.8rem;
+            padding: 1.2rem 1rem;
             transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
+            height: 100%;
+            min-height: 220px;
+            overflow: hidden;
         }
         .resource-card:hover {
             border-color: #428cff80;
-            transform: translateY(-6px);
-            box-shadow: 0 25px 40px -15px rgba(66, 140, 255, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 30px -12px rgba(66, 140, 255, 0.25);
         }
+
         .card-top {
             display: flex;
             align-items: flex-start;
-            gap: 1rem;
-            margin-bottom: 1.2rem;
+            gap: 0.8rem;
+            margin-bottom: 0.6rem;
+            flex-shrink: 0;
         }
         .file-icon-wrap {
-            width: 54px;
-            height: 54px;
+            width: 44px;
+            height: 44px;
             background: rgba(66, 140, 255, 0.15);
-            border-radius: 1.2rem;
+            border-radius: 1rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.8rem;
+            font-size: 1.4rem;
             color: #428cff;
             flex-shrink: 0;
         }
@@ -451,51 +467,60 @@
         }
         .card-title {
             font-weight: 600;
-            font-size: 1.2rem;
+            font-size: 1rem;
             color: #fff;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            margin-bottom: 0.3rem;
+            margin-bottom: 0.2rem;
         }
         .card-category {
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             background: #1f2a44;
-            padding: 0.2rem 1rem;
+            padding: 0.15rem 0.8rem;
             border-radius: 2rem;
             color: #a5b3d1;
             display: inline-block;
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
+
         .card-desc {
             color: #9aa8cc;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            margin: 0.5rem 0 1.5rem;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            margin: 0.3rem 0 0.5rem;
             flex: 1;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            word-break: break-word;
         }
+
         .card-footer {
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 0.8rem;
+            gap: 0.4rem;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding-top: 1rem;
-            margin-top: 0.5rem;
+            padding-top: 0.6rem;
+            margin-top: auto;
+            flex-shrink: 0;
         }
         .uploader-info {
             display: flex;
             align-items: center;
-            gap: 0.6rem;
-            font-size: 0.85rem;
+            gap: 0.4rem;
+            font-size: 0.75rem;
+            min-width: 0;
         }
         .uploader-avatar {
-            width: 32px;
-            height: 32px;
+            width: 26px;
+            height: 26px;
             background: linear-gradient(135deg, #2f3f66, #1f2a44);
             border-radius: 50%;
             display: flex;
@@ -503,49 +528,62 @@
             justify-content: center;
             color: #fff;
             font-weight: 600;
-            font-size: 0.8rem;
+            font-size: 0.65rem;
             border: 1px solid rgba(66, 140, 255, 0.2);
+            flex-shrink: 0;
         }
         .uploader-name {
             color: #d7def5;
             font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 70px;
         }
         .uploader-role {
             color: #7a8bb5;
             background: #1f2a44;
-            padding: 0.15rem 0.6rem;
+            padding: 0.1rem 0.5rem;
             border-radius: 1rem;
-            font-size: 0.7rem;
+            font-size: 0.6rem;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
         .card-date {
             color: #5b6b92;
-            font-size: 0.75rem;
+            font-size: 0.65rem;
+            flex-shrink: 0;
         }
 
         .card-actions {
             display: flex;
-            gap: 0.8rem;
-            margin-top: 1rem;
+            gap: 0.5rem;
+            margin-top: 0.6rem;
             flex-wrap: wrap;
+            flex-shrink: 0;
         }
         .resource-link,
         .edit-resource,
         .delete-resource {
             flex: 1;
             text-align: center;
-            padding: 0.7rem;
-            border-radius: 2rem;
+            padding: 0.4rem 0.4rem;
+            border-radius: 1.6rem;
             text-decoration: none;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.72rem;
             transition: 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
+            gap: 0.25rem;
             cursor: pointer;
             border: none;
             font-family: inherit;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
         }
         .resource-link {
             background: #428cff;
@@ -576,11 +614,11 @@
             grid-column: 1 / -1;
             text-align: center;
             color: #5b6b92;
-            padding: 6rem 0;
+            padding: 4rem 0;
         }
         .empty-state i {
-            font-size: 4rem;
-            margin-bottom: 1.5rem;
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
             opacity: 0.2;
         }
 
@@ -1181,6 +1219,32 @@
             box-shadow: 0 10px 25px rgba(66, 140, 255, 0.35);
         }
 
+        /* ─── TOAST ─── */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1f2a44;
+            color: #fff;
+            padding: 0.8rem 1.4rem;
+            border-radius: 0.8rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+            opacity: 0;
+            z-index: 3000;
+            font-size: 0.9rem;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            border: 1px solid rgba(66, 140, 255, 0.15);
+        }
+        .toast.show {
+            opacity: 0.95;
+            pointer-events: auto;
+        }
+        .toast.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
         /* ─── RESPONSIVE ─── */
         @media (max-width: 1024px) {
             .preview-info {
@@ -1292,9 +1356,9 @@
                 height: 50vh;
             }
             .preview-info {
-                padding: 8rem 0.8rem;
+                padding: 1rem 0.8rem;
                 gap: 0.5rem;
-                max-height: 500vh;
+                max-height: 50vh;
             }
             .preview-info h3 {
                 font-size: 1rem;
@@ -1339,32 +1403,6 @@
             }
         }
 
-        /* ─── TOAST ─── */
-        .toast {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            background: #1f2a44;
-            color: #fff;
-            padding: 0.8rem 1.4rem;
-            border-radius: 0.8rem;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-            opacity: 0;
-            z-index: 3000;
-            font-size: 0.9rem;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            border: 1px solid rgba(66, 140, 255, 0.15);
-        }
-        .toast.show {
-            opacity: 0.95;
-            pointer-events: auto;
-        }
-        .toast.hide {
-            opacity: 0;
-            pointer-events: none;
-        }
-
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
@@ -1398,21 +1436,24 @@
             }
 
             .main {
-                padding: 1rem 1rem;
+                padding: 1rem 0.8rem;
             }
 
             .top-bar {
                 flex-direction: row;
-                justify-content: flex-end;
+                justify-content: space-between;
                 gap: 0.6rem;
                 margin-bottom: 1.2rem;
             }
 
+            .action-buttons {
+                gap: 0.5rem;
+            }
+
             .upload-btn-main {
-                justify-content: center;
-                padding: 0.8rem 2.5rem;
-                font-size: 0.85rem;
-                border-radius: 1.5rem;
+                padding: 0.6rem 1.2rem;
+                font-size: 0.8rem;
+                border-radius: 2rem;
             }
 
             .stats-row {
@@ -1421,7 +1462,7 @@
                 margin-bottom: 1.5rem;
             }
             .stat-card {
-                padding: 1rem;
+                padding: 0.8rem;
                 border-radius: 1.5rem;
             }
             .stat-card .number {
@@ -1431,20 +1472,73 @@
                 font-size: 0.7rem;
             }
 
+            /* ─── MOBILE: 2 columns with consistent height ─── */
             .resources-grid {
-                gap: 1.2rem;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.8rem;
             }
             .resource-card {
-                padding: 0.7rem;
+                padding: 0.7rem 0.6rem;
+                border-radius: 1.2rem;
+                min-height: 180px;
+            }
+            .file-icon-wrap {
+                width: 36px;
+                height: 36px;
+                font-size: 1.1rem;
+            }
+            .card-title {
+                font-size: 0.85rem;
+            }
+            .card-desc {
+                font-size: 0.75rem;
+                -webkit-line-clamp: 2;
+            }
+            .card-category {
+                font-size: 0.55rem;
+                padding: 0.1rem 0.6rem;
+            }
+            .uploader-info {
+                font-size: 0.65rem;
+            }
+            .uploader-avatar {
+                width: 20px;
+                height: 20px;
+                font-size: 0.5rem;
+            }
+            .uploader-name {
+                max-width: 50px;
+            }
+            .uploader-role {
+                font-size: 0.5rem;
+                padding: 0.05rem 0.4rem;
+            }
+            .card-date {
+                font-size: 0.55rem;
             }
             .card-actions {
-                flex-direction: column;
+                gap: 0.4rem;
+                margin-top: 0.5rem;
+                flex-direction: row;
             }
-            .card-actions .resource-link,
-            .card-actions .edit-resource,
-            .card-actions .delete-resource {
-                flex: none;
-                width: 100%;
+            .resource-link,
+            .edit-resource,
+            .delete-resource {
+                font-size: 0.6rem;
+                padding: 0.3rem 0.4rem;
+                border-radius: 1.2rem;
+                flex: 1;
+                min-width: 0;
+            }
+            .resource-link i,
+            .edit-resource i,
+            .delete-resource i {
+                font-size: 0.6rem;
+            }
+            .card-footer {
+                padding-top: 0.4rem;
+                margin-top: 0.2rem;
+                gap: 0.3rem;
             }
 
             .sidebar-overlay {
@@ -1492,36 +1586,184 @@
 
         @media (max-width: 480px) {
             .stats-row {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr 1fr;
             }
             .resources-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.6rem;
+            }
+            .resource-card {
+                padding: 0.5rem 0.4rem;
+                border-radius: 1rem;
+                min-height: 150px;
+            }
+            .file-icon-wrap {
+                width: 30px;
+                height: 30px;
+                font-size: 0.9rem;
+                border-radius: 0.7rem;
+            }
+            .card-title {
+                font-size: 0.75rem;
+            }
+            .card-desc {
+                font-size: 0.65rem;
+                -webkit-line-clamp: 2;
+                margin: 0.2rem 0 0.3rem;
+            }
+            .card-category {
+                font-size: 0.5rem;
+                padding: 0.05rem 0.5rem;
+            }
+            .uploader-info {
+                font-size: 0.55rem;
+            }
+            .uploader-avatar {
+                width: 18px;
+                height: 18px;
+                font-size: 0.45rem;
+            }
+            .uploader-name {
+                max-width: 35px;
+            }
+            .uploader-role {
+                display: none;
+            }
+            .card-date {
+                font-size: 0.5rem;
+            }
+            .resource-link,
+            .edit-resource,
+            .delete-resource {
+                font-size: 0.5rem;
+                padding: 0.6rem 0.3rem;
+                border-radius: 1rem;
+            }
+            .resource-link i,
+            .edit-resource i,
+            .delete-resource i {
+                font-size: 0.5rem;
             }
             .mobile-search {
-                width: 160px;
-                height: 2rem;
+                width: 170px;
+                height: 1.8rem;
             }
             .mobile-search input {
-                font-size: 0.7rem;
+                font-size: 0.65rem;
+                padding: 0 0.4rem;
             }
             .upload-btn-main {
-                padding: 0.7rem 4rem;
-                font-size: 0.75rem;
-                gap: 0.4rem;
+                padding: 0.4rem 4rem;
+                font-size: 0.65rem;
+                gap: 0.2rem;
+                border-radius: 1.5rem;
             }
             .upload-btn-main i {
-                font-size: 0.8rem;
+                font-size: 0.7rem;
             }
             .modal-content {
                 padding: 1rem;
                 border-radius: 1.5rem;
             }
             .file-upload-area {
-                min-height: 100px;
-                padding: 0.8rem;
+                min-height: 80px;
+                padding: 0.6rem;
             }
             .file-upload-area i {
-                font-size: 1.8rem;
+                font-size: 1.5rem;
+            }
+            .file-upload-area p {
+                font-size: 0.8rem;
+            }
+            .preview-info {
+                padding: 0.8rem 0.6rem;
+            }
+            .preview-info h3 {
+                font-size: 0.9rem;
+            }
+            .preview-info .pi-desc {
+                font-size: 0.75rem;
+                max-height: 50px;
+            }
+            .pi-meta-row {
+                font-size: 0.65rem;
+                gap: 0.3rem;
+            }
+            .pi-meta-row .pi-filename {
+                max-width: 60px;
+            }
+            .pi-download-btn {
+                font-size: 0.7rem;
+                padding: 0.4rem 0.8rem;
+            }
+            .pdf-controls {
+                font-size: 0.65rem;
+                gap: 0.3rem;
+                padding: 0.2rem 0.5rem;
+            }
+            .pdf-controls button {
+                font-size: 0.65rem;
+                padding: 0.15rem 0.5rem;
+            }
+            .pdf-controls .page-info {
+                min-width: 50px;
+                font-size: 0.65rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .resources-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.4rem;
+            }
+            .resource-card {
+                padding: 0.4rem 0.3rem;
+                border-radius: 0.8rem;
+                min-height: 130px;
+            }
+            .file-icon-wrap {
+                width: 26px;
+                height: 26px;
+                font-size: 0.75rem;
+            }
+            .card-title {
+                font-size: 0.65rem;
+            }
+            .card-desc {
+                font-size: 0.55rem;
+                -webkit-line-clamp: 1;
+                margin: 0.1rem 0 0.2rem;
+            }
+            .card-category {
+                font-size: 0.45rem;
+                padding: 0.05rem 0.4rem;
+            }
+            .uploader-info {
+                font-size: 0.5rem;
+                gap: 0.2rem;
+            }
+            .uploader-avatar {
+                width: 16px;
+                height: 16px;
+                font-size: 0.4rem;
+            }
+            .uploader-name {
+                max-width: 25px;
+            }
+            .card-date {
+                font-size: 0.45rem;
+            }
+            .resource-link,
+            .edit-resource,
+            .delete-resource {
+                font-size: 0.45rem;
+                padding: 0.15rem 0.2rem;
+                gap: 0.15rem;
+            }
+            .resource-link i,
+            .edit-resource i,
+            .delete-resource i {
+                font-size: 0.4rem;
             }
         }
     </style>
@@ -1582,20 +1824,26 @@
             </div>
         </div>
 
+        <!-- Top bar with search and upload button -->
         <div class="top-bar">
             <div class="search-box">
                 <i class="fas fa-search"></i>
                 <input type="text" id="searchInput" placeholder="Search resources..." />
             </div>
-            <button class="upload-btn-main" id="openUploadModal"><i class="fas fa-plus-circle"></i> Upload</button>
+            <div class="action-buttons">
+                <button class="upload-btn-main" id="openUploadModal"><i class="fas fa-plus-circle"></i> Upload</button>
+                <!-- Your existing notification button goes here -->
+            </div>
         </div>
 
+        <!-- Stats row -->
         <div class="stats-row" id="statsRow">
             <div class="stat-card"><div class="number" id="statTotalCard">0</div><div class="label">Total resources</div></div>
             <div class="stat-card"><div class="number" id="statRecentCard">0</div><div class="label">Added this week</div></div>
             <div class="stat-card"><div class="number" id="statCategoriesCard">0</div><div class="label">Categories</div></div>
         </div>
 
+        <!-- Resources grid -->
         <div id="resourcesGrid" class="resources-grid"></div>
     </div>
 
@@ -2030,15 +2278,15 @@
                   <div class="card-top">
                     <div class="file-icon-wrap"><i class="fas ${iconClass}"></i></div>
                     <div class="card-meta">
-                      <div class="card-title">${escapeHtml(r.title)}</div>
-                      <span class="card-category">${escapeHtml(r.category || 'Uncategorized')}</span>
+                      <div class="card-title" title="${escapeHtml(r.title)}">${escapeHtml(r.title)}</div>
+                      <span class="card-category" title="${escapeHtml(r.category || 'Uncategorized')}">${escapeHtml(r.category || 'Uncategorized')}</span>
                     </div>
                   </div>
                   <div class="card-desc">${escapeHtml(r.description || '')}</div>
                   <div class="card-footer">
                     <div class="uploader-info">
                       <div class="uploader-avatar">${uploaderInitial}</div>
-                      <span class="uploader-name">${escapeHtml(r.uploader_name || 'Unknown')}</span>
+                      <span class="uploader-name" title="${escapeHtml(r.uploader_name || 'Unknown')}">${escapeHtml(r.uploader_name || 'Unknown')}</span>
                       <span class="uploader-role">${escapeHtml(r.uploader_role || 'member')}</span>
                     </div>
                     <span class="card-date">${date}</span>
@@ -2131,7 +2379,7 @@
                 uploadModal.classList.add('open');
             }
 
-            // ─── Update Resource ───
+            // ─── Update Resource (fixed) ───
             async function updateResource(resourceId) {
                 const title = modalResourceTitle.value.trim();
                 const category = modalCategory.value;
@@ -2147,13 +2395,19 @@
                     return;
                 }
 
-                const existingResource = allResources.find(r => r.id === resourceId);
-                if (!existingResource) {
-                    alert('Resource not found. Please refresh and try again.');
+                const { data: serverResource, error: fetchError } = await supabase
+                    .from('resources')
+                    .select('*')
+                    .eq('id', resourceId)
+                    .single();
+
+                if (fetchError || !serverResource) {
+                    console.error('Fetch error:', fetchError);
+                    alert('Resource not found on server. It may have been deleted.');
                     return;
                 }
 
-                const isOwner = existingResource.uploader_id === currentUser.id;
+                const isOwner = serverResource.uploader_id === currentUser.id;
                 const isAdmin = currentUserRole === 'admin' || currentUserRole === 'CEO';
                 if (!isOwner && !isAdmin) {
                     alert('You do not have permission to edit this resource.');
@@ -2166,21 +2420,18 @@
                 modalProgressFill.style.width = '0%';
 
                 try {
-                    let fileUrl = existingResource.file_url;
+                    let fileUrl = serverResource.file_url;
 
                     if (file) {
-                        if (existingResource.file_url) {
-                            const oldFileName = getFileNameFromUrl(existingResource.file_url);
+                        if (serverResource.file_url) {
+                            const oldFileName = getFileNameFromUrl(serverResource.file_url);
                             if (oldFileName && oldFileName !== 'unknown-file') {
-                                await supabase.storage.from('resources').remove([
-                                    `resources/${oldFileName}`
-                                ]);
+                                await supabase.storage.from('resources').remove([`resources/${oldFileName}`]);
                             }
                         }
 
                         const fileExt = file.name.split('.').pop();
-                        const fileName =
-                            `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+                        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
                         const filePath = `resources/${fileName}`;
 
                         const { error: uploadError } = await supabase.storage
@@ -2196,8 +2447,7 @@
 
                         if (uploadError) throw new Error('Upload failed: ' + uploadError.message);
 
-                        const { data: { publicUrl } } = supabase.storage.from('resources')
-                            .getPublicUrl(filePath);
+                        const { data: { publicUrl } } = supabase.storage.from('resources').getPublicUrl(filePath);
                         fileUrl = publicUrl;
                     }
 
@@ -2227,7 +2477,7 @@
                     showToast('✅ Resource updated successfully!');
 
                 } catch (err) {
-                    console.error(err);
+                    console.error('Update error:', err);
                     alert('Update failed: ' + err.message);
                 } finally {
                     modalUploadBtn.disabled = false;
@@ -2256,8 +2506,7 @@
 
                 try {
                     const fileExt = file.name.split('.').pop();
-                    const fileName =
-                        `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+                    const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
                     const filePath = `resources/${fileName}`;
 
                     const { error: uploadError } = await supabase.storage
@@ -2273,8 +2522,7 @@
 
                     if (uploadError) throw uploadError;
 
-                    const { data: { publicUrl } } = supabase.storage.from('resources').getPublicUrl(
-                        filePath);
+                    const { data: { publicUrl } } = supabase.storage.from('resources').getPublicUrl(filePath);
 
                     const { error: dbError } = await supabase
                         .from('resources')
