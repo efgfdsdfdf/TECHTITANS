@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
@@ -16,7 +17,9 @@
       box-sizing: border-box;
       font-family: 'Inter', sans-serif;
     }
-    html, body {
+
+    html,
+    body {
       background: #0b0f17;
       display: flex;
       height: 100%;
@@ -28,6 +31,7 @@
       padding-left: env(safe-area-inset-left);
       padding-right: env(safe-area-inset-right);
     }
+
     body.sidebar-collapsed .sidebar {
       transform: translateX(-100%);
       width: 0;
@@ -35,9 +39,11 @@
       overflow: hidden;
       border-right: none;
     }
+
     body.sidebar-collapsed .main {
       padding-left: 0;
     }
+
     .sidebar {
       width: 260px;
       background: rgba(10, 16, 28, 0.95);
@@ -51,6 +57,7 @@
       transition: transform 0.25s ease, width 0.25s ease, padding 0.25s ease;
       overflow: hidden;
     }
+
     .logo {
       color: #fff;
       font-size: 1.5rem;
@@ -59,12 +66,17 @@
       padding-left: 1rem;
       white-space: nowrap;
     }
-    .logo span { color: #428cff; }
+
+    .logo span {
+      color: #428cff;
+    }
+
     .nav {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
     }
+
     .nav a {
       color: #9aa4bf;
       text-decoration: none;
@@ -78,15 +90,19 @@
       position: relative;
       white-space: nowrap;
     }
-    .nav a:hover, .nav a.active {
+
+    .nav a:hover,
+    .nav a.active {
       background: #1f2a44;
       color: #fff;
     }
+
     .nav a.active {
       background: #428cff;
       color: #fff;
       box-shadow: 0 8px 16px -8px #428cff;
     }
+
     .sidebar-unread {
       background: #ff4d4d;
       color: #fff;
@@ -98,6 +114,7 @@
       line-height: 1.3;
       box-shadow: 0 0 0 1px #0b0f17;
     }
+
     .logout-btn {
       margin-top: auto;
       background: transparent;
@@ -113,6 +130,7 @@
       justify-content: center;
       gap: 0.5rem;
     }
+
     .logout-btn:hover {
       background: #ff4d4d20;
       border-color: #ff4d4d;
@@ -128,6 +146,7 @@
       overflow: hidden;
       transition: padding 0.25s ease;
     }
+
     .chat-panel {
       flex: 1;
       background: #131c30;
@@ -139,6 +158,7 @@
       height: 100%;
       min-height: 0;
     }
+
     .chat-header {
       padding: 1.2rem 1.8rem;
       border-bottom: 1px solid #263154;
@@ -152,6 +172,7 @@
       background: #131c30;
       z-index: 5;
     }
+
     .chat-header .hamburger-toggle {
       background: none;
       border: none;
@@ -163,10 +184,12 @@
       border-radius: 0.5rem;
       transition: 0.2s;
     }
+
     .chat-header .hamburger-toggle:hover {
       background: #1f2a44;
       color: #fff;
     }
+
     .online-count {
       background: #1f2a44;
       padding: 0.2rem 0.8rem;
@@ -178,6 +201,7 @@
       gap: 0.3rem;
       margin-left: auto;
     }
+
     .online-count::before {
       content: '';
       width: 8px;
@@ -186,6 +210,7 @@
       border-radius: 50%;
       display: inline-block;
     }
+
     .messages-area {
       flex: 1;
       min-height: 0;
@@ -200,6 +225,7 @@
       width: 100%;
       gap: 0;
     }
+
     .dm-conversations-list {
       width: min(360px, 34vw);
       border-right: 1px solid #263154;
@@ -208,6 +234,7 @@
       background: #0d1426;
       flex-shrink: 0;
     }
+
     .dm-list-header {
       position: sticky;
       top: 0;
@@ -219,23 +246,27 @@
       font-size: 0.9rem;
       background: #0d1426;
     }
+
     .dm-list-header {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-.dm-list-hamburger {
-  display: none;
-}
-@media (max-width: 768px) {
-  .dm-list-hamburger {
-    display: inline-flex;
-    width: 2.4rem;
-    height: 2.4rem;
-    font-size: 1.1rem;
-    padding: 0;
-  }
-}
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .dm-list-hamburger {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .dm-list-hamburger {
+        display: inline-flex;
+        width: 2.4rem;
+        height: 2.4rem;
+        font-size: 1.1rem;
+        padding: 0;
+      }
+    }
+
     .dm-conversation-item {
       padding: 0.8rem 1rem;
       border-bottom: 1px solid #1f2a44;
@@ -245,19 +276,23 @@
       align-items: center;
       gap: 0.8rem;
     }
+
     .dm-conversation-item:hover {
       background: #18233b;
     }
+
     .dm-conversation-item.active {
       background: #203257;
       border-left: 3px solid #428cff;
     }
+
     .dm-conv-avatar-wrap {
       position: relative;
       flex-shrink: 0;
       width: 42px;
       height: 42px;
     }
+
     .dm-conv-avatar {
       width: 42px;
       height: 42px;
@@ -265,6 +300,7 @@
       object-fit: cover;
       background: #1f2a44;
     }
+
     .dm-conv-avatar-initials {
       width: 42px;
       height: 42px;
@@ -276,6 +312,7 @@
       font-weight: 600;
       color: #fff;
     }
+
     .dm-conv-avatar-wrap .status-dot {
       position: absolute;
       bottom: 1px;
@@ -284,15 +321,18 @@
       height: 0.6rem;
       border: 2px solid #0d1426;
     }
+
     .dm-conv-content {
       flex: 1;
       min-width: 0;
     }
+
     .dm-conv-top-row {
       display: flex;
       align-items: baseline;
       gap: 0.4rem;
     }
+
     .dm-conv-name {
       color: #fff;
       font-weight: 500;
@@ -303,12 +343,14 @@
       flex: 1;
       min-width: 0;
     }
+
     .dm-conv-time {
       color: #6b7fb1;
       font-size: 0.68rem;
       flex-shrink: 0;
       white-space: nowrap;
     }
+
     .dm-conv-preview {
       color: #6b7fb1;
       font-size: 0.78rem;
@@ -317,11 +359,13 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
     .dm-conv-role {
       color: #9aa4bf;
       font-size: 0.75rem;
       margin-top: 0.2rem;
     }
+
     .status-dot {
       width: 0.6rem;
       height: 0.6rem;
@@ -329,9 +373,11 @@
       background: #444;
       flex-shrink: 0;
     }
+
     .status-dot.online {
       background: #2ecc71;
     }
+
     .dm-unread-badge {
       background: #428cff;
       color: #fff;
@@ -349,11 +395,12 @@
       display: none;
       flex-direction: column;
       background:
-        radial-gradient(circle at 18px 18px, rgba(255,255,255,0.035) 1px, transparent 1px) 0 0 / 36px 36px,
+        radial-gradient(circle at 18px 18px, rgba(255, 255, 255, 0.035) 1px, transparent 1px) 0 0 / 36px 36px,
         linear-gradient(180deg, #111a2c 0%, #0d1525 100%);
       min-width: 0;
       min-height: 0;
     }
+
     .dm-chat-header {
       min-height: 72px;
       padding: 0.9rem 1.1rem;
@@ -368,18 +415,22 @@
       gap: 1rem;
       flex-shrink: 0;
     }
+
     .dm-chat-header .dm-back-btn {
       display: none;
     }
+
     .dm-chat-peer {
       display: flex;
       align-items: center;
       gap: 0.8rem;
       min-width: 0;
     }
+
     .dm-peer-copy {
       min-width: 0;
     }
+
     .dm-chat-title {
       display: block;
       color: #f8fbff;
@@ -389,22 +440,25 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
     .dm-chat-subtitle {
       display: block;
       color: #91a0c7;
       font-size: 0.78rem;
       margin-top: 0.15rem;
     }
+
     .dm-chat-actions {
       display: flex;
       align-items: center;
       gap: 0.45rem;
       flex-shrink: 0;
     }
+
     .dm-icon-btn {
       min-width: 2.55rem;
       height: 2.55rem;
-      border: 1px solid rgba(255,255,255,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 50%;
       background: #18233b;
       color: #eaf0ff;
@@ -414,6 +468,7 @@
       justify-content: center;
       transition: background 0.2s ease, transform 0.2s ease;
     }
+
     .dm-chat-actions .dm-icon-btn {
       width: auto;
       min-width: 4rem;
@@ -422,15 +477,18 @@
       font-size: 0.8rem;
       font-weight: 700;
     }
+
     .dm-icon-btn:hover {
       background: #203257;
       transform: translateY(-1px);
     }
+
     .dm-icon-btn:disabled {
       opacity: 0.45;
       cursor: not-allowed;
       transform: none;
     }
+
     .dm-chat-messages {
       flex: 1;
       overflow-y: auto;
@@ -441,6 +499,7 @@
       scroll-behavior: smooth;
       min-height: 0;
     }
+
     .dm-chat-input {
       display: flex;
       padding: 0.85rem 1rem;
@@ -453,17 +512,20 @@
       flex-shrink: 0;
       z-index: 50;
     }
+
     .dm-composer-tools {
       display: flex;
       align-items: center;
       gap: 0.45rem;
       flex-shrink: 0;
     }
+
     .dm-input-wrap {
       flex: 1;
       min-width: 0;
       position: relative;
     }
+
     #dmChatInput {
       width: 100%;
       background: #0b1221;
@@ -474,9 +536,11 @@
       outline: none;
       min-width: 0;
     }
+
     #dmChatInput:focus {
       border-color: #428cff;
     }
+
     #dmChatSendBtn {
       background: #428cff;
       border: none;
@@ -489,6 +553,7 @@
       transition: 0.2s;
       flex-shrink: 0;
     }
+
     .voice-btn {
       background: #2f3a5a;
       border: none;
@@ -512,12 +577,15 @@
       align-items: flex-end;
       gap: 0.5rem;
     }
+
     .dm-msg-row.sent {
       justify-content: flex-end;
     }
+
     .dm-msg-row.unread .dm-msg {
       border-left: 4px solid #428cff;
     }
+
     .dm-msg {
       max-width: min(68%, 720px);
       padding: 0.72rem 0.82rem 0.42rem;
@@ -526,11 +594,13 @@
       font-size: 0.9rem;
       line-height: 1.4;
       position: relative;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
     }
+
     .dm-msg-text {
       white-space: pre-wrap;
     }
+
     .dm-msg-meta {
       display: flex;
       align-items: center;
@@ -541,21 +611,25 @@
       line-height: 1;
       opacity: 0.76;
     }
+
     .dm-msg-status {
       color: #bde7ff;
       font-weight: 800;
       letter-spacing: 0;
     }
+
     .dm-msg.sent {
       background: linear-gradient(135deg, #2979ff, #1f9f7a);
       color: #fff;
       border-bottom-right-radius: 0.25rem;
     }
+
     .dm-msg.received {
       background: #202b43;
       color: #e0e7ff;
       border-bottom-left-radius: 0.25rem;
     }
+
     .dm-seen-indicator {
       font-size: 0.68rem;
       color: #8fa0c5;
@@ -573,6 +647,7 @@
       z-index: 10;
       padding: 0.3rem 0;
     }
+
     .dm-date-separator span {
       background: #1f2a44;
       color: #9aa4bf;
@@ -583,7 +658,7 @@
       text-transform: uppercase;
       letter-spacing: 0.3px;
       border: 1px solid #2f3a5a;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     }
 
     .dm-voice-note {
@@ -593,13 +668,14 @@
       gap: 0.65rem;
       min-width: min(300px, 62vw);
     }
+
     .dm-audio-btn {
       min-width: 3.2rem;
       padding: 0 0.6rem;
       height: 2.35rem;
       border: none;
       border-radius: 999px;
-      background: rgba(255,255,255,0.16);
+      background: rgba(255, 255, 255, 0.16);
       color: #fff;
       cursor: pointer;
       display: inline-flex;
@@ -608,43 +684,51 @@
       font-size: 0.72rem;
       font-weight: 700;
     }
+
     .dm-wave {
       height: 1.8rem;
       display: flex;
       align-items: center;
       gap: 3px;
     }
+
     .dm-wave span {
       width: 3px;
       height: var(--h);
       border-radius: 999px;
-      background: rgba(255,255,255,0.48);
+      background: rgba(255, 255, 255, 0.48);
     }
+
     .dm-audio-duration {
       font-size: 0.76rem;
       opacity: 0.82;
       min-width: 2.6rem;
       text-align: right;
     }
+
     .dm-audio-progress {
       grid-column: 2 / 4;
       height: 3px;
       border-radius: 999px;
-      background: rgba(255,255,255,0.18);
+      background: rgba(255, 255, 255, 0.18);
       overflow: hidden;
     }
+
     .dm-audio-progress span {
       display: block;
       width: 0%;
       height: 100%;
       background: #fff;
     }
+
     .dm-msg.received .dm-audio-btn {
-      background: rgba(66,140,255,0.22);
+      background: rgba(66, 140, 255, 0.22);
     }
+
     .dm-msg.received .dm-wave span {
-      background: rgba(190,210,255,0.58);
+      background: rgba(190, 210, 255, 0.58);
     }
+
     .dm-empty-state {
       margin: auto;
       max-width: 360px;
@@ -653,12 +737,13 @@
       padding: 2rem;
       line-height: 1.5;
     }
+
     .dm-delete-btn {
       position: absolute;
       top: 0.35rem;
       right: 0.4rem;
       border: 0;
-      background: rgba(0,0,0,0.18);
+      background: rgba(0, 0, 0, 0.18);
       color: inherit;
       border-radius: 999px;
       padding: 0.2rem 0.45rem;
@@ -666,6 +751,7 @@
       opacity: 0;
       cursor: pointer;
     }
+
     .dm-msg:hover .dm-delete-btn {
       opacity: 0.85;
     }
@@ -682,17 +768,19 @@
       color: #fff;
       text-transform: uppercase;
       flex-shrink: 0;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
       cursor: pointer;
       transition: transform 0.1s;
       object-fit: cover;
     }
+
     .avatar img {
       width: 100%;
       height: 100%;
       border-radius: 50%;
       object-fit: cover;
     }
+
     .avatar:hover {
       transform: scale(1.05);
     }
@@ -702,6 +790,7 @@
       margin-bottom: 0.5rem;
       padding: 0 1.5rem;
     }
+
     .typing-indicator {
       display: flex;
       align-items: center;
@@ -712,6 +801,7 @@
       width: fit-content;
       margin-bottom: 0.5rem;
     }
+
     .typing-indicator span {
       width: 0.5rem;
       height: 0.5rem;
@@ -719,32 +809,62 @@
       border-radius: 50%;
       animation: typingBounce 1.4s infinite ease-in-out;
     }
-    .typing-indicator span:nth-child(1) { animation-delay: 0s; }
-    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes typingBounce {
-      0%, 60%, 100% { transform: translateY(0); }
-      30% { transform: translateY(-0.5rem); }
+
+    .typing-indicator span:nth-child(1) {
+      animation-delay: 0s;
     }
+
+    .typing-indicator span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-indicator span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes typingBounce {
+
+      0%,
+      60%,
+      100% {
+        transform: translateY(0);
+      }
+
+      30% {
+        transform: translateY(-0.5rem);
+      }
+    }
+
     .typing-text {
       color: #9aa4bf;
       font-size: 0.85rem;
       margin-left: 0.5rem;
     }
+
     .recording-timer {
       color: #ff4d4d;
       font-size: 1rem;
       font-weight: 600;
       margin-left: 0.5rem;
     }
+
     .voice-btn.recording {
       background: #ff4d4d;
       animation: pulse 1s infinite;
     }
+
     @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.1);
+      }
+
+      100% {
+        transform: scale(1);
+      }
     }
 
     .call-modal {
@@ -753,12 +873,13 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0, 0, 0, 0.8);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 2000;
     }
+
     .call-modal-content {
       background: #1f2a44;
       border-radius: 1.5rem;
@@ -767,13 +888,18 @@
       width: 90%;
       color: #fff;
     }
+
     .call-modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 1rem;
     }
-    .call-modal-header h3 { font-size: 1.2rem; }
+
+    .call-modal-header h3 {
+      font-size: 1.2rem;
+    }
+
     .call-timer {
       color: #9aa4bf;
       font-size: 0.92rem;
@@ -781,6 +907,7 @@
       text-align: center;
       margin: -0.35rem 0 1rem;
     }
+
     .call-modal-close {
       background: none;
       border: none;
@@ -788,6 +915,7 @@
       font-size: 1.5rem;
       cursor: pointer;
     }
+
     .call-videos {
       display: flex;
       gap: 1rem;
@@ -795,6 +923,7 @@
       justify-content: center;
       margin-bottom: 1rem;
     }
+
     .video-container {
       background: #0b0f17;
       border-radius: 1rem;
@@ -803,37 +932,43 @@
       height: 200px;
       position: relative;
     }
+
     .video-container video {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
+
     .rtc-video-slot {
       width: 100%;
       height: 100%;
       background: #090d15;
     }
-    .rtc-video-slot > * {
+
+    .rtc-video-slot>* {
       width: 100% !important;
       height: 100% !important;
       object-fit: cover;
     }
+
     .video-label {
       position: absolute;
       bottom: 0.5rem;
       left: 0.5rem;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0, 0, 0, 0.5);
       color: #fff;
       padding: 0.2rem 0.5rem;
       border-radius: 0.5rem;
       font-size: 0.8rem;
     }
+
     .call-controls {
       display: flex;
       gap: 1rem;
       justify-content: center;
       margin-top: 1rem;
     }
+
     .call-controls button {
       background: #428cff;
       border: none;
@@ -846,8 +981,15 @@
       align-items: center;
       gap: 0.5rem;
     }
-    .call-controls button.hangup { background: #ff4d4d; }
-    .call-controls button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .call-controls button.hangup {
+      background: #ff4d4d;
+    }
+
+    .call-controls button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
     .call-options-modal {
       position: fixed;
@@ -855,12 +997,13 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0, 0, 0, 0.5);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 1500;
     }
+
     .call-options-content {
       background: #1f2a44;
       border-radius: 1.5rem;
@@ -869,7 +1012,11 @@
       color: #fff;
       text-align: center;
     }
-    .call-options-content h3 { margin-bottom: 1rem; }
+
+    .call-options-content h3 {
+      margin-bottom: 1rem;
+    }
+
     .call-option-btn {
       background: #2f3a5a;
       border: none;
@@ -886,17 +1033,35 @@
       gap: 0.5rem;
       transition: background 0.2s;
     }
-    .call-option-btn:hover { background: #428cff; }
-    .call-option-btn.video { background: #428cff; }
-    .call-option-btn.video:hover { background: #5f9eff; }
+
+    .call-option-btn:hover {
+      background: #428cff;
+    }
+
+    .call-option-btn.video {
+      background: #428cff;
+    }
+
+    .call-option-btn.video:hover {
+      background: #5f9eff;
+    }
 
     #incomingCallModal .call-modal-content {
       max-width: 400px;
       text-align: center;
     }
-    #incomingCallModal .call-controls { margin-top: 1.5rem; }
-    #acceptCallBtn { background: #2ecc71; }
-    #declineCallBtn { background: #ff4d4d; }
+
+    #incomingCallModal .call-controls {
+      margin-top: 1.5rem;
+    }
+
+    #acceptCallBtn {
+      background: #2ecc71;
+    }
+
+    #declineCallBtn {
+      background: #ff4d4d;
+    }
 
     .read-receipts-modal {
       position: absolute;
@@ -907,11 +1072,12 @@
       color: #fff;
       font-size: 0.9rem;
       z-index: 1000;
-      box-shadow: 0 12px 28px rgba(0,0,0,0.7);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.7);
       min-width: 260px;
       max-width: 320px;
       backdrop-filter: blur(4px);
     }
+
     .read-receipts-modal h4 {
       margin-bottom: 0.8rem;
       color: #b0c8ff;
@@ -927,14 +1093,17 @@
       color: #fff;
       padding: 0.8rem 1.2rem;
       border-radius: 0.8rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
       opacity: 0.9;
       z-index: 3000;
       font-size: 0.9rem;
       pointer-events: none;
       transition: opacity 0.3s;
     }
-    .toast.hide { opacity: 0; }
+
+    .toast.hide {
+      opacity: 0;
+    }
 
     .mobile-nav-overlay {
       display: none;
@@ -943,11 +1112,12 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0, 0, 0, 0.6);
       z-index: 1000;
       align-items: stretch;
       justify-content: flex-start;
     }
+
     .mobile-nav-panel {
       width: 280px;
       max-width: 80vw;
@@ -959,13 +1129,20 @@
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
-      box-shadow: 4px 0 30px rgba(0,0,0,0.5);
+      box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
       animation: slideInNav 0.25s ease;
     }
+
     @keyframes slideInNav {
-      from { transform: translateX(-100%); }
-      to { transform: translateX(0); }
+      from {
+        transform: translateX(-100%);
+      }
+
+      to {
+        transform: translateX(0);
+      }
     }
+
     .mobile-nav-panel .close-btn {
       align-self: flex-end;
       background: none;
@@ -976,12 +1153,17 @@
       line-height: 1;
       padding: 0.2rem;
     }
-    .mobile-nav-panel .close-btn:hover { color: #fff; }
+
+    .mobile-nav-panel .close-btn:hover {
+      color: #fff;
+    }
+
     .mobile-nav-links {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
     }
+
     .mobile-nav-links a {
       color: #9aa4bf;
       text-decoration: none;
@@ -994,16 +1176,19 @@
       gap: 0.8rem;
       font-size: 1rem;
     }
+
     .mobile-nav-links a:hover,
     .mobile-nav-links a.active {
       background: #1f2a44;
       color: #fff;
     }
+
     .mobile-nav-links a.active {
       background: #428cff;
       color: #fff;
       box-shadow: 0 8px 16px -8px #428cff;
     }
+
     .mobile-nav-panel .logout-btn {
       margin-top: auto;
       background: transparent;
@@ -1019,6 +1204,7 @@
       justify-content: center;
       gap: 0.5rem;
     }
+
     .mobile-nav-panel .logout-btn:hover {
       background: #ff4d4d20;
       border-color: #ff4d4d;
@@ -1030,15 +1216,18 @@
         flex-direction: column;
         height: 100vh;
       }
+
       .sidebar {
         display: none;
       }
+
       body.sidebar-collapsed .sidebar {
         transform: none;
         width: auto;
         padding: 2rem 1rem;
         overflow: visible;
       }
+
       .main {
         padding: 0;
         order: 1;
@@ -1046,6 +1235,7 @@
         height: 100%;
         overflow: hidden;
       }
+
       .chat-panel {
         border-radius: 0;
         border-left: none;
@@ -1054,12 +1244,15 @@
         height: 100%;
         padding: 0;
       }
+
       .chat-header {
         display: none;
       }
+
       .dm-chat-header {
         display: flex !important;
       }
+
       .messages-area {
         height: 100%;
         width: 100%;
@@ -1068,9 +1261,11 @@
         display: flex;
         flex-direction: column;
       }
+
       .online-count {
         margin-left: 0;
       }
+
       .dm-layout {
         flex-direction: row;
         width: 200vw;
@@ -1081,6 +1276,7 @@
         transition: transform 0.26s ease;
         will-change: transform;
       }
+
       .dm-conversations-list,
       .dm-chat-area {
         width: 100vw;
@@ -1089,21 +1285,25 @@
         min-width: 100vw;
         height: 100%;
       }
+
       .dm-conversations-list {
         border-right: none;
         border-bottom: 1px solid #263154;
         min-height: 0;
         -webkit-overflow-scrolling: touch;
       }
+
       .dm-chat-area {
         display: flex;
         flex-direction: column;
         min-height: 0;
         height: 100%;
       }
+
       .dm-layout.chat-open {
         transform: translateX(-100vw);
       }
+
       .dm-chat-header .dm-back-btn {
         display: inline-flex;
         background: none;
@@ -1115,9 +1315,11 @@
         margin-right: 0.5rem;
         padding: 0 0.2rem;
       }
+
       .dm-chat-messages {
         -webkit-overflow-scrolling: touch;
       }
+
       .dm-chat-header .hamburger-btn {
         display: inline-flex;
         width: 2.7rem;
@@ -1127,35 +1329,50 @@
         font-size: 1.2rem;
         padding: 0;
       }
+
       .dm-chat-actions .dm-icon-btn {
         min-width: 2.7rem;
         width: 2.7rem;
         padding: 0;
         font-size: 0;
       }
-      #dmHeaderVoiceCallBtn::before { content: 'Call'; font-size: 0.72rem; }
-      #dmHeaderVideoCallBtn::before { content: 'Video'; font-size: 0.72rem; }
+
+      #dmHeaderVoiceCallBtn::before {
+        content: 'Call';
+        font-size: 0.72rem;
+      }
+
+      #dmHeaderVideoCallBtn::before {
+        content: 'Video';
+        font-size: 0.72rem;
+      }
+
       .dm-msg {
         max-width: 80%;
       }
+
       #dmChatSendBtn,
       .voice-btn {
         width: 2.8rem;
         height: 2.8rem;
         font-size: 1.1rem;
       }
+
       #dmChatInput {
         padding: 0.7rem 1rem;
         font-size: 16px;
       }
+
       .chat-header .hamburger-toggle {
         display: none !important;
       }
     }
+
     @media (max-width: 480px) {
       .sidebar {
         display: none;
       }
+
       .dm-msg {
         max-width: 90%;
       }
@@ -1165,6 +1382,7 @@
     .chat-header .hamburger-toggle {
       display: inline-flex;
     }
+
     @media (max-width: 768px) {
       .chat-header .hamburger-toggle {
         display: none;
@@ -1174,6 +1392,7 @@
     #profileModal .call-modal-content {
       max-width: 400px;
     }
+
     #profileModal .call-modal-content .btn {
       background: #428cff;
       border: none;
@@ -1184,18 +1403,26 @@
       font-weight: 600;
       transition: background 0.2s;
     }
+
     #profileModal .call-modal-content .btn:hover {
       background: #5f9eff;
     }
   </style>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="native-bridge.js"></script>
-  <script src="notifications.js"></script>
-  <script src="ringtone.js"></script>
-  <script src="global-notifications.js"></script>
-  <script src="agora-utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
+  </script>
+  <script src="native-bridge.js">
+  </script>
+  <script src="notifications.js">
+  </script>
+  <script src="ringtone.js">
+  </script>
+  <script src="global-notifications.js">
+  </script>
+  <script src="agora-utils.js">
+  </script>
 </head>
+
 <body>
 
   <!-- ─── SIDEBAR ─── -->
@@ -1303,20 +1530,25 @@
       </div>
       <div style="text-align:center;padding:1rem;">
         <div style="display:flex;justify-content:center;margin-bottom:1rem;">
-          <img id="modalAvatar" src="" alt="Avatar" style="width:100px;height:100px;border-radius:50%;object-fit:cover;background:#1f2a44;display:none;">
-          <div id="modalAvatarPlaceholder" style="width:100px;height:100px;border-radius:50%;background:#428cff;display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:#fff;display:none;">TT</div>
+          <img id="modalAvatar" src="" alt="Avatar"
+            style="width:100px;height:100px;border-radius:50%;object-fit:cover;background:#1f2a44;display:none;">
+          <div id="modalAvatarPlaceholder"
+            style="width:100px;height:100px;border-radius:50%;background:#428cff;display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:#fff;display:none;">
+            TT</div>
         </div>
         <h2 id="modalName" style="color:#fff;margin-bottom:0.5rem;">-</h2>
         <p id="modalRole" style="color:#9aa4bf;margin-bottom:0.5rem;">-</p>
         <p id="modalJoined" style="color:#9aa4bf;font-size:0.9rem;">-</p>
-        <button id="modalSendDM" class="btn" style="margin-top:1rem;width:auto;padding:0.6rem 2rem;">Send Message</button>
+        <button id="modalSendDM" class="btn" style="margin-top:1rem;width:auto;padding:0.6rem 2rem;">Send
+          Message</button>
       </div>
     </div>
   </div>
 
-  <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+  <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js">
+  </script>
   <script>
-    (function() {
+    (function () {
       const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
       const SUPABASE_ANON_KEY =
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kcXF0c2RpYnR2eW1mZ250c3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTI1NjIsImV4cCI6MjA4Nzg4ODU2Mn0.hS-7kmoyFljnhkJEkw7nmgimw9ioQreidyu27_NXYyo';
@@ -1400,11 +1632,9 @@
       if (sidebarToggle) {
         sidebarToggle.addEventListener('click', () => {
           document.body.classList.toggle('sidebar-collapsed');
-          // Store preference in localStorage
           const collapsed = document.body.classList.contains('sidebar-collapsed');
           localStorage.setItem('techTitansSidebarCollapsed', collapsed);
         });
-        // Restore preference
         const stored = localStorage.getItem('techTitansSidebarCollapsed');
         if (stored === 'true') {
           document.body.classList.add('sidebar-collapsed');
@@ -1421,8 +1651,10 @@
         const msgDay = new Date(msgDate.getFullYear(), msgDate.getMonth(), msgDate.getDate());
         if (msgDay.getTime() === today.getTime()) return 'Today';
         else if (msgDay.getTime() === yesterday.getTime()) return 'Yesterday';
-        else return msgDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long',
-            day: 'numeric' });
+        else return msgDate.toLocaleDateString('en-US', {
+          weekday: 'long', year: 'numeric', month: 'long',
+          day: 'numeric'
+        });
       }
 
       function formatTimeOnly(date) {
@@ -1453,7 +1685,7 @@
 
       function escapeHtml(unsafe) {
         if (unsafe === null || unsafe === undefined) return '';
-        return String(unsafe).replace(/[&<>"']/g, function(m) {
+        return String(unsafe).replace(/[&<>"']/g, function (m) {
           if (m === '&') return '&amp;';
           if (m === '<') return '&lt;';
           if (m === '>') return '&gt;';
@@ -1468,13 +1700,13 @@
           .map(h => `<span style="--h:${h}px"></span>`)
           .join('');
         return `
-          <div class="dm-voice-note" data-audio-url="${escapeHtml(audioUrl)}" data-message-id="${escapeHtml(messageId)}">
-            <button type="button" class="dm-audio-btn" aria-label="Play voice note">Play</button>
-            <div class="dm-wave">${bars}</div>
-            <span class="dm-audio-duration">0:00</span>
-            <div class="dm-audio-progress"><span></span></div>
-          </div>
-        `;
+            <div class="dm-voice-note" data-audio-url="${escapeHtml(audioUrl)}" data-message-id="${escapeHtml(messageId)}">
+              <button type="button" class="dm-audio-btn" aria-label="Play voice note">Play</button>
+              <div class="dm-wave">${bars}</div>
+              <span class="dm-audio-duration">0:00</span>
+              <div class="dm-audio-progress"><span></span></div>
+            </div>
+          `;
       }
 
       function renderMessageBubble(msg, options = {}) {
@@ -1497,31 +1729,19 @@
           `<span class="dm-msg-status">${msg.read_at ? 'Seen' : 'Sent'}</span>` :
           '';
 
-        let avatarHtml = '';
-        if (!isSent) {
-          if (sender.avatar_url) {
-            avatarHtml =
-              `<img src="${escapeHtml(sender.avatar_url)}" class="avatar" alt="${escapeHtml(senderName)}" data-user-id="${sender.id || msg.sender_id}" data-user-name="${escapeHtml(senderName)}" data-user-role="${escapeHtml(senderRole)}">`;
-          } else {
-            avatarHtml =
-              `<div class="avatar" style="background-color:${stringToColor(senderName)};" data-user-id="${sender.id || msg.sender_id}" data-user-name="${escapeHtml(senderName)}" data-user-role="${escapeHtml(senderRole)}">${getInitials(senderName)}</div>`;
-          }
-        }
-
         return `
-          <div class="dm-msg-row ${isSent ? 'sent' : 'received'} ${isUnread ? 'unread' : ''}" data-message-id="${msg.id}" data-created-at="${msg.created_at}" data-sender-id="${msg.sender_id}">
-            ${avatarHtml}
-            <div class="dm-msg ${isSent ? 'sent' : 'received'}">
-              ${contentHtml}
-              <div class="dm-msg-meta">
-                <span>${timeStr}</span>
-                ${statusHtml}
+            <div class="dm-msg-row ${isSent ? 'sent' : 'received'} ${isUnread ? 'unread' : ''}" data-message-id="${msg.id}" data-created-at="${msg.created_at}" data-sender-id="${msg.sender_id}">
+              <div class="dm-msg ${isSent ? 'sent' : 'received'}">
+                ${contentHtml}
+                <div class="dm-msg-meta">
+                  <span>${timeStr}</span>
+                  ${statusHtml}
+                </div>
+                ${seenHtml}
+                ${deleteBtn}
               </div>
-              ${seenHtml}
-              ${deleteBtn}
             </div>
-          </div>
-        `;
+          `;
       }
 
       function attachMessageInteractions(root) {
@@ -1622,8 +1842,10 @@
             onlineUsers.clear();
             Object.values(state).forEach(presences => {
               presences.forEach(p => {
-                if (p.userId !== currentUser.id) onlineUsers.set(p.userId, { name: p.name,
-                  role: p.role });
+                if (p.userId !== currentUser.id) onlineUsers.set(p.userId, {
+                  name: p.name,
+                  role: p.role
+                });
               });
             });
             document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
@@ -1638,8 +1860,10 @@
           })
           .on('presence', { event: 'join' }, ({ key, newPresences }) => {
             newPresences.forEach(p => {
-              if (p.userId !== currentUser.id) onlineUsers.set(p.userId, { name: p.name,
-                role: p.role });
+              if (p.userId !== currentUser.id) onlineUsers.set(p.userId, {
+                name: p.name,
+                role: p.role
+              });
             });
             document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
           })
@@ -1649,8 +1873,10 @@
           })
           .subscribe(async (status) => {
             if (status === 'SUBSCRIBED') {
-              await presenceChannel.track({ userId: currentUser.id, name: currentUserFullName,
-                role: currentRole, online_at: new Date().toISOString() });
+              await presenceChannel.track({
+                userId: currentUser.id, name: currentUserFullName,
+                role: currentRole, online_at: new Date().toISOString()
+              });
             }
           });
       }
@@ -1659,8 +1885,10 @@
       function updateDMBadge() {
         const total = Object.values(dmUnreadBySender).reduce((a, b) => a + b, 0);
         const dmBadge = document.getElementById('dmUnreadBadge');
-        if (total > 0) { dmBadge.style.display = 'inline-block';
-          dmBadge.textContent = total; } else { dmBadge.style.display = 'none'; }
+        if (total > 0) {
+          dmBadge.style.display = 'inline-block';
+          dmBadge.textContent = total;
+        } else { dmBadge.style.display = 'none'; }
       }
 
       // ─── MARK DM AS READ ───
@@ -1684,9 +1912,9 @@
             if (newCount > 0) badge.textContent = newCount;
             else if (badge) {
               badge.remove();
-              // Add seen indicator when all messages from this sender are read
               if (!targetItem.querySelector('.dm-conv-seen')) {
-                targetItem.insertAdjacentHTML('beforeend', '<span class="dm-conv-seen"><i class="fas fa-check-double"></i></span>');
+                targetItem.insertAdjacentHTML('beforeend',
+                  '<span class="dm-conv-seen"><i class="fas fa-check-double"></i></span>');
               }
             }
           }
@@ -1732,8 +1960,7 @@
         const chatArea = document.querySelector('.dm-chat-area');
         const backBtn = document.querySelector('.dm-back-btn');
         const outerHeader = document.querySelector('.chat-panel > .chat-header');
-        
-        // Remove any inline styles that might conflict with the sliding CSS layout
+
         list.style.display = '';
         chatArea.style.display = '';
         layout.style.transform = '';
@@ -1769,19 +1996,19 @@
 
           const lastInteraction = {};
           if (allMessages) {
-             for (const msg of allMessages) {
-                const otherId = msg.sender_id === currentUser.id ? msg.recipient_id : msg.sender_id;
-                const time = new Date(msg.created_at).getTime();
-                if (!lastInteraction[otherId] || time > lastInteraction[otherId].time) {
-                   lastInteraction[otherId] = { time, msg };
-                }
-             }
+            for (const msg of allMessages) {
+              const otherId = msg.sender_id === currentUser.id ? msg.recipient_id : msg.sender_id;
+              const time = new Date(msg.created_at).getTime();
+              if (!lastInteraction[otherId] || time > lastInteraction[otherId].time) {
+                lastInteraction[otherId] = { time, msg };
+              }
+            }
           }
 
           allProfiles.sort((a, b) => {
-             const timeA = lastInteraction[a.id]?.time || 0;
-             const timeB = lastInteraction[b.id]?.time || 0;
-             return timeB - timeA;
+            const timeA = lastInteraction[a.id]?.time || 0;
+            const timeB = lastInteraction[b.id]?.time || 0;
+            return timeB - timeA;
           });
 
           const unreadCounts = {};
@@ -1799,100 +2026,103 @@
 
           const conversationsHtml = allProfiles.map(profile => {
             const unread = unreadCounts[profile.id] || 0;
-            const unreadBadge = unread > 0 ? `<span class="dm-unread-badge">${unread}</span>` : '';
-            const seenIndicator = unread === 0 ? `<span class="dm-conv-seen"><i class="fas fa-check-double"></i></span>` : '';
+            const unreadBadge = unread > 0 ? `<span class="dm-unread-badge">${unread}</span>` :
+              '';
+            const seenIndicator = unread === 0 ?
+              `<span class="dm-conv-seen"><i class="fas fa-check-double"></i></span>` : '';
             const onlineClass = onlineUsers.has(profile.id) ? 'online' : '';
-            
+
             let avatarHtml = '';
             if (profile.avatar_url) {
-              avatarHtml = `<img src="${escapeHtml(profile.avatar_url)}" class="dm-conv-avatar">`;
+              avatarHtml =
+                `<img src="${escapeHtml(profile.avatar_url)}" class="dm-conv-avatar">`;
             } else {
-              const bg = stringToColor(profile.full_name || '?');
-              avatarHtml = `<div class="dm-conv-avatar-initials" style="background-color:${bg}">${getInitials(profile.full_name)}</div>`;
+              // No colored avatar — show nothing or a minimal fallback
+              avatarHtml =
+                `<div class="dm-conv-avatar-initials" style="background:#2a3455;color:#9aa4bf;font-size:0.85rem;"><i class="fas fa-user"></i></div>`;
             }
 
             const lastMsgData = lastInteraction[profile.id];
             let previewText = 'No messages yet';
             let timeText = '';
             if (lastMsgData) {
-               const m = lastMsgData.msg;
-               if (m.audio_url) previewText = '🎤 Voice Note';
-               else if (m.content) previewText = escapeHtml(m.content);
-               else previewText = 'Message';
-               
-               // Use formatTimeOnly or relative date logic
-               const msgDate = new Date(m.created_at);
-               const now = new Date();
-               if (msgDate.toDateString() === now.toDateString()) {
-                 timeText = formatTimeOnly(m.created_at);
-               } else {
-                 timeText = msgDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-               }
+              const m = lastMsgData.msg;
+              if (m.audio_url) previewText = '🎤 Voice Note';
+              else if (m.content) previewText = escapeHtml(m.content);
+              else previewText = 'Message';
+
+              const msgDate = new Date(m.created_at);
+              const now = new Date();
+              if (msgDate.toDateString() === now.toDateString()) {
+                timeText = formatTimeOnly(m.created_at);
+              } else {
+                timeText = msgDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+              }
             }
 
             return `
-              <div class="dm-conversation-item" data-user-id="${profile.id}" data-user-name="${escapeHtml(profile.full_name)}" data-user-role="${escapeHtml(profile.job_role)}">
-                <div class="dm-conv-avatar-wrap">
-                  ${avatarHtml}
-                  <span class="status-dot ${onlineClass}"></span>
-                </div>
-                <div class="dm-conv-content">
-                  <div class="dm-conv-top-row">
-                    <div class="dm-conv-name">${escapeHtml(profile.full_name)}</div>
-                    ${timeText ? `<div class="dm-conv-time">${timeText}</div>` : ''}
+                <div class="dm-conversation-item" data-user-id="${profile.id}" data-user-name="${escapeHtml(profile.full_name)}" data-user-role="${escapeHtml(profile.job_role)}">
+                  <div class="dm-conv-avatar-wrap">
+                    ${avatarHtml}
+                    <span class="status-dot ${onlineClass}"></span>
                   </div>
-                  <div class="dm-conv-preview">${previewText}</div>
+                  <div class="dm-conv-content">
+                    <div class="dm-conv-top-row">
+                      <div class="dm-conv-name">${escapeHtml(profile.full_name)}</div>
+                      ${timeText ? `<div class="dm-conv-time">${timeText}</div>` : ''}
+                    </div>
+                    <div class="dm-conv-preview">${previewText}</div>
+                  </div>
+                  ${unreadBadge}
+                  ${seenIndicator}
                 </div>
-                ${unreadBadge}
-                ${seenIndicator}
-              </div>
-            `;
+              `;
           }).join('');
 
           area.innerHTML = `
-            <div class="dm-layout">
-              <div class="dm-conversations-list" id="dmConversationsList">
-<div class="dm-list-header">
-  <button class="dm-icon-btn dm-list-hamburger" id="mobileNavToggleList" title="Menu">☰</button>
-  <span>All Members</span>
-</div>
-                ${conversationsHtml}
-              </div>
-              <div class="dm-chat-area" id="dmChatArea" style="display:none;">
-                <div class="dm-chat-header">
-                  <div class="dm-chat-peer">
-                    <button class="dm-back-btn dm-icon-btn" id="dmBackBtn" title="Back">&lt;</button>
-                    <div id="dmPeerAvatar" class="avatar" style="display:none;"></div>
-                    <div class="dm-peer-copy">
-                      <span class="dm-chat-title">Select a conversation</span>
-                      <span class="dm-chat-subtitle">Messages and calls stay private here</span>
+              <div class="dm-layout">
+                <div class="dm-conversations-list" id="dmConversationsList">
+                  <div class="dm-list-header">
+                    <button class="dm-icon-btn dm-list-hamburger" id="mobileNavToggleList" title="Menu">☰</button>
+                    <span>All Members</span>
+                  </div>
+                  ${conversationsHtml}
+                </div>
+                <div class="dm-chat-area" id="dmChatArea" style="display:none;">
+                  <div class="dm-chat-header">
+                    <div class="dm-chat-peer">
+                      <button class="dm-back-btn dm-icon-btn" id="dmBackBtn" title="Back">&lt;</button>
+                      <div id="dmPeerAvatar" class="avatar" style="display:none;"></div>
+                      <div class="dm-peer-copy">
+                        <span class="dm-chat-title">Select a conversation</span>
+                        <span class="dm-chat-subtitle">Messages and calls stay private here</span>
+                      </div>
+                    </div>
+                    <div class="dm-chat-actions">
+                      <button class="dm-icon-btn" id="dmHeaderVoiceCallBtn" title="Voice call" disabled>Call</button>
+                      <button class="dm-icon-btn" id="dmHeaderVideoCallBtn" title="Video call" disabled>Video</button>
                     </div>
                   </div>
-                  <div class="dm-chat-actions">
-                    <button class="dm-icon-btn" id="dmHeaderVoiceCallBtn" title="Voice call" disabled>Call</button>
-                    <button class="dm-icon-btn" id="dmHeaderVideoCallBtn" title="Video call" disabled>Video</button>
+                  <div id="dmChatMessages" class="dm-chat-messages"><div class="dm-empty-state">Pick a member to start a direct conversation.</div></div>
+                  <div id="dmTypingContainer" class="typing-container" style="display:none;">
+                    <div class="typing-indicator">
+                      <span></span><span></span><span></span>
+                      <span class="typing-text" id="dmTypingText">Someone is typing...</span>
+                    </div>
                   </div>
-                </div>
-                <div id="dmChatMessages" class="dm-chat-messages"><div class="dm-empty-state">Pick a member to start a direct conversation.</div></div>
-                <div id="dmTypingContainer" class="typing-container" style="display:none;">
-                  <div class="typing-indicator">
-                    <span></span><span></span><span></span>
-                    <span class="typing-text" id="dmTypingText">Someone is typing...</span>
+                  <div class="dm-chat-input">
+                    <div class="dm-composer-tools">
+                      <button class="voice-btn" id="dmVoiceNoteBtn" title="Record voice note">Mic</button>
+                    </div>
+                    <div class="dm-input-wrap">
+                      <input type="text" id="dmChatInput" placeholder="Message">
+                    </div>
+                    <button id="dmChatSendBtn">Send</button>
+                    <span id="dmRecordingTimer" class="recording-timer" style="display:none;">0:00</span>
                   </div>
-                </div>
-                <div class="dm-chat-input">
-                  <div class="dm-composer-tools">
-                    <button class="voice-btn" id="dmVoiceNoteBtn" title="Record voice note">Mic</button>
-                  </div>
-                  <div class="dm-input-wrap">
-                    <input type="text" id="dmChatInput" placeholder="Message">
-                  </div>
-                  <button id="dmChatSendBtn">Send</button>
-                  <span id="dmRecordingTimer" class="recording-timer" style="display:none;">0:00</span>
                 </div>
               </div>
-            </div>
-          `;
+            `;
 
           // ── conversation clicks ──
           document.querySelectorAll('.dm-conversation-item').forEach(item => {
@@ -1909,11 +2139,10 @@
                 badge.remove();
                 delete dmUnreadBySender[userId];
                 updateDMBadge();
-                // Add seen indicator when unread badge is removed
                 if (!item.querySelector('.dm-conv-seen')) {
-                  item.insertAdjacentHTML('beforeend', '<span class="dm-conv-seen"><i class="fas fa-check-double"></i></span>');
+                  item.insertAdjacentHTML('beforeend',
+                    '<span class="dm-conv-seen"><i class="fas fa-check-double"></i></span>');
                 }
-                // Mark messages from this user as read in the DB immediately
                 try {
                   await supabase
                     .from('private_messages')
@@ -1946,12 +2175,12 @@
             });
           }
           const mobileNavToggleList = document.getElementById('mobileNavToggleList');
-if (mobileNavToggleList && mobileNavOverlay) {
-  mobileNavToggleList.addEventListener('click', () => {
-    mobileNavOverlay.style.display = 'flex';
-    mobileNavOverlay.setAttribute('aria-hidden', 'false');
-  });
-}
+          if (mobileNavToggleList && mobileNavOverlay) {
+            mobileNavToggleList.addEventListener('click', () => {
+              mobileNavOverlay.style.display = 'flex';
+              mobileNavOverlay.setAttribute('aria-hidden', 'false');
+            });
+          }
           if (mobileNavClose && mobileNavOverlay) {
             mobileNavClose.addEventListener('click', () => {
               mobileNavOverlay.style.display = 'none';
@@ -1997,8 +2226,10 @@ if (mobileNavToggleList && mobileNavOverlay) {
                 dmVoiceBtn.textContent = 'Mic';
                 dmVoiceBtn.classList.remove('recording');
                 dmRecordingTimer.style.display = 'none';
-                if (dmRecordingTimerInterval) { clearInterval(dmRecordingTimerInterval);
-                  dmRecordingTimerInterval = null; }
+                if (dmRecordingTimerInterval) {
+                  clearInterval(dmRecordingTimerInterval);
+                  dmRecordingTimerInterval = null;
+                }
               }
             } else {
               try {
@@ -2008,9 +2239,11 @@ if (mobileNavToggleList && mobileNavOverlay) {
                 dmMediaRecorder.ondataavailable = event => { dmAudioChunks.push(event.data); };
                 dmMediaRecorder.onstop = async () => {
                   const audioBlob = new Blob(dmAudioChunks, { type: 'audio/webm' });
-                  if (!currentRecipientId) { alert(
+                  if (!currentRecipientId) {
+                    alert(
                       'No chat selected. Please open a conversation first.');
-                    return; }
+                    return;
+                  }
                   await sendPrivateVoiceNote(audioBlob, currentRecipientId);
                   stream.getTracks().forEach(track => track.stop());
                 };
@@ -2029,8 +2262,10 @@ if (mobileNavToggleList && mobileNavOverlay) {
                   dmRecordingTimer.textContent =
                     `${minutes}:${seconds.toString().padStart(2, '0')}`;
                 }, 1000);
-              } catch (err) { console.error('DM mic error:', err);
-                alert('Could not access microphone.'); }
+              } catch (err) {
+                console.error('DM mic error:', err);
+                alert('Could not access microphone.');
+              }
             }
           });
 
@@ -2089,19 +2324,22 @@ if (mobileNavToggleList && mobileNavOverlay) {
         const safeRole = otherProfile.job_role || 'Member';
         headerTitle.textContent = safeName;
         headerSubtitle.textContent = `${safeRole} • ${onlineUsers.has(otherUserId) ? 'online' : 'offline'}`;
+
+        // ─── Remove coloured avatar ───
+        // Only show avatar if there's an actual image URL; otherwise hide it.
         if (otherProfile.avatar_url) {
-          peerAvatar.innerHTML = `<img src="${escapeHtml(otherProfile.avatar_url)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+          peerAvatar.innerHTML =
+            `<img src="${escapeHtml(otherProfile.avatar_url)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
           peerAvatar.style.display = 'flex';
           peerAvatar.style.backgroundColor = 'transparent';
         } else {
-          peerAvatar.innerHTML = '';
-          peerAvatar.style.display = 'flex';
-          peerAvatar.style.backgroundColor = stringToColor(safeName);
-          peerAvatar.textContent = getInitials(safeName);
+          // No avatar image → hide the avatar element entirely (no coloured initials)
+          peerAvatar.style.display = 'none';
         }
+
         voiceCallBtn.disabled = false;
         videoCallBtn.disabled = false;
-        chatArea.style.display = 'flex'; // ensure visible
+        chatArea.style.display = 'flex';
         if (window.innerWidth > 768) {
           input.focus();
         }
@@ -2113,7 +2351,7 @@ if (mobileNavToggleList && mobileNavOverlay) {
             .select(`*, sender:profiles!sender_id (id, full_name, job_role, avatar_url)`)
             .or(
               `and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`
-              )
+            )
             .order('created_at', { ascending: true });
 
           if (error && error.message && error.message.includes('Could not find a relationship')) {
@@ -2123,14 +2361,17 @@ if (mobileNavToggleList && mobileNavOverlay) {
               .select('*')
               .or(
                 `and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`
-                )
+              )
               .order('created_at', { ascending: true });
             if (msgsError) throw msgsError;
             data = (msgs || []).map((msg) => ({
               ...msg,
               sender: msg.sender_id === currentUser.id ?
                 { id: currentUser.id, full_name: currentUserFullName, job_role: currentRole, avatar_url: null } :
-                { id: otherUserId, full_name: safeName, job_role: safeRole, avatar_url: otherProfile.avatar_url || null }
+                {
+                  id: otherUserId, full_name: safeName, job_role: safeRole, avatar_url: otherProfile
+                    .avatar_url || null
+                }
             }));
           } else if (error) { throw error; }
 
@@ -2142,7 +2383,10 @@ if (mobileNavToggleList && mobileNavOverlay) {
             lastDate = msg.created_at;
             html += renderMessageBubble(msg, {
               isSent: msg.sender_id === currentUser.id,
-              sender: msg.sender || { id: otherUserId, full_name: safeName, job_role: safeRole, avatar_url: otherProfile.avatar_url || null }
+              sender: msg.sender || {
+                id: otherUserId, full_name: safeName, job_role: safeRole,
+                avatar_url: otherProfile.avatar_url || null
+              }
             });
           }
           messagesDiv.innerHTML = html ||
@@ -2182,10 +2426,12 @@ if (mobileNavToggleList && mobileNavOverlay) {
             supabase.channel(typingChannel).send({
               type: 'broadcast',
               event: 'typing',
-              payload: { userId: currentUser.id, userName: currentUserFullName,
-                timestamp: Date.now() }
+              payload: {
+                userId: currentUser.id, userName: currentUserFullName,
+                timestamp: Date.now()
+              }
             });
-            dmTypingTimeout = setTimeout(() => {}, 2000);
+            dmTypingTimeout = setTimeout(() => { }, 2000);
           };
 
           messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -2212,8 +2458,10 @@ if (mobileNavToggleList && mobileNavOverlay) {
           if (error) throw error;
           const messagesDiv = document.getElementById('dmChatMessages');
           appendRenderedMessage(messagesDiv, data, { isSent: true });
-        } catch (err) { console.error('Send private message error:', err);
-          alert('Failed to send: ' + err.message); }
+        } catch (err) {
+          console.error('Send private message error:', err);
+          alert('Failed to send: ' + err.message);
+        }
       }
 
       // ─── SEND PRIVATE VOICE NOTE ───
@@ -2223,8 +2471,10 @@ if (mobileNavToggleList && mobileNavOverlay) {
         const { error: uploadError } = await supabase.storage
           .from('voice_notes')
           .upload(fileName, audioBlob, { contentType: 'audio/webm' });
-        if (uploadError) { console.error('Upload error:', uploadError);
-          alert('Failed to upload voice note: ' + uploadError.message); return; }
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          alert('Failed to upload voice note: ' + uploadError.message); return;
+        }
 
         const { data: urlData } = supabase.storage.from('voice_notes').getPublicUrl(fileName);
         const audioUrl = urlData.publicUrl;
@@ -2232,15 +2482,19 @@ if (mobileNavToggleList && mobileNavOverlay) {
         try {
           const { data, error } = await supabase
             .from('private_messages')
-            .insert({ sender_id: currentUser.id, recipient_id: otherUserId, content: '',
-              audio_url: audioUrl })
+            .insert({
+              sender_id: currentUser.id, recipient_id: otherUserId, content: '',
+              audio_url: audioUrl
+            })
             .select()
             .single();
           if (error) throw error;
           const messagesDiv = document.getElementById('dmChatMessages');
           appendRenderedMessage(messagesDiv, data, { isSent: true });
-        } catch (err) { console.error('Insert private voice note error:', err);
-          alert('Failed to send voice note: ' + err.message); }
+        } catch (err) {
+          console.error('Insert private voice note error:', err);
+          alert('Failed to send voice note: ' + err.message);
+        }
       }
 
       // ─── DELETE PRIVATE MESSAGE ───
@@ -2251,8 +2505,10 @@ if (mobileNavToggleList && mobileNavOverlay) {
           const { error } = await query;
           if (error) throw error;
           removePrivateMessageFromUI(messageId);
-        } catch (err) { console.error('Delete DM error:', err);
-          alert('Failed to delete message: ' + err.message); }
+        } catch (err) {
+          console.error('Delete DM error:', err);
+          alert('Failed to delete message: ' + err.message);
+        }
       }
 
       function removePrivateMessageFromUI(messageId) {
@@ -2298,8 +2554,10 @@ if (mobileNavToggleList && mobileNavOverlay) {
 
         const readerName = (msg.sender_id === currentUser.id) ? msg.profiles_recipient_id?.full_name : msg
           .profiles_sender_id?.full_name;
-        const readTime = msg.read_at ? new Date(msg.read_at).toLocaleString('en-US', { month: 'short',
-          day: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
+        const readTime = msg.read_at ? new Date(msg.read_at).toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric', hour: '2-digit', minute: '2-digit'
+        }) : null;
         if (msg.read_at) {
           modal.innerHTML =
             `<h4>Read receipt</h4><p style="padding:0.5rem 0;">Seen by ${escapeHtml(readerName)} at ${readTime}</p>`;
@@ -2309,8 +2567,12 @@ if (mobileNavToggleList && mobileNavOverlay) {
         modal.style.left = e.pageX + 10 + 'px';
         modal.style.top = e.pageY + 10 + 'px';
         modal.style.display = 'block';
-        const hideModal = (ev) => { if (!modal.contains(ev.target)) { modal.style.display = 'none';
-            document.removeEventListener('click', hideModal); } };
+        const hideModal = (ev) => {
+          if (!modal.contains(ev.target)) {
+            modal.style.display = 'none';
+            document.removeEventListener('click', hideModal);
+          }
+        };
         setTimeout(() => document.addEventListener('click', hideModal), 0);
       }
 
@@ -2356,8 +2618,10 @@ if (mobileNavToggleList && mobileNavOverlay) {
         if (!currentUser) return;
         globalDmSubscription = supabase
           .channel(`dm-global-${currentUser.id}`)
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'private_messages',
-            filter: `recipient_id=eq.${currentUser.id}` }, async (payload) => {
+          .on('postgres_changes', {
+            event: 'INSERT', schema: 'public', table: 'private_messages',
+            filter: `recipient_id=eq.${currentUser.id}`
+          }, async (payload) => {
             const newMsg = payload.new;
             if (newMsg.sender_id === currentUser.id) return;
 
@@ -2369,8 +2633,10 @@ if (mobileNavToggleList && mobileNavOverlay) {
                 .eq('id', newMsg.sender_id)
                 .single();
               const sender = senderProfile || { full_name: 'Unknown', avatar_url: null };
-              const newRow = appendRenderedMessage(messagesDiv, { ...newMsg, sender }, { isSent: false,
-                sender });
+              const newRow = appendRenderedMessage(messagesDiv, { ...newMsg, sender }, {
+                isSent: false,
+                sender
+              });
               if (dmObserver) dmObserver.observe(newRow);
               return;
             }
@@ -2397,7 +2663,7 @@ if (mobileNavToggleList && mobileNavOverlay) {
               const { data: prof } = await supabase.from('profiles').select('full_name').eq('id',
                 newMsg.sender_id).single();
               if (prof) senderName = prof.full_name;
-            } catch (e) {}
+            } catch (e) { }
             showToast(`New DM from ${senderName}`);
 
             if (window.TechTitansNotifications) {
@@ -2408,8 +2674,10 @@ if (mobileNavToggleList && mobileNavOverlay) {
               });
             }
           })
-          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'private_messages',
-            filter: `recipient_id=eq.${currentUser.id}` }, (payload) => {
+          .on('postgres_changes', {
+            event: 'UPDATE', schema: 'public', table: 'private_messages',
+            filter: `recipient_id=eq.${currentUser.id}`
+          }, (payload) => {
             const updated = payload.new;
             if (updated.read_at && dmUnreadBySender[updated.sender_id]) {
               dmUnreadBySender[updated.sender_id]--;
@@ -2432,8 +2700,10 @@ if (mobileNavToggleList && mobileNavOverlay) {
               }
             }
           })
-          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'private_messages',
-            filter: `sender_id=eq.${currentUser.id}` }, (payload) => {
+          .on('postgres_changes', {
+            event: 'UPDATE', schema: 'public', table: 'private_messages',
+            filter: `sender_id=eq.${currentUser.id}`
+          }, (payload) => {
             const updated = payload.new;
             if (updated.read_at && currentRecipientId === updated.recipient_id) {
               const msgRow = document.querySelector(`.dm-msg-row[data-message-id="${updated.id}"]`);
@@ -2455,13 +2725,13 @@ if (mobileNavToggleList && mobileNavOverlay) {
         dmDeleteSubscription = supabase
           .channel('dm-deletes')
           .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'private_messages' },
-          (payload) => {
-            const deletedMsg = payload.old;
-            if (deletedMsg.sender_id === currentUser.id || deletedMsg.recipient_id === currentUser
-              .id) {
-              removePrivateMessageFromUI(deletedMsg.id);
-            }
-          })
+            (payload) => {
+              const deletedMsg = payload.old;
+              if (deletedMsg.sender_id === currentUser.id || deletedMsg.recipient_id === currentUser
+                .id) {
+                removePrivateMessageFromUI(deletedMsg.id);
+              }
+            })
           .subscribe();
       }
 
@@ -2583,7 +2853,7 @@ if (mobileNavToggleList && mobileNavOverlay) {
         try {
           await channel.send({ type: 'broadcast', event, payload });
         } finally {
-          try { channel.unsubscribe(); } catch (err) {}
+          try { channel.unsubscribe(); } catch (err) { }
         }
       }
 
@@ -2684,7 +2954,7 @@ if (mobileNavToggleList && mobileNavOverlay) {
       async function subscribeToCurrentCall(callId) {
         if (!callId) return;
         if (callStatusChannel) {
-          try { await callStatusChannel.unsubscribe(); } catch (err) {}
+          try { await callStatusChannel.unsubscribe(); } catch (err) { }
           callStatusChannel = null;
         }
 
@@ -2724,9 +2994,9 @@ if (mobileNavToggleList && mobileNavOverlay) {
       async function markParticipantLeft(callId, userId, endedAt = new Date()) {
         if (!callId || !userId) return;
         try {
-          const durationSeconds = callStartedAt
-            ? Math.max(0, Math.floor((endedAt.getTime() - callStartedAt.getTime()) / 1000))
-            : 0;
+          const durationSeconds = callStartedAt ?
+            Math.max(0, Math.floor((endedAt.getTime() - callStartedAt.getTime()) / 1000)) :
+            0;
           await supabase.from('call_participants')
             .update({
               status: 'left',
@@ -2777,8 +3047,10 @@ if (mobileNavToggleList && mobileNavOverlay) {
 
         client.on('user-published', async (user, mediaType) => {
           await client.subscribe(user, mediaType);
-          if (mediaType === 'video') { const remoteVideoTrack = user.videoTrack;
-            remoteVideoTrack.play('remoteVideo'); }
+          if (mediaType === 'video') {
+            const remoteVideoTrack = user.videoTrack;
+            remoteVideoTrack.play('remoteVideo');
+          }
           if (mediaType === 'audio') user.audioTrack.play();
           remoteVideoLabel.textContent = targetUserName;
         });
@@ -2804,8 +3076,10 @@ if (mobileNavToggleList && mobileNavOverlay) {
         }
 
         const { data: callData, error: callError } = await supabase.from('calls')
-          .insert({ initiated_by: currentUser.id, type: callType, status: 'ringing',
-            room_id: channelName })
+          .insert({
+            initiated_by: currentUser.id, type: callType, status: 'ringing',
+            room_id: channelName
+          })
           .select()
           .single();
         if (callError || !callData) {
@@ -2860,8 +3134,10 @@ if (mobileNavToggleList && mobileNavOverlay) {
 
         client.on('user-published', async (user, mediaType) => {
           await client.subscribe(user, mediaType);
-          if (mediaType === 'video') { const remoteVideoTrack = user.videoTrack;
-            remoteVideoTrack.play('remoteVideo'); }
+          if (mediaType === 'video') {
+            const remoteVideoTrack = user.videoTrack;
+            remoteVideoTrack.play('remoteVideo');
+          }
           if (mediaType === 'audio') user.audioTrack.play();
           remoteVideoLabel.textContent = callerName;
         });
@@ -2983,14 +3259,14 @@ if (mobileNavToggleList && mobileNavOverlay) {
                 ended_by: currentUser.id,
                 callType: endedCallType,
                 callerName: currentUserFullName,
-                duration_seconds: callStartedAt
-                  ? Math.max(0, Math.floor((endedAt.getTime() - callStartedAt.getTime()) / 1000))
-                  : 0
+                duration_seconds: callStartedAt ?
+                  Math.max(0, Math.floor((endedAt.getTime() - callStartedAt.getTime()) / 1000)) :
+                  0
               }
             });
-            const durationSeconds = callStartedAt
-              ? Math.max(0, Math.floor((endedAt.getTime() - callStartedAt.getTime()) / 1000))
-              : 0;
+            const durationSeconds = callStartedAt ?
+              Math.max(0, Math.floor((endedAt.getTime() - callStartedAt.getTime()) / 1000)) :
+              0;
             const endUpdate = await supabase.from('calls')
               .update({
                 status: 'ended',
@@ -3010,7 +3286,8 @@ if (mobileNavToggleList && mobileNavOverlay) {
                 const isVideo = endedCallType === 'video';
                 let msgContent = `📞 ${isVideo ? 'Video' : 'Voice'} call ended`;
                 if (durationSeconds > 0) {
-                  msgContent = `📞 ${isVideo ? 'Video' : 'Voice'} call - ${formatCallDuration(durationSeconds)}`;
+                  msgContent =
+                    `📞 ${isVideo ? 'Video' : 'Voice'} call - ${formatCallDuration(durationSeconds)}`;
                 } else {
                   msgContent = `📞 Missed ${isVideo ? 'Video' : 'Voice'} call`;
                 }
@@ -3018,7 +3295,7 @@ if (mobileNavToggleList && mobileNavOverlay) {
                   sender_id: currentUser.id,
                   recipient_id: endedCallTarget,
                   content: msgContent,
-                  read_at: new Date().toISOString() // Marked as read for the caller
+                  read_at: new Date().toISOString()
                 });
               }
             }
@@ -3039,12 +3316,14 @@ if (mobileNavToggleList && mobileNavOverlay) {
         const client = agoraClient;
         agoraClient = null;
         if (client) {
-          try { await client.leave(); } catch (leaveError) { console.warn('Agora DM leave skipped:',
-              leaveError); }
+          try { await client.leave(); } catch (leaveError) {
+            console.warn('Agora DM leave skipped:',
+              leaveError);
+          }
         }
         await cleanupLocalCallMedia();
         if (callStatusChannel) {
-          try { await callStatusChannel.unsubscribe(); } catch (err) {}
+          try { await callStatusChannel.unsubscribe(); } catch (err) { }
           callStatusChannel = null;
         }
         stopCallTimer('Call ended');
@@ -3149,8 +3428,10 @@ if (mobileNavToggleList && mobileNavOverlay) {
         window.location.href = 'index.html';
       });
 
-      document.getElementById('closeProfileModal').addEventListener('click', () => { profileModal.style.display =
-          'none'; });
+      document.getElementById('closeProfileModal').addEventListener('click', () => {
+        profileModal.style.display =
+        'none';
+      });
       modalSendDM.addEventListener('click', () => {
         const userId = modalSendDM.dataset.userId;
         profileModal.style.display = 'none';
@@ -3170,8 +3451,10 @@ if (mobileNavToggleList && mobileNavOverlay) {
         const userName = activeItem ? activeItem.dataset.userName : 'User';
         startDMCall(currentRecipientId, userName, 'voice');
       });
-      document.getElementById('cancelCallOptionsBtn').addEventListener('click', () => { callOptionsModal.style
-          .display = 'none'; });
+      document.getElementById('cancelCallOptionsBtn').addEventListener('click', () => {
+        callOptionsModal.style
+        .display = 'none';
+      });
       document.getElementById('acceptCallBtn').addEventListener('click', acceptDMCall);
       document.getElementById('declineCallBtn').addEventListener('click', async () => {
         if (window.TechTitansRingtone) window.TechTitansRingtone.stop();
@@ -3185,8 +3468,10 @@ if (mobileNavToggleList && mobileNavOverlay) {
               call_id: pendingCall.callId,
               event_type: 'call_declined',
               user_id: currentUser.id,
-              metadata: { callerId: pendingCall.callerId, missed: true,
-                callType: pendingCall.callType, callerName: currentUserFullName }
+              metadata: {
+                callerId: pendingCall.callerId, missed: true,
+                callType: pendingCall.callType, callerName: currentUserFullName
+              }
             });
             await sendUserBroadcast(pendingCall.callerId, 'call-missed', {
               callId: pendingCall.callId,
@@ -3241,4 +3526,5 @@ if (mobileNavToggleList && mobileNavOverlay) {
     })();
   </script>
 </body>
+
 </html>
