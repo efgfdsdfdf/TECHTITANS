@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="img/titans_logo2.png">
+  <title>TECH TITANS · Call Logs</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    html, body {
+      background: #0b0f17;
+      display: flex;
+      height: 100%;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+      color: #e9edef;
+    }
+    body.sidebar-collapsed .sidebar {
+      transform: translateX(-100%);
+      width: 0;
+      padding: 0;
+      overflow: hidden;
+      border-right: none;
+    }
+    body.sidebar-collapsed .main {
+      padding-left: 0;
+    }
+    .sidebar {
+      width: 260px;
+      background: rgba(10, 16, 28, 0.95);
+      backdrop-filter: blur(10px);
+      border-right: 1px solid #1f2a44;
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      flex-shrink: 0;
+      transition: transform 0.25s ease, width 0.25s ease, padding 0.25s ease;
+      overflow: hidden;
+    }
+    .logo {
+      color: #fff;
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      padding-left: 1rem;
+      white-space: nowrap;
+    }
+    .logo span { color: #428cff; }
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .nav a {
+      color: #9aa4bf;
+      text-decoration: none;
+      padding: 0.9rem 1rem;
+      border-radius: 1.2rem;
+      transition: 0.2s;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      position: relative;
+      white-space: nowrap;
+    }
+    .nav a:hover, .nav a.active {
+      background: #1f2a44;
+      color: #fff;
+    }
+    .nav a.active {
+      background: #428cff;
+      color: #fff;
+      box-shadow: 0 8px 16px -8px #428cff;
+    }
+    .sidebar-unread {
+      background: #ff4d4d;
+      color: #fff;
+      border-radius: 2rem;
+      padding: 0.15rem 0.5rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-left: auto;
+      line-height: 1.3;
+      box-shadow: 0 0 0 1px #0b0f17;
+    }
+    .logout-btn {
+      margin-top: auto;
+      background: transparent;
+      border: 1px solid #2f3a5a;
+      color: #ff9f9f;
+      padding: 0.9rem;
+      border-radius: 1.2rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .logout-btn:hover {
+      background: #ff4d4d20;
+      border-color: #ff4d4d;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+      min-width: 0;
+      height: 100%;
+      overflow: hidden;
+      transition: padding 0.25s ease;
+    }
+    .calls-panel {
+      flex: 1;
+      background: #131c30;
+      border-radius: 2rem;
+      border: 1px solid #263154;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      height: 100%;
+      min-height: 0;
+    }
+    .calls-header {
+      padding: 1.2rem 1.8rem;
+      border-bottom: 1px solid #263154;
+      color: #fff;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-shrink: 0;
+      background: #131c30;
+      z-index: 5;
+      font-size: 1.1rem;
+    }
+    .calls-header .hamburger-toggle {
+      background: none;
+      border: none;
+      color: #9aa4bf;
+      font-size: 1.4rem;
+      cursor: pointer;
+      display: none;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.5rem;
+      transition: 0.2s;
+    }
+    .calls-header .hamburger-toggle:hover {
+      background: #1f2a44;
+      color: #fff;
+    }
+    .calls-header i.fa-phone-alt {
+      color: #428cff;
+    }
+    .calls-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-left: auto;
+    }
+    .calls-tab {
+      background: #1f2a44;
+      border: 1px solid transparent;
+      color: #9aa4bf;
+      padding: 0.4rem 1rem;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: 0.2s;
+    }
+    .calls-tab:hover {
+      color: #fff;
+      border-color: #428cff40;
+    }
+    .calls-tab.active {
+      background: #428cff;
+      color: #fff;
+      border-color: #428cff;
+    }
+    .calls-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    /* ─── ONGOING CALLS ─── */
+    .ongoing-section {
+      margin-bottom: 1rem;
+    }
+    .section-label {
+      color: #6b7fb1;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 0.6rem;
+      padding-left: 0.2rem;
+    }
+    .call-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.9rem 1.1rem;
+      border-radius: 1.2rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid transparent;
+      transition: 0.2s;
+      cursor: default;
+    }
+    .call-item:hover {
+      background: rgba(66, 140, 255, 0.06);
+      border-color: rgba(66, 140, 255, 0.15);
+    }
+    .call-item.ongoing {
+      background: rgba(46, 204, 113, 0.08);
+      border-color: rgba(46, 204, 113, 0.25);
+      animation: ongoingPulse 3s ease-in-out infinite;
+    }
+    @keyframes ongoingPulse {
+      0%, 100% { border-color: rgba(46, 204, 113, 0.25); }
+      50% { border-color: rgba(46, 204, 113, 0.55); }
+    }
+    .call-item.missed {
+      border-left: 3px solid #ff6b6b;
+    }
+    .call-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .call-icon.voice { background: rgba(66, 140, 255, 0.15); color: #428cff; }
+    .call-icon.video { background: rgba(138, 43, 226, 0.15); color: #a855f7; }
+    .call-icon.ongoing-icon { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+    .call-icon.missed-icon { background: rgba(255, 77, 77, 0.15); color: #ff6b6b; }
+    .call-details {
+      flex: 1;
+      min-width: 0;
+    }
+    .call-name {
+      color: #fff;
+      font-weight: 500;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .call-meta {
+      color: #6b7fb1;
+      font-size: 0.78rem;
+      margin-top: 0.15rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .call-meta i {
+      font-size: 0.7rem;
+    }
+    .call-type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: #1f2a44;
+      color: #9aa4bf;
+      padding: 0.15rem 0.6rem;
+      border-radius: 2rem;
+      font-size: 0.7rem;
+      font-weight: 500;
+    }
+    .call-type-badge.group { background: rgba(66,140,255,0.12); color: #428cff; }
+    .call-type-badge.direct { background: rgba(138,43,226,0.12); color: #a855f7; }
+    .call-duration {
+      color: #9aa4bf;
+      font-size: 0.82rem;
+      font-weight: 600;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .call-duration.live {
+      color: #2ecc71;
+    }
+    .call-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.25rem 0.8rem;
+      border-radius: 2rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .call-status.ended { background: #1f2a44; color: #9aa4bf; }
+    .call-status.active { background: rgba(46,204,113,0.15); color: #2ecc71; }
+    .call-status.missed { background: rgba(255,77,77,0.12); color: #ff6b6b; }
+    .call-status.declined { background: rgba(255,140,0,0.12); color: #ffaa00; }
+
+    .join-call-btn {
+      background: #2ecc71;
+      border: none;
+      color: #fff;
+      padding: 0.5rem 1.2rem;
+      border-radius: 2rem;
+      font-weight: 600;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: 0.2s;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .join-call-btn:hover {
+      background: #27ae60;
+      transform: translateY(-1px);
+    }
+    .empty-state {
+      text-align: center;
+      color: #6b7fb1;
+      padding: 4rem 2rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .empty-state i {
+      font-size: 3rem;
+      color: #2a3650;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    .date-separator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0.8rem 0 0.4rem;
+    }
+    .date-separator span {
+      background: #1f2a44;
+      color: #9aa4bf;
+      padding: 0.25rem 1rem;
+      border-radius: 2rem;
+      font-size: 0.72rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      border: 1px solid #2f3a5a;
+    }
+    .loading-spinner {
+      display: flex;
+      justify-content: center;
+      padding: 3rem;
+    }
+    .loading-spinner::after {
+      content: '';
+      width: 32px;
+      height: 32px;
+      border: 3px solid #1f2a44;
+      border-top-color: #428cff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── MOBILE NAV OVERLAY ─── */
+    .mobile-nav-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      align-items: stretch;
+      justify-content: flex-start;
+    }
+    .mobile-nav-panel {
+      width: 280px;
+      max-width: 80vw;
+      height: 100%;
+      background: rgba(10, 16, 28, 0.98);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 2rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      box-shadow: 4px 0 30px rgba(0,0,0,0.5);
+      animation: slideInNav 0.25s ease;
+    }
+    @keyframes slideInNav {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(0); }
+    }
+    .mobile-nav-panel .close-btn {
+      align-self: flex-end;
+      background: none;
+      border: none;
+      color: #9aa4bf;
+      font-size: 2rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0.2rem;
+    }
+    .mobile-nav-panel .close-btn:hover { color: #fff; }
+    .mobile-nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .mobile-nav-links a {
+      color: #9aa4bf;
+      text-decoration: none;
+      padding: 0.9rem 1rem;
+      border-radius: 1.2rem;
+      transition: 0.2s;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-size: 1rem;
+    }
+    .mobile-nav-links a:hover,
+    .mobile-nav-links a.active {
+      background: #1f2a44;
+      color: #fff;
+    }
+    .mobile-nav-links a.active {
+      background: #428cff;
+      color: #fff;
+      box-shadow: 0 8px 16px -8px #428cff;
+    }
+    .mobile-nav-panel .logout-btn {
+      margin-top: auto;
+      background: transparent;
+      border: 1px solid #2f3a5a;
+      color: #ff9f9f;
+      padding: 0.9rem;
+      border-radius: 1.2rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .mobile-nav-panel .logout-btn:hover {
+      background: #ff4d4d20;
+      border-color: #ff4d4d;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+      .sidebar {
+        display: none;
+      }
+      .main {
+        padding: 0;
+        height: 100%;
+      }
+      .calls-panel {
+        border-radius: 0;
+        border: none;
+      }
+      .calls-header .hamburger-toggle {
+        display: inline-flex;
+      }
+      .calls-content {
+        padding: 0.8rem 1rem;
+      }
+      .call-item {
+        padding: 0.75rem 0.8rem;
+        gap: 0.8rem;
+      }
+      .call-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 1rem;
+      }
+      .calls-tabs {
+        display: none;
+      }
+    }
+    @media (max-width: 480px) {
+      .call-name { font-size: 0.88rem; }
+      .call-meta { font-size: 0.72rem; }
+      .call-duration { font-size: 0.76rem; }
+    }
+
+    /* Desktop sidebar toggle */
+    .calls-header .hamburger-toggle {
+      display: inline-flex;
+    }
+    @media (max-width: 768px) {
+      .calls-header .hamburger-toggle {
+        display: inline-flex;
+      }
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="native-bridge.js"></script>
+  <script src="notifications.js"></script>
+  <script src="ringtone.js"></script>
+  <script src="global-notifications.js"></script>
+</head>
+<body>
+
+  <!-- ─── SIDEBAR ─── -->
+  <div class="sidebar">
+    <div class="logo">TECH<span>TITANS</span></div>
+    <div class="nav" id="sidebarNav">
+      <a href="dashboard.html"><i class="fas fa-chart-pie"></i> <span>Dashboard</span></a>
+      <a href="messages.html" id="chatNavLink"><i class="fas fa-comments"></i> <span>Group Chat</span>
+        <span class="sidebar-unread" id="sidebarUnreadBadge" style="display:none;">0</span>
+      </a>
+      <a href="dm.html" id="dmNavLink"><i class="fas fa-envelope"></i> <span>Direct Messages</span>
+        <span class="sidebar-unread" id="dmUnreadBadge" style="display:none;">0</span>
+      </a>
+      <a href="calls.html" class="active" id="callsNavLink"><i class="fas fa-phone"></i> <span>Call Logs</span></a>
+      <a href="resources.html"><i class="fas fa-book-open"></i> <span>Resources</span></a>
+      <a href="profile.html"><i class="fas fa-user-cog"></i> <span>Profile</span></a>
+    </div>
+    <button class="logout-btn" id="logout"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></button>
+  </div>
+
+  <!-- ─── MAIN ─── -->
+  <div class="main">
+    <div class="calls-panel">
+      <div class="calls-header">
+        <button class="hamburger-toggle" id="hamburgerToggle" title="Menu">
+          <i class="fas fa-bars"></i>
+        </button>
+        <i class="fas fa-phone-alt"></i>
+        <span>Call Logs</span>
+        <div class="calls-tabs">
+          <button class="calls-tab active" data-filter="all">All</button>
+          <button class="calls-tab" data-filter="group">Group</button>
+          <button class="calls-tab" data-filter="direct">Direct</button>
+          <button class="calls-tab" data-filter="missed">Missed</button>
+        </div>
+      </div>
+      <div class="calls-content" id="callsContent">
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── MOBILE NAV OVERLAY ─── -->
+  <div id="mobileNavOverlay" class="mobile-nav-overlay" aria-hidden="true">
+    <div class="mobile-nav-panel">
+      <button class="close-btn" id="mobileNavClose" aria-label="Close menu">&times;</button>
+      <nav class="mobile-nav-links" aria-label="Mobile navigation">
+        <a href="dashboard.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
+        <a href="messages.html"><i class="fas fa-comments"></i> Group Chat</a>
+        <a href="dm.html"><i class="fas fa-envelope"></i> Direct Messages</a>
+        <a href="calls.html" class="active"><i class="fas fa-phone"></i> Call Logs</a>
+        <a href="resources.html"><i class="fas fa-book-open"></i> Resources</a>
+        <a href="profile.html"><i class="fas fa-user-cog"></i> Profile</a>
+      </nav>
+      <button class="logout-btn" id="mobileLogout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
+      const SUPABASE_ANON_KEY =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kcXF0c2RpYnR2eW1mZ250c3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTI1NjIsImV4cCI6MjA4Nzg4ODU2Mn0.hS-7kmoyFljnhkJEkw7nmgimw9ioQreidyu27_NXYyo';
+
+      let supabase;
+      try {
+        if (!window.supabase) throw new Error('Supabase library failed to load.');
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        if (window.TechTitansNotifications) {
+          window.TechTitansNotifications.connect(supabase);
+        }
+      } catch (e) {
+        console.error(e);
+        document.body.innerHTML = '<p style="color:white;padding:2rem;">Service unavailable. Please refresh.</p>';
+        return;
+      }
+
+      let currentUser = null;
+      let currentFilter = 'all';
+      let allCallLogs = [];
+      let profilesCache = {};
+
+      // ─── DOM REFS ───
+      const callsContent = document.getElementById('callsContent');
+      const hamburgerToggle = document.getElementById('hamburgerToggle');
+      const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+      const mobileNavClose = document.getElementById('mobileNavClose');
+      const mobileLogout = document.getElementById('mobileLogout');
+
+      // ─── SIDEBAR TOGGLE ───
+      if (hamburgerToggle) {
+        hamburgerToggle.addEventListener('click', () => {
+          if (window.innerWidth <= 768) {
+            mobileNavOverlay.style.display = 'flex';
+            mobileNavOverlay.setAttribute('aria-hidden', 'false');
+          } else {
+            document.body.classList.toggle('sidebar-collapsed');
+            localStorage.setItem('techTitansSidebarCollapsed', document.body.classList.contains('sidebar-collapsed'));
+          }
+        });
+        const stored = localStorage.getItem('techTitansSidebarCollapsed');
+        if (stored === 'true') document.body.classList.add('sidebar-collapsed');
+      }
+      if (mobileNavClose && mobileNavOverlay) {
+        mobileNavClose.addEventListener('click', () => {
+          mobileNavOverlay.style.display = 'none';
+          mobileNavOverlay.setAttribute('aria-hidden', 'true');
+        });
+      }
+      if (mobileNavOverlay) {
+        mobileNavOverlay.addEventListener('click', event => {
+          if (event.target === mobileNavOverlay) {
+            mobileNavOverlay.style.display = 'none';
+            mobileNavOverlay.setAttribute('aria-hidden', 'true');
+          }
+        });
+      }
+      if (mobileLogout) {
+        mobileLogout.addEventListener('click', () => document.getElementById('logout').click());
+      }
+
+      // ─── TABS ───
+      document.querySelectorAll('.calls-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.calls-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          currentFilter = tab.dataset.filter;
+          renderCalls();
+        });
+      });
+
+      // ─── AUTH & INIT ───
+      document.getElementById('logout').addEventListener('click', async () => {
+        await supabase.auth.signOut();
+        window.location.href = 'index.html';
+      });
+
+      async function init() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) { window.location.href = 'index.html'; return; }
+        currentUser = session.user;
+
+        // Load profiles cache
+        const { data: profiles } = await supabase.from('profiles').select('id, full_name, job_role, avatar_url');
+        if (profiles) {
+          profiles.forEach(p => { profilesCache[p.id] = p; });
+        }
+
+        await loadCallLogs();
+        subscribeToCallChanges();
+      }
+
+      // ─── HELPERS ───
+      function escapeHtml(unsafe) {
+        if (unsafe === null || unsafe === undefined) return '';
+        return String(unsafe).replace(/[&<>"']/g, function (m) {
+          if (m === '&') return '&amp;';
+          if (m === '<') return '&lt;';
+          if (m === '>') return '&gt;';
+          if (m === '"') return '&quot;';
+          if (m === "'") return '&#039;';
+          return m;
+        });
+      }
+
+      function formatDateHeader(date) {
+        const now = new Date();
+        const msgDate = new Date(date);
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const msgDay = new Date(msgDate.getFullYear(), msgDate.getMonth(), msgDate.getDate());
+        if (msgDay.getTime() === today.getTime()) return 'Today';
+        else if (msgDay.getTime() === yesterday.getTime()) return 'Yesterday';
+        else return msgDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      }
+
+      function formatTime(date) {
+        return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+
+      function formatDuration(seconds) {
+        if (!seconds || seconds <= 0) return '0:00';
+        const hrs = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        const secs = Math.floor(seconds % 60);
+        if (hrs > 0) return `${hrs}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        return `${mins}:${String(secs).padStart(2, '0')}`;
+      }
+
+      function getProfileName(userId) {
+        return profilesCache[userId]?.full_name || 'Unknown';
+      }
+
+      // ─── LOAD CALL LOGS ───
+      async function loadCallLogs() {
+        allCallLogs = [];
+
+        // 1. Fetch group calls
+        const { data: groupCalls, error: gcErr } = await supabase
+          .from('group_calls')
+          .select('id, role, started_by, started_at, ended_at, status, type')
+          .order('started_at', { ascending: false })
+          .limit(200);
+
+        if (!gcErr && groupCalls) {
+          for (const gc of groupCalls) {
+            const duration = (gc.ended_at && gc.started_at)
+              ? Math.floor((new Date(gc.ended_at) - new Date(gc.started_at)) / 1000)
+              : null;
+            allCallLogs.push({
+              id: gc.id,
+              source: 'group',
+              callerName: getProfileName(gc.started_by),
+              callerId: gc.started_by,
+              role: gc.role || 'General',
+              type: gc.type || 'voice',
+              status: gc.status || 'ended',
+              startedAt: gc.started_at,
+              endedAt: gc.ended_at,
+              duration,
+              label: `${gc.role || 'General'} Group Call`
+            });
+          }
+        }
+
+        // 2. Fetch DM calls from 'calls' table
+        try {
+          const { data: dmCalls, error: dcErr } = await supabase
+            .from('calls')
+            .select('id, initiated_by, type, status, started_at, ended_at, room_id')
+            .order('created_at', { ascending: false })
+            .limit(200);
+
+          if (!dcErr && dmCalls) {
+            // Get participant info for these calls
+            const callIds = dmCalls.map(c => c.id);
+            let participantMap = {};
+            if (callIds.length > 0) {
+              const { data: participants } = await supabase
+                .from('call_participants')
+                .select('call_id, user_id, status, joined_at, left_at, duration_seconds')
+                .in('call_id', callIds);
+              if (participants) {
+                participants.forEach(p => {
+                  if (!participantMap[p.call_id]) participantMap[p.call_id] = [];
+                  participantMap[p.call_id].push(p);
+                });
+              }
+            }
+
+            for (const dc of dmCalls) {
+              const participants = participantMap[dc.id] || [];
+              const otherParticipant = participants.find(p => p.user_id !== dc.initiated_by);
+              const myParticipation = participants.find(p => p.user_id === currentUser.id);
+
+              const duration = (dc.ended_at && dc.started_at)
+                ? Math.floor((new Date(dc.ended_at) - new Date(dc.started_at)) / 1000)
+                : null;
+
+              // Determine if this call was "missed" by current user
+              let effectiveStatus = dc.status;
+              if (dc.status === 'missed' || dc.status === 'cancelled' || dc.status === 'declined') {
+                if (dc.initiated_by !== currentUser.id && (!myParticipation || myParticipation.status === 'invited')) {
+                  effectiveStatus = 'missed';
+                }
+              }
+
+              const callerName = getProfileName(dc.initiated_by);
+              const otherName = otherParticipant ? getProfileName(otherParticipant.user_id) : 'Unknown';
+              const displayName = dc.initiated_by === currentUser.id
+                ? otherName
+                : callerName;
+              const isOutgoing = dc.initiated_by === currentUser.id;
+
+              allCallLogs.push({
+                id: dc.id,
+                source: 'direct',
+                callerName: displayName,
+                callerId: dc.initiated_by,
+                type: dc.type || 'voice',
+                status: effectiveStatus,
+                startedAt: dc.started_at || dc.created_at,
+                endedAt: dc.ended_at,
+                duration,
+                label: `${isOutgoing ? 'Outgoing' : 'Incoming'} ${dc.type || 'voice'} call`,
+                isOutgoing
+              });
+            }
+          }
+        } catch (e) {
+          console.warn('Could not load DM calls (table may not exist):', e);
+        }
+
+        // Sort all logs by time descending
+        allCallLogs.sort((a, b) => new Date(b.startedAt || 0) - new Date(a.startedAt || 0));
+        renderCalls();
+      }
+
+      // ─── RENDER ───
+      function renderCalls() {
+        let filtered = allCallLogs;
+        if (currentFilter === 'group') filtered = allCallLogs.filter(c => c.source === 'group');
+        else if (currentFilter === 'direct') filtered = allCallLogs.filter(c => c.source === 'direct');
+        else if (currentFilter === 'missed') filtered = allCallLogs.filter(c => c.status === 'missed');
+
+        if (filtered.length === 0) {
+          callsContent.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-phone-slash"></i>
+              <p>No ${currentFilter !== 'all' ? currentFilter + ' ' : ''}calls found.<br>
+              Your voice and video call history will appear here.</p>
+            </div>`;
+          return;
+        }
+
+        // Group by date
+        let html = '';
+        let lastDate = '';
+        const ongoingCalls = filtered.filter(c => c.status === 'active');
+        const pastCalls = filtered.filter(c => c.status !== 'active');
+
+        // Ongoing calls section
+        if (ongoingCalls.length > 0) {
+          html += '<div class="ongoing-section">';
+          html += '<div class="section-label"><i class="fas fa-circle" style="color:#2ecc71;font-size:0.5rem;margin-right:0.3rem;"></i> Active Calls</div>';
+          ongoingCalls.forEach(call => {
+            html += renderCallItem(call);
+          });
+          html += '</div>';
+        }
+
+        // Past calls
+        if (pastCalls.length > 0) {
+          if (ongoingCalls.length > 0) {
+            html += '<div class="section-label" style="margin-top:0.5rem;">Call History</div>';
+          }
+          pastCalls.forEach(call => {
+            const callDate = new Date(call.startedAt).toDateString();
+            if (callDate !== lastDate) {
+              lastDate = callDate;
+              html += `<div class="date-separator"><span>${formatDateHeader(call.startedAt)}</span></div>`;
+            }
+            html += renderCallItem(call);
+          });
+        }
+
+        callsContent.innerHTML = html;
+      }
+
+      function renderCallItem(call) {
+        const isOngoing = call.status === 'active';
+        const isMissed = call.status === 'missed';
+        const isDeclined = call.status === 'declined' || call.status === 'cancelled';
+        const isVideo = call.type === 'video';
+        const isGroup = call.source === 'group';
+
+        let iconClass = isVideo ? 'video' : 'voice';
+        let iconName = isVideo ? 'fa-video' : 'fa-phone-alt';
+        if (isOngoing) { iconClass = 'ongoing-icon'; }
+        else if (isMissed) { iconClass = 'missed-icon'; iconName = 'fa-phone-slash'; }
+
+        let statusHtml = '';
+        if (isOngoing) {
+          statusHtml = `<span class="call-status active"><i class="fas fa-circle" style="font-size:0.5rem;"></i> Live</span>`;
+        } else if (isMissed) {
+          statusHtml = `<span class="call-status missed">Missed</span>`;
+        } else if (isDeclined) {
+          statusHtml = `<span class="call-status declined">Declined</span>`;
+        }
+
+        let durationHtml = '';
+        if (isOngoing) {
+          durationHtml = `<span class="call-duration live"><i class="fas fa-circle" style="font-size:0.4rem;animation:ongoingPulse 1s infinite;"></i> Ongoing</span>`;
+        } else if (call.duration && call.duration > 0) {
+          durationHtml = `<span class="call-duration"><i class="fas fa-clock"></i> ${formatDuration(call.duration)}</span>`;
+        }
+
+        const sourceBadge = isGroup
+          ? `<span class="call-type-badge group"><i class="fas fa-users"></i> Group</span>`
+          : `<span class="call-type-badge direct"><i class="fas fa-user"></i> Direct</span>`;
+
+        const directionIcon = call.isOutgoing !== undefined
+          ? (call.isOutgoing
+            ? '<i class="fas fa-arrow-up-right-from-square" style="color:#428cff;font-size:0.65rem;" title="Outgoing"></i>'
+            : '<i class="fas fa-arrow-down-to-line" style="color:#2ecc71;font-size:0.65rem;" title="Incoming"></i>')
+          : '';
+
+        const joinBtn = isOngoing && isGroup
+          ? `<a href="messages.html" class="join-call-btn"><i class="fas fa-phone-alt"></i> Join</a>`
+          : '';
+
+        return `
+          <div class="call-item ${isOngoing ? 'ongoing' : ''} ${isMissed ? 'missed' : ''}">
+            <div class="call-icon ${iconClass}"><i class="fas ${iconName}"></i></div>
+            <div class="call-details">
+              <div class="call-name">${escapeHtml(call.callerName || call.label)}</div>
+              <div class="call-meta">
+                ${directionIcon}
+                ${sourceBadge}
+                <span>${isVideo ? 'Video' : 'Voice'}</span>
+                <span>·</span>
+                <span>${formatTime(call.startedAt)}</span>
+                ${isGroup ? `<span>· ${escapeHtml(call.role)}</span>` : ''}
+              </div>
+            </div>
+            ${statusHtml}
+            ${durationHtml}
+            ${joinBtn}
+          </div>`;
+      }
+
+      // ─── REALTIME SUBSCRIPTIONS ───
+      function subscribeToCallChanges() {
+        // Group calls
+        supabase
+          .channel('calls-page-group-calls')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'group_calls' }, () => {
+            loadCallLogs();
+          })
+          .subscribe();
+
+        // DM calls
+        try {
+          supabase
+            .channel('calls-page-dm-calls')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'calls' }, () => {
+              loadCallLogs();
+            })
+            .subscribe();
+        } catch (e) {
+          console.warn('Could not subscribe to DM calls:', e);
+        }
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>

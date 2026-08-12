@@ -21,18 +21,16 @@
 
     html {
       background: #0b141a;
-      height: 100%;
-      height: 100vh;
-      height: 100dvh;
+      position: fixed;
+      inset: 0;
       overflow: hidden;
-      width: 100%;
     }
 
     body {
       background: #0b141a;
       display: flex;
-      height: 100%;
-      width: 100%;
+      position: fixed;
+      inset: 0;
       overflow: hidden;
       padding-top: env(safe-area-inset-top);
       padding-bottom: env(safe-area-inset-bottom);
@@ -1718,10 +1716,6 @@
 
     /* Fix for notched phones */
     @supports (padding: max(0px)) {
-      .chat-input-area {
-        padding-bottom: max(0.4rem, env(safe-area-inset-bottom));
-      }
-
       .call-modal-content {
         padding-bottom: max(1rem, env(safe-area-inset-bottom));
       }
@@ -1758,6 +1752,7 @@
       <a href="dm.html" id="dmNavLink"><i class="fas fa-envelope"></i> <span>Direct Messages</span>
         <span class="sidebar-unread" id="dmUnreadBadge" style="display:none;">0</span>
       </a>
+      <a href="calls.html" id="callsNavLink"><i class="fas fa-phone"></i> <span>Call Logs</span></a>
       <a href="resources.html"><i class="fas fa-book-open"></i> <span>Resources</span></a>
       <a href="profile.html"><i class="fas fa-user-cog"></i> <span>Profile</span></a>
     </div>
@@ -1840,6 +1835,7 @@
         <a href="dm.html"><i class="fas fa-envelope"></i> Direct Messages
           <span class="sidebar-unread" id="globalDmUnreadBadge" style="display:none;">0</span>
         </a>
+        <a href="calls.html"><i class="fas fa-phone"></i> Call Logs</a>
         <a href="resources.html"><i class="fas fa-book-open"></i> Resources</a>
         <a href="profile.html"><i class="fas fa-user-cog"></i> Profile</a>
       </nav>
