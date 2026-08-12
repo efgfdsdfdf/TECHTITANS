@@ -9,6 +9,7 @@ const entries = [
   'img',
   'admin.html',
   'agora-utils.js',
+  'calls.html',
   'dashboard.html',
   'dm.html',
   'index.html',
