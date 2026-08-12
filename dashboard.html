@@ -1094,41 +1094,58 @@
             // STATS: messages / unread / resources / chart / activity
             // ===========================================================================
             const Stats = {
+                // cache last known counts to avoid glitching to zero on transient errors
+                _lastGroupCount: 0,
+                _lastDmCount: 0,
+
                 async fetchUnreadMessageCount() {
-                    if (!State.currentUser || !State.currentRole) return 0;
+                    if (!State.currentUser || !State.currentRole) return this._lastGroupCount;
                     try {
-                        let query = supabase.from('group_messages').select('id, sender_id');
-                        if (!State.isCEO) query = query.eq('role', State.currentRole);
-                        const { data: messages, error: msgError } = await query;
+                        // Remove the role filter – group messages are global.
+                        const { data: messages, error: msgError } = await supabase
+                            .from('group_messages')
+                            .select('id, sender_id');
                         if (msgError) throw msgError;
+                        if (!messages || messages.length === 0) {
+                            this._lastGroupCount = 0;
+                            return 0;
+                        }
                         const messageIds = messages.map(m => m.id);
                         let readSet = new Set();
                         if (messageIds.length) {
-                            const { data: reads } = await supabase
+                            const { data: reads, error: readError } = await supabase
                                 .from('message_reads')
                                 .select('message_id')
                                 .eq('user_id', State.currentUser.id)
                                 .in('message_id', messageIds);
+                            if (readError) throw readError;
                             if (reads) readSet = new Set(reads.map(r => r.message_id));
                         }
-                        return messages.filter(msg => !readSet.has(msg.id) && msg.sender_id !== State.currentUser.id)
-                            .length;
+                        const count = messages.filter(msg =>
+                            !readSet.has(msg.id) &&
+                            msg.sender_id !== State.currentUser.id
+                        ).length;
+                        this._lastGroupCount = count;
+                        return count;
                     } catch (err) {
-                        console.error('unread error:', err);
-                        return 0;
+                        console.error('fetchUnreadMessageCount error:', err);
+                        // return cached count instead of 0 to prevent flicker
+                        return this._lastGroupCount;
                     }
                 },
 
                 async fetchDmUnreadCount() {
-                    if (!State.currentUser) return 0;
+                    if (!State.currentUser) return this._lastDmCount;
                     try {
-                        // Get all DMs involving this user
                         const { data: dms, error: dmError } = await supabase
                             .from('direct_messages')
                             .select('id, sender_id')
                             .or(`sender_id.eq.${State.currentUser.id},receiver_id.eq.${State.currentUser.id}`);
                         if (dmError) throw dmError;
-                        if (!dms || !dms.length) return 0;
+                        if (!dms || !dms.length) {
+                            this._lastDmCount = 0;
+                            return 0;
+                        }
 
                         const dmIds = dms.map(d => d.id);
                         const { data: reads, error: readError } = await supabase
@@ -1139,14 +1156,16 @@
                         if (readError) throw readError;
 
                         const readSet = new Set(reads ? reads.map(r => r.dm_id) : []);
-                        // Count DMs where this user is the receiver and hasn't read them
-                        return dms.filter(dm =>
+                        const count = dms.filter(dm =>
                             dm.sender_id !== State.currentUser.id &&
                             !readSet.has(dm.id)
                         ).length;
+                        this._lastDmCount = count;
+                        return count;
                     } catch (err) {
-                        console.error('DM unread error:', err);
-                        return 0;
+                        console.error('fetchDmUnreadCount error:', err);
+                        // return cached count instead of 0 to prevent flicker
+                        return this._lastDmCount;
                     }
                 },
 
@@ -1163,9 +1182,9 @@
 
                 async fetchTotalMessages() {
                     try {
-                        let query = supabase.from('group_messages').select('*', { count: 'exact', head: true });
-                        if (!State.isCEO && State.currentRole) query = query.eq('role', State.currentRole);
-                        const { count, error } = await query;
+                        const { count, error } = await supabase
+                            .from('group_messages')
+                            .select('*', { count: 'exact', head: true });
                         return error ? 0 : count;
                     } catch { return 0; }
                 },
@@ -1180,13 +1199,11 @@
 
                 async fetchRecentMessages() {
                     try {
-                        let query = supabase
+                        const { data, error } = await supabase
                             .from('group_messages')
                             .select('id, content, created_at, sender_id, profiles!inner(full_name)')
                             .order('created_at', { ascending: false })
                             .limit(3);
-                        if (!State.isCEO && State.currentRole) query = query.eq('role', State.currentRole);
-                        const { data, error } = await query;
                         if (error) throw error;
                         return data || [];
                     } catch (err) {
@@ -1202,12 +1219,10 @@
                         sevenDaysAgo.setDate(now.getDate() - 7);
                         const start = sevenDaysAgo.toISOString();
 
-                        let query = supabase
+                        const { data, error } = await supabase
                             .from('group_messages')
                             .select('created_at')
                             .gte('created_at', start);
-                        if (!State.isCEO && State.currentRole) query = query.eq('role', State.currentRole);
-                        const { data, error } = await query;
                         if (error) throw error;
 
                         const counts = {};
