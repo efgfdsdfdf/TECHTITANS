@@ -102,6 +102,14 @@ Backend support added:
   - Supports direct messages, group messages, announcements, friend/request notifications, resource notifications, and system notifications as rows in `notifications`.
   - Does not send incoming calls through the normal notification channel; calls use `send-call-notification`.
 
+Required Supabase secrets for browser/PWA web push (both message and call notifications — must be the same key pair the browser subscribed with via `push-public-key`):
+
+```bash
+npx supabase secrets set PUSH_PUBLIC_KEY='<vapid-public-key>'
+npx supabase secrets set PUSH_PRIVATE_KEY='<vapid-private-key>'
+npx supabase secrets set PUSH_SUBJECT='mailto:admin@techtitans.app'
+```
+
 Required Supabase secrets for Android FCM:
 
 ```bash

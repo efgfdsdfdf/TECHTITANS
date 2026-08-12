@@ -79,10 +79,51 @@ const TechTitansNotifications = {
     this._userId = data.user.id;
     this._pushPublicKey = options.pushPublicKey || window.TECH_TITANS_PUSH_PUBLIC_KEY || null;
     this._renderNotificationWidget(options);
+    this._listenForSubscriptionChanges();
     await this._refreshUnreadCount();
     await this.subscribe();
     await this._loadPushPublicKey();
     await this.registerPushDevice();
+  },
+
+  _listenForSubscriptionChanges() {
+    if (!('serviceWorker' in navigator) || this._subscriptionChangeListener) return;
+    this._subscriptionChangeListener = async (event) => {
+      const data = event.data;
+      if (!data || data.type !== 'push_subscription_changed' || !data.subscription) return;
+      try {
+        const deviceRecord = {
+          user_id: this._userId,
+          device_type: this._detectDeviceType(),
+          browser: navigator.userAgent || 'unknown',
+          push_token: JSON.stringify(data.subscription),
+          device_identifier: data.endpoint,
+          is_active: true,
+          last_seen_at: new Date().toISOString()
+        };
+        if (data.oldEndpoint && data.oldEndpoint !== data.endpoint) {
+          await this._supabase
+            .from('user_devices')
+            .update({ is_active: false })
+            .eq('user_id', this._userId)
+            .eq('device_identifier', data.oldEndpoint);
+        }
+        const { data: existingDevice } = await this._supabase
+          .from('user_devices')
+          .select('id')
+          .eq('user_id', this._userId)
+          .eq('device_identifier', data.endpoint)
+          .maybeSingle();
+        if (existingDevice?.id) {
+          await this._supabase.from('user_devices').update(deviceRecord).eq('id', existingDevice.id);
+        } else {
+          await this._supabase.from('user_devices').insert(deviceRecord);
+        }
+      } catch (error) {
+        console.warn('Unable to store rotated push subscription:', error);
+      }
+    };
+    navigator.serviceWorker.addEventListener('message', this._subscriptionChangeListener);
   },
 
   async _loadPushPublicKey() {
@@ -503,6 +544,7 @@ const TechTitansNotifications = {
 if (window.location.pathname.includes('dashboard.html') ||
     window.location.pathname.includes('dm.html') ||
     window.location.pathname.includes('messages.html') ||
+    window.location.pathname.includes('calls.html') ||
     window.location.pathname.includes('resources.html') ||
     window.location.pathname.includes('profile.html')) {
   document.addEventListener('click', () => {

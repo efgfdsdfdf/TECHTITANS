@@ -44,6 +44,13 @@ self.addEventListener('push', (event) => {
     silent: false
   };
 
+  if (isCall) {
+    options.actions = [
+      { action: 'accept', title: 'Accept' },
+      { action: 'decline', title: 'Decline' }
+    ];
+  }
+
   // Incoming call: also notify open clients to show the in-app overlay
   if (isCall) {
     event.waitUntil(
@@ -77,7 +84,32 @@ self.addEventListener('notificationclick', (event) => {
 
   event.waitUntil((async () => {
     const clientsList = await clients.matchAll({ type: 'window', includeUncontrolled: true });
-    const absoluteUrl = new URL(targetUrl, self.location.origin).href;
+
+    // Decline button: tell open clients to decline, or open a page that declines silently
+    if (isCall && event.action === 'decline') {
+      if (clientsList.length > 0) {
+        for (const client of clientsList) {
+          client.postMessage({
+            type: 'call_declined_from_notification',
+            callId: data.callId,
+            callType: data.callType,
+            callerId: data.callerId
+          });
+        }
+        return;
+      }
+      const declineUrl = new URL(`dm.html?callId=${encodeURIComponent(data.callId || '')}&nativeDeclined=1`, self.location.origin).href;
+      if (clients.openWindow) {
+        return clients.openWindow(declineUrl);
+      }
+      return;
+    }
+
+    // Accept button or notification body tap
+    const callUrl = isCall
+      ? new URL(`dm.html?callId=${encodeURIComponent(data.callId || '')}${event.action === 'accept' ? '&nativeAccepted=1' : ''}`, self.location.origin).href
+      : null;
+    const absoluteUrl = callUrl || new URL(targetUrl, self.location.origin).href;
 
     // For call notifications, notify all clients that the call was accepted from notification
     if (isCall) {
@@ -91,6 +123,13 @@ self.addEventListener('notificationclick', (event) => {
           roomId: data.roomId
         });
       }
+      if (clientsList.length > 0 && 'focus' in clientsList[0]) {
+        return clientsList[0].focus();
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(absoluteUrl);
+      }
+      return;
     }
 
     for (const client of clientsList) {
@@ -101,6 +140,34 @@ self.addEventListener('notificationclick', (event) => {
 
     if (clients.openWindow) {
       return clients.openWindow(absoluteUrl);
+    }
+  })());
+});
+
+// Keep push delivery working when the browser rotates the subscription
+self.addEventListener('pushsubscriptionchange', (event) => {
+  event.waitUntil((async () => {
+    try {
+      const oldSubscription = event.oldSubscription || await self.registration.pushManager.getSubscription();
+      const applicationServerKey = oldSubscription?.options?.applicationServerKey;
+      if (!applicationServerKey) return;
+
+      const newSubscription = await self.registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey
+      });
+
+      const windowClients = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+      windowClients.forEach((client) => {
+        client.postMessage({
+          type: 'push_subscription_changed',
+          subscription: newSubscription.toJSON(),
+          endpoint: newSubscription.endpoint,
+          oldEndpoint: oldSubscription?.endpoint || null
+        });
+      });
+    } catch (error) {
+      // Re-subscription will be retried on next page load via registerPushDevice
     }
   })());
 });
