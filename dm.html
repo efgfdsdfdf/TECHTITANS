@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -549,6 +549,51 @@
             justify-content: center;
         }
 
+        .recording-ui {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #0b1221;
+            border-radius: 999px;
+            padding: 0.4rem 1rem;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .recording-ui .recording-timer {
+            color: #ff4d4d;
+            font-weight: 500;
+            animation: pulse 1.5s infinite;
+        }
+
+        .recording-ui button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .recording-ui .cancel-record-btn {
+            color: #ff6b6b;
+        }
+        .recording-ui .cancel-record-btn:hover {
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .recording-ui .send-record-btn {
+            color: #428cff;
+            background: rgba(66, 140, 255, 0.1);
+        }
+        .recording-ui .send-record-btn:hover {
+            background: rgba(66, 140, 255, 0.2);
+        }
+
         .dm-msg-row {
             display: flex;
             margin-bottom: 0.5rem;
@@ -568,14 +613,6 @@
 
         .dm-msg-row.unread .dm-msg {
             border-left: 4px solid #428cff;
-        }
-
-        .dm-msg-row.swipe-active .dm-msg {
-            transform: translateX(0px);
-        }
-
-        .dm-msg-row.swipe-reply .dm-msg {
-            transform: translateX(0px);
         }
 
         .dm-msg-row .swipe-reply-indicator {
@@ -693,6 +730,30 @@
             touch-action: none;
         }
 
+        /* Quote block inside message (WhatsApp style) */
+        .dm-msg .reply-quote {
+            background: rgba(255, 255, 255, 0.06);
+            border-left: 3px solid #2ecc71;
+            padding: 0.4rem 0.6rem;
+            margin-bottom: 0.4rem;
+            border-radius: 0.3rem;
+            font-size: 0.82rem;
+            color: #b0c8ff;
+        }
+
+        .dm-msg .reply-quote .quote-sender {
+            font-weight: 600;
+            color: #2ecc71;
+            font-size: 0.75rem;
+            display: block;
+            margin-bottom: 0.1rem;
+        }
+
+        .dm-msg .reply-quote .quote-text {
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
         .dm-msg-text {
             white-space: pre-wrap;
         }
@@ -720,10 +781,28 @@
             border-bottom-right-radius: 0.25rem;
         }
 
+        .dm-msg.sent .reply-quote {
+            background: rgba(255, 255, 255, 0.12);
+            border-left-color: #aaffaa;
+        }
+
+        .dm-msg.sent .reply-quote .quote-sender {
+            color: #aaffaa;
+        }
+
+        .dm-msg.sent .reply-quote .quote-text {
+            color: #d0e8ff;
+        }
+
         .dm-msg.received {
             background: #202b43;
             color: #e0e7ff;
             border-bottom-left-radius: 0.25rem;
+        }
+
+        .dm-msg.received .reply-quote {
+            background: rgba(255, 255, 255, 0.04);
+            border-left-color: #2ecc71;
         }
 
         .dm-seen-indicator {
@@ -1820,7 +1899,7 @@
             let dmObserver = null;
 
             // ─── REPLY STATE ───
-            let replyToMessage = null;
+            let replyToMessage = null; // { messageId, senderName, preview }
 
             // ─── DOM REFS ───
             const modal = document.getElementById('receiptsModal');
@@ -1921,16 +2000,51 @@
               `;
             }
 
+            // Parse reply quote from content: if content starts with "> Replying to [sender]:\n" then extract quote and rest
+            function parseReplyQuote(content) {
+                const lines = content.split('\n');
+                const firstLine = lines[0] || '';
+                const match = firstLine.match(/^> Replying to (.*?):/);
+                if (match) {
+                    // The quote is the first line after the "> Replying to ..." line, until an empty line or end
+                    // But we have a specific format: we added two newlines after the quote.
+                    // Actually we prepend: `> Replying to ${senderName}: ${preview}\n\n`
+                    // So the quote is the first line, then an empty line, then the reply.
+                    // We'll treat the quote as the first line (without the "> Replying to" prefix)
+                    const quoteLine = firstLine.replace(/^> Replying to .*?: /, '').trim();
+                    const rest = lines.slice(1).filter(l => l.trim() !== '').join('\n');
+                    return { quote: quoteLine, reply: rest, sender: match[1] };
+                }
+                return null;
+            }
+
             function renderMessageBubble(msg, options = {}) {
                 const isSent = options.isSent ?? msg.sender_id === currentUser.id;
                 const sender = msg.sender || options.sender || {};
                 const senderName = sender.full_name || options.senderName || 'Unknown';
-                const senderRole = sender.job_role || options.senderRole || '';
                 const isUnread = !isSent && !msg.read_at;
                 const timeStr = formatTimeOnly(msg.created_at || new Date());
-                const contentHtml = msg.audio_url ?
-                    renderVoiceNote(msg.audio_url, msg.id) :
-                    `<div class="dm-msg-text">${escapeHtml(msg.content)}</div>`;
+                let contentHtml = '';
+                let replyQuoteHtml = '';
+
+                // Check if message is a reply (starts with "> Replying to")
+                const parsed = parseReplyQuote(msg.content || '');
+                if (parsed) {
+                    // It's a reply: show quote block
+                    replyQuoteHtml = `
+                    <div class="reply-quote">
+                      <span class="quote-sender">Replying to ${escapeHtml(parsed.sender)}</span>
+                      <span class="quote-text">${escapeHtml(parsed.quote)}</span>
+                    </div>
+                  `;
+                    contentHtml = `<div class="dm-msg-text">${escapeHtml(parsed.reply)}</div>`;
+                } else {
+                    // Normal message
+                    contentHtml = msg.audio_url ?
+                        renderVoiceNote(msg.audio_url, msg.id) :
+                        `<div class="dm-msg-text">${escapeHtml(msg.content)}</div>`;
+                }
+
                 const deleteBtn = (isSent || isCEO) ?
                     `<button class="dm-delete-btn" title="Delete message" data-id="${msg.id}">Delete</button>` :
                     '';
@@ -1940,20 +2054,13 @@
                 const statusHtml = isSent ?
                     `<span class="dm-msg-status">${msg.read_at ? 'Seen' : 'Sent'}</span>` :
                     '';
-                // Reply indicator if this message is a reply
-                const replyHtml = msg.reply_to ? `
-                    <div style="font-size:0.75rem;opacity:0.7;margin-bottom:0.3rem;display:flex;align-items:center;gap:0.3rem;">
-                        <i class="fas fa-reply" style="font-size:0.6rem;"></i>
-                        <span>Replying to ${escapeHtml(msg.reply_to_sender_name || 'a message')}</span>
-                    </div>
-                ` : '';
 
                 return `
                 <div class="dm-msg-row ${isSent ? 'sent' : 'received'} ${isUnread ? 'unread' : ''}" data-message-id="${msg.id}" data-created-at="${msg.created_at}" data-sender-id="${msg.sender_id}" data-sender-name="${escapeHtml(senderName)}">
                   <div class="swipe-reply-indicator"><i class="fas fa-reply"></i></div>
                   <div class="swipe-reply-bg"></div>
                   <div class="dm-msg ${isSent ? 'sent' : 'received'}">
-                    ${replyHtml}
+                    ${replyQuoteHtml}
                     ${contentHtml}
                     <div class="dm-msg-meta">
                       <span>${timeStr}</span>
@@ -1970,7 +2077,6 @@
                 if (!root) root = document;
                 root.querySelectorAll('.dm-msg-row').forEach(row => {
                     row.addEventListener('contextmenu', onRightClick);
-                    // Swipe to reply - uses pointer events for both touch & mouse
                     setupSwipeToReply(row);
                 });
                 root.querySelectorAll('.dm-delete-btn').forEach(btn => {
@@ -1995,7 +2101,6 @@
                 let pointerId = null;
 
                 function onPointerDown(e) {
-                    // Only allow left-click (button === 0) or touch
                     if (e.pointerType === 'mouse' && e.button !== 0) return;
                     const pointer = e;
                     startX = pointer.clientX;
@@ -2464,14 +2569,18 @@
                         </div>
                       </div>
                       <div class="dm-chat-input">
-                        <div class="dm-composer-tools">
-                          <button class="voice-btn" id="dmVoiceNoteBtn" title="Record voice note">Mic</button>
+                        <div class="dm-composer-tools" id="dmComposerTools">
+                          <button class="voice-btn" id="dmVoiceNoteBtn" title="Record voice note">🎤</button>
                         </div>
-                        <div class="dm-input-wrap">
+                        <div class="dm-input-wrap" id="dmChatInputWrap">
                           <input type="text" id="dmChatInput" placeholder="Message">
                         </div>
-                        <button id="dmChatSendBtn">Send</button>
-                        <span id="dmRecordingTimer" class="recording-timer" style="display:none;">0:00</span>
+                        <button id="dmChatSendBtn">➤</button>
+                        <div id="dmRecordingUi" class="recording-ui" style="display: none;">
+                          <button id="dmCancelRecordBtn" class="cancel-record-btn" title="Cancel">🗑️</button>
+                          <span id="dmRecordingTimer" class="recording-timer">🔴 0:00</span>
+                          <button id="dmSendRecordBtn" class="send-record-btn" title="Send">➤</button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -2576,56 +2685,86 @@
                     // ── voice recording ──
                     const dmVoiceBtn = document.getElementById('dmVoiceNoteBtn');
                     const dmRecordingTimer = document.getElementById('dmRecordingTimer');
-                    dmVoiceBtn.addEventListener('click', async () => {
-                        if (dmIsRecording) {
-                            if (dmMediaRecorder) {
-                                dmMediaRecorder.stop();
-                                dmIsRecording = false;
-                                dmVoiceBtn.textContent = 'Mic';
-                                dmVoiceBtn.classList.remove('recording');
-                                dmRecordingTimer.style.display = 'none';
-                                if (dmRecordingTimerInterval) {
-                                    clearInterval(dmRecordingTimerInterval);
-                                    dmRecordingTimerInterval = null;
+                    const dmRecordingUi = document.getElementById('dmRecordingUi');
+                    const dmChatInputWrap = document.getElementById('dmChatInputWrap');
+                    const dmChatSendBtn = document.getElementById('dmChatSendBtn');
+                    const dmCancelRecordBtn = document.getElementById('dmCancelRecordBtn');
+                    const dmSendRecordBtn = document.getElementById('dmSendRecordBtn');
+                    const dmComposerTools = document.getElementById('dmComposerTools');
+
+                    let dmCancelVoiceNote = false;
+
+                    dmVoiceBtn.addEventListener('click', dmStartRecording);
+                    dmCancelRecordBtn.addEventListener('click', dmCancelRecording);
+                    dmSendRecordBtn.addEventListener('click', dmStopRecording);
+
+                    async function dmStartRecording() {
+                        if (dmIsRecording) return;
+                        try {
+                            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                            dmMediaRecorder = new MediaRecorder(stream);
+                            dmAudioChunks = [];
+                            dmCancelVoiceNote = false;
+
+                            dmMediaRecorder.ondataavailable = event => { dmAudioChunks.push(event.data); };
+                            dmMediaRecorder.onstop = async () => {
+                                stream.getTracks().forEach(track => track.stop());
+                                if (dmCancelVoiceNote) return;
+                                if (!currentRecipientId) {
+                                    alert('No chat selected. Please open a conversation first.');
+                                    return;
                                 }
-                            }
-                        } else {
-                            try {
-                                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                                dmMediaRecorder = new MediaRecorder(stream);
-                                dmAudioChunks = [];
-                                dmMediaRecorder.ondataavailable = event => { dmAudioChunks.push(event.data); };
-                                dmMediaRecorder.onstop = async () => {
-                                    const audioBlob = new Blob(dmAudioChunks, { type: 'audio/webm' });
-                                    if (!currentRecipientId) {
-                                        alert(
-                                            'No chat selected. Please open a conversation first.');
-                                        return;
-                                    }
-                                    await sendPrivateVoiceNote(audioBlob, currentRecipientId);
-                                    stream.getTracks().forEach(track => track.stop());
-                                };
-                                dmMediaRecorder.start();
-                                dmIsRecording = true;
-                                dmVoiceBtn.classList.add('recording');
-                                dmVoiceBtn.textContent = 'Stop';
-                                dmRecordingStartTime = Date.now();
-                                dmRecordingTimer.style.display = 'inline';
-                                dmRecordingTimerInterval = setInterval(() => {
-                                    if (!dmIsRecording) return;
-                                    const elapsed = Math.floor((Date.now() -
-                                        dmRecordingStartTime) / 1000);
-                                    const minutes = Math.floor(elapsed / 60);
-                                    const seconds = elapsed % 60;
-                                    dmRecordingTimer.textContent =
-                                        `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                                }, 1000);
-                            } catch (err) {
-                                console.error('DM mic error:', err);
-                                alert('Could not access microphone.');
+                                const audioBlob = new Blob(dmAudioChunks, { type: 'audio/webm' });
+                                await sendPrivateVoiceNote(audioBlob, currentRecipientId);
+                            };
+
+                            dmMediaRecorder.start();
+                            dmIsRecording = true;
+                            dmRecordingStartTime = Date.now();
+
+                            // Show recording UI, hide input
+                            dmComposerTools.style.display = 'none';
+                            dmChatInputWrap.style.display = 'none';
+                            dmChatSendBtn.style.display = 'none';
+                            dmRecordingUi.style.display = 'flex';
+
+                            dmRecordingTimerInterval = setInterval(() => {
+                                if (!dmIsRecording) return;
+                                const elapsed = Math.floor((Date.now() - dmRecordingStartTime) / 1000);
+                                const minutes = Math.floor(elapsed / 60);
+                                const seconds = elapsed % 60;
+                                dmRecordingTimer.textContent = `🔴 ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                            }, 1000);
+                        } catch (err) {
+                            console.error('DM mic error:', err);
+                            alert('Could not access microphone.');
+                        }
+                    }
+
+                    function dmCancelRecording() {
+                        if (dmMediaRecorder && dmIsRecording) {
+                            dmCancelVoiceNote = true;
+                            dmStopRecording();
+                        }
+                    }
+
+                    function dmStopRecording() {
+                        if (dmMediaRecorder && dmIsRecording) {
+                            dmMediaRecorder.stop();
+                            dmIsRecording = false;
+
+                            // Hide recording UI, restore input
+                            dmComposerTools.style.display = 'flex';
+                            dmChatInputWrap.style.display = 'block';
+                            dmChatSendBtn.style.display = 'inline-flex';
+                            dmRecordingUi.style.display = 'none';
+
+                            if (dmRecordingTimerInterval) {
+                                clearInterval(dmRecordingTimerInterval);
+                                dmRecordingTimerInterval = null;
                             }
                         }
-                    });
+                    }
 
                     // ── auto-open from URL ──
                     const urlParams = new URLSearchParams(window.location.search);
@@ -2704,7 +2843,7 @@
                 try {
                     let { data, error } = await supabase
                         .from('private_messages')
-                        .select(`*, sender:profiles!sender_id (id, full_name, job_role, avatar_url), reply_to_message:reply_to (id, content, sender:profiles!sender_id(full_name))`)
+                        .select(`*, sender:profiles!sender_id (id, full_name, job_role, avatar_url)`)
                         .or(
                             `and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`
                         )
@@ -2741,11 +2880,6 @@
                         const dateHeader = maybeAppendDateSeparator(lastDate, msg.created_at);
                         if (dateHeader) html += dateHeader;
                         lastDate = msg.created_at;
-                        // Check if this message has a reply
-                        if (msg.reply_to) {
-                            const replySender = msg.reply_to_message?.sender?.full_name || 'Someone';
-                            msg.reply_to_sender_name = replySender;
-                        }
                         html += renderMessageBubble(msg, {
                             isSent: msg.sender_id === currentUser.id,
                             sender: msg.sender || {
@@ -2813,15 +2947,19 @@
             // ─── SEND PRIVATE MESSAGE ───
             async function sendPrivateMessage(otherUserId) {
                 const input = document.getElementById('dmChatInput');
-                const content = input.value.trim();
+                let content = input.value.trim();
                 if (!content) return;
                 input.value = '';
 
+                // If replying, prepend a quote in WhatsApp style
+                if (replyToMessage) {
+                    // Format: > Replying to [sender]: [preview]\n\n[reply]
+                    const quoted = `> Replying to ${replyToMessage.senderName}: ${replyToMessage.preview}\n\n`;
+                    content = quoted + content;
+                }
+
                 try {
                     const payload = { sender_id: currentUser.id, recipient_id: otherUserId, content: content };
-                    if (replyToMessage) {
-                        payload.reply_to = replyToMessage.messageId;
-                    }
                     const { data, error } = await supabase
                         .from('private_messages')
                         .insert(payload)
@@ -2829,12 +2967,8 @@
                         .single();
                     if (error) throw error;
                     const messagesDiv = document.getElementById('dmChatMessages');
-                    // Add sender info
                     data.sender = { id: currentUser.id, full_name: currentUserFullName, job_role: currentRole,
                         avatar_url: null };
-                    if (replyToMessage) {
-                        data.reply_to_sender_name = replyToMessage.senderName;
-                    }
                     appendRenderedMessage(messagesDiv, data, { isSent: true });
                     clearReplyTo();
                 } catch (err) {
@@ -2859,6 +2993,7 @@
                 const { data: urlData } = supabase.storage.from('voice_notes').getPublicUrl(fileName);
                 const audioUrl = urlData.publicUrl;
 
+                // For voice notes, we don't support quoting (just send as is)
                 try {
                     const payload = {
                         sender_id: currentUser.id,
@@ -2866,9 +3001,6 @@
                         content: '',
                         audio_url: audioUrl
                     };
-                    if (replyToMessage) {
-                        payload.reply_to = replyToMessage.messageId;
-                    }
                     const { data, error } = await supabase
                         .from('private_messages')
                         .insert(payload)
@@ -2878,9 +3010,6 @@
                     const messagesDiv = document.getElementById('dmChatMessages');
                     data.sender = { id: currentUser.id, full_name: currentUserFullName, job_role: currentRole,
                         avatar_url: null };
-                    if (replyToMessage) {
-                        data.reply_to_sender_name = replyToMessage.senderName;
-                    }
                     appendRenderedMessage(messagesDiv, data, { isSent: true });
                     clearReplyTo();
                 } catch (err) {
@@ -3021,7 +3150,8 @@
                         filter: `recipient_id=eq.${currentUser.id}`
                     }, async (payload) => {
                         const newMsg = payload.new;
-                        if (newMsg.sender_id === currentUser.id) return;
+                        if (document.querySelector(`.dm-msg-row[data-message-id="${newMsg.id}"]`)) return;
+                        if (String(newMsg.sender_id).toLowerCase() === String(currentUser.id).toLowerCase()) return;
 
                         if (currentRecipientId === newMsg.sender_id) {
                             const messagesDiv = document.getElementById('dmChatMessages');
@@ -3064,7 +3194,7 @@
                         } catch (e) {}
                         showToast(`New DM from ${senderName}`);
 
-                        if (window.TechTitansNotifications) {
+                        if (window.TechTitansNotifications && document.hidden) {
                             window.TechTitansNotifications.display(`New DM from ${senderName}`, {
                                 body: newMsg.content ? newMsg.content.substring(0, 50) + (newMsg.content
                                     .length > 50 ? '...' : '') : 'Sent a voice note',
@@ -3138,7 +3268,7 @@
                     .subscribe();
             }
 
-            // ─── AGORA DM CALL FUNCTIONS ─── (unchanged)
+            // ─── AGORA DM CALL FUNCTIONS ─── (unchanged, kept for brevity)
             async function getDmChannelName(userA, userB) {
                 const sorted = [userA, userB].sort();
                 return window.TechTitansAgora.compactChannelName('dm', sorted.join('_'));

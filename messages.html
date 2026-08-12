@@ -789,7 +789,7 @@
         }
 
         .message.sent {
-            background: #005c4b;
+            background: #1c4b82; /* Blue instead of green */
             color: #e9edef;
             border-top-right-radius: 0;
         }
@@ -843,12 +843,80 @@
             font-size: 0.7rem;
         }
 
+        .dm-voice-note {
+            display: grid;
+            grid-template-columns: auto minmax(130px, 1fr) auto;
+            align-items: center;
+            gap: 0.65rem;
+            min-width: min(300px, 62vw);
+        }
+
+        .dm-audio-btn {
+            min-width: 3.2rem;
+            padding: 0 0.6rem;
+            height: 2.35rem;
+            border: none;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.16);
+            color: #fff;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .dm-wave {
+            height: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .dm-wave span {
+            width: 3px;
+            height: var(--h);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.48);
+        }
+
+        .dm-audio-duration {
+            font-size: 0.76rem;
+            opacity: 0.82;
+            min-width: 2.6rem;
+            text-align: right;
+        }
+
+        .dm-audio-progress {
+            grid-column: 2 / 4;
+            height: 3px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.18);
+            overflow: hidden;
+        }
+
+        .dm-audio-progress span {
+            display: block;
+            width: 0%;
+            height: 100%;
+            background: #fff;
+        }
+
+        .message.received .dm-audio-btn {
+            background: rgba(66, 140, 255, 0.22);
+        }
+
+        .message.received .dm-wave span {
+            background: rgba(190, 210, 255, 0.58);
+        }
+
         .message.sent audio {
             border-color: #4a9aff;
         }
 
         .message.sent audio::-webkit-media-controls-panel {
-            background: #0a2a1a;
+            background: #10305a;
         }
 
         .message.sent audio::-webkit-media-controls-play-button {
@@ -858,6 +926,7 @@
         /* --- REPLY INDICATOR IN INPUT AREA --- */
         .reply-indicator {
             display: none;
+            width: 100%; /* Puts reply indicator on top of the input box */
             background: #1a2a3a;
             border-left: 4px solid #428cff;
             padding: 0.4rem 0.9rem;
@@ -1192,6 +1261,51 @@
         .voice-btn:disabled {
             opacity: 0.4;
             cursor: not-allowed;
+        }
+
+        .recording-ui {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #0b1221;
+            border-radius: 999px;
+            padding: 0.4rem 1rem;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .recording-ui .recording-timer {
+            color: #ff4d4d;
+            font-weight: 500;
+            animation: pulse 1.5s infinite;
+        }
+
+        .recording-ui button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .recording-ui .cancel-record-btn {
+            color: #ff6b6b;
+        }
+        .recording-ui .cancel-record-btn:hover {
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .recording-ui .send-record-btn {
+            color: #428cff;
+            background: rgba(66, 140, 255, 0.1);
+        }
+        .recording-ui .send-record-btn:hover {
+            background: rgba(66, 140, 255, 0.2);
         }
 
         @keyframes pulse {
@@ -2071,11 +2185,15 @@
                     <button class="cancel-reply-btn" id="cancelReplyBtn">✕</button>
                 </div>
                 <button class="voice-btn" id="voiceNoteBtn" disabled>🎤</button>
-                <div class="input-wrap">
+                <div class="input-wrap" id="chatInputWrap">
                     <input type="text" id="messageInput" placeholder="Write a message..." disabled>
                 </div>
                 <button id="sendBtn" disabled>➤</button>
-                <span id="recordingTimer" class="recording-timer" style="display:none;">0:00</span>
+                <div id="recordingUi" class="recording-ui" style="display: none;">
+                    <button id="cancelRecordBtn" class="cancel-record-btn" title="Cancel">🗑️</button>
+                    <span id="recordingTimer" class="recording-timer">🔴 0:00</span>
+                    <button id="sendRecordBtn" class="send-record-btn" title="Send">➤</button>
+                </div>
             </div>
         </div>
     </div>
@@ -2546,7 +2664,16 @@
 
                 let contentHtml = '';
                 if (message.audio_url) {
-                    contentHtml = `<audio controls src="${escapeHtml(message.audio_url)}"></audio>`;
+                    const bars = [12, 20, 15, 26, 18, 30, 14, 24, 17, 28, 13, 22, 16, 25]
+                        .map(h => `<span style="--h:${h}px"></span>`)
+                        .join('');
+                    contentHtml = `
+                    <div class="dm-voice-note" data-audio-url="${escapeHtml(message.audio_url)}">
+                      <button type="button" class="dm-audio-btn" aria-label="Play voice note">Play</button>
+                      <div class="dm-wave">${bars}</div>
+                      <span class="dm-audio-duration">0:00</span>
+                      <div class="dm-audio-progress"><span></span></div>
+                    </div>`;
                 } else {
                     contentHtml = escapeHtml(message.content);
                 }
@@ -2693,6 +2820,7 @@
                     } else {
                         area.scrollTop = area.scrollHeight;
                     }
+                    document.querySelectorAll('.dm-voice-note').forEach(setupVoiceNoteControl);
                     removeNotificationButtons();
                 } catch (err) {
                     console.error('Load messages error:', err);
@@ -3366,6 +3494,7 @@
                     const newRow = document.querySelector(`.message-row[data-message-id="${message.id}"]`);
                     if (observer && newRow) observer.observe(newRow);
                 }
+                document.querySelectorAll('.dm-voice-note').forEach(setupVoiceNoteControl);
                 removeNotificationButtons();
             }
 
@@ -3387,6 +3516,7 @@
                 const isScrolledToBottom = area.scrollHeight - area.scrollTop <= area.clientHeight + 50;
                 if (isScrolledToBottom) area.scrollTop = area.scrollHeight;
                 attachMessageHandlers();
+                document.querySelectorAll('.dm-voice-note').forEach(setupVoiceNoteControl);
                 removeNotificationButtons();
             }
 
@@ -4076,6 +4206,54 @@
                 window.location.href = 'index.html';
             });
 
+            // Setup voice note controls
+            function setupVoiceNoteControl(note) {
+                if (note.dataset.ready === 'true') return;
+                note.dataset.ready = 'true';
+                const audio = new Audio(note.dataset.audioUrl);
+                const button = note.querySelector('.dm-audio-btn');
+                const duration = note.querySelector('.dm-audio-duration');
+                const progress = note.querySelector('.dm-audio-progress span');
+
+                audio.addEventListener('loadedmetadata', () => {
+                    duration.textContent = formatAudioTime(audio.duration);
+                });
+                audio.addEventListener('timeupdate', () => {
+                    const percent = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+                    progress.style.width = `${percent}%`;
+                    duration.textContent = formatAudioTime(audio.duration ? audio.duration - audio.currentTime : audio.currentTime);
+                });
+                audio.addEventListener('ended', () => {
+                    button.textContent = 'Play';
+                    progress.style.width = '0%';
+                    duration.textContent = formatAudioTime(audio.duration);
+                });
+                button.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    document.querySelectorAll('.dm-voice-note').forEach(other => {
+                        if (other !== note && other._audio) {
+                            other._audio.pause();
+                            other.querySelector('.dm-audio-btn').textContent = 'Play';
+                        }
+                    });
+                    if (audio.paused) {
+                        audio.play();
+                        button.textContent = 'Pause';
+                    } else {
+                        audio.pause();
+                        button.textContent = 'Play';
+                    }
+                });
+                note._audio = audio;
+            }
+
+            function formatAudioTime(seconds) {
+                if (isNaN(seconds)) return '0:00';
+                const m = Math.floor(seconds / 60);
+                const s = Math.floor(seconds % 60);
+                return `${m}:${s < 10 ? '0' : ''}${s}`;
+            }
+
             // --- SEND MESSAGE ---
             document.getElementById('sendBtn').addEventListener('click', sendMessage);
             document.getElementById('messageInput').addEventListener('keypress', (e) => {
@@ -4160,7 +4338,6 @@
                 };
 
                 if (replyContext) {
-                    messageData.reply_to = replyContext.messageId;
                     // Store reply context in metadata
                     messageData.metadata = {
                         reply_to_id: replyContext.messageId,
@@ -4192,30 +4369,44 @@
             // --- VOICE NOTES ---
             const voiceBtn = document.getElementById('voiceNoteBtn');
             const recordingTimer = document.getElementById('recordingTimer');
-            voiceBtn.addEventListener('click', toggleRecording);
+            const recordingUi = document.getElementById('recordingUi');
+            const chatInputWrap = document.getElementById('chatInputWrap');
+            const sendBtn = document.getElementById('sendBtn');
+            const cancelRecordBtn = document.getElementById('cancelRecordBtn');
+            const sendRecordBtn = document.getElementById('sendRecordBtn');
+            
+            let cancelVoiceNote = false;
 
-            async function toggleRecording() {
-                if (isRecording) stopRecording();
-                else await startRecording();
-            }
+            voiceBtn.addEventListener('click', startRecording);
+            cancelRecordBtn.addEventListener('click', cancelRecording);
+            sendRecordBtn.addEventListener('click', stopRecording);
 
             async function startRecording() {
+                if (isRecording) return;
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     mediaRecorder = new MediaRecorder(stream);
                     audioChunks = [];
+                    cancelVoiceNote = false;
+                    
                     mediaRecorder.ondataavailable = event => { audioChunks.push(event.data); };
                     mediaRecorder.onstop = async () => {
+                        stream.getTracks().forEach(track => track.stop());
+                        if (cancelVoiceNote) return;
                         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                         await uploadVoiceNote(audioBlob);
-                        stream.getTracks().forEach(track => track.stop());
                     };
+                    
                     mediaRecorder.start();
                     isRecording = true;
-                    voiceBtn.classList.add('recording');
-                    voiceBtn.textContent = '🔴';
                     recordingStartTime = Date.now();
-                    recordingTimer.style.display = 'inline';
+                    
+                    // Show recording UI, hide input
+                    voiceBtn.style.display = 'none';
+                    chatInputWrap.style.display = 'none';
+                    sendBtn.style.display = 'none';
+                    recordingUi.style.display = 'flex';
+                    
                     updateRecordingTimer();
                 } catch (err) {
                     console.error('Microphone access error:', err);
@@ -4223,13 +4414,24 @@
                 }
             }
 
+            function cancelRecording() {
+                if (mediaRecorder && isRecording) {
+                    cancelVoiceNote = true;
+                    stopRecording();
+                }
+            }
+
             function stopRecording() {
                 if (mediaRecorder && isRecording) {
                     mediaRecorder.stop();
                     isRecording = false;
-                    voiceBtn.classList.remove('recording');
-                    voiceBtn.textContent = '🎤';
-                    recordingTimer.style.display = 'none';
+                    
+                    // Hide recording UI, restore input
+                    voiceBtn.style.display = 'inline-flex';
+                    chatInputWrap.style.display = 'block';
+                    sendBtn.style.display = 'inline-flex';
+                    recordingUi.style.display = 'none';
+                    
                     if (recordingTimerInterval) {
                         clearInterval(recordingTimerInterval);
                         recordingTimerInterval = null;
@@ -4275,7 +4477,6 @@
                 };
 
                 if (replyContext) {
-                    messageData.reply_to = replyContext.messageId;
                     messageData.metadata = {
                         reply_to_id: replyContext.messageId,
                         reply_to_sender: replyContext.senderName,
@@ -4428,7 +4629,7 @@
                                 await updateGlobalUnreadCount();
                                 updateUnreadBadges();
 
-                                if (window.TechTitansNotifications) {
+                                if (window.TechTitansNotifications && document.hidden) {
                                     window.TechTitansNotifications.display(`New message in ${newMsg.role}`, {
                                         body: `${senderProfile.full_name}: ${newMsg.content || 'Sent a voice note'}`,
                                         url: 'messages.html'
@@ -4476,7 +4677,7 @@
                             await updateGlobalUnreadCount();
                             updateUnreadBadges();
 
-                            if (window.TechTitansNotifications) {
+                            if (window.TechTitansNotifications && document.hidden) {
                                 window.TechTitansNotifications.display(`New message in ${newMsg.role}`, {
                                     body: `${senderProfile.full_name}: ${newMsg.content || 'Sent a voice note'}`,
                                     url: 'messages.html'

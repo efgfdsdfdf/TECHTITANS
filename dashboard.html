@@ -1,1431 +1,1639 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="img/titans_logo2.png">
-  <title>TECH TITANS · Dashboard</title>
-  <!-- Font Awesome Icons (v6 free) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- Chart.js for message trend -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="native-bridge.js"></script>
-  <script src="notifications.js"></script>
-  <script src="ringtone.js"></script>
-  <script src="global-notifications.js"></script>
-  <style>
-    /* =====================================================================
-       DESIGN TOKENS
-       A small, deliberate palette kept close to the original brand blue,
-       but with restrained radii, quieter shadows and a clearer type scale
-       so the surface reads as a professional operations console rather
-       than a marketing page.
-    ===================================================================== */
-    :root {
-      --bg-canvas: #0a0e17;
-      --bg-canvas-2: #10151f;
-      --bg-surface: rgba(20, 27, 40, 0.72);
-      --bg-surface-solid: #141b28;
-      --bg-surface-raised: rgba(26, 34, 50, 0.85);
-      --bg-inset: rgba(6, 10, 18, 0.55);
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="img/titans_logo2.png">
+    <title>TECH TITANS · Dashboard</title>
+    <!-- Font Awesome Icons (v6 free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js for message trend -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
+    </script>
+    <script src="native-bridge.js">
+    </script>
+    <script src="notifications.js">
+    </script>
+    <script src="ringtone.js">
+    </script>
+    <script src="global-notifications.js">
+    </script>
+    <style>
+        /* =====================================================================
+           DESIGN TOKENS
+           A small, deliberate palette kept close to the original brand blue,
+           but with restrained radii, quieter shadows and a clearer type scale
+           so the surface reads as a professional operations console rather
+           than a marketing page.
+        ===================================================================== */
+        :root {
+            --bg-canvas: #0a0e17;
+            --bg-canvas-2: #10151f;
+            --bg-surface: rgba(20, 27, 40, 0.72);
+            --bg-surface-solid: #141b28;
+            --bg-surface-raised: rgba(26, 34, 50, 0.85);
+            --bg-inset: rgba(6, 10, 18, 0.55);
 
-      --border-subtle: rgba(112, 148, 209, 0.14);
-      --border-default: rgba(112, 148, 209, 0.22);
-      --border-strong: rgba(112, 148, 209, 0.34);
+            --border-subtle: rgba(112, 148, 209, 0.14);
+            --border-default: rgba(112, 148, 209, 0.22);
+            --border-strong: rgba(112, 148, 209, 0.34);
 
-      --accent: #3f7fe0;
-      --accent-hover: #5590ea;
-      --accent-soft: rgba(63, 127, 224, 0.14);
-      --accent-soft-strong: rgba(63, 127, 224, 0.22);
+            --accent: #3f7fe0;
+            --accent-hover: #5590ea;
+            --accent-soft: rgba(63, 127, 224, 0.14);
+            --accent-soft-strong: rgba(63, 127, 224, 0.22);
 
-      --danger: #e2564f;
-      --danger-soft: rgba(226, 86, 79, 0.14);
-      --warning: #d99a3f;
+            --danger: #e2564f;
+            --danger-soft: rgba(226, 86, 79, 0.14);
+            --warning: #d99a3f;
 
-      --text-primary: #eef2fb;
-      --text-secondary: #a7b3cf;
-      --text-muted: #6b7899;
+            --text-primary: #eef2fb;
+            --text-secondary: #a7b3cf;
+            --text-muted: #6b7899;
 
-      --radius-xs: 6px;
-      --radius-sm: 10px;
-      --radius-md: 14px;
-      --radius-lg: 18px;
-      --radius-pill: 999px;
+            --radius-xs: 6px;
+            --radius-sm: 10px;
+            --radius-md: 14px;
+            --radius-lg: 18px;
+            --radius-pill: 999px;
 
-      --shadow-sm: 0 4px 14px -6px rgba(0, 0, 0, 0.45);
-      --shadow-md: 0 14px 34px -18px rgba(0, 0, 0, 0.6);
-      --shadow-lg: 0 24px 60px -24px rgba(0, 0, 0, 0.7);
+            --shadow-sm: 0 4px 14px -6px rgba(0, 0, 0, 0.45);
+            --shadow-md: 0 14px 34px -18px rgba(0, 0, 0, 0.6);
+            --shadow-lg: 0 24px 60px -24px rgba(0, 0, 0, 0.7);
 
-      --font-body: 'Inter', system-ui, -apple-system, sans-serif;
-    }
+            --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+        }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: var(--font-body);
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font-body);
+        }
 
-    body {
-      background:
-        radial-gradient(circle at 12% 0%, rgba(63, 127, 224, 0.10), transparent 45%),
-        linear-gradient(180deg, var(--bg-canvas-2), var(--bg-canvas));
-      min-height: 100vh;
-      display: flex;
-      color: var(--text-primary);
-    }
+        body {
+            background:
+                radial-gradient(circle at 12% 0%, rgba(63, 127, 224, 0.10), transparent 45%),
+                linear-gradient(180deg, var(--bg-canvas-2), var(--bg-canvas));
+            min-height: 100vh;
+            display: flex;
+            color: var(--text-primary);
+        }
 
-    a { color: inherit; }
-    button { font-family: inherit; }
+        a {
+            color: inherit;
+        }
+        button {
+            font-family: inherit;
+        }
 
-    /* ---------- SIDEBAR ---------- */
-    .sidebar {
-      width: 264px;
-      flex-shrink: 0;
-      background: var(--bg-surface);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border-right: 1px solid var(--border-subtle);
-      padding: 1.75rem 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 2.25rem;
-    }
+        /* ---------- SIDEBAR ---------- */
+        .sidebar {
+            width: 264px;
+            flex-shrink: 0;
+            background: var(--bg-surface);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-right: 1px solid var(--border-subtle);
+            padding: 1.75rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2.25rem;
+        }
 
-    .logo {
-      display: flex;
-      align-items: baseline;
-      gap: 0.35rem;
-      font-size: 1.35rem;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-      padding-left: 0.6rem;
-      color: var(--text-primary);
-    }
-    .logo span { color: var(--accent); }
+        .logo {
+            display: flex;
+            align-items: baseline;
+            gap: 0.35rem;
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            padding-left: 0.6rem;
+            color: var(--text-primary);
+        }
+        .logo span {
+            color: var(--accent);
+        }
 
-    .nav {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-    .nav a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      padding: 0.7rem 0.9rem;
-      border-radius: var(--radius-sm);
-      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-      font-weight: 500;
-      font-size: 0.92rem;
-      display: flex;
-      align-items: center;
-      gap: 0.85rem;
-      background: var(--bg-inset);
-      border: 1px solid var(--border-subtle);
-      border-left: 2px solid var(--border-subtle);
-    }
-    .nav a i { width: 1.1rem; font-size: 1rem; text-align: center; color: var(--text-muted); }
-    .nav a:hover {
-      background: rgba(112, 148, 209, 0.1);
-      border-color: var(--border-strong);
-      color: var(--text-primary);
-    }
-    .nav a:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 1px;
-    }
-    .nav a.active {
-      background: var(--accent-soft);
-      border-color: var(--border-strong);
-      border-left: 2px solid var(--accent);
-      color: var(--text-primary);
-      box-shadow: var(--shadow-sm);
-    }
-    .nav a.active i { color: var(--accent); }
+        .nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.7rem 0.9rem;
+            border-radius: var(--radius-sm);
+            transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+            font-weight: 500;
+            font-size: 0.92rem;
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            background: var(--bg-inset);
+            border: 1px solid var(--border-subtle);
+            border-left: 2px solid var(--border-subtle);
+            position: relative;
+        }
+        .nav a i {
+            width: 1.1rem;
+            font-size: 1rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+        .nav a:hover {
+            background: rgba(112, 148, 209, 0.1);
+            border-color: var(--border-strong);
+            color: var(--text-primary);
+        }
+        .nav a:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 1px;
+        }
+        .nav a.active {
+            background: var(--accent-soft);
+            border-color: var(--border-strong);
+            border-left: 2px solid var(--accent);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-sm);
+        }
+        .nav a.active i {
+            color: var(--accent);
+        }
 
-    .sidebar-unread {
-      background: var(--danger);
-      color: white;
-      border-radius: var(--radius-pill);
-      padding: 0.15rem 0.5rem;
-      font-size: 0.68rem;
-      font-weight: 700;
-      margin-left: auto;
-    }
+        /* ---- unread badges on sidebar nav items ---- */
+        .nav-badge {
+            background: var(--danger);
+            color: #fff;
+            border-radius: var(--radius-pill);
+            padding: 0.1rem 0.5rem;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            margin-left: auto;
+            flex-shrink: 0;
+            min-width: 1.3rem;
+            text-align: center;
+            line-height: 1.4;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 2px 6px rgba(226, 86, 79, 0.25);
+            display: none;
+            /* hidden by default; shown when count > 0 */
+        }
+        .nav-badge.visible {
+            display: inline-block;
+        }
 
-    .logout-btn {
-      margin-top: auto;
-      background: transparent;
-      border: 1px solid var(--border-default);
-      color: var(--text-secondary);
-      padding: 0.75rem;
-      border-radius: var(--radius-sm);
-      font-weight: 600;
-      font-size: 0.88rem;
-      cursor: pointer;
-      transition: 0.15s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-    .logout-btn:hover {
-      background: var(--danger-soft);
-      border-color: var(--danger);
-      color: #ffd4d1;
-    }
+        /* ---- CEO/Admin panel link ---- */
+        .nav a[href="admin.html"] i {
+            color: var(--warning);
+        }
+        .nav a[href="admin.html"].active i {
+            color: var(--warning);
+        }
 
-    /* ---------- MAIN CONTENT ---------- */
-    .main {
-      flex: 1;
-      padding: 1.75rem 2.25rem 2.5rem;
-      overflow-y: auto;
-      min-width: 0;
-    }
+        .logout-btn {
+            margin-top: auto;
+            background: transparent;
+            border: 1px solid var(--border-default);
+            color: var(--text-secondary);
+            padding: 0.75rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .logout-btn:hover {
+            background: var(--danger-soft);
+            border-color: var(--danger);
+            color: #ffd4d1;
+        }
 
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-      gap: 1rem;
-    }
-    .page-heading {
-      font-size: 1.3rem;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-    }
-    .page-subheading {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-top: 0.15rem;
-    }
-    .user-greeting {
-      background: var(--bg-surface);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      padding: 0.55rem 1.1rem;
-      border-radius: var(--radius-pill);
-      border: 1px solid var(--border-default);
-      font-weight: 500;
-      font-size: 0.88rem;
-      color: var(--text-secondary);
-      flex-shrink: 0;
-    }
-    .user-greeting i { margin-right: 0.4rem; color: var(--accent); }
-    .user-greeting span { color: var(--text-primary); font-weight: 600; }
+        /* ---------- MAIN CONTENT ---------- */
+        .main {
+            flex: 1;
+            padding: 1.75rem 2.25rem 2.5rem;
+            overflow-y: auto;
+            min-width: 0;
+        }
 
-    /* ---------- ANNOUNCEMENT BANNER ---------- */
-    .announcement-banner {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      background: var(--bg-surface);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-md);
-      padding: 0.95rem 1.1rem;
-      margin-bottom: 1.5rem;
-      cursor: pointer;
-      transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
-      box-shadow: var(--shadow-sm);
-    }
-    .announcement-banner:hover {
-      border-color: var(--border-strong);
-      background: var(--bg-surface-raised);
-    }
-    .announcement-banner:active { transform: scale(0.997); }
-    .announcement-banner:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-    }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+        .page-heading {
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+        .page-subheading {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.15rem;
+        }
+        .user-greeting {
+            background: var(--bg-surface);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 0.55rem 1.1rem;
+            border-radius: var(--radius-pill);
+            border: 1px solid var(--border-default);
+            font-weight: 500;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+        .user-greeting i {
+            margin-right: 0.4rem;
+            color: var(--accent);
+        }
+        .user-greeting span {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
 
-    .banner-icon {
-      flex-shrink: 0;
-      width: 38px;
-      height: 38px;
-      border-radius: var(--radius-sm);
-      background: var(--accent-soft);
-      color: var(--accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-    }
-    .banner-body { flex: 1; min-width: 0; }
-    .banner-top {
-      display: flex;
-      align-items: baseline;
-      gap: 0.6rem;
-      margin-bottom: 0.2rem;
-    }
-    .banner-label {
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--accent);
-    }
-    .banner-meta {
-      font-size: 0.76rem;
-      color: var(--text-muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .banner-text {
-      font-size: 0.92rem;
-      color: var(--text-primary);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .banner-text.is-empty { color: var(--text-muted); font-style: italic; }
+        /* ---------- ANNOUNCEMENT BANNER (no badge) ---------- */
+        .announcement-banner {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--bg-surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            padding: 0.95rem 1.1rem;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        .announcement-banner:hover {
+            border-color: var(--border-strong);
+            background: var(--bg-surface-raised);
+        }
+        .announcement-banner:active {
+            transform: scale(0.997);
+        }
+        .announcement-banner:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
 
-    .banner-right {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      flex-shrink: 0;
-    }
-    .banner-badge {
-      background: var(--danger);
-      color: white;
-      border-radius: var(--radius-pill);
-      padding: 0.18rem 0.55rem;
-      font-size: 0.72rem;
-      font-weight: 700;
-      min-width: 1.4rem;
-      text-align: center;
-    }
-    .banner-chevron { color: var(--text-muted); font-size: 0.85rem; }
+        .banner-icon {
+            flex-shrink: 0;
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-sm);
+            background: var(--accent-soft);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        .banner-body {
+            flex: 1;
+            min-width: 0;
+        }
+        .banner-top {
+            display: flex;
+            align-items: baseline;
+            gap: 0.6rem;
+            margin-bottom: 0.2rem;
+        }
+        .banner-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+        .banner-meta {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .banner-text {
+            font-size: 0.92rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .banner-text.is-empty {
+            color: var(--text-muted);
+            font-style: italic;
+        }
 
-    /* ---------- ANNOUNCEMENT MODAL ---------- */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(5, 8, 14, 0.66);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      display: none;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 6vh 1.25rem;
-      z-index: 100;
-    }
-    .modal-overlay.open { display: flex; }
+        .banner-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-shrink: 0;
+        }
+        /* banner badge removed per user request — hidden entirely */
+        .banner-badge {
+            display: none !important;
+        }
+        .banner-chevron {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
 
-    .modal-panel {
-      width: 100%;
-      max-width: 620px;
-      max-height: 86vh;
-      background: var(--bg-surface-solid);
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-lg);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      animation: modal-in 0.16s ease-out;
-    }
-    @keyframes modal-in {
-      from { opacity: 0; transform: translateY(-8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+        /* ---------- ANNOUNCEMENT MODAL ---------- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 8, 14, 0.66);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 6vh 1.25rem;
+            z-index: 100;
+        }
+        .modal-overlay.open {
+            display: flex;
+        }
 
-    .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.1rem 1.35rem;
-      border-bottom: 1px solid var(--border-subtle);
-      flex-shrink: 0;
-    }
-    .modal-header h3 {
-      font-size: 1.05rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 0.55rem;
-    }
-    .modal-header h3 i { color: var(--accent); font-size: 0.95rem; }
-    .modal-close {
-      background: transparent;
-      border: 1px solid var(--border-default);
-      color: var(--text-secondary);
-      width: 30px;
-      height: 30px;
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: 0.15s ease;
-    }
-    .modal-close:hover { background: var(--danger-soft); border-color: var(--danger); color: #ffd4d1; }
+        .modal-panel {
+            width: 100%;
+            max-width: 620px;
+            max-height: 86vh;
+            background: var(--bg-surface-solid);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: modal-in 0.16s ease-out;
+        }
+        @keyframes modal-in {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    .modal-body {
-      padding: 1.1rem 1.35rem 1.35rem;
-      overflow-y: auto;
-    }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.1rem 1.35rem;
+            border-bottom: 1px solid var(--border-subtle);
+            flex-shrink: 0;
+        }
+        .modal-header h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+        }
+        .modal-header h3 i {
+            color: var(--accent);
+            font-size: 0.95rem;
+        }
+        .modal-close {
+            background: transparent;
+            border: 1px solid var(--border-default);
+            color: var(--text-secondary);
+            width: 30px;
+            height: 30px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.15s ease;
+        }
+        .modal-close:hover {
+            background: var(--danger-soft);
+            border-color: var(--danger);
+            color: #ffd4d1;
+        }
 
-    /* CEO composer (lives inside the modal) */
-    .composer-toggle {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: var(--accent-soft);
-      color: var(--accent-hover);
-      border: 1px dashed var(--border-strong);
-      border-radius: var(--radius-md);
-      padding: 0.65rem 0.9rem;
-      font-weight: 600;
-      font-size: 0.88rem;
-      cursor: pointer;
-      width: 100%;
-      margin-bottom: 1.1rem;
-      transition: 0.15s ease;
-    }
-    .composer-toggle:hover { background: var(--accent-soft-strong); }
+        .modal-body {
+            padding: 1.1rem 1.35rem 1.35rem;
+            overflow-y: auto;
+        }
 
-    .announcement-form {
-      background: var(--bg-inset);
-      border-radius: var(--radius-md);
-      padding: 1rem;
-      margin-bottom: 1.1rem;
-      border: 1px solid var(--border-subtle);
-      display: none;
-    }
-    .announcement-form.open { display: block; }
-    .announcement-form textarea {
-      width: 100%;
-      background: var(--bg-canvas);
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-sm);
-      padding: 0.8rem 0.9rem;
-      color: var(--text-primary);
-      font-size: 0.92rem;
-      resize: vertical;
-      min-height: 80px;
-      margin-bottom: 0.85rem;
-    }
-    .announcement-form textarea:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    .form-actions {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    .file-label {
-      background: var(--bg-surface-raised);
-      color: var(--text-secondary);
-      padding: 0.5rem 1rem;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      border: 1px solid var(--border-default);
-      transition: 0.15s ease;
-      font-size: 0.85rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-    .file-label:hover { border-color: var(--border-strong); color: var(--text-primary); }
-    .file-name-preview {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      max-width: 160px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    #announcementFile { display: none; }
-    .post-btn {
-      background: var(--accent);
-      border: none;
-      color: white;
-      padding: 0.55rem 1.4rem;
-      border-radius: var(--radius-sm);
-      font-weight: 600;
-      font-size: 0.88rem;
-      cursor: pointer;
-      transition: 0.15s ease;
-      margin-left: auto;
-    }
-    .post-btn:hover { background: var(--accent-hover); }
-    .post-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        /* CEO composer */
+        .composer-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--accent-soft);
+            color: var(--accent-hover);
+            border: 1px dashed var(--border-strong);
+            border-radius: var(--radius-md);
+            padding: 0.65rem 0.9rem;
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 1.1rem;
+            transition: 0.15s ease;
+        }
+        .composer-toggle:hover {
+            background: var(--accent-soft-strong);
+        }
 
-    /* announcements list (inside modal) */
-    .announcements-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    .announcement-card {
-      background: var(--bg-inset);
-      border: 1px solid var(--border-subtle);
-      border-left: 3px solid var(--accent);
-      border-radius: var(--radius-md);
-      padding: 1rem 1.1rem;
-      position: relative;
-    }
-    .announcement-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 0.75rem;
-      color: var(--text-muted);
-      font-size: 0.78rem;
-      margin-bottom: 0.5rem;
-      padding-right: 1.75rem;
-    }
-    .announcement-author {
-      font-weight: 600;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-    }
-    .announcement-date { color: var(--text-muted); flex-shrink: 0; }
-    .announcement-content {
-      color: var(--text-primary);
-      font-size: 0.92rem;
-      line-height: 1.5;
-      margin-bottom: 0.6rem;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-    .announcement-attachment a {
-      color: var(--accent-hover);
-      text-decoration: none;
-      font-size: 0.85rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-    }
-    .announcement-attachment a:hover { text-decoration: underline; }
-    .empty-state {
-      color: var(--text-muted);
-      text-align: center;
-      padding: 2rem 1rem;
-      font-size: 0.9rem;
-    }
-    .delete-announcement {
-      position: absolute;
-      top: 0.85rem;
-      right: 0.85rem;
-      background: transparent;
-      border: 1px solid transparent;
-      color: var(--text-muted);
-      width: 1.8rem;
-      height: 1.8rem;
-      border-radius: var(--radius-xs);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: 0.15s ease;
-      font-size: 0.85rem;
-    }
-    .delete-announcement:hover { background: var(--danger-soft); border-color: var(--danger); color: #ffd4d1; }
+        .announcement-form {
+            background: var(--bg-inset);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-bottom: 1.1rem;
+            border: 1px solid var(--border-subtle);
+            display: none;
+        }
+        .announcement-form.open {
+            display: block;
+        }
+        .announcement-form textarea {
+            width: 100%;
+            background: var(--bg-canvas);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-sm);
+            padding: 0.8rem 0.9rem;
+            color: var(--text-primary);
+            font-size: 0.92rem;
+            resize: vertical;
+            min-height: 80px;
+            margin-bottom: 0.85rem;
+        }
+        .announcement-form textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .form-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .file-label {
+            background: var(--bg-surface-raised);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            border: 1px solid var(--border-default);
+            transition: 0.15s ease;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .file-label:hover {
+            border-color: var(--border-strong);
+            color: var(--text-primary);
+        }
+        .file-name-preview {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            max-width: 160px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        #announcementFile {
+            display: none;
+        }
+        .post-btn {
+            background: var(--accent);
+            border: none;
+            color: white;
+            padding: 0.55rem 1.4rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: 0.15s ease;
+            margin-left: auto;
+        }
+        .post-btn:hover {
+            background: var(--accent-hover);
+        }
+        .post-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
 
-    /* dashboard grid (user info cards) */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.1rem;
-      margin-bottom: 1.5rem;
-    }
-    .card {
-      background: var(--bg-surface);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-md);
-      padding: 1.35rem 1.25rem;
-      transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
-      box-shadow: var(--shadow-sm);
-    }
-    .card:hover {
-      border-color: var(--border-strong);
-      box-shadow: var(--shadow-md);
-      transform: translateY(-2px);
-    }
-    .card-title {
-      color: var(--text-muted);
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      font-weight: 600;
-      margin-bottom: 0.6rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-    .card-title i { color: var(--accent); }
-    .card-value {
-      color: var(--text-primary);
-      font-size: 1.55rem;
-      font-weight: 700;
-      line-height: 1.25;
-      margin-bottom: 0.15rem;
-      word-break: break-word;
-    }
-    .card-label {
-      color: var(--text-muted);
-      font-size: 0.83rem;
-    }
+        /* announcements list */
+        .announcements-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .announcement-card {
+            background: var(--bg-inset);
+            border: 1px solid var(--border-subtle);
+            border-left: 3px solid var(--accent);
+            border-radius: var(--radius-md);
+            padding: 1rem 1.1rem;
+            position: relative;
+        }
+        .announcement-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            margin-bottom: 0.5rem;
+            padding-right: 1.75rem;
+        }
+        .announcement-author {
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .announcement-date {
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+        .announcement-content {
+            color: var(--text-primary);
+            font-size: 0.92rem;
+            line-height: 1.5;
+            margin-bottom: 0.6rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .announcement-attachment a {
+            color: var(--accent-hover);
+            text-decoration: none;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .announcement-attachment a:hover {
+            text-decoration: underline;
+        }
+        .empty-state {
+            color: var(--text-muted);
+            text-align: center;
+            padding: 2rem 1rem;
+            font-size: 0.9rem;
+        }
+        .delete-announcement {
+            position: absolute;
+            top: 0.85rem;
+            right: 0.85rem;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            width: 1.8rem;
+            height: 1.8rem;
+            border-radius: var(--radius-xs);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.15s ease;
+            font-size: 0.85rem;
+        }
+        .delete-announcement:hover {
+            background: var(--danger-soft);
+            border-color: var(--danger);
+            color: #ffd4d1;
+        }
 
-    /* chart & activity row */
-    .row-duo {
-      display: grid;
-      grid-template-columns: 1.5fr 1fr;
-      gap: 1.1rem;
-      margin-top: 0.25rem;
-    }
-    .chart-container, .activity-feed {
-      background: var(--bg-surface);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-md);
-      padding: 1.35rem;
-      box-shadow: var(--shadow-sm);
-    }
-    .chart-container h3, .activity-feed h3 {
-      font-size: 0.98rem;
-      font-weight: 700;
-      margin-bottom: 1.2rem;
-      color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .chart-container h3 i, .activity-feed h3 i { color: var(--accent); font-size: 0.9rem; }
-    canvas { max-height: 200px; width: 100% !important; }
+        /* dashboard grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+        .card {
+            background: var(--bg-surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            padding: 1.35rem 1.25rem;
+            transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        .card:hover {
+            border-color: var(--border-strong);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        .card-title {
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: 600;
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .card-title i {
+            color: var(--accent);
+        }
+        .card-value {
+            color: var(--text-primary);
+            font-size: 1.55rem;
+            font-weight: 700;
+            line-height: 1.25;
+            margin-bottom: 0.15rem;
+            word-break: break-word;
+        }
+        .card-label {
+            color: var(--text-muted);
+            font-size: 0.83rem;
+        }
 
-    .activity-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.85rem;
-      padding: 0.7rem 0;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-    .activity-item:last-child { border-bottom: none; }
-    .activity-avatar {
-      width: 32px; height: 32px;
-      background: var(--accent-soft);
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent);
-      font-weight: 700;
-      font-size: 0.82rem;
-      flex-shrink: 0;
-    }
-    .activity-details { flex: 1; min-width: 0; }
-    .activity-name { font-weight: 600; color: var(--text-primary); font-size: 0.88rem; }
-    .activity-msg {
-      color: var(--text-secondary);
-      font-size: 0.85rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 100%;
-    }
-    .activity-time { font-size: 0.72rem; color: var(--text-muted); }
+        /* chart & activity row */
+        .row-duo {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 1.1rem;
+            margin-top: 0.25rem;
+        }
+        .chart-container,
+        .activity-feed {
+            background: var(--bg-surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            padding: 1.35rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .chart-container h3,
+        .activity-feed h3 {
+            font-size: 0.98rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .chart-container h3 i,
+        .activity-feed h3 i {
+            color: var(--accent);
+            font-size: 0.9rem;
+        }
+        canvas {
+            max-height: 200px;
+            width: 100% !important;
+        }
 
-    /* loading state */
-    .loading { opacity: 0.55; pointer-events: none; animation: pulse 1.4s infinite; }
-    @keyframes pulse { 0% { opacity: 0.55; } 50% { opacity: 0.9; } 100% { opacity: 0.55; } }
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.85rem;
+            padding: 0.7rem 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        .activity-avatar {
+            width: 32px;
+            height: 32px;
+            background: var(--accent-soft);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 0.82rem;
+            flex-shrink: 0;
+        }
+        .activity-details {
+            flex: 1;
+            min-width: 0;
+        }
+        .activity-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.88rem;
+        }
+        .activity-msg {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+        .activity-time {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
 
-    /* ---------- RESPONSIVE ---------- */
-    @media (max-width: 1000px) {
-      .row-duo { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 768px) {
-      body { flex-direction: column; }
-      .sidebar {
-        width: 100%;
-        padding: 0.85rem;
-        gap: 0.85rem;
-      }
-      .nav { flex-direction: row; flex-wrap: wrap; justify-content: center; }
-      .nav a { padding: 0.5rem 0.8rem; font-size: 0.85rem; border-left: 1px solid var(--border-subtle); border-bottom: 2px solid transparent; }
-      .nav a.active { border-left: none; border-bottom: 2px solid var(--accent); }
-      .sidebar-unread { position: absolute; top: -2px; right: -2px; }
-      .main { padding: 1rem; }
-      .top-bar { flex-wrap: wrap; }
-      .dashboard-grid { gap: 0.85rem; }
-      .form-actions { flex-direction: column; align-items: stretch; }
-      .post-btn { margin-left: 0; }
-      .modal-overlay { padding: 0; align-items: stretch; }
-      .modal-panel { max-width: none; max-height: 100vh; height: 100vh; border-radius: 0; }
-    }
-    @media (max-width: 480px) {
-      .card-value { font-size: 1.4rem; }
-      .announcement-form { padding: 0.85rem; }
-      .banner-text { font-size: 0.85rem; }
-    }
-  </style>
+        .loading {
+            opacity: 0.55;
+            pointer-events: none;
+            animation: pulse 1.4s infinite;
+        }
+        @keyframes pulse {
+            0% {
+                opacity: 0.55;
+            }
+            50% {
+                opacity: 0.9;
+            }
+            100% {
+                opacity: 0.55;
+            }
+        }
+
+        /* ---------- RESPONSIVE ---------- */
+        @media (max-width: 1000px) {
+            .row-duo {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                padding: 0.85rem;
+                gap: 0.85rem;
+            }
+            .nav {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .nav a {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.85rem;
+                border-left: 1px solid var(--border-subtle);
+                border-bottom: 2px solid transparent;
+            }
+            .nav a.active {
+                border-left: none;
+                border-bottom: 2px solid var(--accent);
+            }
+            .nav-badge {
+                font-size: 0.55rem;
+                min-width: 1rem;
+                padding: 0.05rem 0.4rem;
+            }
+            .main {
+                padding: 1rem;
+            }
+            .top-bar {
+                flex-wrap: wrap;
+            }
+            .dashboard-grid {
+                gap: 0.85rem;
+            }
+            .form-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .post-btn {
+                margin-left: 0;
+            }
+            .modal-overlay {
+                padding: 0;
+                align-items: stretch;
+            }
+            .modal-panel {
+                max-width: none;
+                max-height: 100vh;
+                height: 100vh;
+                border-radius: 0;
+            }
+        }
+        @media (max-width: 480px) {
+            .card-value {
+                font-size: 1.4rem;
+            }
+            .announcement-form {
+                padding: 0.85rem;
+            }
+            .banner-text {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="sidebar">
-    <div class="logo">TECH<span>TITANS</span></div>
+    <div class="sidebar">
+        <div class="logo">TECH<span>TITANS</span></div>
 
-    <div id="sidebarNav" class="nav">
-      <a href="dashboard.html" class="active"><i class="fas fa-chart-pie"></i> Dashboard</a>
-      <a href="messages.html" id="chatNavLink"><i class="fas fa-comments"></i> Group Chat
-        <span class="sidebar-unread" id="sidebarUnreadBadge" style="display: none;">0</span>
-      </a>
-      <a href="dm.html"><i class="fas fa-envelope"></i> Direct Messages
-        <span class="sidebar-unread" id="globalDmUnreadBadge" style="display: none;">0</span>
-      </a>
-      <a href="calls.html"><i class="fas fa-phone"></i> Call Logs</a>
-      <a href="resources.html"><i class="fas fa-book-open"></i> Resources</a>
-      <a href="profile.html"><i class="fas fa-user-cog"></i> Profile</a>
-    </div>
-    <button class="logout-btn" id="logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
-  </div>
-
-  <div class="main">
-    <div class="top-bar">
-      <div>
-        <div class="page-heading">Dashboard</div>
-        <div class="page-subheading">Overview of activity and announcements</div>
-      </div>
-      <div class="user-greeting"><i class="fas fa-hand-peace"></i> Hello, <span id="userName"></span></div>
-    </div>
-
-    <!-- ========== ANNOUNCEMENT BANNER ========== -->
-    <div class="announcement-banner" id="announcementBanner" role="button" tabindex="0" aria-haspopup="dialog">
-      <div class="banner-icon"><i class="fas fa-bullhorn"></i></div>
-      <div class="banner-body">
-        <div class="banner-top">
-          <span class="banner-label">Announcement</span>
-          <span class="banner-meta" id="bannerMeta">Loading…</span>
+        <div id="sidebarNav" class="nav">
+            <a href="dashboard.html" class="active"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a href="messages.html" id="chatNavLink">
+                <i class="fas fa-comments"></i> Group Chat
+                <span class="nav-badge" id="sidebarUnreadBadge">0</span>
+            </a>
+            <a href="dm.html" id="dmNavLink">
+                <i class="fas fa-envelope"></i> Direct Messages
+                <span class="nav-badge" id="globalDmUnreadBadge">0</span>
+            </a>
+            <a href="calls.html"><i class="fas fa-phone"></i> Call Logs</a>
+            <a href="resources.html"><i class="fas fa-book-open"></i> Resources</a>
+            <a href="profile.html"><i class="fas fa-user-cog"></i> Profile</a>
         </div>
-        <div class="banner-text" id="bannerText">Loading announcements…</div>
-      </div>
-      <div class="banner-right">
-        <span class="banner-badge" id="bannerUnreadBadge" style="display: none;">0</span>
-        <i class="fas fa-chevron-right banner-chevron"></i>
-      </div>
+        <button class="logout-btn" id="logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </div>
 
-    <!-- Compact user info cards (3 only) -->
-    <div class="dashboard-grid" id="userInfoGrid">
-      <!-- filled by js -->
-    </div>
-
-    <!-- extended stats + chart + activity -->
-    <div class="row-duo">
-      <!-- message trend chart -->
-      <div class="chart-container">
-        <h3><i class="fas fa-chart-line"></i> Message activity (7 days)</h3>
-        <canvas id="messageChart"></canvas>
-        <p class="card-label" style="margin-top: 0.8rem; text-align: center;">messages per day</p>
-      </div>
-      <!-- recent activity feed -->
-      <div class="activity-feed">
-        <h3><i class="fas fa-clock"></i> Recent activity</h3>
-        <div id="recentActivityList">
-          <div class="activity-item loading">Loading...</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========== ANNOUNCEMENT MODAL ========== -->
-  <div class="modal-overlay" id="announcementModal" role="dialog" aria-modal="true" aria-labelledby="announcementModalTitle">
-    <div class="modal-panel">
-      <div class="modal-header">
-        <h3 id="announcementModalTitle"><i class="fas fa-bullhorn"></i> Announcements</h3>
-        <button class="modal-close" id="closeAnnouncementModal" aria-label="Close"><i class="fas fa-times"></i></button>
-      </div>
-      <div class="modal-body">
-        <button type="button" class="composer-toggle" id="composerToggle" style="display: none;">
-          <i class="fas fa-plus"></i> New announcement
-        </button>
-        <div id="ceoAnnouncementForm" class="announcement-form">
-          <textarea id="announcementContent" placeholder="Write an important announcement..."></textarea>
-          <div class="form-actions">
-            <label for="announcementFile" class="file-label"><i class="fas fa-paperclip"></i> Attach file</label>
-            <input type="file" id="announcementFile" accept="*/*">
-            <span class="file-name-preview" id="fileNamePreview"></span>
-            <button class="post-btn" id="postAnnouncementBtn"><i class="fas fa-paper-plane"></i> Post</button>
-          </div>
-        </div>
-        <div id="announcementsList" class="announcements-list">
-          <div class="empty-state loading">Loading announcements...</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-   /**
- * ⚠️ IMPORTANT: This code requires a `target_value` column in the `announcements` table.
- *
- * Your database has a trigger/function that references `NEW.target_value`, but the column
- * does not exist. To fix this, run the following SQL in your Supabase SQL Editor:
- *
- *   ALTER TABLE announcements ADD COLUMN target_value TEXT DEFAULT NULL;
- *
- * After adding the column, the insert below (which includes `target_value: 'global'`)
- * will succeed.
- *
- * If you cannot add the column, you must either:
- *   - Drop the trigger that references `target_value`, or
- *   - Modify the trigger to not use that field.
- *
- * This JavaScript already includes the `target_value` field in the INSERT.
- */
-
-(function() {
-  'use strict';
-
-  // ===========================================================================
-  // CONFIG
-  // ===========================================================================
-  const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kcXF0c2RpYnR2eW1mZ250c3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTI1NjIsImV4cCI6MjA4Nzg4ODU2Mn0.hS-7kmoyFljnhkJEkw7nmgimw9ioQreidyu27_NXYyo';
-  const ANNOUNCEMENT_TTL_MS = 24 * 60 * 60 * 1000; // announcements older than this are pruned
-  const UNREAD_POLL_MS = 10000;
-
-  if (!window.supabase) {
-    document.body.innerHTML = '<p style="color:white;padding:2rem;">Failed to load Supabase. Refresh.</p>';
-    return;
-  }
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  if (window.TechTitansNotifications) {
-    window.TechTitansNotifications.connect(supabase);
-  }
-
-  // ===========================================================================
-  // STATE
-  // ===========================================================================
-  const State = {
-    currentUser: null,
-    currentRole: null,
-    isCEO: false,
-    unreadMessageCount: 0,
-    refreshInterval: null,
-    messageChart: null,
-    announcementsChannel: null,
-    announcements: [],      // cached, most-recent-first
-    announcementsModalOpen: false
-  };
-
-  // ===========================================================================
-  // DOM REFS
-  // ===========================================================================
-  const El = {
-    userName: document.getElementById('userName'),
-    sidebarNav: document.getElementById('sidebarNav'),
-    sidebarUnreadBadge: document.getElementById('sidebarUnreadBadge'),
-    userInfoGrid: document.getElementById('userInfoGrid'),
-    logout: document.getElementById('logout'),
-
-    banner: document.getElementById('announcementBanner'),
-    bannerMeta: document.getElementById('bannerMeta'),
-    bannerText: document.getElementById('bannerText'),
-    bannerBadge: document.getElementById('bannerUnreadBadge'),
-
-    modal: document.getElementById('announcementModal'),
-    modalClose: document.getElementById('closeAnnouncementModal'),
-    composerToggle: document.getElementById('composerToggle'),
-    ceoForm: document.getElementById('ceoAnnouncementForm'),
-    announcementContent: document.getElementById('announcementContent'),
-    announcementFile: document.getElementById('announcementFile'),
-    fileNamePreview: document.getElementById('fileNamePreview'),
-    postBtn: document.getElementById('postAnnouncementBtn'),
-    announcementsList: document.getElementById('announcementsList'),
-
-    messageChart: document.getElementById('messageChart'),
-    recentActivityList: document.getElementById('recentActivityList')
-  };
-
-  // ===========================================================================
-  // UTILS
-  // ===========================================================================
-  function escapeHtml(unsafe) {
-    if (!unsafe) return '';
-    return unsafe.replace(/[&<>"']/g, function(m) {
-      if (m === '&') return '&amp;';
-      if (m === '<') return '&lt;';
-      if (m === '>') return '&gt;';
-      if (m === '"') return '&quot;';
-      if (m === "'") return '&#039;';
-      return m;
-    });
-  }
-
-  function formatFullTimestamp(dateStr) {
-    return new Date(dateStr).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  }
-
-  function formatRelativeTime(dateStr) {
-    const then = new Date(dateStr).getTime();
-    const diffMs = Date.now() - then;
-    const min = Math.floor(diffMs / 60000);
-    if (min < 1) return 'Just now';
-    if (min < 60) return `${min}m ago`;
-    const hr = Math.floor(min / 60);
-    if (hr < 24) return `${hr}h ago`;
-    const day = Math.floor(hr / 24);
-    if (day < 7) return `${day}d ago`;
-    return formatFullTimestamp(dateStr);
-  }
-
-  function seenStorageKey() {
-    return State.currentUser ? `tt_announcements_last_seen_${State.currentUser.id}` : null;
-  }
-
-  function getLastSeenAt() {
-    const key = seenStorageKey();
-    if (!key) return 0;
-    const raw = localStorage.getItem(key);
-    return raw ? parseInt(raw, 10) || 0 : 0;
-  }
-
-  function setLastSeenAt(ts) {
-    const key = seenStorageKey();
-    if (!key) return;
-    localStorage.setItem(key, String(ts));
-  }
-
-  // ===========================================================================
-  // STATS: messages / unread / resources / chart / activity
-  // ===========================================================================
-  const Stats = {
-    async fetchUnreadMessageCount() {
-      if (!State.currentUser || !State.currentRole) return 0;
-      try {
-        let query = supabase.from('group_messages').select('id, sender_id');
-        if (!State.isCEO) query = query.eq('role', State.currentRole);
-        const { data: messages, error: msgError } = await query;
-        if (msgError) throw msgError;
-        const messageIds = messages.map(m => m.id);
-        let readSet = new Set();
-        if (messageIds.length) {
-          const { data: reads } = await supabase
-            .from('message_reads')
-            .select('message_id')
-            .eq('user_id', State.currentUser.id)
-            .in('message_id', messageIds);
-          if (reads) readSet = new Set(reads.map(r => r.message_id));
-        }
-        return messages.filter(msg => !readSet.has(msg.id) && msg.sender_id !== State.currentUser.id).length;
-      } catch (err) {
-        console.error('unread error:', err);
-        return 0;
-      }
-    },
-
-    async refreshUnreadBadge() {
-      State.unreadMessageCount = await Stats.fetchUnreadMessageCount();
-      if (El.sidebarUnreadBadge) {
-        if (State.unreadMessageCount > 0) {
-          El.sidebarUnreadBadge.style.display = 'inline-block';
-          El.sidebarUnreadBadge.textContent = State.unreadMessageCount;
-        } else {
-          El.sidebarUnreadBadge.style.display = 'none';
-        }
-      }
-    },
-
-    async fetchTotalMessages() {
-      try {
-        let query = supabase.from('group_messages').select('*', { count: 'exact', head: true });
-        if (!State.isCEO && State.currentRole) query = query.eq('role', State.currentRole);
-        const { count, error } = await query;
-        return error ? 0 : count;
-      } catch { return 0; }
-    },
-
-    async fetchTotalResources() {
-      try {
-        const { count, error } = await supabase.from('resources').select('*', { count: 'exact', head: true });
-        return error ? 0 : count;
-      } catch { return 0; }
-    },
-
-    async fetchRecentMessages() {
-      try {
-        let query = supabase
-          .from('group_messages')
-          .select('id, content, created_at, sender_id, profiles!inner(full_name)')
-          .order('created_at', { ascending: false })
-          .limit(3);
-        if (!State.isCEO && State.currentRole) query = query.eq('role', State.currentRole);
-        const { data, error } = await query;
-        if (error) throw error;
-        return data || [];
-      } catch (err) {
-        console.error('recent messages error:', err);
-        return [];
-      }
-    },
-
-    async fetchDailyCounts() {
-      try {
-        const now = new Date();
-        const sevenDaysAgo = new Date(now);
-        sevenDaysAgo.setDate(now.getDate() - 7);
-        const start = sevenDaysAgo.toISOString();
-
-        let query = supabase
-          .from('group_messages')
-          .select('created_at')
-          .gte('created_at', start);
-        if (!State.isCEO && State.currentRole) query = query.eq('role', State.currentRole);
-        const { data, error } = await query;
-        if (error) throw error;
-
-        const counts = {};
-        for (let i = 0; i < 7; i++) {
-          const d = new Date(now);
-          d.setDate(now.getDate() - i);
-          const ymd = d.toISOString().split('T')[0];
-          counts[ymd] = 0;
-        }
-        data.forEach(msg => {
-          const day = msg.created_at.split('T')[0];
-          if (counts.hasOwnProperty(day)) counts[day]++;
-        });
-        return Object.keys(counts).sort().map(date => ({ date, count: counts[date] }));
-      } catch (err) {
-        console.error('daily counts error:', err);
-        return [];
-      }
-    },
-
-    async renderChart() {
-      const daily = await Stats.fetchDailyCounts();
-      const ctx = El.messageChart.getContext('2d');
-      if (State.messageChart) State.messageChart.destroy();
-      State.messageChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: daily.map(d => d.date.slice(5)),
-          datasets: [{
-            label: 'messages',
-            data: daily.map(d => d.count),
-            backgroundColor: '#3f7fe080',
-            borderRadius: 5,
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            y: { beginAtZero: true, grid: { color: '#20304f' }, ticks: { color: '#8a9ac2' } },
-            x: { grid: { display: false }, ticks: { color: '#8a9ac2' } }
-          }
-        }
-      });
-    },
-
-    async renderActivity() {
-      const recent = await Stats.fetchRecentMessages();
-      if (!recent.length) {
-        El.recentActivityList.innerHTML = '<div class="activity-item">No recent messages</div>';
-        return;
-      }
-      El.recentActivityList.innerHTML = recent.map(msg => {
-        const name = msg.profiles?.full_name || 'User';
-        const initial = name.charAt(0).toUpperCase();
-        const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        return `
-          <div class="activity-item">
-            <div class="activity-avatar">${initial}</div>
-            <div class="activity-details">
-              <span class="activity-name">${escapeHtml(name)}</span>
-              <div class="activity-msg">${escapeHtml(msg.content) || '📎 file'}</div>
-              <span class="activity-time">${time}</span>
+    <div class="main">
+        <div class="top-bar">
+            <div>
+                <div class="page-heading">Dashboard</div>
+                <div class="page-subheading">Overview of activity and announcements</div>
             </div>
-          </div>
-        `;
-      }).join('');
-    },
-
-    async updateStatsCards() {
-      const [totalMsg, unread, totalRes] = await Promise.all([
-        Stats.fetchTotalMessages(),
-        Stats.fetchUnreadMessageCount(),
-        Stats.fetchTotalResources()
-      ]);
-      document.querySelectorAll('.stats-card').forEach(el => el.remove());
-      const statsHTML = `
-        <div class="card stats-card">
-          <div class="card-title"><i class="fas fa-envelope"></i> Total messages</div>
-          <div class="card-value">${totalMsg}</div>
-          <div class="card-label">in current scope</div>
+            <div class="user-greeting"><i class="fas fa-hand-peace"></i> Hello, <span id="userName"></span></div>
         </div>
-        <div class="card stats-card">
-          <div class="card-title"><i class="fas fa-bell"></i> Unread</div>
-          <div class="card-value">${unread}</div>
-          <div class="card-label">messages waiting</div>
+
+        <!-- ========== ANNOUNCEMENT BANNER (badge removed) ========== -->
+        <div class="announcement-banner" id="announcementBanner" role="button" tabindex="0" aria-haspopup="dialog">
+            <div class="banner-icon"><i class="fas fa-bullhorn"></i></div>
+            <div class="banner-body">
+                <div class="banner-top">
+                    <span class="banner-label">Announcement</span>
+                    <span class="banner-meta" id="bannerMeta">Loading…</span>
+                </div>
+                <div class="banner-text" id="bannerText">Loading announcements…</div>
+            </div>
+            <div class="banner-right">
+                <!-- badge removed per user request: "not up there" -->
+                <i class="fas fa-chevron-right banner-chevron"></i>
+            </div>
         </div>
-        <div class="card stats-card">
-          <div class="card-title"><i class="fas fa-archive"></i> Resources</div>
-          <div class="card-value">${totalRes}</div>
-          <div class="card-label">available files</div>
+
+        <!-- Compact user info cards -->
+        <div class="dashboard-grid" id="userInfoGrid">
+            <!-- filled by js -->
         </div>
-      `;
-      El.userInfoGrid.insertAdjacentHTML('beforeend', statsHTML);
-    }
-  };
 
-  // ===========================================================================
-  // ANNOUNCEMENTS: data, banner, modal, realtime, CEO actions
-  // ===========================================================================
-  const Announcements = {
-    async fetch() {
-      try {
-        const cutoff = new Date(Date.now() - ANNOUNCEMENT_TTL_MS).toISOString();
-        const { data, error } = await supabase
-          .from('announcements')
-          .select('*, profiles!created_by(full_name)')
-          .gte('created_at', cutoff)
-          .order('created_at', { ascending: false });
-        if (error) throw error;
-        return data || [];
-      } catch (err) {
-        console.error('fetch announcements error:', err);
-        return [];
-      }
-    },
-
-    async deleteOld() {
-      if (!State.isCEO) return;
-      const cutoff = new Date(Date.now() - ANNOUNCEMENT_TTL_MS).toISOString();
-      const { error } = await supabase.from('announcements').delete().lt('created_at', cutoff);
-      if (error) console.error('Failed to delete old announcements:', error);
-    },
-
-    async delete(id) {
-      if (!State.isCEO) return;
-      if (!confirm('Delete this announcement?')) return;
-      const { error } = await supabase.from('announcements').delete().eq('id', id);
-      if (error) {
-        alert('Failed to delete: ' + error.message);
-        return;
-      }
-      State.announcements = State.announcements.filter(a => a.id !== id);
-      Announcements.renderList();
-      Announcements.renderBanner();
-    },
-
-    async post() {
-      const content = El.announcementContent.value.trim();
-      const file = El.announcementFile.files[0];
-      if (!content && !file) return;
-
-      El.postBtn.disabled = true;
-      El.postBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Posting...';
-
-      let fileUrl = null;
-      if (file) {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${State.currentUser.id}/${Date.now()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage.from('announcements').upload(fileName, file);
-        if (uploadError) {
-          alert('Upload failed: ' + uploadError.message);
-          El.postBtn.disabled = false;
-          El.postBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Post';
-          return;
-        }
-        const { data: urlData } = supabase.storage.from('announcements').getPublicUrl(fileName);
-        fileUrl = urlData.publicUrl;
-      }
-
-      // Include target_value – this column must exist in the table (see note above).
-      const { error } = await supabase
-        .from('announcements')
-        .insert({
-          content,
-          file_url: fileUrl,
-          created_by: State.currentUser.id,
-          target_value: 'global'
-        });
-
-      El.postBtn.disabled = false;
-      El.postBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Post';
-
-      if (error) {
-        alert('Failed to post: ' + error.message);
-        return;
-      }
-
-      El.announcementContent.value = '';
-      El.announcementFile.value = '';
-      El.fileNamePreview.textContent = '';
-      El.ceoForm.classList.remove('open');
-
-      await Announcements.deleteOld();
-      // Realtime subscription will pick up the INSERT and update the UI.
-    },
-
-    // --- rendering ---
-    truncate(text, max) {
-      if (!text) return '';
-      return text.length > max ? text.slice(0, max).trim() + '…' : text;
-    },
-
-    renderBanner() {
-      const latest = State.announcements[0];
-      if (!latest) {
-        El.bannerMeta.textContent = 'Nothing posted yet';
-        El.bannerText.textContent = 'No announcements yet';
-        El.bannerText.classList.add('is-empty');
-        El.bannerBadge.style.display = 'none';
-        return;
-      }
-      El.bannerText.classList.remove('is-empty');
-      const author = latest.profiles?.full_name || 'CEO';
-      El.bannerMeta.textContent = `${author} · ${formatRelativeTime(latest.created_at)}`;
-      El.bannerText.textContent = Announcements.truncate(latest.content || '📎 attachment', 110);
-
-      const lastSeen = getLastSeenAt();
-      const unread = State.announcements.filter(a =>
-        new Date(a.created_at).getTime() > lastSeen && a.created_by !== State.currentUser?.id
-      ).length;
-      if (unread > 0 && !State.announcementsModalOpen) {
-        El.bannerBadge.style.display = 'inline-block';
-        El.bannerBadge.textContent = unread > 9 ? '9+' : unread;
-      } else {
-        El.bannerBadge.style.display = 'none';
-      }
-    },
-
-    cardHTML(a) {
-      const date = formatFullTimestamp(a.created_at);
-      const fileLink = a.file_url
-        ? `<div class="announcement-attachment"><a href="${a.file_url}" target="_blank" rel="noopener"><i class="fas fa-paperclip"></i> Attachment</a></div>`
-        : '';
-      const deleteBtn = State.isCEO
-        ? `<button class="delete-announcement" data-id="${a.id}" aria-label="Delete"><i class="fas fa-trash"></i></button>`
-        : '';
-      return `
-        <div class="announcement-card" data-id="${a.id}">
-          ${deleteBtn}
-          <div class="announcement-meta">
-            <span class="announcement-author"><i class="fas fa-user-circle"></i> ${escapeHtml(a.profiles?.full_name || 'CEO')}</span>
-            <span class="announcement-date">${date}</span>
-          </div>
-          <div class="announcement-content">${escapeHtml(a.content)}</div>
-          ${fileLink}
+        <!-- extended stats + chart + activity -->
+        <div class="row-duo">
+            <div class="chart-container">
+                <h3><i class="fas fa-chart-line"></i> Message activity (7 days)</h3>
+                <canvas id="messageChart"></canvas>
+                <p class="card-label" style="margin-top: 0.8rem; text-align: center;">messages per day</p>
+            </div>
+            <div class="activity-feed">
+                <h3><i class="fas fa-clock"></i> Recent activity</h3>
+                <div id="recentActivityList">
+                    <div class="activity-item loading">Loading...</div>
+                </div>
+            </div>
         </div>
-      `;
-    },
+    </div>
 
-    renderList() {
-      if (!State.announcements.length) {
-        El.announcementsList.innerHTML = '<div class="empty-state">No announcements in the last 24 hours.</div>';
-        return;
-      }
-      El.announcementsList.innerHTML = State.announcements.map(Announcements.cardHTML).join('');
-    },
+    <!-- ========== ANNOUNCEMENT MODAL ========== -->
+    <div class="modal-overlay" id="announcementModal" role="dialog" aria-modal="true" aria-labelledby="announcementModalTitle">
+        <div class="modal-panel">
+            <div class="modal-header">
+                <h3 id="announcementModalTitle"><i class="fas fa-bullhorn"></i> Announcements</h3>
+                <button class="modal-close" id="closeAnnouncementModal" aria-label="Close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <button type="button" class="composer-toggle" id="composerToggle" style="display: none;">
+                    <i class="fas fa-plus"></i> New announcement
+                </button>
+                <div id="ceoAnnouncementForm" class="announcement-form">
+                    <textarea id="announcementContent" placeholder="Write an important announcement..."></textarea>
+                    <div class="form-actions">
+                        <label for="announcementFile" class="file-label"><i class="fas fa-paperclip"></i> Attach file</label>
+                        <input type="file" id="announcementFile" accept="*/*">
+                        <span class="file-name-preview" id="fileNamePreview"></span>
+                        <button class="post-btn" id="postAnnouncementBtn"><i class="fas fa-paper-plane"></i> Post</button>
+                    </div>
+                </div>
+                <div id="announcementsList" class="announcements-list">
+                    <div class="empty-state loading">Loading announcements...</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    async load() {
-      State.announcements = await Announcements.fetch();
-      Announcements.renderBanner();
-      Announcements.renderList();
-    },
+    <script>
+        /**
+         * ⚠️ IMPORTANT: This code requires a `target_value` column in the `announcements` table.
+         *
+         * Your database has a trigger/function that references `NEW.target_value`, but the column
+         * does not exist. To fix this, run the following SQL in your Supabase SQL Editor:
+         *
+         *   ALTER TABLE announcements ADD COLUMN target_value TEXT DEFAULT NULL;
+         *
+         * After adding the column, the insert below (which includes `target_value: 'global'`)
+         * will succeed.
+         *
+         * If you cannot add the column, you must either:
+         *   - Drop the trigger that references `target_value`, or
+         *   - Modify the trigger to not use that field.
+         *
+         * This JavaScript already includes the `target_value` field in the INSERT.
+         */
 
-    // --- modal open/close ---
-    openModal() {
-      State.announcementsModalOpen = true;
-      El.modal.classList.add('open');
-      // Mark everything currently loaded as seen.
-      const newest = State.announcements[0];
-      setLastSeenAt(newest ? new Date(newest.created_at).getTime() : Date.now());
-      El.bannerBadge.style.display = 'none';
-      document.addEventListener('keydown', Announcements.onKeydown);
-    },
+        (function() {
+            'use strict';
 
-    closeModal() {
-      State.announcementsModalOpen = false;
-      El.modal.classList.remove('open');
-      document.removeEventListener('keydown', Announcements.onKeydown);
-    },
+            // ===========================================================================
+            // CONFIG
+            // ===========================================================================
+            const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
+            const SUPABASE_ANON_KEY =
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kcXF0c2RpYnR2eW1mZ250c3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTI1NjIsImV4cCI6MjA4Nzg4ODU2Mn0.hS-7kmoyFljnhkJEkw7nmgimw9ioQreidyu27_NXYyo';
+            const ANNOUNCEMENT_TTL_MS = 24 * 60 * 60 * 1000;
+            const UNREAD_POLL_MS = 10000;
 
-    onKeydown(e) {
-      if (e.key === 'Escape') Announcements.closeModal();
-    },
-
-    subscribeRealtime() {
-      if (State.announcementsChannel) State.announcementsChannel.unsubscribe();
-      State.announcementsChannel = supabase
-        .channel('announcements-channel')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'announcements' }, async (payload) => {
-          const { data, error } = await supabase
-            .from('announcements')
-            .select('*, profiles!created_by(full_name)')
-            .eq('id', payload.new.id)
-            .single();
-          if (!error && data) {
-            State.announcements.unshift(data);
-            Announcements.renderBanner();
-            Announcements.renderList();
-
-            if (window.TechTitansNotifications && data.created_by !== State.currentUser.id) {
-              window.TechTitansNotifications.display('New Announcement', {
-                body: Announcements.truncate(data.content, 50),
-                url: 'dashboard.html'
-              });
+            if (!window.supabase) {
+                document.body.innerHTML = '<p style="color:white;padding:2rem;">Failed to load Supabase. Refresh.</p>';
+                return;
             }
-          }
-        })
-        .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'announcements' }, (payload) => {
-          State.announcements = State.announcements.filter(a => a.id !== payload.old.id);
-          Announcements.renderBanner();
-          Announcements.renderList();
-        })
-        .subscribe();
-    },
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            if (window.TechTitansNotifications) {
+                window.TechTitansNotifications.connect(supabase);
+            }
 
-    wireEvents() {
-      El.banner.addEventListener('click', Announcements.openModal);
-      El.banner.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); Announcements.openModal(); }
-      });
-      El.modalClose.addEventListener('click', Announcements.closeModal);
-      El.modal.addEventListener('click', (e) => { if (e.target === El.modal) Announcements.closeModal(); });
+            // ===========================================================================
+            // STATE
+            // ===========================================================================
+            const State = {
+                currentUser: null,
+                currentRole: null,
+                isCEO: false,
+                unreadMessageCount: 0,
+                dmUnreadCount: 0,
+                refreshInterval: null,
+                messageChart: null,
+                announcementsChannel: null,
+                announcements: [],
+                announcementsModalOpen: false
+            };
 
-      El.composerToggle.addEventListener('click', () => {
-        El.ceoForm.classList.toggle('open');
-      });
+            // ===========================================================================
+            // DOM REFS
+            // ===========================================================================
+            const El = {
+                userName: document.getElementById('userName'),
+                sidebarNav: document.getElementById('sidebarNav'),
+                sidebarUnreadBadge: document.getElementById('sidebarUnreadBadge'),
+                dmUnreadBadge: document.getElementById('globalDmUnreadBadge'),
+                userInfoGrid: document.getElementById('userInfoGrid'),
+                logout: document.getElementById('logout'),
 
-      El.announcementFile.addEventListener('change', () => {
-        const f = El.announcementFile.files[0];
-        El.fileNamePreview.textContent = f ? f.name : '';
-      });
+                banner: document.getElementById('announcementBanner'),
+                bannerMeta: document.getElementById('bannerMeta'),
+                bannerText: document.getElementById('bannerText'),
 
-      El.postBtn.addEventListener('click', Announcements.post);
+                modal: document.getElementById('announcementModal'),
+                modalClose: document.getElementById('closeAnnouncementModal'),
+                composerToggle: document.getElementById('composerToggle'),
+                ceoForm: document.getElementById('ceoAnnouncementForm'),
+                announcementContent: document.getElementById('announcementContent'),
+                announcementFile: document.getElementById('announcementFile'),
+                fileNamePreview: document.getElementById('fileNamePreview'),
+                postBtn: document.getElementById('postAnnouncementBtn'),
+                announcementsList: document.getElementById('announcementsList'),
 
-      El.announcementsList.addEventListener('click', (e) => {
-        const btn = e.target.closest('.delete-announcement');
-        if (btn) Announcements.delete(btn.getAttribute('data-id'));
-      });
-    }
-  };
-  window.deleteAnnouncement = Announcements.delete; // kept for backward compatibility
+                messageChart: document.getElementById('messageChart'),
+                recentActivityList: document.getElementById('recentActivityList')
+            };
 
-  // ===========================================================================
-  // DASHBOARD BOOTSTRAP
-  // ===========================================================================
-  async function loadDashboard() {
-    try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error || !user) {
-        window.location.href = 'index.html';
-        return;
-      }
-      State.currentUser = user;
-      const metadata = user.user_metadata || {};
-      const fullName = metadata.full_name || 'User';
-      const jobRole = metadata.job_role || 'Not specified';
-      const firstName = fullName.split(' ')[0] || 'User';
-      const email = user.email || '—';
-      const createdAt = user.created_at
-        ? new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-        : '—';
+            // ===========================================================================
+            // UTILS
+            // ===========================================================================
+            function escapeHtml(unsafe) {
+                if (!unsafe) return '';
+                return unsafe.replace(/[&<>"']/g, function(m) {
+                    if (m === '&') return '&amp;';
+                    if (m === '<') return '&lt;';
+                    if (m === '>') return '&gt;';
+                    if (m === '"') return '&quot;';
+                    if (m === "'") return '&#039;';
+                    return m;
+                });
+            }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
+            function formatFullTimestamp(dateStr) {
+                return new Date(dateStr).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit',
+                    minute: '2-digit' });
+            }
 
-      const metadataRole = user.user_metadata?.role;
-      const effectiveRole = profile?.role || metadataRole || (jobRole === 'CEO' ? 'admin' : null);
-      const isAdmin = effectiveRole === 'admin';
-      State.currentRole = jobRole;
-      State.isCEO = (State.currentRole === 'CEO');
+            function formatRelativeTime(dateStr) {
+                const then = new Date(dateStr).getTime();
+                const diffMs = Date.now() - then;
+                const min = Math.floor(diffMs / 60000);
+                if (min < 1) return 'Just now';
+                if (min < 60) return `${min}m ago`;
+                const hr = Math.floor(min / 60);
+                if (hr < 24) return `${hr}h ago`;
+                const day = Math.floor(hr / 24);
+                if (day < 7) return `${day}d ago`;
+                return formatFullTimestamp(dateStr);
+            }
 
-      if (isAdmin && El.sidebarNav && !El.sidebarNav.querySelector('a[href="admin.html"]')) {
-        El.sidebarNav.insertAdjacentHTML('beforeend',
-          '<a href="admin.html"><i class="fas fa-user-cog"></i> Admin Panel</a>');
-      }
+            function seenStorageKey() {
+                return State.currentUser ? `tt_announcements_last_seen_${State.currentUser.id}` : null;
+            }
 
-      El.userName.textContent = firstName;
+            function getLastSeenAt() {
+                const key = seenStorageKey();
+                if (!key) return 0;
+                const raw = localStorage.getItem(key);
+                return raw ? parseInt(raw, 10) || 0 : 0;
+            }
 
-      El.userInfoGrid.innerHTML = `
-        <div class="card">
-          <div class="card-title"><i class="fas fa-user"></i> User</div>
-          <div class="card-value">${escapeHtml(fullName)}</div>
-          <div class="card-label">${escapeHtml(jobRole)}</div>
-        </div>
-        <div class="card">
-          <div class="card-title"><i class="fas fa-envelope"></i> Email</div>
-          <div class="card-value" style="font-size:1.3rem;">${escapeHtml(email)}</div>
-          <div class="card-label">contact</div>
-        </div>
-        <div class="card">
-          <div class="card-title"><i class="fas fa-calendar"></i> Member since</div>
-          <div class="card-value" style="font-size:1.3rem;">${createdAt}</div>
-          <div class="card-label">join date</div>
-        </div>
-      `;
+            function setLastSeenAt(ts) {
+                const key = seenStorageKey();
+                if (!key) return;
+                localStorage.setItem(key, String(ts));
+            }
 
-      // CEO-only composer toggle inside the modal
-      if (State.isCEO) {
-        El.composerToggle.style.display = 'flex';
-        await Announcements.deleteOld();
-      } else {
-        El.composerToggle.style.display = 'none';
-        El.ceoForm.style.display = 'none';
-      }
+            // update a nav badge element
+            function setNavBadge(el, count) {
+                if (!el) return;
+                if (count > 0) {
+                    el.textContent = count > 99 ? '99+' : count;
+                    el.classList.add('visible');
+                } else {
+                    el.classList.remove('visible');
+                    el.textContent = '0';
+                }
+            }
 
-      Announcements.wireEvents();
-      await Announcements.load();
-      Announcements.subscribeRealtime();
+            // ===========================================================================
+            // STATS: messages / unread / resources / chart / activity
+            // ===========================================================================
+            const Stats = {
+                async fetchUnreadMessageCount() {
+                    if (!State.currentUser || !State.currentRole) return 0;
+                    try {
+                        let query = supabase.from('group_messages').select('id, sender_id');
+                        if (!State.isCEO) query = query.eq('role', State.currentRole);
+                        const { data: messages, error: msgError } = await query;
+                        if (msgError) throw msgError;
+                        const messageIds = messages.map(m => m.id);
+                        let readSet = new Set();
+                        if (messageIds.length) {
+                            const { data: reads } = await supabase
+                                .from('message_reads')
+                                .select('message_id')
+                                .eq('user_id', State.currentUser.id)
+                                .in('message_id', messageIds);
+                            if (reads) readSet = new Set(reads.map(r => r.message_id));
+                        }
+                        return messages.filter(msg => !readSet.has(msg.id) && msg.sender_id !== State.currentUser.id)
+                            .length;
+                    } catch (err) {
+                        console.error('unread error:', err);
+                        return 0;
+                    }
+                },
 
-      // Periodic unread message sync
-      Stats.refreshUnreadBadge();
-      State.refreshInterval = setInterval(Stats.refreshUnreadBadge, UNREAD_POLL_MS);
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) Stats.refreshUnreadBadge();
-      });
+                async fetchDmUnreadCount() {
+                    if (!State.currentUser) return 0;
+                    try {
+                        // Get all DMs involving this user
+                        const { data: dms, error: dmError } = await supabase
+                            .from('direct_messages')
+                            .select('id, sender_id')
+                            .or(`sender_id.eq.${State.currentUser.id},receiver_id.eq.${State.currentUser.id}`);
+                        if (dmError) throw dmError;
+                        if (!dms || !dms.length) return 0;
 
-      // Extended stats, chart, activity
-      await Promise.all([
-        Stats.updateStatsCards(),
-        Stats.renderChart(),
-        Stats.renderActivity()
-      ]);
+                        const dmIds = dms.map(d => d.id);
+                        const { data: reads, error: readError } = await supabase
+                            .from('dm_reads')
+                            .select('dm_id')
+                            .eq('user_id', State.currentUser.id)
+                            .in('dm_id', dmIds);
+                        if (readError) throw readError;
 
-    } catch (err) {
-      console.error('Dashboard load error:', err);
-    }
-  }
+                        const readSet = new Set(reads ? reads.map(r => r.dm_id) : []);
+                        // Count DMs where this user is the receiver and hasn't read them
+                        return dms.filter(dm =>
+                            dm.sender_id !== State.currentUser.id &&
+                            !readSet.has(dm.id)
+                        ).length;
+                    } catch (err) {
+                        console.error('DM unread error:', err);
+                        return 0;
+                    }
+                },
 
-  El.logout.addEventListener('click', async () => {
-    if (State.refreshInterval) clearInterval(State.refreshInterval);
-    if (State.announcementsChannel) State.announcementsChannel.unsubscribe();
-    await supabase.auth.signOut();
-    window.location.href = 'index.html';
-  });
+                async refreshUnreadBadge() {
+                    const [groupCount, dmCount] = await Promise.all([
+                        Stats.fetchUnreadMessageCount(),
+                        Stats.fetchDmUnreadCount()
+                    ]);
+                    State.unreadMessageCount = groupCount;
+                    State.dmUnreadCount = dmCount;
+                    setNavBadge(El.sidebarUnreadBadge, groupCount);
+                    setNavBadge(El.dmUnreadBadge, dmCount);
+                },
 
-  loadDashboard();
-})();
-  </script>
-  <!--
-    Note: For automatic 24-hour deletion without relying on CEO actions,
-    create a Supabase cron job (pg_cron) that runs daily:
-    DELETE FROM announcements WHERE created_at < NOW() - INTERVAL '24 hours';
-  -->
+                async fetchTotalMessages() {
+                    try {
+                        let query = supabase.from('group_messages').select('*', { count: 'exact', head: true });
+                        if (!State.isCEO && State.currentRole) query = query.eq('role', State.currentRole);
+                        const { count, error } = await query;
+                        return error ? 0 : count;
+                    } catch { return 0; }
+                },
+
+                async fetchTotalResources() {
+                    try {
+                        const { count, error } = await supabase.from('resources').select('*', { count: 'exact',
+                            head: true });
+                        return error ? 0 : count;
+                    } catch { return 0; }
+                },
+
+                async fetchRecentMessages() {
+                    try {
+                        let query = supabase
+                            .from('group_messages')
+                            .select('id, content, created_at, sender_id, profiles!inner(full_name)')
+                            .order('created_at', { ascending: false })
+                            .limit(3);
+                        if (!State.isCEO && State.currentRole) query = query.eq('role', State.currentRole);
+                        const { data, error } = await query;
+                        if (error) throw error;
+                        return data || [];
+                    } catch (err) {
+                        console.error('recent messages error:', err);
+                        return [];
+                    }
+                },
+
+                async fetchDailyCounts() {
+                    try {
+                        const now = new Date();
+                        const sevenDaysAgo = new Date(now);
+                        sevenDaysAgo.setDate(now.getDate() - 7);
+                        const start = sevenDaysAgo.toISOString();
+
+                        let query = supabase
+                            .from('group_messages')
+                            .select('created_at')
+                            .gte('created_at', start);
+                        if (!State.isCEO && State.currentRole) query = query.eq('role', State.currentRole);
+                        const { data, error } = await query;
+                        if (error) throw error;
+
+                        const counts = {};
+                        for (let i = 0; i < 7; i++) {
+                            const d = new Date(now);
+                            d.setDate(now.getDate() - i);
+                            const ymd = d.toISOString().split('T')[0];
+                            counts[ymd] = 0;
+                        }
+                        data.forEach(msg => {
+                            const day = msg.created_at.split('T')[0];
+                            if (counts.hasOwnProperty(day)) counts[day]++;
+                        });
+                        return Object.keys(counts).sort().map(date => ({ date, count: counts[date] }));
+                    } catch (err) {
+                        console.error('daily counts error:', err);
+                        return [];
+                    }
+                },
+
+                async renderChart() {
+                    const daily = await Stats.fetchDailyCounts();
+                    const ctx = El.messageChart.getContext('2d');
+                    if (State.messageChart) State.messageChart.destroy();
+                    State.messageChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: daily.map(d => d.date.slice(5)),
+                            datasets: [{
+                                label: 'messages',
+                                data: daily.map(d => d.count),
+                                backgroundColor: '#3f7fe080',
+                                borderRadius: 5,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: { beginAtZero: true, grid: { color: '#20304f' }, ticks: { color: '#8a9ac2' } },
+                                x: { grid: { display: false }, ticks: { color: '#8a9ac2' } }
+                            }
+                        }
+                    });
+                },
+
+                async renderActivity() {
+                    const recent = await Stats.fetchRecentMessages();
+                    if (!recent.length) {
+                        El.recentActivityList.innerHTML = '<div class="activity-item">No recent messages</div>';
+                        return;
+                    }
+                    El.recentActivityList.innerHTML = recent.map(msg => {
+                        const name = msg.profiles?.full_name || 'User';
+                        const initial = name.charAt(0).toUpperCase();
+                        const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit',
+                            minute: '2-digit' });
+                        return `
+                            <div class="activity-item">
+                                <div class="activity-avatar">${initial}</div>
+                                <div class="activity-details">
+                                    <span class="activity-name">${escapeHtml(name)}</span>
+                                    <div class="activity-msg">${escapeHtml(msg.content) || '📎 file'}</div>
+                                    <span class="activity-time">${time}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                },
+
+                async updateStatsCards() {
+                    const [totalMsg, unread, totalRes] = await Promise.all([
+                        Stats.fetchTotalMessages(),
+                        Stats.fetchUnreadMessageCount(),
+                        Stats.fetchTotalResources()
+                    ]);
+                    document.querySelectorAll('.stats-card').forEach(el => el.remove());
+                    const statsHTML = `
+                        <div class="card stats-card">
+                            <div class="card-title"><i class="fas fa-envelope"></i> Total messages</div>
+                            <div class="card-value">${totalMsg}</div>
+                            <div class="card-label">in current scope</div>
+                        </div>
+                        <div class="card stats-card">
+                            <div class="card-title"><i class="fas fa-bell"></i> Unread</div>
+                            <div class="card-value">${unread}</div>
+                            <div class="card-label">messages waiting</div>
+                        </div>
+                        <div class="card stats-card">
+                            <div class="card-title"><i class="fas fa-archive"></i> Resources</div>
+                            <div class="card-value">${totalRes}</div>
+                            <div class="card-label">available files</div>
+                        </div>
+                    `;
+                    El.userInfoGrid.insertAdjacentHTML('beforeend', statsHTML);
+                }
+            };
+
+            // ===========================================================================
+            // ANNOUNCEMENTS: data, banner, modal, realtime, CEO actions
+            // ===========================================================================
+            const Announcements = {
+                async fetch() {
+                    try {
+                        const cutoff = new Date(Date.now() - ANNOUNCEMENT_TTL_MS).toISOString();
+                        const { data, error } = await supabase
+                            .from('announcements')
+                            .select('*, profiles!created_by(full_name)')
+                            .gte('created_at', cutoff)
+                            .order('created_at', { ascending: false });
+                        if (error) throw error;
+                        return data || [];
+                    } catch (err) {
+                        console.error('fetch announcements error:', err);
+                        return [];
+                    }
+                },
+
+                async deleteOld() {
+                    if (!State.isCEO) return;
+                    const cutoff = new Date(Date.now() - ANNOUNCEMENT_TTL_MS).toISOString();
+                    const { error } = await supabase.from('announcements').delete().lt('created_at', cutoff);
+                    if (error) console.error('Failed to delete old announcements:', error);
+                },
+
+                async delete(id) {
+                    if (!State.isCEO) return;
+                    if (!confirm('Delete this announcement?')) return;
+                    const { error } = await supabase.from('announcements').delete().eq('id', id);
+                    if (error) {
+                        alert('Failed to delete: ' + error.message);
+                        return;
+                    }
+                    State.announcements = State.announcements.filter(a => a.id !== id);
+                    Announcements.renderList();
+                    Announcements.renderBanner();
+                },
+
+                async post() {
+                    const content = El.announcementContent.value.trim();
+                    const file = El.announcementFile.files[0];
+                    if (!content && !file) return;
+
+                    El.postBtn.disabled = true;
+                    El.postBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Posting...';
+
+                    let fileUrl = null;
+                    if (file) {
+                        const fileExt = file.name.split('.').pop();
+                        const fileName = `${State.currentUser.id}/${Date.now()}.${fileExt}`;
+                        const { error: uploadError } = await supabase.storage.from('announcements').upload(fileName,
+                            file);
+                        if (uploadError) {
+                            alert('Upload failed: ' + uploadError.message);
+                            El.postBtn.disabled = false;
+                            El.postBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Post';
+                            return;
+                        }
+                        const { data: urlData } = supabase.storage.from('announcements').getPublicUrl(fileName);
+                        fileUrl = urlData.publicUrl;
+                    }
+
+                    const { error } = await supabase
+                        .from('announcements')
+                        .insert({
+                            content,
+                            file_url: fileUrl,
+                            created_by: State.currentUser.id,
+                            target_value: 'global'
+                        });
+
+                    El.postBtn.disabled = false;
+                    El.postBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Post';
+
+                    if (error) {
+                        alert('Failed to post: ' + error.message);
+                        return;
+                    }
+
+                    El.announcementContent.value = '';
+                    El.announcementFile.value = '';
+                    El.fileNamePreview.textContent = '';
+                    El.ceoForm.classList.remove('open');
+
+                    await Announcements.deleteOld();
+                },
+
+                truncate(text, max) {
+                    if (!text) return '';
+                    return text.length > max ? text.slice(0, max).trim() + '…' : text;
+                },
+
+                renderBanner() {
+                    const latest = State.announcements[0];
+                    if (!latest) {
+                        El.bannerMeta.textContent = 'Nothing posted yet';
+                        El.bannerText.textContent = 'No announcements yet';
+                        El.bannerText.classList.add('is-empty');
+                        return;
+                    }
+                    El.bannerText.classList.remove('is-empty');
+                    const author = latest.profiles?.full_name || 'CEO';
+                    El.bannerMeta.textContent = `${author} · ${formatRelativeTime(latest.created_at)}`;
+                    El.bannerText.textContent = Announcements.truncate(latest.content || '📎 attachment', 110);
+                    // banner badge is hidden per user request
+                },
+
+                cardHTML(a) {
+                    const date = formatFullTimestamp(a.created_at);
+                    const fileLink = a.file_url ?
+                        `<div class="announcement-attachment"><a href="${a.file_url}" target="_blank" rel="noopener"><i class="fas fa-paperclip"></i> Attachment</a></div>` :
+                        '';
+                    const deleteBtn = State.isCEO ?
+                        `<button class="delete-announcement" data-id="${a.id}" aria-label="Delete"><i class="fas fa-trash"></i></button>` :
+                        '';
+                    return `
+                        <div class="announcement-card" data-id="${a.id}">
+                            ${deleteBtn}
+                            <div class="announcement-meta">
+                                <span class="announcement-author"><i class="fas fa-user-circle"></i> ${escapeHtml(a.profiles?.full_name || 'CEO')}</span>
+                                <span class="announcement-date">${date}</span>
+                            </div>
+                            <div class="announcement-content">${escapeHtml(a.content)}</div>
+                            ${fileLink}
+                        </div>
+                    `;
+                },
+
+                renderList() {
+                    if (!State.announcements.length) {
+                        El.announcementsList.innerHTML =
+                        '<div class="empty-state">No announcements in the last 24 hours.</div>';
+                        return;
+                    }
+                    El.announcementsList.innerHTML = State.announcements.map(Announcements.cardHTML).join('');
+                },
+
+                async load() {
+                    State.announcements = await Announcements.fetch();
+                    Announcements.renderBanner();
+                    Announcements.renderList();
+                },
+
+                openModal() {
+                    State.announcementsModalOpen = true;
+                    El.modal.classList.add('open');
+                    const newest = State.announcements[0];
+                    setLastSeenAt(newest ? new Date(newest.created_at).getTime() : Date.now());
+                    document.addEventListener('keydown', Announcements.onKeydown);
+                },
+
+                closeModal() {
+                    State.announcementsModalOpen = false;
+                    El.modal.classList.remove('open');
+                    document.removeEventListener('keydown', Announcements.onKeydown);
+                },
+
+                onKeydown(e) {
+                    if (e.key === 'Escape') Announcements.closeModal();
+                },
+
+                subscribeRealtime() {
+                    if (State.announcementsChannel) State.announcementsChannel.unsubscribe();
+                    State.announcementsChannel = supabase
+                        .channel('announcements-channel')
+                        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'announcements' },
+                            async (payload) => {
+                                const { data, error } = await supabase
+                                    .from('announcements')
+                                    .select('*, profiles!created_by(full_name)')
+                                    .eq('id', payload.new.id)
+                                    .single();
+                                if (!error && data) {
+                                    State.announcements.unshift(data);
+                                    Announcements.renderBanner();
+                                    Announcements.renderList();
+                                    if (window.TechTitansNotifications && data.created_by !== State
+                                        .currentUser.id) {
+                                        window.TechTitansNotifications.display('New Announcement', {
+                                            body: Announcements.truncate(data.content, 50),
+                                            url: 'dashboard.html'
+                                        });
+                                    }
+                                }
+                            })
+                        .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'announcements' },
+                            (payload) => {
+                                State.announcements = State.announcements.filter(a => a.id !== payload.old.id);
+                                Announcements.renderBanner();
+                                Announcements.renderList();
+                            })
+                        .subscribe();
+                },
+
+                wireEvents() {
+                    El.banner.addEventListener('click', Announcements.openModal);
+                    El.banner.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault();
+                            Announcements.openModal(); }
+                    });
+                    El.modalClose.addEventListener('click', Announcements.closeModal);
+                    El.modal.addEventListener('click', (e) => { if (e.target === El.modal) Announcements
+                            .closeModal(); });
+
+                    El.composerToggle.addEventListener('click', () => {
+                        El.ceoForm.classList.toggle('open');
+                    });
+
+                    El.announcementFile.addEventListener('change', () => {
+                        const f = El.announcementFile.files[0];
+                        El.fileNamePreview.textContent = f ? f.name : '';
+                    });
+
+                    El.postBtn.addEventListener('click', Announcements.post);
+
+                    El.announcementsList.addEventListener('click', (e) => {
+                        const btn = e.target.closest('.delete-announcement');
+                        if (btn) Announcements.delete(btn.getAttribute('data-id'));
+                    });
+                }
+            };
+            window.deleteAnnouncement = Announcements.delete;
+
+            // ===========================================================================
+            // DASHBOARD BOOTSTRAP
+            // ===========================================================================
+            async function loadDashboard() {
+                try {
+                    const { data: { user }, error } = await supabase.auth.getUser();
+                    if (error || !user) {
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                    State.currentUser = user;
+                    const metadata = user.user_metadata || {};
+                    const fullName = metadata.full_name || 'User';
+                    const jobRole = metadata.job_role || 'Not specified';
+                    const firstName = fullName.split(' ')[0] || 'User';
+                    const email = user.email || '—';
+                    const createdAt = user.created_at ?
+                        new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short',
+                            day: 'numeric' }) :
+                        '—';
+
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('role')
+                        .eq('id', user.id)
+                        .single();
+
+                    const metadataRole = user.user_metadata?.role;
+                    const effectiveRole = profile?.role || metadataRole || (jobRole === 'CEO' ? 'admin' : null);
+                    const isAdmin = effectiveRole === 'admin';
+                    State.currentRole = jobRole;
+                    State.isCEO = (State.currentRole === 'CEO');
+
+                    if (isAdmin && El.sidebarNav && !El.sidebarNav.querySelector('a[href="admin.html"]')) {
+                        El.sidebarNav.insertAdjacentHTML('beforeend',
+                            '<a href="admin.html"><i class="fas fa-user-cog"></i> Admin Panel</a>');
+                    }
+
+                    El.userName.textContent = firstName;
+
+                    El.userInfoGrid.innerHTML = `
+                        <div class="card">
+                            <div class="card-title"><i class="fas fa-user"></i> User</div>
+                            <div class="card-value">${escapeHtml(fullName)}</div>
+                            <div class="card-label">${escapeHtml(jobRole)}</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title"><i class="fas fa-envelope"></i> Email</div>
+                            <div class="card-value" style="font-size:1.3rem;">${escapeHtml(email)}</div>
+                            <div class="card-label">contact</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title"><i class="fas fa-calendar"></i> Member since</div>
+                            <div class="card-value" style="font-size:1.3rem;">${createdAt}</div>
+                            <div class="card-label">join date</div>
+                        </div>
+                    `;
+
+                    if (State.isCEO) {
+                        El.composerToggle.style.display = 'flex';
+                        await Announcements.deleteOld();
+                    } else {
+                        El.composerToggle.style.display = 'none';
+                        El.ceoForm.style.display = 'none';
+                    }
+
+                    Announcements.wireEvents();
+                    await Announcements.load();
+                    Announcements.subscribeRealtime();
+
+                    // initial unread badge sync
+                    await Stats.refreshUnreadBadge();
+                    State.refreshInterval = setInterval(Stats.refreshUnreadBadge, UNREAD_POLL_MS);
+                    document.addEventListener('visibilitychange', () => {
+                        if (!document.hidden) Stats.refreshUnreadBadge();
+                    });
+
+                    await Promise.all([
+                        Stats.updateStatsCards(),
+                        Stats.renderChart(),
+                        Stats.renderActivity()
+                    ]);
+
+                } catch (err) {
+                    console.error('Dashboard load error:', err);
+                }
+            }
+
+            El.logout.addEventListener('click', async () => {
+                if (State.refreshInterval) clearInterval(State.refreshInterval);
+                if (State.announcementsChannel) State.announcementsChannel.unsubscribe();
+                await supabase.auth.signOut();
+                window.location.href = 'index.html';
+            });
+
+            loadDashboard();
+        })();
+    </script>
+    <!--
+      Note: For automatic 24-hour deletion without relying on CEO actions,
+      create a Supabase cron job (pg_cron) that runs daily:
+      DELETE FROM announcements WHERE created_at < NOW() - INTERVAL '24 hours';
+    -->
 </body>
 </html>
