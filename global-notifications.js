@@ -228,6 +228,20 @@ const TechTitansGlobal = {
         }
       }
 
+      if (data.type === 'call_declined_from_notification') {
+        // User tapped "decline" on the OS notification
+        if (this._onDmPage && window.declineDMCallFromNotification) {
+          window.declineDMCallFromNotification(data);
+        } else {
+          this._pendingCall = this._pendingCall || {
+            callId: data.callId,
+            callerId: data.callerId,
+            callType: data.callType
+          };
+          this._declineCall();
+        }
+      }
+
       if (data.type === 'call_notification_dismissed' || data.type === 'call_cancelled') {
         this._dismissCallOverlay();
       }
@@ -339,6 +353,15 @@ const TechTitansGlobal = {
     if (!this._pendingCall) return;
     const call = this._pendingCall;
     this._dismissCallOverlay();
+
+    // Record the decline so the caller's realtime subscription and call logs see it
+    if (this._supabase && call.callId) {
+      this._supabase.from('call_participants')
+        .update({ status: 'declined' })
+        .eq('call_id', call.callId)
+        .eq('user_id', this._userId)
+        .then(() => {}, () => {});
+    }
 
     // Notify caller that call was declined
     if (this._supabase && call.callerId) {

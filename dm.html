@@ -1898,6 +1898,7 @@
             let callTimerInterval = null;
             let callStatusChannel = null;
             let endingCall = false;
+            let ringPushInterval = null;
             let userChannel = null;
             let dmObserver = null;
 
@@ -3425,6 +3426,28 @@
                 }
             }
 
+            function startRingPushLoop(callId, recipientId) {
+                stopRingPushLoop();
+                if (!callId || !recipientId) return;
+                let resends = 0;
+                ringPushInterval = setInterval(() => {
+                    resends += 1;
+                    if (resends > 4 || currentDMCallId !== callId) {
+                        stopRingPushLoop();
+                        return;
+                    }
+                    // The edge function rejects 'incoming' once the call is no longer ringing
+                    sendCallPushNotification(callId, recipientId, 'incoming');
+                }, 8000);
+            }
+
+            function stopRingPushLoop() {
+                if (ringPushInterval) {
+                    clearInterval(ringPushInterval);
+                    ringPushInterval = null;
+                }
+            }
+
             async function cleanupLocalCallMedia() {
                 if (localAudioTrack) {
                     localAudioTrack.stop();
@@ -3636,6 +3659,7 @@
                         console.warn('Unable to insert call participants:', participantError);
                     }
                     await sendCallPushNotification(callData.id, targetUserId, 'incoming');
+                    startRingPushLoop(callData.id, targetUserId);
                 }
 
                 await sendUserBroadcast(targetUserId, 'call-offer', {
@@ -3723,6 +3747,7 @@
                 const params = new URLSearchParams(window.location.search);
                 const callId = params.get('callId');
                 const nativeAccepted = params.get('nativeAccepted') === '1';
+                const nativeDeclined = params.get('nativeDeclined') === '1';
                 if (!callId || callActive || callStarting) return;
 
                 try {
@@ -3734,6 +3759,12 @@
                     if (callError || !call || ['ended', 'declined', 'missed', 'cancelled', 'failed'].includes(call
                             .status)) {
                         showToast('This call is no longer available');
+                        return;
+                    }
+
+                    if (nativeDeclined) {
+                        await declineCallById(call.id, call.initiated_by, call.type);
+                        showToast('Call declined');
                         return;
                     }
 
@@ -3780,9 +3811,53 @@
                 await acceptDMCall();
             };
 
+            async function declineCallById(callId, callerId, declinedCallType) {
+                if (!callId) return;
+                try {
+                    await supabase.from('call_participants')
+                        .update({ status: 'declined' })
+                        .eq('call_id', callId)
+                        .eq('user_id', currentUser.id);
+                    await supabase.from('call_events').insert({
+                        call_id: callId,
+                        event_type: 'call_declined',
+                        user_id: currentUser.id,
+                        metadata: {
+                            callerId,
+                            missed: true,
+                            callType: declinedCallType,
+                            callerName: currentUserFullName
+                        }
+                    });
+                    if (callerId) {
+                        await sendUserBroadcast(callerId, 'call-missed', {
+                            callId,
+                            missedBy: currentUser.id,
+                            callType: declinedCallType,
+                            calleeName: currentUserFullName
+                        });
+                    }
+                } catch (declineError) {
+                    console.warn('Unable to record call decline event:', declineError);
+                }
+            }
+
+            window.declineDMCallFromNotification = async (data) => {
+                if (window.TechTitansRingtone) window.TechTitansRingtone.stop();
+                const callId = data.callId || pendingCall?.callId;
+                const callerId = data.callerId || pendingCall?.callerId;
+                const declinedType = data.callType || pendingCall?.callType;
+                if (pendingCall && (!callId || pendingCall.callId === callId)) {
+                    incomingCallModal.style.display = 'none';
+                    pendingCall = null;
+                }
+                await declineCallById(callId, callerId, declinedType);
+            };
+
             async function hangUpCall(shouldNotifyPeer = true) {
                 if (endingCall) return;
                 endingCall = true;
+                stopRingPushLoop();
                 if (window.TechTitansRingtone) window.TechTitansRingtone.stop();
                 const endedCallId = currentDMCallId;
                 const endedCallTarget = callTarget;
@@ -3920,6 +3995,7 @@
                     })
                     .on('broadcast', { event: 'call-accepted' }, ({ payload }) => {
                         if (!currentDMCallId || payload.callId !== currentDMCallId) return;
+                        stopRingPushLoop();
                         callModalTitle.textContent = `Call with ${payload.calleeName || 'teammate'}`;
                         const startedAt = payload.startedAt ? new Date(payload.startedAt) : new Date();
                         startCallTimer(startedAt);

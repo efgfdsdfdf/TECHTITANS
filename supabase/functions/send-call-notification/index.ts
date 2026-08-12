@@ -250,9 +250,11 @@ function buildApplePayload(action: string, call: CallRecord, caller: ProfileReco
 }
 
 function configureWebPush() {
-  const publicKey = Deno.env.get("VAPID_PUBLIC_KEY");
-  const privateKey = Deno.env.get("VAPID_PRIVATE_KEY");
-  const subject = Deno.env.get("VAPID_SUBJECT") || "mailto:admin@techtitans.app";
+  // Browsers subscribe with PUSH_PUBLIC_KEY (served by push-public-key), so call
+  // pushes must be signed with the same key pair. VAPID_* kept as fallback.
+  const publicKey = Deno.env.get("PUSH_PUBLIC_KEY") || Deno.env.get("VAPID_PUBLIC_KEY");
+  const privateKey = Deno.env.get("PUSH_PRIVATE_KEY") || Deno.env.get("VAPID_PRIVATE_KEY");
+  const subject = Deno.env.get("PUSH_SUBJECT") || Deno.env.get("VAPID_SUBJECT") || "mailto:admin@techtitans.app";
 
   if (!publicKey || !privateKey) return false;
   webpush.setVapidDetails(subject, publicKey, privateKey);
@@ -434,6 +436,7 @@ serve(async (request) => {
         await webpush.sendNotification(
           JSON.parse(device.push_token),
           JSON.stringify(buildWebPushPayload(action, call, caller || null)),
+          { TTL: 45, urgency: "high" },
         );
         sent += 1;
         return;
