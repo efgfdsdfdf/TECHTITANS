@@ -557,7 +557,9 @@
             gap: 0.5rem;
             transition: transform 0.15s ease;
             position: relative;
-            touch-action: pan-y;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .dm-msg-row.sent {
@@ -688,6 +690,7 @@
             box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
             transition: transform 0.15s ease;
             transform: translateX(0);
+            touch-action: none;
         }
 
         .dm-msg-text {
@@ -1967,7 +1970,7 @@
                 if (!root) root = document;
                 root.querySelectorAll('.dm-msg-row').forEach(row => {
                     row.addEventListener('contextmenu', onRightClick);
-                    // Swipe to reply - only on touch devices
+                    // Swipe to reply - uses pointer events for both touch & mouse
                     setupSwipeToReply(row);
                 });
                 root.querySelectorAll('.dm-delete-btn').forEach(btn => {
@@ -1982,28 +1985,35 @@
                 root.querySelectorAll('.dm-voice-note').forEach(setupVoiceNoteControl);
             }
 
-            // ─── SWIPE TO REPLY ───
+            // ─── SWIPE TO REPLY (works on both mobile & desktop) ───
             function setupSwipeToReply(row) {
                 let startX = 0;
                 let startY = 0;
                 let isSwiping = false;
                 let currentX = 0;
                 let isHorizontal = false;
+                let pointerId = null;
 
-                row.addEventListener('touchstart', function(e) {
-                    const touch = e.touches[0];
-                    startX = touch.clientX;
-                    startY = touch.clientY;
+                function onPointerDown(e) {
+                    // Only allow left-click (button === 0) or touch
+                    if (e.pointerType === 'mouse' && e.button !== 0) return;
+                    const pointer = e;
+                    startX = pointer.clientX;
+                    startY = pointer.clientY;
                     isSwiping = false;
                     currentX = 0;
                     isHorizontal = false;
-                    // Don't interfere with scroll
-                }, { passive: true });
+                    pointerId = pointer.pointerId;
+                    row.setPointerCapture(pointerId);
+                    row.addEventListener('pointermove', onPointerMove);
+                    row.addEventListener('pointerup', onPointerUp);
+                    row.addEventListener('pointercancel', onPointerUp);
+                }
 
-                row.addEventListener('touchmove', function(e) {
-                    const touch = e.touches[0];
-                    const deltaX = touch.clientX - startX;
-                    const deltaY = touch.clientY - startY;
+                function onPointerMove(e) {
+                    const pointer = e;
+                    const deltaX = pointer.clientX - startX;
+                    const deltaY = pointer.clientY - startY;
 
                     if (!isSwiping && Math.abs(deltaX) > 10) {
                         isSwiping = true;
@@ -2017,16 +2027,15 @@
                         if (msgEl) {
                             msgEl.style.transform = `translateX(${currentX}px)`;
                         }
-                        // Show indicator when swiped enough
                         if (currentX > 40) {
                             row.classList.add('show-reply-indicator');
                         } else {
                             row.classList.remove('show-reply-indicator');
                         }
                     }
-                }, { passive: false });
+                }
 
-                row.addEventListener('touchend', function(e) {
+                function onPointerUp(e) {
                     const msgEl = row.querySelector('.dm-msg');
                     if (msgEl) {
                         msgEl.style.transform = '';
@@ -2034,7 +2043,6 @@
                     row.classList.remove('show-reply-indicator');
 
                     if (isSwiping && isHorizontal && currentX > 50) {
-                        // Trigger reply
                         const msgId = row.dataset.messageId;
                         const senderName = row.dataset.senderName || 'Someone';
                         const msgTextEl = row.querySelector('.dm-msg-text');
@@ -2045,7 +2053,6 @@
                         }
                         if (preview.length > 60) preview = preview.substring(0, 60) + '...';
                         setReplyTo(msgId, senderName, preview);
-                        // Focus the input
                         const input = document.getElementById('dmChatInput');
                         if (input) {
                             setTimeout(() => input.focus(), 100);
@@ -2056,7 +2063,12 @@
                     isSwiping = false;
                     currentX = 0;
                     isHorizontal = false;
-                }, { passive: true });
+                    row.removeEventListener('pointermove', onPointerMove);
+                    row.removeEventListener('pointerup', onPointerUp);
+                    row.removeEventListener('pointercancel', onPointerUp);
+                }
+
+                row.addEventListener('pointerdown', onPointerDown);
             }
 
             function setReplyTo(messageId, senderName, preview) {
@@ -2731,7 +2743,6 @@
                         lastDate = msg.created_at;
                         // Check if this message has a reply
                         if (msg.reply_to) {
-                            // Add reply info to the message
                             const replySender = msg.reply_to_message?.sender?.full_name || 'Someone';
                             msg.reply_to_sender_name = replySender;
                         }
@@ -3127,7 +3138,7 @@
                     .subscribe();
             }
 
-            // ─── AGORA DM CALL FUNCTIONS ─── (unchanged, keep as is)
+            // ─── AGORA DM CALL FUNCTIONS ─── (unchanged)
             async function getDmChannelName(userA, userB) {
                 const sorted = [userA, userB].sort();
                 return window.TechTitansAgora.compactChannelName('dm', sorted.join('_'));
