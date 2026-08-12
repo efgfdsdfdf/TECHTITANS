@@ -190,27 +190,6 @@
             color: #fff;
         }
 
-        .online-count {
-            background: #1f2a44;
-            padding: 0.2rem 0.8rem;
-            border-radius: 2rem;
-            font-size: 0.8rem;
-            color: #8affb8;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-            margin-left: auto;
-        }
-
-        .online-count::before {
-            content: '';
-            width: 8px;
-            height: 8px;
-            background: #2ecc71;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
         .messages-area {
             flex: 1;
             min-height: 0;
@@ -576,6 +555,9 @@
             cursor: pointer;
             align-items: flex-end;
             gap: 0.5rem;
+            transition: transform 0.15s ease;
+            position: relative;
+            touch-action: pan-y;
         }
 
         .dm-msg-row.sent {
@@ -584,6 +566,115 @@
 
         .dm-msg-row.unread .dm-msg {
             border-left: 4px solid #428cff;
+        }
+
+        .dm-msg-row.swipe-active .dm-msg {
+            transform: translateX(0px);
+        }
+
+        .dm-msg-row.swipe-reply .dm-msg {
+            transform: translateX(0px);
+        }
+
+        .dm-msg-row .swipe-reply-indicator {
+            position: absolute;
+            left: -60px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #2ecc71;
+            color: #fff;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+        }
+
+        .dm-msg-row.show-reply-indicator .swipe-reply-indicator {
+            opacity: 1;
+            transform: translateY(-50%) scale(1);
+        }
+
+        .dm-msg-row .swipe-reply-bg {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            background: rgba(46, 204, 113, 0.15);
+            border-radius: 1rem;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+
+        .dm-msg-row.show-reply-indicator .swipe-reply-bg {
+            opacity: 1;
+        }
+
+        /* Reply bar above input */
+        .dm-reply-bar {
+            display: none;
+            padding: 0.6rem 1rem;
+            background: rgba(17, 26, 44, 0.98);
+            border-top: 1px solid #263154;
+            border-bottom: 1px solid #263154;
+            align-items: center;
+            gap: 0.8rem;
+            flex-shrink: 0;
+            font-size: 0.85rem;
+            color: #e0e7ff;
+            position: relative;
+        }
+
+        .dm-reply-bar.visible {
+            display: flex;
+        }
+
+        .dm-reply-bar .reply-close {
+            background: none;
+            border: none;
+            color: #9aa4bf;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.2rem 0.4rem;
+            flex-shrink: 0;
+        }
+
+        .dm-reply-bar .reply-close:hover {
+            color: #fff;
+        }
+
+        .dm-reply-bar .reply-line {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
+        }
+
+        .dm-reply-bar .reply-sender {
+            font-weight: 600;
+            color: #2ecc71;
+            font-size: 0.78rem;
+        }
+
+        .dm-reply-bar .reply-preview {
+            color: #9aa4bf;
+            font-size: 0.82rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dm-reply-bar .reply-preview i {
+            margin-right: 0.3rem;
+            color: #6b7fb1;
         }
 
         .dm-msg {
@@ -595,6 +686,8 @@
             line-height: 1.4;
             position: relative;
             box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+            transition: transform 0.15s ease;
+            transform: translateX(0);
         }
 
         .dm-msg-text {
@@ -1267,10 +1360,6 @@
                 flex-direction: column;
             }
 
-            .online-count {
-                margin-left: 0;
-            }
-
             .dm-layout {
                 flex-direction: row;
                 width: 200vw;
@@ -1450,6 +1539,10 @@
                 font-size: 0.9rem !important;
                 margin-left: 0.3rem !important;
             }
+
+            .dm-reply-bar {
+                padding: 0.5rem 0.8rem !important;
+            }
         }
 
         @media (max-width: 480px) {
@@ -1570,7 +1663,6 @@
                     <i class="fas fa-bars"></i>
                 </button>
                 <span>Direct Messages</span>
-                <div class="online-count" id="onlineCount">0 online</div>
             </div>
             <div class="messages-area" id="messagesArea" oncontextmenu="return false;"></div>
         </div>
@@ -1724,6 +1816,9 @@
             let userChannel = null;
             let dmObserver = null;
 
+            // ─── REPLY STATE ───
+            let replyToMessage = null;
+
             // ─── DOM REFS ───
             const modal = document.getElementById('receiptsModal');
             const toast = document.getElementById('toast');
@@ -1790,13 +1885,6 @@
                 return `${minutes}:${secs.toString().padStart(2, '0')}`;
             }
 
-            function stringToColor(str) {
-                let hash = 0;
-                for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-                const hue = Math.abs(hash % 360);
-                return `hsl(${hue}, 70%, 50%)`;
-            }
-
             function getInitials(name) {
                 if (!name) return '?';
                 const parts = name.trim().split(/\s+/);
@@ -1849,10 +1937,20 @@
                 const statusHtml = isSent ?
                     `<span class="dm-msg-status">${msg.read_at ? 'Seen' : 'Sent'}</span>` :
                     '';
+                // Reply indicator if this message is a reply
+                const replyHtml = msg.reply_to ? `
+                    <div style="font-size:0.75rem;opacity:0.7;margin-bottom:0.3rem;display:flex;align-items:center;gap:0.3rem;">
+                        <i class="fas fa-reply" style="font-size:0.6rem;"></i>
+                        <span>Replying to ${escapeHtml(msg.reply_to_sender_name || 'a message')}</span>
+                    </div>
+                ` : '';
 
                 return `
-                <div class="dm-msg-row ${isSent ? 'sent' : 'received'} ${isUnread ? 'unread' : ''}" data-message-id="${msg.id}" data-created-at="${msg.created_at}" data-sender-id="${msg.sender_id}">
+                <div class="dm-msg-row ${isSent ? 'sent' : 'received'} ${isUnread ? 'unread' : ''}" data-message-id="${msg.id}" data-created-at="${msg.created_at}" data-sender-id="${msg.sender_id}" data-sender-name="${escapeHtml(senderName)}">
+                  <div class="swipe-reply-indicator"><i class="fas fa-reply"></i></div>
+                  <div class="swipe-reply-bg"></div>
                   <div class="dm-msg ${isSent ? 'sent' : 'received'}">
+                    ${replyHtml}
                     ${contentHtml}
                     <div class="dm-msg-meta">
                       <span>${timeStr}</span>
@@ -1867,7 +1965,11 @@
 
             function attachMessageInteractions(root) {
                 if (!root) root = document;
-                root.querySelectorAll('.dm-msg-row').forEach(row => row.addEventListener('contextmenu', onRightClick));
+                root.querySelectorAll('.dm-msg-row').forEach(row => {
+                    row.addEventListener('contextmenu', onRightClick);
+                    // Swipe to reply - only on touch devices
+                    setupSwipeToReply(row);
+                });
                 root.querySelectorAll('.dm-delete-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         e.stopPropagation();
@@ -1880,6 +1982,102 @@
                 root.querySelectorAll('.dm-voice-note').forEach(setupVoiceNoteControl);
             }
 
+            // ─── SWIPE TO REPLY ───
+            function setupSwipeToReply(row) {
+                let startX = 0;
+                let startY = 0;
+                let isSwiping = false;
+                let currentX = 0;
+                let isHorizontal = false;
+
+                row.addEventListener('touchstart', function(e) {
+                    const touch = e.touches[0];
+                    startX = touch.clientX;
+                    startY = touch.clientY;
+                    isSwiping = false;
+                    currentX = 0;
+                    isHorizontal = false;
+                    // Don't interfere with scroll
+                }, { passive: true });
+
+                row.addEventListener('touchmove', function(e) {
+                    const touch = e.touches[0];
+                    const deltaX = touch.clientX - startX;
+                    const deltaY = touch.clientY - startY;
+
+                    if (!isSwiping && Math.abs(deltaX) > 10) {
+                        isSwiping = true;
+                        isHorizontal = Math.abs(deltaX) > Math.abs(deltaY);
+                    }
+
+                    if (isSwiping && isHorizontal && deltaX > 0) {
+                        e.preventDefault();
+                        currentX = Math.min(deltaX, 80);
+                        const msgEl = row.querySelector('.dm-msg');
+                        if (msgEl) {
+                            msgEl.style.transform = `translateX(${currentX}px)`;
+                        }
+                        // Show indicator when swiped enough
+                        if (currentX > 40) {
+                            row.classList.add('show-reply-indicator');
+                        } else {
+                            row.classList.remove('show-reply-indicator');
+                        }
+                    }
+                }, { passive: false });
+
+                row.addEventListener('touchend', function(e) {
+                    const msgEl = row.querySelector('.dm-msg');
+                    if (msgEl) {
+                        msgEl.style.transform = '';
+                    }
+                    row.classList.remove('show-reply-indicator');
+
+                    if (isSwiping && isHorizontal && currentX > 50) {
+                        // Trigger reply
+                        const msgId = row.dataset.messageId;
+                        const senderName = row.dataset.senderName || 'Someone';
+                        const msgTextEl = row.querySelector('.dm-msg-text');
+                        let preview = msgTextEl ? msgTextEl.textContent.trim() : 'Message';
+                        if (!preview) {
+                            const voiceNote = row.querySelector('.dm-voice-note');
+                            if (voiceNote) preview = '🎤 Voice note';
+                        }
+                        if (preview.length > 60) preview = preview.substring(0, 60) + '...';
+                        setReplyTo(msgId, senderName, preview);
+                        // Focus the input
+                        const input = document.getElementById('dmChatInput');
+                        if (input) {
+                            setTimeout(() => input.focus(), 100);
+                        }
+                        showToast(`Replying to ${senderName}`);
+                    }
+
+                    isSwiping = false;
+                    currentX = 0;
+                    isHorizontal = false;
+                }, { passive: true });
+            }
+
+            function setReplyTo(messageId, senderName, preview) {
+                replyToMessage = { messageId, senderName, preview };
+                const bar = document.getElementById('dmReplyBar');
+                const senderEl = document.getElementById('replySender');
+                const previewEl = document.getElementById('replyPreview');
+                if (bar && senderEl && previewEl) {
+                    senderEl.textContent = `Replying to ${senderName}`;
+                    previewEl.innerHTML = `<i class="fas fa-quote-left"></i> ${escapeHtml(preview)}`;
+                    bar.classList.add('visible');
+                }
+            }
+
+            function clearReplyTo() {
+                replyToMessage = null;
+                const bar = document.getElementById('dmReplyBar');
+                if (bar) bar.classList.remove('visible');
+            }
+
+            // ─── APPEND MESSAGE WITH REPLY SUPPORT ───
             function appendRenderedMessage(messagesDiv, msg, options = {}) {
                 const emptyState = messagesDiv.querySelector('.dm-empty-state');
                 if (emptyState) emptyState.remove();
@@ -1969,7 +2167,6 @@
                                 });
                             });
                         });
-                        document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
                         document.querySelectorAll('.dm-conversation-item').forEach(item => {
                             const uid = item.dataset.userId;
                             const dot = item.querySelector('.status-dot');
@@ -1986,11 +2183,25 @@
                                 role: p.role
                             });
                         });
-                        document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
+                        document.querySelectorAll('.dm-conversation-item').forEach(item => {
+                            const uid = item.dataset.userId;
+                            const dot = item.querySelector('.status-dot');
+                            if (dot) {
+                                if (onlineUsers.has(uid)) dot.classList.add('online');
+                                else dot.classList.remove('online');
+                            }
+                        });
                     })
                     .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
                         leftPresences.forEach(p => onlineUsers.delete(p.userId));
-                        document.getElementById('onlineCount').innerHTML = `${onlineUsers.size + 1} online`;
+                        document.querySelectorAll('.dm-conversation-item').forEach(item => {
+                            const uid = item.dataset.userId;
+                            const dot = item.querySelector('.status-dot');
+                            if (dot) {
+                                if (onlineUsers.has(uid)) dot.classList.add('online');
+                                else dot.classList.remove('online');
+                            }
+                        });
                     })
                     .subscribe(async (status) => {
                         if (status === 'SUBSCRIBED') {
@@ -2226,6 +2437,13 @@
                           <button class="dm-icon-btn" id="dmHeaderVideoCallBtn" title="Video call" disabled>Video</button>
                         </div>
                       </div>
+                      <div id="dmReplyBar" class="dm-reply-bar">
+                        <button class="reply-close" id="replyCloseBtn" title="Cancel reply"><i class="fas fa-times"></i></button>
+                        <div class="reply-line">
+                          <span class="reply-sender" id="replySender">Replying to Someone</span>
+                          <span class="reply-preview" id="replyPreview"><i class="fas fa-quote-left"></i> Message preview</span>
+                        </div>
+                      </div>
                       <div id="dmChatMessages" class="dm-chat-messages"><div class="dm-empty-state">Pick a member to start a direct conversation.</div></div>
                       <div id="dmTypingContainer" class="typing-container" style="display:none;">
                         <div class="typing-indicator">
@@ -2250,6 +2468,7 @@
                     // ── conversation clicks ──
                     document.querySelectorAll('.dm-conversation-item').forEach(item => {
                         item.addEventListener('click', async () => {
+                            clearReplyTo();
                             const userId = item.dataset.userId;
                             const userName = item.dataset.userName;
                             const userRole = item.dataset.userRole;
@@ -2284,7 +2503,11 @@
                     document.getElementById('dmBackBtn').addEventListener('click', () => {
                         setDmMobileChatOpen(false);
                         currentRecipientId = null;
+                        clearReplyTo();
                     });
+
+                    // ── reply bar close ──
+                    document.getElementById('replyCloseBtn').addEventListener('click', clearReplyTo);
 
                     // ── mobile nav ──
                     const mobileNavToggle = document.getElementById('mobileNavToggle');
@@ -2427,6 +2650,7 @@
                 currentRecipientId = otherUserId;
                 if (dmTypingSubscription) dmTypingSubscription.unsubscribe();
                 dmActiveTypers.clear();
+                clearReplyTo();
 
                 const chatArea = document.getElementById('dmChatArea');
                 const headerTitle = document.querySelector('.dm-chat-title');
@@ -2448,7 +2672,6 @@
                 headerTitle.textContent = safeName;
                 headerSubtitle.textContent = `${safeRole} • ${onlineUsers.has(otherUserId) ? 'online' : 'offline'}`;
 
-                // ─── Avatar: only show if actual image exists ───
                 if (otherProfile.avatar_url) {
                     peerAvatar.innerHTML =
                         `<img src="${escapeHtml(otherProfile.avatar_url)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
@@ -2469,7 +2692,7 @@
                 try {
                     let { data, error } = await supabase
                         .from('private_messages')
-                        .select(`*, sender:profiles!sender_id (id, full_name, job_role, avatar_url)`)
+                        .select(`*, sender:profiles!sender_id (id, full_name, job_role, avatar_url), reply_to_message:reply_to (id, content, sender:profiles!sender_id(full_name))`)
                         .or(
                             `and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`
                         )
@@ -2506,6 +2729,12 @@
                         const dateHeader = maybeAppendDateSeparator(lastDate, msg.created_at);
                         if (dateHeader) html += dateHeader;
                         lastDate = msg.created_at;
+                        // Check if this message has a reply
+                        if (msg.reply_to) {
+                            // Add reply info to the message
+                            const replySender = msg.reply_to_message?.sender?.full_name || 'Someone';
+                            msg.reply_to_sender_name = replySender;
+                        }
                         html += renderMessageBubble(msg, {
                             isSent: msg.sender_id === currentUser.id,
                             sender: msg.sender || {
@@ -2578,14 +2807,25 @@
                 input.value = '';
 
                 try {
+                    const payload = { sender_id: currentUser.id, recipient_id: otherUserId, content: content };
+                    if (replyToMessage) {
+                        payload.reply_to = replyToMessage.messageId;
+                    }
                     const { data, error } = await supabase
                         .from('private_messages')
-                        .insert({ sender_id: currentUser.id, recipient_id: otherUserId, content: content })
+                        .insert(payload)
                         .select()
                         .single();
                     if (error) throw error;
                     const messagesDiv = document.getElementById('dmChatMessages');
+                    // Add sender info
+                    data.sender = { id: currentUser.id, full_name: currentUserFullName, job_role: currentRole,
+                        avatar_url: null };
+                    if (replyToMessage) {
+                        data.reply_to_sender_name = replyToMessage.senderName;
+                    }
                     appendRenderedMessage(messagesDiv, data, { isSent: true });
+                    clearReplyTo();
                 } catch (err) {
                     console.error('Send private message error:', err);
                     alert('Failed to send: ' + err.message);
@@ -2609,19 +2849,29 @@
                 const audioUrl = urlData.publicUrl;
 
                 try {
+                    const payload = {
+                        sender_id: currentUser.id,
+                        recipient_id: otherUserId,
+                        content: '',
+                        audio_url: audioUrl
+                    };
+                    if (replyToMessage) {
+                        payload.reply_to = replyToMessage.messageId;
+                    }
                     const { data, error } = await supabase
                         .from('private_messages')
-                        .insert({
-                            sender_id: currentUser.id,
-                            recipient_id: otherUserId,
-                            content: '',
-                            audio_url: audioUrl
-                        })
+                        .insert(payload)
                         .select()
                         .single();
                     if (error) throw error;
                     const messagesDiv = document.getElementById('dmChatMessages');
+                    data.sender = { id: currentUser.id, full_name: currentUserFullName, job_role: currentRole,
+                        avatar_url: null };
+                    if (replyToMessage) {
+                        data.reply_to_sender_name = replyToMessage.senderName;
+                    }
                     appendRenderedMessage(messagesDiv, data, { isSent: true });
+                    clearReplyTo();
                 } catch (err) {
                     console.error('Insert private voice note error:', err);
                     alert('Failed to send voice note: ' + err.message);
@@ -2877,7 +3127,7 @@
                     .subscribe();
             }
 
-            // ─── AGORA DM CALL FUNCTIONS ───
+            // ─── AGORA DM CALL FUNCTIONS ─── (unchanged, keep as is)
             async function getDmChannelName(userA, userB) {
                 const sorted = [userA, userB].sort();
                 return window.TechTitansAgora.compactChannelName('dm', sorted.join('_'));
