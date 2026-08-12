@@ -2089,9 +2089,16 @@ if (mobileNavToggleList && mobileNavOverlay) {
         const safeRole = otherProfile.job_role || 'Member';
         headerTitle.textContent = safeName;
         headerSubtitle.textContent = `${safeRole} • ${onlineUsers.has(otherUserId) ? 'online' : 'offline'}`;
-        peerAvatar.style.display = 'flex';
-        peerAvatar.style.backgroundColor = stringToColor(safeName);
-        peerAvatar.textContent = getInitials(safeName);
+        if (otherProfile.avatar_url) {
+          peerAvatar.innerHTML = `<img src="${escapeHtml(otherProfile.avatar_url)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+          peerAvatar.style.display = 'flex';
+          peerAvatar.style.backgroundColor = 'transparent';
+        } else {
+          peerAvatar.innerHTML = '';
+          peerAvatar.style.display = 'flex';
+          peerAvatar.style.backgroundColor = stringToColor(safeName);
+          peerAvatar.textContent = getInitials(safeName);
+        }
         voiceCallBtn.disabled = false;
         videoCallBtn.disabled = false;
         chatArea.style.display = 'flex'; // ensure visible
@@ -2122,8 +2129,8 @@ if (mobileNavToggleList && mobileNavOverlay) {
             data = (msgs || []).map((msg) => ({
               ...msg,
               sender: msg.sender_id === currentUser.id ?
-                { id: currentUser.id, full_name: currentUserFullName, job_role: currentRole } :
-                { id: otherUserId, full_name: safeName, job_role: safeRole }
+                { id: currentUser.id, full_name: currentUserFullName, job_role: currentRole, avatar_url: null } :
+                { id: otherUserId, full_name: safeName, job_role: safeRole, avatar_url: otherProfile.avatar_url || null }
             }));
           } else if (error) { throw error; }
 
@@ -2135,7 +2142,7 @@ if (mobileNavToggleList && mobileNavOverlay) {
             lastDate = msg.created_at;
             html += renderMessageBubble(msg, {
               isSent: msg.sender_id === currentUser.id,
-              sender: msg.sender || { id: otherUserId, full_name: safeName, job_role: safeRole }
+              sender: msg.sender || { id: otherUserId, full_name: safeName, job_role: safeRole, avatar_url: otherProfile.avatar_url || null }
             });
           }
           messagesDiv.innerHTML = html ||
