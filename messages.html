@@ -4311,6 +4311,27 @@
                 }
             });
 
+            // Insert a group message; if the metadata column is missing from the
+            // schema (PGRST204), retry without it so sending still works.
+            async function insertGroupMessage(messageData) {
+                let { data, error } = await supabase
+                    .from('group_messages')
+                    .insert(messageData)
+                    .select()
+                    .single();
+                if (error && messageData.metadata &&
+                    (error.code === 'PGRST204' || /column/i.test(error.message || ''))) {
+                    console.warn('metadata column unavailable, retrying without it:', error.message);
+                    const { metadata, ...fallbackData } = messageData;
+                    ({ data, error } = await supabase
+                        .from('group_messages')
+                        .insert(fallbackData)
+                        .select()
+                        .single());
+                }
+                return { data, error };
+            }
+
             // --- SEND MESSAGE FUNCTION ---
             async function sendMessage() {
                 const input = document.getElementById('messageInput');
@@ -4346,11 +4367,7 @@
                     };
                 }
 
-                const { data, error } = await supabase
-                    .from('group_messages')
-                    .insert(messageData)
-                    .select()
-                    .single();
+                const { data, error } = await insertGroupMessage(messageData);
 
                 if (error) {
                     console.error('Send error:', error);
@@ -4484,11 +4501,7 @@
                     };
                 }
 
-                const { data, error } = await supabase
-                    .from('group_messages')
-                    .insert(messageData)
-                    .select()
-                    .single();
+                const { data, error } = await insertGroupMessage(messageData);
 
                 if (error) {
                     console.error('Insert error:', error);
