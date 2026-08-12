@@ -656,11 +656,13 @@
 
           const avatarUrl = publicUrlData.publicUrl;
 
-          // Update profiles table
-          const { error: updateError } = await supabase
+          // Update profiles table with select() to verify
+          const { data: updateData, error: updateError } = await supabase
             .from('profiles')
             .update({ avatar_url: avatarUrl })
-            .eq('id', currentUserId);
+            .eq('id', currentUserId)
+            .select('avatar_url')
+            .single();
 
           if (updateError) {
             if (updateError.message && updateError.message.includes('row-level security policy')) {
@@ -669,8 +671,15 @@
             throw updateError;
           }
 
-          // Update UI with final URL
-          setAvatar(avatarUrl, profileNameEl.textContent);
+          // Verify the update actually persisted
+          if (!updateData || !updateData.avatar_url) {
+            console.warn('Avatar update returned no data — RLS may be blocking writes. Returned:', updateData);
+            throw new Error('Profile update was blocked. Please check that your Supabase RLS policies allow users to update their own profile (avatar_url column).');
+          }
+
+          // Update UI with final URL (add cache-busting param)
+          const cachedUrl = avatarUrl + (avatarUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
+          setAvatar(cachedUrl, profileNameEl.textContent);
           uploadStatus.textContent = 'Upload successful!';
           setTimeout(() => { uploadStatus.textContent = ''; }, 3000);
         } catch (err) {
