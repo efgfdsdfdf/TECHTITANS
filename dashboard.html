@@ -1084,8 +1084,10 @@
                 if (count > 0) {
                     el.textContent = count > 99 ? '99+' : count;
                     el.classList.add('visible');
+                    el.style.display = 'inline-block';
                 } else {
                     el.classList.remove('visible');
+                    el.style.display = 'none';
                     el.textContent = '0';
                 }
             }
@@ -1137,31 +1139,14 @@
                 async fetchDmUnreadCount() {
                     if (!State.currentUser) return this._lastDmCount;
                     try {
-                        const { data: dms, error: dmError } = await supabase
-                            .from('direct_messages')
-                            .select('id, sender_id')
-                            .or(`sender_id.eq.${State.currentUser.id},receiver_id.eq.${State.currentUser.id}`);
+                        const { count, error: dmError } = await supabase
+                            .from('private_messages')
+                            .select('*', { count: 'exact', head: true })
+                            .eq('recipient_id', State.currentUser.id)
+                            .is('read_at', null);
                         if (dmError) throw dmError;
-                        if (!dms || !dms.length) {
-                            this._lastDmCount = 0;
-                            return 0;
-                        }
-
-                        const dmIds = dms.map(d => d.id);
-                        const { data: reads, error: readError } = await supabase
-                            .from('dm_reads')
-                            .select('dm_id')
-                            .eq('user_id', State.currentUser.id)
-                            .in('dm_id', dmIds);
-                        if (readError) throw readError;
-
-                        const readSet = new Set(reads ? reads.map(r => r.dm_id) : []);
-                        const count = dms.filter(dm =>
-                            dm.sender_id !== State.currentUser.id &&
-                            !readSet.has(dm.id)
-                        ).length;
-                        this._lastDmCount = count;
-                        return count;
+                        this._lastDmCount = count || 0;
+                        return this._lastDmCount;
                     } catch (err) {
                         console.error('fetchDmUnreadCount error:', err);
                         // return cached count instead of 0 to prevent flicker
