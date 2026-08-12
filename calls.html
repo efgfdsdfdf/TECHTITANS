@@ -509,7 +509,10 @@
         font-size: 1rem;
       }
       .calls-tabs {
-        display: none;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
       }
     }
     @media (max-width: 480px) {
@@ -747,6 +750,14 @@
             const duration = (gc.ended_at && gc.started_at)
               ? Math.floor((new Date(gc.ended_at) - new Date(gc.started_at)) / 1000)
               : null;
+            let status = gc.status || 'ended';
+            if (status === 'active' && gc.started_at) {
+              const ageInSeconds = (Date.now() - new Date(gc.started_at).getTime()) / 1000;
+              if (ageInSeconds > 45) {
+                status = 'ended'; // Treat stale call as ended
+              }
+            }
+
             allCallLogs.push({
               id: gc.id,
               source: 'group',
@@ -754,7 +765,7 @@
               callerId: gc.started_by,
               role: gc.role || 'General',
               type: 'voice',
-              status: gc.status || 'ended',
+              status: status,
               startedAt: gc.started_at,
               endedAt: gc.ended_at,
               duration,

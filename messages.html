@@ -3057,14 +3057,14 @@
         }
 
         try {
-          // Check for active calls that are not stale (started within last 10 minutes)
-          const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+          // Check for active calls that are not stale (started within last 1 minute)
+          const oneMinAgo = new Date(Date.now() - 60 * 1000).toISOString();
           const { data, error } = await supabase
             .from('group_calls')
             .select('id, started_by, started_at, profiles!started_by(full_name)')
             .eq('role', role)
             .eq('status', 'active')
-            .gt('started_at', tenMinsAgo)
+            .gt('started_at', oneMinAgo)
             .order('started_at', { ascending: false })
             .limit(1)
             .single();
@@ -3097,16 +3097,16 @@
         }
       }
 
-      // Clean up stale calls (older than 10 min with status='active')
+      // Clean up stale calls (older than 1 min with status='active')
       async function cleanupStaleCalls(role) {
         try {
-          const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+          const oneMinAgo = new Date(Date.now() - 60 * 1000).toISOString();
           await supabase
             .from('group_calls')
             .update({ status: 'ended', ended_at: new Date().toISOString() })
             .eq('role', role)
             .eq('status', 'active')
-            .lt('started_at', tenMinsAgo);
+            .lt('started_at', oneMinAgo);
         } catch (e) { /* ignore */ }
       }
 
@@ -3453,18 +3453,30 @@
             try {
               const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
               if (!sessionError && sessionData?.session?.access_token) {
-                fetch(`${SUPABASE_URL}/functions/v1/send-call-notification`, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${sessionData.session.access_token}`
-                  },
-                  body: JSON.stringify({
-                    callId: callData.id,
-                    recipientId: role, // Use role name as the recipient identifier for group calls
-                    action: 'group_call'
-                  })
-                }).catch(e => console.warn('Group call push failed:', e));
+                let pushQuery = supabase.from('profiles').select('id');
+                if (role !== 'General') {
+                  pushQuery = pushQuery.eq('job_role', role);
+                }
+                const { data: usersToNotify } = await pushQuery;
+                
+                if (usersToNotify && usersToNotify.length > 0) {
+                  usersToNotify.forEach(u => {
+                    if (u.id !== currentUser.id) {
+                      fetch(`${SUPABASE_URL}/functions/v1/send-call-notification`, {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${sessionData.session.access_token}`
+                        },
+                        body: JSON.stringify({
+                          callId: callData.id,
+                          recipientId: u.id,
+                          action: 'group_call'
+                        })
+                      }).catch(e => console.warn('Group call push failed for user:', u.id, e));
+                    }
+                  });
+                }
               }
             } catch (e) {
               console.warn('Unable to send group call push:', e);
