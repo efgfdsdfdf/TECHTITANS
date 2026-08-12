@@ -738,7 +738,7 @@
         // 1. Fetch group calls
         const { data: groupCalls, error: gcErr } = await supabase
           .from('group_calls')
-          .select('id, role, started_by, started_at, ended_at, status, type')
+          .select('id, role, started_by, started_at, ended_at, status')
           .order('started_at', { ascending: false })
           .limit(200);
 
@@ -753,7 +753,7 @@
               callerName: getProfileName(gc.started_by),
               callerId: gc.started_by,
               role: gc.role || 'General',
-              type: gc.type || 'voice',
+              type: 'voice',
               status: gc.status || 'ended',
               startedAt: gc.started_at,
               endedAt: gc.ended_at,

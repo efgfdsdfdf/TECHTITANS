@@ -2093,7 +2093,9 @@ if (mobileNavToggleList && mobileNavOverlay) {
         voiceCallBtn.disabled = false;
         videoCallBtn.disabled = false;
         chatArea.style.display = 'flex'; // ensure visible
-        input.focus();
+        if (window.innerWidth > 768) {
+          input.focus();
+        }
         messagesDiv.innerHTML = '<div class="dm-empty-state">Loading conversation...</div>';
 
         try {
@@ -2833,6 +2835,7 @@ if (mobileNavToggleList && mobileNavOverlay) {
         if (callActive || callStarting) { alert('You are already joining or in a call.'); return; }
         callStarting = true;
         incomingCallModal.style.display = 'none';
+        if (window.TechTitansRingtone) window.TechTitansRingtone.stop();
 
         const { callerId, callerName, callChannelName, callType: incomingType, callId } = pendingCall;
         callType = normalizeCallType(incomingType);
@@ -2954,6 +2957,7 @@ if (mobileNavToggleList && mobileNavOverlay) {
       async function hangUpCall(shouldNotifyPeer = true) {
         if (endingCall) return;
         endingCall = true;
+        if (window.TechTitansRingtone) window.TechTitansRingtone.stop();
         const endedCallId = currentDMCallId;
         const endedCallTarget = callTarget;
         const endedCallType = callType;
@@ -3080,6 +3084,9 @@ if (mobileNavToggleList && mobileNavOverlay) {
                 url: 'dm.html'
               });
             }
+            if (window.TechTitansRingtone) {
+              window.TechTitansRingtone.start();
+            }
           })
           .on('broadcast', { event: 'call-accepted' }, ({ payload }) => {
             if (!currentDMCallId || payload.callId !== currentDMCallId) return;
@@ -3158,6 +3165,7 @@ if (mobileNavToggleList && mobileNavOverlay) {
           .display = 'none'; });
       document.getElementById('acceptCallBtn').addEventListener('click', acceptDMCall);
       document.getElementById('declineCallBtn').addEventListener('click', async () => {
+        if (window.TechTitansRingtone) window.TechTitansRingtone.stop();
         if (pendingCall && pendingCall.callId) {
           try {
             await supabase.from('call_participants')

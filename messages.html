@@ -3449,6 +3449,27 @@
             ongoingCallBanner.style.display = 'flex';
             updateCallButtonState(true);
 
+            // Send push notification to all members of this group
+            try {
+              const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+              if (!sessionError && sessionData?.session?.access_token) {
+                fetch(`${SUPABASE_URL}/functions/v1/send-call-notification`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionData.session.access_token}`
+                  },
+                  body: JSON.stringify({
+                    callId: callData.id,
+                    recipientId: role, // Use role name as the recipient identifier for group calls
+                    action: 'group_call'
+                  })
+                }).catch(e => console.warn('Group call push failed:', e));
+              }
+            } catch (e) {
+              console.warn('Unable to send group call push:', e);
+            }
+
             if (window.TechTitansNotifications) {
               window.TechTitansNotifications.display(`Group call started for ${role}`, {
                 body: `${currentUserFullName} has started a call for ${role}.`,
