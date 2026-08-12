@@ -767,7 +767,7 @@
         try {
           const { data: dmCalls, error: dcErr } = await supabase
             .from('calls')
-            .select('id, initiated_by, type, status, started_at, ended_at, room_id')
+            .select('id, initiated_by, type, status, started_at, ended_at, room_id, created_at')
             .order('created_at', { ascending: false })
             .limit(200);
 

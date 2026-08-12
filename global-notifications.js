@@ -219,9 +219,13 @@ const TechTitansGlobal = {
       }
 
       if (data.type === 'call_accepted_from_notification') {
-        // User tapped "accept" on the OS notification — navigate to dm.html
+        // User tapped "accept" on the OS notification
         this._dismissCallOverlay();
-        window.location.href = `dm.html?callId=${encodeURIComponent(data.callId)}&nativeAccepted=1`;
+        if (this._onDmPage && window.acceptDMCallFromNotification) {
+          window.acceptDMCallFromNotification(data);
+        } else {
+          window.location.href = `dm.html?callId=${encodeURIComponent(data.callId)}&nativeAccepted=1`;
+        }
       }
 
       if (data.type === 'call_notification_dismissed' || data.type === 'call_cancelled') {

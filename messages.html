@@ -595,6 +595,11 @@
       border-radius: 1.5rem 1.5rem 0.2rem 1.5rem;
     }
 
+    .avatar-wrapper {
+      position: relative;
+      flex-shrink: 0;
+    }
+
     .avatar {
       width: 36px;
       height: 36px;
@@ -623,6 +628,20 @@
 
     .avatar:hover {
       transform: scale(1.05);
+    }
+
+    .avatar-status {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 0.7rem;
+      height: 0.7rem;
+      border-radius: 50%;
+      background: #444;
+      border: 2px solid #0b141a;
+    }
+    .avatar-status.online {
+      background: #2ecc71;
     }
 
     .message-bubble {
@@ -900,24 +919,32 @@
     /* --- CHAT INPUT AREA --- */
     .chat-input-area {
       display: flex;
-      padding: 0.8rem 1rem;
+      padding: 0.85rem 1rem;
+      background: rgba(17, 26, 44, 0.96);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid #263154;
       gap: 0.5rem;
+      align-items: center;
       flex-shrink: 0;
-      background: #202c33;
       z-index: 5;
       position: relative;
       bottom: 0;
-      align-items: center;
       margin-top: auto;
     }
 
-    .chat-input-area input {
+    .chat-input-area .input-wrap {
       flex: 1;
-      background: #2a3942;
-      border: none;
-      border-radius: 8px;
-      padding: 0.8rem 1rem;
-      color: #d1d7db;
+      min-width: 0;
+      position: relative;
+    }
+
+    .chat-input-area input {
+      width: 100%;
+      background: #0b1221;
+      border: 1px solid #263154;
+      border-radius: 999px;
+      padding: 0.8rem 1.2rem;
+      color: #fff;
       outline: none;
       transition: all 0.3s ease;
       font-size: 0.95rem;
@@ -925,7 +952,7 @@
     }
 
     .chat-input-area input:focus {
-      background: #2a3942;
+      border-color: #428cff;
     }
 
     .chat-input-area input:disabled {
@@ -933,50 +960,46 @@
       cursor: not-allowed;
     }
 
-    .chat-input-area button {
-      background: #00a884;
+    .chat-input-area #sendBtn {
+      background: #428cff;
       border: none;
-      color: #111b21;
-      width: 2.8rem;
-      height: 2.8rem;
+      color: #fff;
+      width: 3rem;
+      height: 3rem;
       border-radius: 50%;
       cursor: pointer;
-      font-size: 1.1rem;
-      transition: all 0.25s ease;
-      flex-shrink: 0;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    }
-
-    .chat-input-area button:hover {
-      background: #00bfa5;
-    }
-
-    .chat-input-area button:disabled {
-      background: #3b4a54;
-      color: #8696a0;
-      box-shadow: none;
-      transform: none;
-      cursor: not-allowed;
-    }
-
-    .voice-btn {
-      background: #00a884;
-      border: none;
-      color: #111b21;
-      width: 2.8rem;
-      height: 2.8rem;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       transition: 0.2s;
       flex-shrink: 0;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .chat-input-area #sendBtn:hover {
+      background: #5f9eff;
+    }
+
+    .chat-input-area #sendBtn:disabled {
+      background: #1f2a44;
+      color: #6b7fb1;
+      cursor: not-allowed;
+    }
+
+    .voice-btn {
+      background: #2f3a5a;
+      border: none;
+      color: #fff;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: 0.2s;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .voice-btn.recording {
@@ -1817,8 +1840,10 @@
 
       <!-- INPUT -->
       <div class="chat-input-area">
-        <input type="text" id="messageInput" placeholder="Write a message..." disabled>
         <button class="voice-btn" id="voiceNoteBtn" disabled>🎤</button>
+        <div class="input-wrap">
+          <input type="text" id="messageInput" placeholder="Write a message..." disabled>
+        </div>
         <button id="sendBtn" disabled>➤</button>
         <span id="recordingTimer" class="recording-timer" style="display:none;">0:00</span>
       </div>
@@ -2286,12 +2311,14 @@
 
         let avatarHtml = '';
         if (!isSent) {
+          const onlineClass = onlineUsers.has(sender.id) ? 'online' : '';
+          const statusDot = `<div class="avatar-status ${onlineClass}"></div>`;
           if (avatarUrl) {
             avatarHtml =
-              `<img src="${escapeHtml(avatarUrl)}" class="avatar" alt="${escapeHtml(senderName)}" data-user-id="${sender.id}" data-user-name="${escapeHtml(senderName)}" data-user-role="${escapeHtml(messageRole)}">`;
+              `<div class="avatar-wrapper"><img src="${escapeHtml(avatarUrl)}" class="avatar" alt="${escapeHtml(senderName)}" data-user-id="${sender.id}" data-user-name="${escapeHtml(senderName)}" data-user-role="${escapeHtml(messageRole)}">${statusDot}</div>`;
           } else {
             avatarHtml =
-              `<div class="avatar" style="background-color: ${avatarColor};" data-user-id="${sender.id}" data-user-name="${escapeHtml(senderName)}" data-user-role="${escapeHtml(messageRole)}">${getInitials(senderName)}</div>`;
+              `<div class="avatar-wrapper"><div class="avatar" style="background-color: ${avatarColor};" data-user-id="${sender.id}" data-user-name="${escapeHtml(senderName)}" data-user-role="${escapeHtml(messageRole)}">${getInitials(senderName)}</div>${statusDot}</div>`;
           }
         }
 
@@ -3083,14 +3110,15 @@
         } catch (e) { /* ignore */ }
       }
 
-      // Periodic cleanup (every 30s)
-      function startCallCleanupInterval() {
-        if (callCleanupInterval) clearInterval(callCleanupInterval);
-        callCleanupInterval = setInterval(async () => {
-          const role = selectedGroupRole || 'General';
-          await cleanupStaleCalls(role);
-          await checkOngoingCall();
-        }, 30000);
+      let groupCallsSubscription = null;
+      function setupGroupCallsRealtime() {
+        if (groupCallsSubscription) groupCallsSubscription.unsubscribe();
+        groupCallsSubscription = supabase.channel('messages-group-calls-sync')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'group_calls' }, () => {
+            checkOngoingCall();
+          })
+          .subscribe();
+        checkOngoingCall();
       }
 
       function updateCallButtonState(active) {
@@ -3394,6 +3422,16 @@
               .single();
             if (callError) throw callError;
             activeGroupCallId = callData.id;
+
+            try {
+              await supabase.from('group_messages').insert({
+                role: role,
+                sender_id: currentUser.id,
+                content: '📞 Started a group voice/video call'
+              });
+            } catch (msgErr) {
+              console.warn('Failed to insert group call system message:', msgErr);
+            }
 
             await supabase.channel(`group-call-${role}`).send({
               type: 'broadcast',
@@ -4031,7 +4069,7 @@
           setupGroupCallSubscription();
           setupGroupCallDbSubscription();
           await checkOngoingCall();
-          startCallCleanupInterval();
+          setupGroupCallsRealtime();
           removeNotificationButtons();
         } catch (err) {
           console.error('Init error:', err);
