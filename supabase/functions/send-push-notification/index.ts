@@ -47,10 +47,13 @@ function jsonResponse(request: Request, status: number, body: Record<string, unk
 function isAuthorized(request: Request) {
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const webhookSecret = Deno.env.get("PUSH_WEBHOOK_SECRET");
-  const authorization = request.headers.get("Authorization") || request.headers.get("authorization");
+  const authorization = request.headers.get("Authorization") || request.headers.get("authorization") || "";
   const requestSecret = request.headers.get("x-push-webhook-secret");
 
-  if (serviceRoleKey && authorization === `Bearer ${serviceRoleKey}`) return true;
+  const cleanAuth = authorization.replace(/^Bearer\s+/i, "").trim();
+  const cleanServiceKey = (serviceRoleKey || "").trim();
+
+  if (cleanServiceKey && cleanAuth === cleanServiceKey) return true;
   if (webhookSecret && requestSecret === webhookSecret) return true;
   return false;
 }

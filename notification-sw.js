@@ -12,6 +12,7 @@ self.addEventListener('push', (event) => {
   const isCall = type === 'incoming_call';
   const isCallCancel = type === 'call_cancelled';
   const isAnnouncement = type === 'announcement';
+  const isMessage = type === 'message' || type === 'private_message' || type === 'group_message';
 
   // If call was cancelled, close the existing call notification
   if (isCallCancel) {
@@ -30,16 +31,16 @@ self.addEventListener('push', (event) => {
     body: payload.body || 'New activity',
     icon: payload.icon || 'img/titans_logo2.png',
     badge: payload.badge || 'img/titans_logo2.png',
-    tag: payload.tag || payload.data?.tag || (isCall ? `call-${payload.data?.callId}` : undefined),
-    requireInteraction: isCall || isAnnouncement || Boolean(payload.requireInteraction),
-    renotify: isCall || Boolean(payload.renotify),
+    tag: payload.tag || payload.data?.tag || (isCall ? `call-${payload.data?.callId}` : `msg-${Date.now()}`),
+    requireInteraction: isCall || isAnnouncement || isMessage || Boolean(payload.requireInteraction),
+    renotify: isCall || isMessage || Boolean(payload.renotify),
     data: {
       ...(payload.data || {}),
       url: payload.url || payload.data?.url || '/'
     },
     vibrate: isCall
       ? [300, 100, 300, 100, 300, 100, 300]
-      : (payload.vibrate || [100, 50, 100]),
+      : [200, 100, 200], // Double vibration for messages
     silent: false
   };
 
