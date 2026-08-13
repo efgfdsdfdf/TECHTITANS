@@ -324,12 +324,22 @@ const TechTitansGlobal = {
 
   _handleCallMissed() {
     if (!this._pendingCall) return;
-    const callId = this._pendingCall.callId;
+    const call = this._pendingCall;
+    const callId = call.callId;
 
     this._dismissCallOverlay();
     this._showToast('📵 Missed call', 'warning');
 
-    // Cancel OS notification
+    // Show a push notification that routes to calls.html
+    if (window.TechTitansNotifications) {
+      window.TechTitansNotifications.display(`Missed call from ${call.callerName || 'Someone'}`, {
+        body: `You missed a ${call.callType === 'video' ? 'video' : 'voice'} call. Tap to view call logs.`,
+        url: 'calls.html',
+        tag: `missed-call-${callId || Date.now()}`
+      });
+    }
+
+    // Cancel the ringing OS notification
     if (window.TechTitansNotifications?.cancelCallNotification) {
       window.TechTitansNotifications.cancelCallNotification(callId);
     }
@@ -362,11 +372,25 @@ const TechTitansGlobal = {
     const container = document.createElement('div');
     container.id = 'globalCallIframeContainer';
     container.innerHTML = `
+      <div id="iframeCallLoader" style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0b0f17;z-index:10;">
+        <div style="width:40px;height:40px;border:3px solid #1f2a44;border-top-color:#428cff;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+        <p style="color:#9aa4bf;margin-top:1rem;font-size:0.9rem;">Connecting call…</p>
+      </div>
+      <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
       <iframe src="${url}" allow="camera; microphone; display-capture" style="width: 100%; height: 100%; border: none;"></iframe>
     `;
     
     document.body.appendChild(container);
     this._callIframeContainer = container;
+
+    // Remove loader once iframe has loaded
+    const iframe = container.querySelector('iframe');
+    if (iframe) {
+      iframe.addEventListener('load', () => {
+        const loader = container.querySelector('#iframeCallLoader');
+        if (loader) loader.remove();
+      });
+    }
 
     // Listen for postMessage from iframe to destroy it
     this._iframeMessageListener = (event) => {

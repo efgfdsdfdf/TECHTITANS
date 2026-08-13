@@ -23,6 +23,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js">
     </script>
     <style>
+        /* ─── HIDE SCROLLBARS (MOBILE) ─── */
+        *::-webkit-scrollbar { display: none; }
+        * { scrollbar-width: none; }
+
         /* ─── RESET & BASE ─── */
         * {
             margin: 0;
@@ -1775,7 +1779,7 @@
     <!-- ─── SIDEBAR ─── -->
     <div class="sidebar" id="sidebar">
         <div class="logo">
-            <div>TECH<span>TITANS</span></div>
+            <div><img src="img/titans_logo2.png" alt="TT" style="width:28px;height:28px;border-radius:6px;vertical-align:middle;margin-right:0.4rem;">TECH<span>TITANS</span></div>
             <button class="close-sidebar" id="closeSidebar"><i class="fas fa-times"></i></button>
         </div>
 

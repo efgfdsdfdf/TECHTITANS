@@ -14,6 +14,10 @@
   <script src="ringtone.js"></script>
   <script src="global-notifications.js"></script>
   <style>
+    /* ─── HIDE SCROLLBARS (MOBILE) ─── */
+    *::-webkit-scrollbar { display: none; }
+    * { scrollbar-width: none; }
+
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
     body {
@@ -408,7 +412,7 @@
 </head>
 <body>
   <div class="sidebar">
-    <div class="logo">TECH<span>TITANS</span></div>
+    <div class="logo"><img src="img/titans_logo2.png" alt="TT" style="width:28px;height:28px;border-radius:6px;vertical-align:middle;margin-right:0.4rem;">TECH<span>TITANS</span></div>
     <div class="nav" id="sidebarNav">
       <a href="dashboard.html"><i class="fas fa-chart-pie"></i> <span>Dashboard</span></a>
       <a href="messages.html"><i class="fas fa-comments"></i> <span>Group Chat</span></a>

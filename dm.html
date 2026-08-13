@@ -11,6 +11,10 @@
     <title>TECH TITANS - Direct Messages</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
+        /* ─── HIDE SCROLLBARS (MOBILE) ─── */
+        *::-webkit-scrollbar { display: none; }
+        * { scrollbar-width: none; }
+
         * {
             margin: 0;
             padding: 0;
@@ -1733,7 +1737,7 @@
 
     <!-- ─── SIDEBAR ─── -->
     <div class="sidebar">
-        <div class="logo">TECH<span>TITANS</span></div>
+        <div class="logo"><img src="img/titans_logo2.png" alt="TT" style="width:28px;height:28px;border-radius:6px;vertical-align:middle;margin-right:0.4rem;">TECH<span>TITANS</span></div>
         <div class="nav" id="sidebarNav">
             <a href="dashboard.html"><i class="fas fa-chart-pie"></i> <span>Dashboard</span></a>
             <a href="messages.html" id="chatNavLink"><i class="fas fa-comments"></i> <span>Group Chat</span>
@@ -4126,7 +4130,7 @@
                 if (window.TechTitansNotifications) {
                     window.TechTitansNotifications.display('Missed call', {
                         body: 'You missed an incoming call.',
-                        url: 'dm.html'
+                        url: 'calls.html'
                     });
                 }
             });
@@ -4138,7 +4142,9 @@
 
             // ─── INIT ───
             async function init() {
-                if (new URLSearchParams(window.location.search).get('iframeMode') === '1') {
+                const urlParams = new URLSearchParams(window.location.search);
+                const isIframeMode = urlParams.get('iframeMode') === '1';
+                if (isIframeMode) {
                     document.body.classList.add('iframe-mode');
                 }
                 
@@ -4151,16 +4157,23 @@
                     currentRole = metadata.job_role;
                     isCEO = (currentRole === 'CEO');
 
-                    await setupPresence();
-                    subscribeToAllDirectMessages();
-                    userChannel = setupUserChannel();
-
-                    await loadPrivateMessagesView();
-                    await acceptNativeCallFromUrl();
+                    if (isIframeMode) {
+                        // In iframe mode, skip heavy chat history load and go straight to call
+                        userChannel = setupUserChannel();
+                        await acceptNativeCallFromUrl();
+                    } else {
+                        await setupPresence();
+                        subscribeToAllDirectMessages();
+                        userChannel = setupUserChannel();
+                        await loadPrivateMessagesView();
+                        await acceptNativeCallFromUrl();
+                    }
                 } catch (err) {
                     console.error('Init error:', err);
-                    document.getElementById('messagesArea').innerHTML =
-                        '<div style="color:#ff628c;text-align:center;padding:2rem;">Failed to load DMs. Please refresh.</div>';
+                    if (!document.body.classList.contains('iframe-mode')) {
+                        document.getElementById('messagesArea').innerHTML =
+                            '<div style="color:#ff628c;text-align:center;padding:2rem;">Failed to load DMs. Please refresh.</div>';
+                    }
                 }
             }
 

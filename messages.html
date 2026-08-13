@@ -11,6 +11,10 @@
     <title>TECH TITANS · Group Chat</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <style>
+        /* ─── HIDE SCROLLBARS (MOBILE) ─── */
+        *::-webkit-scrollbar { display: none; }
+        * { scrollbar-width: none; }
+
         /* --- RESET & BASE --- */
         * {
             margin: 0;
@@ -631,14 +635,41 @@
 
         .group-card .group-meta .arrow {
             color: #428cff;
-            font-size: 1rem;
-            opacity: 0.6;
-            transition: opacity 0.2s, transform 0.2s;
+            font-size: 0.9rem;
+            margin-left: 0.2rem;
+            transition: transform 0.2s;
         }
 
         .group-card:hover .group-meta .arrow {
-            opacity: 1;
-            transform: translateX(3px);
+            transform: translateX(4px);
+        }
+
+        /* --- REPLY QUOTE --- */
+        .reply-quote {
+            background: rgba(0, 0, 0, 0.2);
+            border-left: 3px solid #428cff;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px 8px 8px 4px;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+        
+        .reply-quote .quote-sender {
+            display: block;
+            color: #9aa4bf;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+            font-size: 0.8rem;
+        }
+        
+        .reply-quote .quote-text {
+            color: #cfe1ff;
+            opacity: 0.9;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         /* --- MESSAGE ROWS — BIGGER --- */
@@ -2090,7 +2121,7 @@
 
     <!-- ===== SIDEBAR ===== -->
     <div class="sidebar">
-        <div class="logo">TECH<span>TITANS</span></div>
+        <div class="logo"><img src="img/titans_logo2.png" alt="TT" style="width:28px;height:28px;border-radius:6px;vertical-align:middle;margin-right:0.4rem;">TECH<span>TITANS</span></div>
         <div class="nav" id="sidebarNav">
             <a href="dashboard.html"><i class="fas fa-chart-pie"></i> <span>Dashboard</span></a>
             <a href="messages.html" class="active" id="chatNavLink"><i class="fas fa-comments"></i> <span>Group
@@ -2663,6 +2694,17 @@
                 }
 
                 let contentHtml = '';
+                let replyQuoteHtml = '';
+
+                if (message.metadata && message.metadata.reply_to_sender) {
+                    replyQuoteHtml = `
+                    <div class="reply-quote">
+                      <span class="quote-sender">Replying to ${escapeHtml(message.metadata.reply_to_sender)}</span>
+                      <span class="quote-text">${escapeHtml(message.metadata.reply_to_content || 'Voice note')}</span>
+                    </div>
+                    `;
+                }
+
                 if (message.audio_url) {
                     const bars = [12, 20, 15, 26, 18, 30, 14, 24, 17, 28, 13, 22, 16, 25]
                         .map(h => `<span style="--h:${h}px"></span>`)
@@ -2698,7 +2740,11 @@
                     return `
                         <div class="message-row sent ${unreadClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${sender.id}" data-sender-name="${escapeHtml(senderName)}" data-content="${escapeHtml(message.content || '')}">
                           <div class="message-bubble">
-                            <div class="message sent">${contentHtml}<small>${timeStr}</small></div>
+                            <div class="message sent">
+                                ${replyQuoteHtml}
+                                ${contentHtml}
+                                <small>${timeStr}</small>
+                            </div>
                             ${renderMessageActions(message.id, message.content, message.created_at, sender.id, !!message.audio_url)}
                             ${seenHtml}
                           </div>
@@ -2713,7 +2759,11 @@
                             <div class="sender-name">
                               ${escapeHtml(senderName)} ${roleBadge}
                             </div>
-                            <div class="message received">${contentHtml}<small>${timeStr}</small></div>
+                            <div class="message received">
+                                ${replyQuoteHtml}
+                                ${contentHtml}
+                                <small>${timeStr}</small>
+                            </div>
                           </div>
                           ${swipeIndicator}
                         </div>
