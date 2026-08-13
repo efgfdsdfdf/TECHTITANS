@@ -3626,6 +3626,11 @@
                     remoteVideoLabel.textContent = targetUserName;
                 });
 
+                // Show modal immediately while connecting
+                callOptionsModal.style.display = 'none';
+                callModalTitle.textContent = `Calling ${targetUserName}...`;
+                callModal.style.display = 'flex';
+
                 let channelName = null;
                 try {
                     channelName = await getDmChannelName(currentUser.id, targetUserId);
@@ -3680,9 +3685,6 @@
                     callId: currentDMCallId
                 });
 
-                callOptionsModal.style.display = 'none';
-                callModalTitle.textContent = `Calling ${targetUserName}...`;
-                callModal.style.display = 'flex';
                 callActive = true;
                 callStarting = false;
             }
@@ -3716,6 +3718,10 @@
                     remoteVideoLabel.textContent = callerName;
                 });
 
+                // Show modal immediately while connecting
+                callModalTitle.textContent = `Connecting to ${callerName}...`;
+                callModal.style.display = 'flex';
+
                 try {
                     setupAgoraTokenRefresh(client, () => callChannelName);
                     const token = await getAgoraToken(callChannelName);
@@ -3748,7 +3754,6 @@
                 }
 
                 callModalTitle.textContent = `Call with ${callerName}`;
-                callModal.style.display = 'flex';
                 callActive = true;
                 callStarting = false;
             }
