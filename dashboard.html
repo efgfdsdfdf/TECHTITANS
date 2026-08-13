@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="img/titans_logo2.png">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="img/titans_logo2.png" />
     <title>TECH TITANS · Dashboard</title>
-    <!-- Font Awesome Icons (v6 free) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Chart.js for message trend -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
@@ -26,10 +24,6 @@
     <style>
         /* =====================================================================
            DESIGN TOKENS
-           A small, deliberate palette kept close to the original brand blue,
-           but with restrained radii, quieter shadows and a clearer type scale
-           so the surface reads as a professional operations console rather
-           than a marketing page.
         ===================================================================== */
         :root {
             --bg-canvas: #0a0e17;
@@ -38,34 +32,27 @@
             --bg-surface-solid: #141b28;
             --bg-surface-raised: rgba(26, 34, 50, 0.85);
             --bg-inset: rgba(6, 10, 18, 0.55);
-
             --border-subtle: rgba(112, 148, 209, 0.14);
             --border-default: rgba(112, 148, 209, 0.22);
             --border-strong: rgba(112, 148, 209, 0.34);
-
             --accent: #3f7fe0;
             --accent-hover: #5590ea;
             --accent-soft: rgba(63, 127, 224, 0.14);
             --accent-soft-strong: rgba(63, 127, 224, 0.22);
-
             --danger: #e2564f;
             --danger-soft: rgba(226, 86, 79, 0.14);
             --warning: #d99a3f;
-
             --text-primary: #eef2fb;
             --text-secondary: #a7b3cf;
             --text-muted: #6b7899;
-
             --radius-xs: 6px;
             --radius-sm: 10px;
             --radius-md: 14px;
             --radius-lg: 18px;
             --radius-pill: 999px;
-
             --shadow-sm: 0 4px 14px -6px rgba(0, 0, 0, 0.45);
             --shadow-md: 0 14px 34px -18px rgba(0, 0, 0, 0.6);
             --shadow-lg: 0 24px 60px -24px rgba(0, 0, 0, 0.7);
-
             --font-body: 'Inter', system-ui, -apple-system, sans-serif;
         }
 
@@ -167,7 +154,6 @@
             color: var(--accent);
         }
 
-        /* ---- unread badges on sidebar nav items ---- */
         .nav-badge {
             background: var(--danger);
             color: #fff;
@@ -184,13 +170,11 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 2px 6px rgba(226, 86, 79, 0.25);
             display: none;
-            /* hidden by default; shown when count > 0 */
         }
         .nav-badge.visible {
             display: inline-block;
         }
 
-        /* ---- CEO/Admin panel link ---- */
         .nav a[href="admin.html"] i {
             color: var(--warning);
         }
@@ -220,7 +204,7 @@
             color: #ffd4d1;
         }
 
-        /* ---------- MAIN CONTENT ---------- */
+        /* ---------- MAIN ---------- */
         .main {
             flex: 1;
             padding: 1.75rem 2.25rem 2.5rem;
@@ -266,7 +250,7 @@
             font-weight: 600;
         }
 
-        /* ---------- ANNOUNCEMENT BANNER (no badge) ---------- */
+        /* ANNOUNCEMENT BANNER */
         .announcement-banner {
             display: flex;
             align-items: center;
@@ -341,23 +325,18 @@
             color: var(--text-muted);
             font-style: italic;
         }
-
         .banner-right {
             display: flex;
             align-items: center;
             gap: 0.75rem;
             flex-shrink: 0;
         }
-        /* banner badge removed per user request — hidden entirely */
-        .banner-badge {
-            display: none !important;
-        }
         .banner-chevron {
             color: var(--text-muted);
             font-size: 0.85rem;
         }
 
-        /* ---------- ANNOUNCEMENT MODAL ---------- */
+        /* MODAL */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -373,7 +352,6 @@
         .modal-overlay.open {
             display: flex;
         }
-
         .modal-panel {
             width: 100%;
             max-width: 620px;
@@ -397,7 +375,6 @@
                 transform: translateY(0);
             }
         }
-
         .modal-header {
             display: flex;
             align-items: center;
@@ -435,13 +412,11 @@
             border-color: var(--danger);
             color: #ffd4d1;
         }
-
         .modal-body {
             padding: 1.1rem 1.35rem 1.35rem;
             overflow-y: auto;
         }
 
-        /* CEO composer */
         .composer-toggle {
             display: flex;
             align-items: center;
@@ -461,7 +436,6 @@
         .composer-toggle:hover {
             background: var(--accent-soft-strong);
         }
-
         .announcement-form {
             background: var(--bg-inset);
             border-radius: var(--radius-md);
@@ -543,7 +517,6 @@
             cursor: not-allowed;
         }
 
-        /* announcements list */
         .announcements-list {
             display: flex;
             flex-direction: column;
@@ -626,13 +599,75 @@
             color: #ffd4d1;
         }
 
-        /* dashboard grid */
+        /* Dashboard cards */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1.1rem;
             margin-bottom: 1.5rem;
         }
+
+        .user-stats-card {
+            background: var(--bg-surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            padding: 1.35rem 1.25rem;
+            box-shadow: var(--shadow-sm);
+            transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .user-stats-card:hover {
+            border-color: var(--border-strong);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        .user-stats-card .card-title {
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: 600;
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .user-stats-card .card-title i {
+            color: var(--accent);
+        }
+        .user-stats-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .user-stats-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.3rem 0.2rem;
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .user-stats-item .username {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        .user-stats-item .count {
+            font-weight: 600;
+            color: var(--accent);
+        }
+        /* Highlight current user in the leaderboard */
+        .user-stats-item.current-user {
+            background: var(--accent-soft);
+            border-radius: var(--radius-xs);
+            padding: 0.3rem 0.4rem !important;
+            border-left: 2px solid var(--accent);
+            margin: 0 -0.2rem;
+        }
+
         .card {
             background: var(--bg-surface);
             backdrop-filter: blur(12px);
@@ -675,7 +710,6 @@
             font-size: 0.83rem;
         }
 
-        /* chart & activity row */
         .row-duo {
             display: grid;
             grid-template-columns: 1.5fr 1fr;
@@ -763,23 +797,34 @@
             animation: pulse 1.4s infinite;
         }
         @keyframes pulse {
-            0% {
-                opacity: 0.55;
-            }
-            50% {
-                opacity: 0.9;
-            }
-            100% {
-                opacity: 0.55;
-            }
+            0% { opacity: 0.55; }
+            50% { opacity: 0.9; }
+            100% { opacity: 0.55; }
         }
 
-        /* ---------- RESPONSIVE ---------- */
+        .refresh-btn {
+            background: var(--accent-soft);
+            border: 1px solid var(--border-default);
+            color: var(--text-secondary);
+            padding: 0.3rem 0.8rem;
+            border-radius: var(--radius-pill);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.15s ease;
+            margin-left: 0.5rem;
+        }
+        .refresh-btn:hover {
+            background: var(--accent-soft-strong);
+            color: var(--text-primary);
+        }
+
+        /* ---------- RESPONSIVE – two columns on mobile ---------- */
         @media (max-width: 1000px) {
             .row-duo {
                 grid-template-columns: 1fr;
             }
         }
+
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
@@ -815,9 +860,6 @@
             .top-bar {
                 flex-wrap: wrap;
             }
-            .dashboard-grid {
-                gap: 0.85rem;
-            }
             .form-actions {
                 flex-direction: column;
                 align-items: stretch;
@@ -836,15 +878,45 @@
                 border-radius: 0;
             }
         }
-        @media (max-width: 480px) {
-            .card-value {
-                font-size: 1.4rem;
+
+        /* Mobile: two columns side‑by‑side for the stats cards */
+        @media (max-width: 600px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.75rem;
             }
-            .announcement-form {
-                padding: 0.85rem;
+            .dashboard-grid .card,
+            .dashboard-grid .user-stats-card {
+                padding: 1rem 0.85rem;
+            }
+            .card-value {
+                font-size: 1.3rem;
             }
             .banner-text {
                 font-size: 0.85rem;
+            }
+            .user-stats-card {
+                grid-column: 1 / -1; /* full width for user stats on very small screens */
+            }
+        }
+
+        @media (max-width: 400px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.5rem;
+            }
+            .dashboard-grid .card,
+            .dashboard-grid .user-stats-card {
+                padding: 0.75rem 0.6rem;
+            }
+            .card-value {
+                font-size: 1.1rem;
+            }
+            .card-title {
+                font-size: 0.6rem;
+            }
+            .card-label {
+                font-size: 0.7rem;
             }
         }
     </style>
@@ -852,7 +924,6 @@
 <body>
     <div class="sidebar">
         <div class="logo">TECH<span>TITANS</span></div>
-
         <div id="sidebarNav" class="nav">
             <a href="dashboard.html" class="active"><i class="fas fa-chart-pie"></i> Dashboard</a>
             <a href="messages.html" id="chatNavLink">
@@ -879,7 +950,6 @@
             <div class="user-greeting"><i class="fas fa-hand-peace"></i> Hello, <span id="userName"></span></div>
         </div>
 
-        <!-- ========== ANNOUNCEMENT BANNER (badge removed) ========== -->
         <div class="announcement-banner" id="announcementBanner" role="button" tabindex="0" aria-haspopup="dialog">
             <div class="banner-icon"><i class="fas fa-bullhorn"></i></div>
             <div class="banner-body">
@@ -890,17 +960,26 @@
                 <div class="banner-text" id="bannerText">Loading announcements…</div>
             </div>
             <div class="banner-right">
-                <!-- badge removed per user request: "not up there" -->
                 <i class="fas fa-chevron-right banner-chevron"></i>
             </div>
         </div>
 
-        <!-- Compact user info cards -->
+        <!-- Dashboard grid: fully personalized stats -->
         <div class="dashboard-grid" id="userInfoGrid">
             <!-- filled by js -->
         </div>
 
-        <!-- extended stats + chart + activity -->
+        <!-- Extra card for message counts per user (leaderboard) -->
+        <div class="dashboard-grid" style="margin-top: -0.5rem; margin-bottom: 1.5rem;">
+            <div class="user-stats-card" id="userStatsCard">
+                <div class="card-title"><i class="fas fa-users"></i> Group messages by user</div>
+                <div id="userStatsList" class="user-stats-list">
+                    <div class="empty-state loading">Loading user stats…</div>
+                </div>
+                <button class="refresh-btn" id="refreshUserStatsBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
+            </div>
+        </div>
+
         <div class="row-duo">
             <div class="chart-container">
                 <h3><i class="fas fa-chart-line"></i> Message activity (7 days)</h3>
@@ -916,7 +995,7 @@
         </div>
     </div>
 
-    <!-- ========== ANNOUNCEMENT MODAL ========== -->
+    <!-- ANNOUNCEMENT MODAL -->
     <div class="modal-overlay" id="announcementModal" role="dialog" aria-modal="true" aria-labelledby="announcementModalTitle">
         <div class="modal-panel">
             <div class="modal-header">
@@ -937,37 +1016,16 @@
                     </div>
                 </div>
                 <div id="announcementsList" class="announcements-list">
-                    <div class="empty-state loading">Loading announcements...</div>
+                    <div class="empty-state loading">Loading announcements…</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        /**
-         * ⚠️ IMPORTANT: This code requires a `target_value` column in the `announcements` table.
-         *
-         * Your database has a trigger/function that references `NEW.target_value`, but the column
-         * does not exist. To fix this, run the following SQL in your Supabase SQL Editor:
-         *
-         *   ALTER TABLE announcements ADD COLUMN target_value TEXT DEFAULT NULL;
-         *
-         * After adding the column, the insert below (which includes `target_value: 'global'`)
-         * will succeed.
-         *
-         * If you cannot add the column, you must either:
-         *   - Drop the trigger that references `target_value`, or
-         *   - Modify the trigger to not use that field.
-         *
-         * This JavaScript already includes the `target_value` field in the INSERT.
-         */
-
         (function() {
             'use strict';
 
-            // ===========================================================================
-            // CONFIG
-            // ===========================================================================
             const SUPABASE_URL = 'https://mdqqtsdibtvymfgntstf.supabase.co';
             const SUPABASE_ANON_KEY =
                 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kcXF0c2RpYnR2eW1mZ250c3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTI1NjIsImV4cCI6MjA4Nzg4ODU2Mn0.hS-7kmoyFljnhkJEkw7nmgimw9ioQreidyu27_NXYyo';
@@ -983,9 +1041,6 @@
                 window.TechTitansNotifications.connect(supabase);
             }
 
-            // ===========================================================================
-            // STATE
-            // ===========================================================================
             const State = {
                 currentUser: null,
                 currentRole: null,
@@ -995,13 +1050,13 @@
                 refreshInterval: null,
                 messageChart: null,
                 announcementsChannel: null,
+                groupChannel: null,
+                privateChannel: null,
+                readChannel: null,
                 announcements: [],
                 announcementsModalOpen: false
             };
 
-            // ===========================================================================
-            // DOM REFS
-            // ===========================================================================
             const El = {
                 userName: document.getElementById('userName'),
                 sidebarNav: document.getElementById('sidebarNav'),
@@ -1009,11 +1064,9 @@
                 dmUnreadBadge: document.getElementById('globalDmUnreadBadge'),
                 userInfoGrid: document.getElementById('userInfoGrid'),
                 logout: document.getElementById('logout'),
-
                 banner: document.getElementById('announcementBanner'),
                 bannerMeta: document.getElementById('bannerMeta'),
                 bannerText: document.getElementById('bannerText'),
-
                 modal: document.getElementById('announcementModal'),
                 modalClose: document.getElementById('closeAnnouncementModal'),
                 composerToggle: document.getElementById('composerToggle'),
@@ -1023,14 +1076,12 @@
                 fileNamePreview: document.getElementById('fileNamePreview'),
                 postBtn: document.getElementById('postAnnouncementBtn'),
                 announcementsList: document.getElementById('announcementsList'),
-
                 messageChart: document.getElementById('messageChart'),
-                recentActivityList: document.getElementById('recentActivityList')
+                recentActivityList: document.getElementById('recentActivityList'),
+                userStatsList: document.getElementById('userStatsList'),
+                refreshUserStatsBtn: document.getElementById('refreshUserStatsBtn')
             };
 
-            // ===========================================================================
-            // UTILS
-            // ===========================================================================
             function escapeHtml(unsafe) {
                 if (!unsafe) return '';
                 return unsafe.replace(/[&<>"']/g, function(m) {
@@ -1065,20 +1116,12 @@
                 return State.currentUser ? `tt_announcements_last_seen_${State.currentUser.id}` : null;
             }
 
-            function getLastSeenAt() {
-                const key = seenStorageKey();
-                if (!key) return 0;
-                const raw = localStorage.getItem(key);
-                return raw ? parseInt(raw, 10) || 0 : 0;
-            }
-
             function setLastSeenAt(ts) {
                 const key = seenStorageKey();
                 if (!key) return;
                 localStorage.setItem(key, String(ts));
             }
 
-            // update a nav badge element
             function setNavBadge(el, count) {
                 if (!el) return;
                 if (count > 0) {
@@ -1093,17 +1136,16 @@
             }
 
             // ===========================================================================
-            // STATS: messages / unread / resources / chart / activity
+            // STATS – now fully personalized
             // ===========================================================================
             const Stats = {
-                // cache last known counts to avoid glitching to zero on transient errors
                 _lastGroupCount: 0,
                 _lastDmCount: 0,
+                _cachedUserCounts: [],
 
                 async fetchUnreadMessageCount() {
                     if (!State.currentUser || !State.currentRole) return this._lastGroupCount;
                     try {
-                        // Remove the role filter – group messages are global.
                         const { data: messages, error: msgError } = await supabase
                             .from('group_messages')
                             .select('id, sender_id');
@@ -1131,7 +1173,6 @@
                         return count;
                     } catch (err) {
                         console.error('fetchUnreadMessageCount error:', err);
-                        // return cached count instead of 0 to prevent flicker
                         return this._lastGroupCount;
                     }
                 },
@@ -1149,7 +1190,6 @@
                         return this._lastDmCount;
                     } catch (err) {
                         console.error('fetchDmUnreadCount error:', err);
-                        // return cached count instead of 0 to prevent flicker
                         return this._lastDmCount;
                     }
                 },
@@ -1165,13 +1205,36 @@
                     setNavBadge(El.dmUnreadBadge, dmCount);
                 },
 
-                async fetchTotalMessages() {
+                // Personal: messages sent by current user in group chat
+                async fetchMyGroupMessageCount() {
+                    if (!State.currentUser) return 0;
                     try {
                         const { count, error } = await supabase
                             .from('group_messages')
-                            .select('*', { count: 'exact', head: true });
-                        return error ? 0 : count;
-                    } catch { return 0; }
+                            .select('id', { count: 'exact', head: true })
+                            .eq('sender_id', State.currentUser.id);
+                        if (error) throw error;
+                        return count || 0;
+                    } catch (err) {
+                        console.error('fetchMyGroupMessageCount error:', err);
+                        return 0;
+                    }
+                },
+
+                // Personal: messages sent by current user in DMs
+                async fetchMyPrivateMessageCount() {
+                    if (!State.currentUser) return 0;
+                    try {
+                        const { count, error } = await supabase
+                            .from('private_messages')
+                            .select('id', { count: 'exact', head: true })
+                            .eq('sender_id', State.currentUser.id);
+                        if (error) throw error;
+                        return count || 0;
+                    } catch (err) {
+                        console.error('fetchMyPrivateMessageCount error:', err);
+                        return 0;
+                    }
                 },
 
                 async fetchTotalResources() {
@@ -1203,13 +1266,11 @@
                         const sevenDaysAgo = new Date(now);
                         sevenDaysAgo.setDate(now.getDate() - 7);
                         const start = sevenDaysAgo.toISOString();
-
                         const { data, error } = await supabase
                             .from('group_messages')
                             .select('created_at')
                             .gte('created_at', start);
                         if (error) throw error;
-
                         const counts = {};
                         for (let i = 0; i < 7; i++) {
                             const d = new Date(now);
@@ -1279,23 +1340,77 @@
                     }).join('');
                 },
 
+                // This returns the leaderboard (all users) – we keep it global for context
+                async fetchUserMessageCounts() {
+                    try {
+                        const { data, error } = await supabase
+                            .from('group_messages')
+                            .select('sender_id, profiles!inner(full_name)');
+                        if (error) throw error;
+                        const counts = {};
+                        data.forEach(msg => {
+                            const id = msg.sender_id;
+                            const name = msg.profiles?.full_name || 'Unknown';
+                            if (!counts[id]) counts[id] = { id, name, count: 0 };
+                            counts[id].count++;
+                        });
+                        const result = Object.values(counts).sort((a, b) => b.count - a.count);
+                        this._cachedUserCounts = result;
+                        return result;
+                    } catch (err) {
+                        console.error('fetchUserMessageCounts error:', err);
+                        return [];
+                    }
+                },
+
+                // Render the leaderboard with current user highlighted
+                async renderUserStats() {
+                    const userCounts = await Stats.fetchUserMessageCounts();
+                    if (!userCounts.length) {
+                        El.userStatsList.innerHTML = '<div class="empty-state">No messages yet</div>';
+                        return;
+                    }
+                    const currentUserId = State.currentUser?.id;
+                    El.userStatsList.innerHTML = userCounts.map(item => {
+                        const isCurrent = item.id === currentUserId;
+                        return `
+                            <div class="user-stats-item ${isCurrent ? 'current-user' : ''}">
+                                <span class="username">${escapeHtml(item.name)} ${isCurrent ? '⭐' : ''}</span>
+                                <span class="count">${item.count}</span>
+                            </div>
+                        `;
+                    }).join('');
+                },
+
+                // Completely personalized stats cards
                 async updateStatsCards() {
-                    const [totalMsg, unread, totalRes] = await Promise.all([
-                        Stats.fetchTotalMessages(),
+                    const [myGroupMsg, myPrivateMsg, unreadGroup, unreadDm, totalRes] = await Promise.all([
+                        Stats.fetchMyGroupMessageCount(),
+                        Stats.fetchMyPrivateMessageCount(),
                         Stats.fetchUnreadMessageCount(),
+                        Stats.fetchDmUnreadCount(),
                         Stats.fetchTotalResources()
                     ]);
+
+                    const myTotalMessages = myGroupMsg + myPrivateMsg;
+                    const totalUnread = unreadGroup + unreadDm;
+
                     document.querySelectorAll('.stats-card').forEach(el => el.remove());
                     const statsHTML = `
                         <div class="card stats-card">
-                            <div class="card-title"><i class="fas fa-envelope"></i> Total messages</div>
-                            <div class="card-value">${totalMsg}</div>
-                            <div class="card-label">in current scope</div>
+                            <div class="card-title"><i class="fas fa-envelope"></i> Your total messages</div>
+                            <div class="card-value">${myTotalMessages}</div>
+                            <div class="card-label">group + direct messages sent</div>
                         </div>
                         <div class="card stats-card">
-                            <div class="card-title"><i class="fas fa-bell"></i> Unread</div>
-                            <div class="card-value">${unread}</div>
-                            <div class="card-label">messages waiting</div>
+                            <div class="card-title"><i class="fas fa-users"></i> Your group messages</div>
+                            <div class="card-value">${myGroupMsg}</div>
+                            <div class="card-label">sent in group chat</div>
+                        </div>
+                        <div class="card stats-card">
+                            <div class="card-title"><i class="fas fa-bell"></i> Unread for you</div>
+                            <div class="card-value">${totalUnread}</div>
+                            <div class="card-label">group + direct messages waiting</div>
                         </div>
                         <div class="card stats-card">
                             <div class="card-title"><i class="fas fa-archive"></i> Resources</div>
@@ -1304,11 +1419,21 @@
                         </div>
                     `;
                     El.userInfoGrid.insertAdjacentHTML('beforeend', statsHTML);
+                },
+
+                async refreshAllStats() {
+                    await Promise.all([
+                        Stats.updateStatsCards(),
+                        Stats.renderUserStats(),
+                        Stats.refreshUnreadBadge(),
+                        Stats.renderChart(),
+                        Stats.renderActivity()
+                    ]);
                 }
             };
 
             // ===========================================================================
-            // ANNOUNCEMENTS: data, banner, modal, realtime, CEO actions
+            // ANNOUNCEMENTS (unchanged)
             // ===========================================================================
             const Announcements = {
                 async fetch() {
@@ -1326,35 +1451,27 @@
                         return [];
                     }
                 },
-
                 async deleteOld() {
                     if (!State.isCEO) return;
                     const cutoff = new Date(Date.now() - ANNOUNCEMENT_TTL_MS).toISOString();
                     const { error } = await supabase.from('announcements').delete().lt('created_at', cutoff);
                     if (error) console.error('Failed to delete old announcements:', error);
                 },
-
                 async delete(id) {
                     if (!State.isCEO) return;
                     if (!confirm('Delete this announcement?')) return;
                     const { error } = await supabase.from('announcements').delete().eq('id', id);
-                    if (error) {
-                        alert('Failed to delete: ' + error.message);
-                        return;
-                    }
+                    if (error) { alert('Failed to delete: ' + error.message); return; }
                     State.announcements = State.announcements.filter(a => a.id !== id);
                     Announcements.renderList();
                     Announcements.renderBanner();
                 },
-
                 async post() {
                     const content = El.announcementContent.value.trim();
                     const file = El.announcementFile.files[0];
                     if (!content && !file) return;
-
                     El.postBtn.disabled = true;
                     El.postBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Posting...';
-
                     let fileUrl = null;
                     if (file) {
                         const fileExt = file.name.split('.').pop();
@@ -1370,7 +1487,6 @@
                         const { data: urlData } = supabase.storage.from('announcements').getPublicUrl(fileName);
                         fileUrl = urlData.publicUrl;
                     }
-
                     const { error } = await supabase
                         .from('announcements')
                         .insert({
@@ -1379,28 +1495,19 @@
                             created_by: State.currentUser.id,
                             target_value: 'global'
                         });
-
                     El.postBtn.disabled = false;
                     El.postBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Post';
-
-                    if (error) {
-                        alert('Failed to post: ' + error.message);
-                        return;
-                    }
-
+                    if (error) { alert('Failed to post: ' + error.message); return; }
                     El.announcementContent.value = '';
                     El.announcementFile.value = '';
                     El.fileNamePreview.textContent = '';
                     El.ceoForm.classList.remove('open');
-
                     await Announcements.deleteOld();
                 },
-
                 truncate(text, max) {
                     if (!text) return '';
                     return text.length > max ? text.slice(0, max).trim() + '…' : text;
                 },
-
                 renderBanner() {
                     const latest = State.announcements[0];
                     if (!latest) {
@@ -1413,9 +1520,7 @@
                     const author = latest.profiles?.full_name || 'CEO';
                     El.bannerMeta.textContent = `${author} · ${formatRelativeTime(latest.created_at)}`;
                     El.bannerText.textContent = Announcements.truncate(latest.content || '📎 attachment', 110);
-                    // banner badge is hidden per user request
                 },
-
                 cardHTML(a) {
                     const date = formatFullTimestamp(a.created_at);
                     const fileLink = a.file_url ?
@@ -1436,7 +1541,6 @@
                         </div>
                     `;
                 },
-
                 renderList() {
                     if (!State.announcements.length) {
                         El.announcementsList.innerHTML =
@@ -1445,13 +1549,11 @@
                     }
                     El.announcementsList.innerHTML = State.announcements.map(Announcements.cardHTML).join('');
                 },
-
                 async load() {
                     State.announcements = await Announcements.fetch();
                     Announcements.renderBanner();
                     Announcements.renderList();
                 },
-
                 openModal() {
                     State.announcementsModalOpen = true;
                     El.modal.classList.add('open');
@@ -1459,17 +1561,14 @@
                     setLastSeenAt(newest ? new Date(newest.created_at).getTime() : Date.now());
                     document.addEventListener('keydown', Announcements.onKeydown);
                 },
-
                 closeModal() {
                     State.announcementsModalOpen = false;
                     El.modal.classList.remove('open');
                     document.removeEventListener('keydown', Announcements.onKeydown);
                 },
-
                 onKeydown(e) {
                     if (e.key === 'Escape') Announcements.closeModal();
                 },
-
                 subscribeRealtime() {
                     if (State.announcementsChannel) State.announcementsChannel.unsubscribe();
                     State.announcementsChannel = supabase
@@ -1502,7 +1601,6 @@
                             })
                         .subscribe();
                 },
-
                 wireEvents() {
                     El.banner.addEventListener('click', Announcements.openModal);
                     El.banner.addEventListener('keydown', (e) => {
@@ -1512,28 +1610,70 @@
                     El.modalClose.addEventListener('click', Announcements.closeModal);
                     El.modal.addEventListener('click', (e) => { if (e.target === El.modal) Announcements
                             .closeModal(); });
-
                     El.composerToggle.addEventListener('click', () => {
                         El.ceoForm.classList.toggle('open');
                     });
-
                     El.announcementFile.addEventListener('change', () => {
                         const f = El.announcementFile.files[0];
                         El.fileNamePreview.textContent = f ? f.name : '';
                     });
-
                     El.postBtn.addEventListener('click', Announcements.post);
-
                     El.announcementsList.addEventListener('click', (e) => {
                         const btn = e.target.closest('.delete-announcement');
                         if (btn) Announcements.delete(btn.getAttribute('data-id'));
                     });
                 }
             };
-            window.deleteAnnouncement = Announcements.delete;
 
             // ===========================================================================
-            // DASHBOARD BOOTSTRAP
+            // REALTIME SUBSCRIPTIONS
+            // ===========================================================================
+            function subscribeToMessageTables() {
+                if (State.groupChannel) State.groupChannel.unsubscribe();
+                State.groupChannel = supabase
+                    .channel('group-messages-changes')
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'group_messages' }, () => {
+                        refreshAll();
+                    })
+                    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'group_messages' }, () => {
+                        refreshAll();
+                    })
+                    .subscribe();
+
+                if (State.privateChannel) State.privateChannel.unsubscribe();
+                State.privateChannel = supabase
+                    .channel('private-messages-changes')
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'private_messages' }, () => {
+                        refreshAll();
+                    })
+                    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'private_messages' }, () => {
+                        refreshAll();
+                    })
+                    .subscribe();
+
+                if (State.readChannel) State.readChannel.unsubscribe();
+                State.readChannel = supabase
+                    .channel('message-reads-changes')
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'message_reads' }, () => {
+                        refreshAll();
+                    })
+                    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'message_reads' }, () => {
+                        refreshAll();
+                    })
+                    .subscribe();
+            }
+
+            let refreshTimeout = null;
+
+            function refreshAll() {
+                if (refreshTimeout) clearTimeout(refreshTimeout);
+                refreshTimeout = setTimeout(() => {
+                    Stats.refreshAllStats();
+                }, 300);
+            }
+
+            // ===========================================================================
+            // BOOTSTRAP
             // ===========================================================================
             async function loadDashboard() {
                 try {
@@ -1602,18 +1742,18 @@
                     await Announcements.load();
                     Announcements.subscribeRealtime();
 
-                    // initial unread badge sync
-                    await Stats.refreshUnreadBadge();
+                    subscribeToMessageTables();
+
+                    await Stats.refreshAllStats();
+
                     State.refreshInterval = setInterval(Stats.refreshUnreadBadge, UNREAD_POLL_MS);
                     document.addEventListener('visibilitychange', () => {
                         if (!document.hidden) Stats.refreshUnreadBadge();
                     });
 
-                    await Promise.all([
-                        Stats.updateStatsCards(),
-                        Stats.renderChart(),
-                        Stats.renderActivity()
-                    ]);
+                    El.refreshUserStatsBtn.addEventListener('click', () => {
+                        Stats.renderUserStats();
+                    });
 
                 } catch (err) {
                     console.error('Dashboard load error:', err);
@@ -1623,6 +1763,9 @@
             El.logout.addEventListener('click', async () => {
                 if (State.refreshInterval) clearInterval(State.refreshInterval);
                 if (State.announcementsChannel) State.announcementsChannel.unsubscribe();
+                if (State.groupChannel) State.groupChannel.unsubscribe();
+                if (State.privateChannel) State.privateChannel.unsubscribe();
+                if (State.readChannel) State.readChannel.unsubscribe();
                 await supabase.auth.signOut();
                 window.location.href = 'index.html';
             });
@@ -1630,10 +1773,5 @@
             loadDashboard();
         })();
     </script>
-    <!--
-      Note: For automatic 24-hour deletion without relying on CEO actions,
-      create a Supabase cron job (pg_cron) that runs daily:
-      DELETE FROM announcements WHERE created_at < NOW() - INTERVAL '24 hours';
-    -->
 </body>
 </html>
