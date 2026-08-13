@@ -698,6 +698,47 @@
             border-radius: 1.5rem 1.5rem 0.2rem 1.5rem;
         }
 
+        .message-row.mention-me .message {
+            background: #2b4f6b;
+            box-shadow: 0 0 10px rgba(66, 140, 255, 0.3);
+        }
+
+        .mention {
+            color: #428cff;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .mention-dropdown {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            background: rgba(16, 21, 31, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #1f2a44;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 250px;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .mention-item {
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: #e9edef;
+            transition: background 0.2s;
+        }
+
+        .mention-item:hover, .mention-item.active {
+            background: rgba(66, 140, 255, 0.15);
+        }
+
         /* Swipe reply indicator */
         .message-row .swipe-reply-indicator {
             position: absolute;
@@ -816,6 +857,7 @@
             font-size: 1rem;
             position: relative;
             min-width: 0;
+            width: fit-content;
             box-shadow: 0 1px 0.5px rgba(11, 20, 26, .13);
         }
 
@@ -2121,7 +2163,7 @@
 
     <!-- ===== SIDEBAR ===== -->
     <div class="sidebar">
-        <div class="logo"><img src="img/titans_logo2.png" alt="TT" style="width:28px;height:28px;border-radius:6px;vertical-align:middle;margin-right:0.4rem;">TECH<span>TITANS</span></div>
+        <div class="logo">TECH<span>TITANS</span></div>
         <div class="nav" id="sidebarNav">
             <a href="dashboard.html"><i class="fas fa-chart-pie"></i> <span>Dashboard</span></a>
             <a href="messages.html" class="active" id="chatNavLink"><i class="fas fa-comments"></i> <span>Group
@@ -2216,7 +2258,8 @@
                     <button class="cancel-reply-btn" id="cancelReplyBtn">✕</button>
                 </div>
                 <button class="voice-btn" id="voiceNoteBtn" disabled>🎤</button>
-                <div class="input-wrap" id="chatInputWrap">
+                <div class="input-wrap" id="chatInputWrap" style="position: relative;">
+                    <div id="mentionDropdown" class="mention-dropdown"></div>
                     <input type="text" id="messageInput" placeholder="Write a message..." disabled>
                 </div>
                 <button id="sendBtn" disabled>➤</button>
@@ -2380,6 +2423,13 @@
             let callHeartbeatInterval = null;
             let callCleanupInterval = null;
             let currentCallType = 'video'; // 'audio' or 'video'
+
+            // Mentions
+            let allUsersProfiles = [];
+            let mentionDropdownIndex = -1;
+            let currentMentionQuery = '';
+            let isMentioning = false;
+            let mentionStartIndex = -1;
 
             // DOM refs
             const modal = document.getElementById('receiptsModal');
@@ -2621,8 +2671,26 @@
                     .from('message_reads')
                     .select('user_id, read_at, profiles!inner(full_name)')
                     .eq('message_id', messageId);
-                const count = data ? data.length : 0;
-                let seenHtml = '';
+                  let safeContent = escapeHtml(msg.content);
+
+                // Highlight mentions
+                const mentionRegex = /@([a-zA-Z0-9 ]+)/g;
+                safeContent = safeContent.replace(mentionRegex, (match, name) => {
+                    const isMentioningMe = name.trim().toLowerCase() === currentUserFullName.toLowerCase();
+                    return `<span class="mention" ${isMentioningMe ? 'style="color:#00e5ff;font-weight:700;"' : ''}>${match}</span>`;
+                });
+
+                let contentHtml = '';
+                if (safeContent) {
+                    contentHtml = `<div class="message ${msgClass}">${replyHtml}${safeContent}</div>`;
+                }
+
+                // Check if current user is mentioned to highlight row
+                const isMentionedMe = msg.content && msg.content.toLowerCase().includes(`@${currentUserFullName.toLowerCase()}`);
+                
+                const messageRow = document.createElement('div');
+                messageRow.className = `message-row ${rowClass} ${msg.isUnread ? 'unread' : ''} ${isMentionedMe ? 'mention-me' : ''}`;
+                messageRow.setAttribute('data-message-id', msg.id);let seenHtml = '';
                 if (count > 0) {
                     const firstReader = data[0]?.profiles?.full_name || 'Someone';
                     seenHtml =
@@ -4307,7 +4375,10 @@
             // --- SEND MESSAGE ---
             document.getElementById('sendBtn').addEventListener('click', sendMessage);
             document.getElementById('messageInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') sendMessage();
+                if (e.key === 'Enter') {
+                    if (isMentioning && document.getElementById('mentionDropdown').style.display === 'block') return;
+                    sendMessage();
+                }
             });
 
             // --- CALL BUTTONS ---
@@ -4692,11 +4763,14 @@
                                 await updateGlobalUnreadCount();
                                 updateUnreadBadges();
 
-                                if (window.TechTitansNotifications && document.hidden) {
-                                    window.TechTitansNotifications.display(`New message in ${newMsg.role}`, {
-                                        body: `${senderProfile.full_name}: ${newMsg.content || 'Sent a voice note'}`,
-                                        url: 'messages.html'
-                                    });
+                                if (window.TechTitansNotifications) {
+                                    const isMentioned = newMsg.content && newMsg.content.toLowerCase().includes(`@${currentUserFullName.toLowerCase()}`);
+                                    if (document.hidden || isMentioned) {
+                                        window.TechTitansNotifications.display(`New message in ${newMsg.role}`, {
+                                            body: `${senderProfile.full_name}: ${newMsg.content || 'Sent a voice note'}`,
+                                            url: 'messages.html'
+                                        });
+                                    }
                                 }
                                 if (isCEO) buildGroupSwitcher();
                             })
@@ -4740,11 +4814,14 @@
                             await updateGlobalUnreadCount();
                             updateUnreadBadges();
 
-                            if (window.TechTitansNotifications && document.hidden) {
-                                window.TechTitansNotifications.display(`New message in ${newMsg.role}`, {
-                                    body: `${senderProfile.full_name}: ${newMsg.content || 'Sent a voice note'}`,
-                                    url: 'messages.html'
-                                });
+                            if (window.TechTitansNotifications) {
+                                const isMentioned = newMsg.content && newMsg.content.toLowerCase().includes(`@${currentUserFullName.toLowerCase()}`);
+                                if (document.hidden || isMentioned) {
+                                    window.TechTitansNotifications.display(`New message in ${newMsg.role}`, {
+                                        body: `${senderProfile.full_name}: ${newMsg.content || 'Sent a voice note'}`,
+                                        url: 'messages.html'
+                                    });
+                                }
                             }
                         })
                         .on('postgres_changes', {
@@ -4807,13 +4884,96 @@
                     currentRole = jobRole;
                     isCEO = (currentRole === 'CEO');
 
+                    // Load profiles for mentions
+                    const { data: profiles } = await supabase.from('profiles').select('id, full_name, avatar_url');
+                    if (profiles) allUsersProfiles = profiles;
+
                     await setupPresence();
                     subscribeToAllDirectMessages();
                     setupMessageReadsSubscription();
 
                     const messageInput = document.getElementById('messageInput');
+                    const mentionDropdown = document.getElementById('mentionDropdown');
+
+                    function renderMentionDropdown(query) {
+                        if (!query) {
+                            mentionDropdown.style.display = 'none';
+                            return;
+                        }
+                        const matches = allUsersProfiles.filter(p => p.full_name && p.full_name.toLowerCase().includes(query.toLowerCase()));
+                        if (matches.length === 0) {
+                            mentionDropdown.style.display = 'none';
+                            return;
+                        }
+                        mentionDropdown.innerHTML = '';
+                        matches.forEach((profile, idx) => {
+                            const item = document.createElement('div');
+                            item.className = 'mention-item' + (idx === 0 ? ' active' : '');
+                            item.innerHTML = `
+                                <img src="${profile.avatar_url || 'https://via.placeholder.com/40'}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">
+                                <span>${profile.full_name}</span>
+                            `;
+                            item.onclick = () => selectMention(profile.full_name);
+                            mentionDropdown.appendChild(item);
+                        });
+                        mentionDropdown.style.display = 'block';
+                        mentionDropdownIndex = 0;
+                    }
+
+                    function selectMention(fullName) {
+                        const val = messageInput.value;
+                        const before = val.substring(0, mentionStartIndex);
+                        const after = val.substring(messageInput.selectionStart);
+                        messageInput.value = before + '@' + fullName + ' ' + after;
+                        mentionDropdown.style.display = 'none';
+                        isMentioning = false;
+                        messageInput.focus();
+                    }
+
                     let typingTimeout;
+                    messageInput.addEventListener('keydown', (e) => {
+                        if (isMentioning && mentionDropdown.style.display === 'block') {
+                            const items = mentionDropdown.querySelectorAll('.mention-item');
+                            if (e.key === 'ArrowDown') {
+                                e.preventDefault();
+                                if (mentionDropdownIndex < items.length - 1) mentionDropdownIndex++;
+                                updateDropdownSelection(items);
+                            } else if (e.key === 'ArrowUp') {
+                                e.preventDefault();
+                                if (mentionDropdownIndex > 0) mentionDropdownIndex--;
+                                updateDropdownSelection(items);
+                            } else if (e.key === 'Enter') {
+                                e.preventDefault();
+                                if (items[mentionDropdownIndex]) items[mentionDropdownIndex].click();
+                            } else if (e.key === 'Escape') {
+                                isMentioning = false;
+                                mentionDropdown.style.display = 'none';
+                            }
+                        }
+                    });
+
+                    function updateDropdownSelection(items) {
+                        items.forEach((it, i) => it.classList.toggle('active', i === mentionDropdownIndex));
+                        if (items[mentionDropdownIndex]) items[mentionDropdownIndex].scrollIntoView({ block: 'nearest' });
+                    }
+
                     messageInput.addEventListener('input', () => {
+                        const val = messageInput.value;
+                        const cursor = messageInput.selectionStart;
+
+                        // Mentions logic
+                        const textBeforeCursor = val.substring(0, cursor);
+                        const lastAtPos = textBeforeCursor.lastIndexOf('@');
+                        if (lastAtPos !== -1 && (lastAtPos === 0 || textBeforeCursor[lastAtPos - 1] === ' ')) {
+                            isMentioning = true;
+                            mentionStartIndex = lastAtPos;
+                            currentMentionQuery = textBeforeCursor.substring(lastAtPos + 1);
+                            renderMentionDropdown(currentMentionQuery || ' '); // Show all if just @
+                        } else {
+                            isMentioning = false;
+                            mentionDropdown.style.display = 'none';
+                        }
+
                         if (typingTimeout) clearTimeout(typingTimeout);
                         sendTypingIndicator();
                         typingTimeout = setTimeout(() => {}, 2000);

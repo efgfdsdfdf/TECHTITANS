@@ -383,18 +383,17 @@ const TechTitansGlobal = {
     document.body.appendChild(container);
     this._callIframeContainer = container;
 
-    // Remove loader once iframe has loaded
+    // We don't remove loader on iframe load anymore; we wait for call-ui-ready message
     const iframe = container.querySelector('iframe');
-    if (iframe) {
-      iframe.addEventListener('load', () => {
+
+    // Listen for postMessage from iframe
+    this._iframeMessageListener = (event) => {
+      if (!event.data) return;
+      if (event.data.type === 'call-ui-ready') {
         const loader = container.querySelector('#iframeCallLoader');
         if (loader) loader.remove();
-      });
-    }
-
-    // Listen for postMessage from iframe to destroy it
-    this._iframeMessageListener = (event) => {
-      if (event.data && event.data.type === 'call-ended') {
+      }
+      if (event.data.type === 'call-ended') {
         this._destroyCallIframe();
       }
     };
