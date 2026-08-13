@@ -1909,6 +1909,7 @@
             let joinedAgoraChannelName = null;
             let pendingCall = null;
             let callStartedAt = null;
+            let isIframeMode = false;
             let callTimerInterval = null;
             let callStatusChannel = null;
             let endingCall = false;
@@ -4146,25 +4147,32 @@
             // ─── INIT ───
             async function init() {
                 const urlParams = new URLSearchParams(window.location.search);
-                const isIframeMode = urlParams.get('iframeMode') === '1';
+                isIframeMode = urlParams.get('iframeMode') === '1';
                 if (isIframeMode) {
                     document.body.classList.add('iframe-mode');
                 }
                 
                 try {
-                    const { data: { user }, error: userError } = await supabase.auth.getUser();
-                    if (userError || !user) { window.location.href = 'index.html'; return; }
-                    currentUser = user;
-                    const metadata = user.user_metadata || {};
-                    currentUserFullName = metadata.full_name || 'User';
-                    currentRole = metadata.job_role;
-                    isCEO = (currentRole === 'CEO');
-
                     if (isIframeMode) {
-                        // In iframe mode, skip heavy chat history load and go straight to call
-                        userChannel = setupUserChannel();
+                        // Fast path: use cached session instead of network getUser()
+                        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+                        if (sessionError || !sessionData?.session?.user) { return; }
+                        const user = sessionData.session.user;
+                        currentUser = user;
+                        const metadata = user.user_metadata || {};
+                        currentUserFullName = metadata.full_name || 'User';
+                        currentRole = metadata.job_role;
+                        isCEO = (currentRole === 'CEO');
+                        // Go straight to call — no channel setup needed
                         await acceptNativeCallFromUrl();
                     } else {
+                        const { data: { user }, error: userError } = await supabase.auth.getUser();
+                        if (userError || !user) { window.location.href = 'index.html'; return; }
+                        currentUser = user;
+                        const metadata = user.user_metadata || {};
+                        currentUserFullName = metadata.full_name || 'User';
+                        currentRole = metadata.job_role;
+                        isCEO = (currentRole === 'CEO');
                         await setupPresence();
                         subscribeToAllDirectMessages();
                         userChannel = setupUserChannel();

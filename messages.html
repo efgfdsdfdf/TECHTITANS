@@ -2671,26 +2671,8 @@
                     .from('message_reads')
                     .select('user_id, read_at, profiles!inner(full_name)')
                     .eq('message_id', messageId);
-                  let safeContent = escapeHtml(msg.content);
-
-                // Highlight mentions
-                const mentionRegex = /@([a-zA-Z0-9 ]+)/g;
-                safeContent = safeContent.replace(mentionRegex, (match, name) => {
-                    const isMentioningMe = name.trim().toLowerCase() === currentUserFullName.toLowerCase();
-                    return `<span class="mention" ${isMentioningMe ? 'style="color:#00e5ff;font-weight:700;"' : ''}>${match}</span>`;
-                });
-
-                let contentHtml = '';
-                if (safeContent) {
-                    contentHtml = `<div class="message ${msgClass}">${replyHtml}${safeContent}</div>`;
-                }
-
-                // Check if current user is mentioned to highlight row
-                const isMentionedMe = msg.content && msg.content.toLowerCase().includes(`@${currentUserFullName.toLowerCase()}`);
-                
-                const messageRow = document.createElement('div');
-                messageRow.className = `message-row ${rowClass} ${msg.isUnread ? 'unread' : ''} ${isMentionedMe ? 'mention-me' : ''}`;
-                messageRow.setAttribute('data-message-id', msg.id);let seenHtml = '';
+                const count = data ? data.length : 0;
+                let seenHtml = '';
                 if (count > 0) {
                     const firstReader = data[0]?.profiles?.full_name || 'Someone';
                     seenHtml =
@@ -2786,6 +2768,11 @@
                     </div>`;
                 } else {
                     contentHtml = escapeHtml(message.content);
+                    // Highlight @mentions in message text
+                    contentHtml = contentHtml.replace(/@([a-zA-Z0-9 ]+)/g, (match, name) => {
+                        const isMentioningMe = name.trim().toLowerCase() === currentUserFullName.toLowerCase();
+                        return `<span class="mention" ${isMentioningMe ? 'style="color:#00e5ff;font-weight:700;"' : ''}>${match}</span>`;
+                    });
                 }
 
                 let avatarHtml = '';
@@ -2801,12 +2788,16 @@
                     }
                 }
 
+                // Check if current user is mentioned
+                const isMentionedMe = message.content && message.content.toLowerCase().includes(`@${currentUserFullName.toLowerCase()}`);
+                const mentionMeClass = isMentionedMe ? 'mention-me' : '';
+
                 // Swipe reply indicator
                 const swipeIndicator = `<div class="swipe-reply-indicator">↩️ Reply</div>`;
 
                 if (isSent) {
                     return `
-                        <div class="message-row sent ${unreadClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${sender.id}" data-sender-name="${escapeHtml(senderName)}" data-content="${escapeHtml(message.content || '')}">
+                        <div class="message-row sent ${unreadClass} ${mentionMeClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${sender.id}" data-sender-name="${escapeHtml(senderName)}" data-content="${escapeHtml(message.content || '')}">
                           <div class="message-bubble">
                             <div class="message sent">
                                 ${replyQuoteHtml}
@@ -2821,7 +2812,7 @@
                       `;
                 } else {
                     return `
-                        <div class="message-row ${unreadClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${sender.id}" data-sender-name="${escapeHtml(senderName)}" data-content="${escapeHtml(message.content || '')}">
+                        <div class="message-row ${unreadClass} ${mentionMeClass}" data-message-id="${message.id}" data-created-at="${message.created_at}" data-sender-id="${sender.id}" data-sender-name="${escapeHtml(senderName)}" data-content="${escapeHtml(message.content || '')}">
                           ${avatarHtml}
                           <div class="message-bubble">
                             <div class="sender-name">
@@ -4502,6 +4493,41 @@
                 try {
                     await supabase.from('message_reads').insert({ message_id: data.id, user_id: currentUser.id });
                 } catch (readErr) { /* ignore */ }
+
+                // Send push notification for @mentions
+                try {
+                    const mentionMatches = content.match(/@([a-zA-Z0-9 ]+)/g);
+                    if (mentionMatches && mentionMatches.length > 0) {
+                        const { data: sessionData } = await supabase.auth.getSession();
+                        const accessToken = sessionData?.session?.access_token;
+                        if (accessToken) {
+                            for (const mention of mentionMatches) {
+                                const mentionedName = mention.substring(1).trim();
+                                const mentionedUser = allUsersProfiles.find(p => p.full_name && p.full_name.toLowerCase() === mentionedName.toLowerCase());
+                                if (mentionedUser && mentionedUser.id !== currentUser.id) {
+                                    fetch(`${SUPABASE_URL}/functions/v1/send-call-notification`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Authorization': `Bearer ${accessToken}`
+                                        },
+                                        body: JSON.stringify({
+                                            recipientId: mentionedUser.id,
+                                            action: 'mention',
+                                            mentionData: {
+                                                senderName: currentUserFullName,
+                                                groupName: messageRole,
+                                                content: content.substring(0, 100)
+                                            }
+                                        })
+                                    }).catch(e => console.warn('Mention push failed:', e));
+                                }
+                            }
+                        }
+                    }
+                } catch (mentionErr) {
+                    console.warn('Mention notification error:', mentionErr);
+                }
             }
 
             // --- VOICE NOTES ---
