@@ -340,13 +340,52 @@ const TechTitansGlobal = {
     const call = this._pendingCall;
     this._dismissCallOverlay();
 
-    // Navigate to dm.html with call params
     const params = new URLSearchParams({
       callId: call.callId || '',
       nativeAccepted: '1',
-      callType: call.callType || 'voice'
+      callType: call.callType || 'voice',
+      iframeMode: '1'
     });
-    window.location.href = `dm.html?${params.toString()}`;
+    
+    const url = `dm.html?${params.toString()}`;
+
+    if (this._onDmPage) {
+      window.location.href = url;
+    } else {
+      this._createCallIframe(url);
+    }
+  },
+
+  _createCallIframe(url) {
+    if (this._callIframe) return;
+    
+    const container = document.createElement('div');
+    container.id = 'globalCallIframeContainer';
+    container.innerHTML = `
+      <iframe src="${url}" allow="camera; microphone; display-capture" style="width: 100%; height: 100%; border: none;"></iframe>
+    `;
+    
+    document.body.appendChild(container);
+    this._callIframeContainer = container;
+
+    // Listen for postMessage from iframe to destroy it
+    this._iframeMessageListener = (event) => {
+      if (event.data && event.data.type === 'call-ended') {
+        this._destroyCallIframe();
+      }
+    };
+    window.addEventListener('message', this._iframeMessageListener);
+  },
+
+  _destroyCallIframe() {
+    if (this._callIframeContainer) {
+      this._callIframeContainer.remove();
+      this._callIframeContainer = null;
+    }
+    if (this._iframeMessageListener) {
+      window.removeEventListener('message', this._iframeMessageListener);
+      this._iframeMessageListener = null;
+    }
   },
 
   _declineCall() {
@@ -484,6 +523,12 @@ const TechTitansGlobal = {
         background: rgba(0, 0, 0, 0.85);
         backdrop-filter: blur(12px);
         animation: gnFadeIn 0.3s ease;
+      }
+      #globalCallIframeContainer {
+        position: fixed;
+        inset: 0;
+        z-index: 999999;
+        background: #0b0f17;
       }
       @keyframes gnFadeIn {
         from { opacity: 0; }
@@ -645,6 +690,7 @@ const TechTitansGlobal = {
       this._globalPresenceChannel = null;
     }
     this._dismissCallOverlay();
+    this._destroyCallIframe();
     this._initialized = false;
   }
 };

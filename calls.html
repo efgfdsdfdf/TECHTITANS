@@ -1169,6 +1169,7 @@
 
                 await loadCallLogs();
                 subscribeToCallChanges();
+                await markMissedCallsAsSeen();
 
                 // Ask for push permission after user interaction
                 const handleInteraction = () => {
@@ -1196,6 +1197,20 @@
                         registerPush();
                     }
                 }, 3000);
+            }
+
+            // --- MARK MISSED CALLS SEEN ---
+            async function markMissedCallsAsSeen() {
+                if (!currentUser) return;
+                try {
+                    await supabase
+                        .from('call_participants')
+                        .update({ status: 'missed_seen' })
+                        .eq('user_id', currentUser.id)
+                        .eq('status', 'missed');
+                } catch (e) {
+                    console.warn('Could not mark missed calls as seen:', e);
+                }
             }
 
             // ─── LOAD CALL LOGS (group + direct) ───
@@ -1283,7 +1298,7 @@
                             const other = participants.find(p => p.user_id !== dc.initiated_by);
                             const myPart = participants.find(p => p.user_id === currentUser.id);
                             const isOutgoing = dc.initiated_by === currentUser.id;
-                            const neverJoined = !myPart || myPart.status === 'invited';
+                            const neverJoined = !myPart || ['invited', 'missed', 'missed_seen'].includes(myPart.status);
 
                             let effectiveStatus = dc.status;
                             if (['ringing', 'initiated'].includes(effectiveStatus)) {

@@ -934,7 +934,10 @@
                 <i class="fas fa-envelope"></i> Direct Messages
                 <span class="nav-badge" id="globalDmUnreadBadge">0</span>
             </a>
-            <a href="calls.html"><i class="fas fa-phone"></i> Call Logs</a>
+            <a href="calls.html">
+                <i class="fas fa-phone"></i> Call Logs
+                <span class="nav-badge" id="missedCallsBadge">0</span>
+            </a>
             <a href="resources.html"><i class="fas fa-book-open"></i> Resources</a>
             <a href="profile.html"><i class="fas fa-user-cog"></i> Profile</a>
         </div>
@@ -1062,6 +1065,7 @@
                 sidebarNav: document.getElementById('sidebarNav'),
                 sidebarUnreadBadge: document.getElementById('sidebarUnreadBadge'),
                 dmUnreadBadge: document.getElementById('globalDmUnreadBadge'),
+                missedCallsBadge: document.getElementById('missedCallsBadge'),
                 userInfoGrid: document.getElementById('userInfoGrid'),
                 logout: document.getElementById('logout'),
                 banner: document.getElementById('announcementBanner'),
@@ -1148,7 +1152,8 @@
                     try {
                         const { data: messages, error: msgError } = await supabase
                             .from('group_messages')
-                            .select('id, sender_id');
+                            .select('id, sender_id')
+                            .in('role', ['General', State.currentRole]);
                         if (msgError) throw msgError;
                         if (!messages || messages.length === 0) {
                             this._lastGroupCount = 0;
@@ -1194,15 +1199,33 @@
                     }
                 },
 
+                async fetchMissedCallsCount() {
+                    if (!State.currentUser) return 0;
+                    try {
+                        const { count, error } = await supabase
+                            .from('call_participants')
+                            .select('*', { count: 'exact', head: true })
+                            .eq('user_id', State.currentUser.id)
+                            .eq('status', 'missed');
+                        if (error) throw error;
+                        return count || 0;
+                    } catch (err) {
+                        console.error('fetchMissedCallsCount error:', err);
+                        return 0;
+                    }
+                },
+
                 async refreshUnreadBadge() {
-                    const [groupCount, dmCount] = await Promise.all([
+                    const [groupCount, dmCount, missedCount] = await Promise.all([
                         Stats.fetchUnreadMessageCount(),
-                        Stats.fetchDmUnreadCount()
+                        Stats.fetchDmUnreadCount(),
+                        Stats.fetchMissedCallsCount()
                     ]);
                     State.unreadMessageCount = groupCount;
                     State.dmUnreadCount = dmCount;
                     setNavBadge(El.sidebarUnreadBadge, groupCount);
                     setNavBadge(El.dmUnreadBadge, dmCount);
+                    setNavBadge(El.missedCallsBadge, missedCount);
                 },
 
                 // Personal: messages sent by current user in group chat

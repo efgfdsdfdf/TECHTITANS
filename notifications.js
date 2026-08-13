@@ -471,6 +471,12 @@ const TechTitansNotifications = {
 
   async displayCall(callerName, callType, options = {}) {
     if (Notification.permission !== 'granted') return null;
+    
+    // Don't push OS notifications for calls on mobile devices
+    if (this._detectDeviceType() === 'mobile') {
+      return null;
+    }
+
     const title = `Incoming ${callType || 'voice'} call`;
     const defaultOptions = {
       icon: 'img/titans_logo2.png',

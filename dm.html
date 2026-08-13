@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -38,6 +38,16 @@
             padding: 0;
             overflow: hidden;
             border-right: none;
+        }
+
+        body.iframe-mode .sidebar,
+        body.iframe-mode .main,
+        body.iframe-mode .gn-toast {
+            display: none !important;
+        }
+
+        body.iframe-mode {
+            background: transparent !important;
         }
 
         body.sidebar-collapsed .main {
@@ -3959,6 +3969,9 @@
                         url: 'dm.html'
                     });
                 }
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'call-ended' }, '*');
+                }
             }
 
             function setupUserChannel() {
@@ -4120,6 +4133,10 @@
 
             // ─── INIT ───
             async function init() {
+                if (new URLSearchParams(window.location.search).get('iframeMode') === '1') {
+                    document.body.classList.add('iframe-mode');
+                }
+                
                 try {
                     const { data: { user }, error: userError } = await supabase.auth.getUser();
                     if (userError || !user) { window.location.href = 'index.html'; return; }
